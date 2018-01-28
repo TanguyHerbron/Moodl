@@ -12,11 +12,12 @@ import com.nauk.coinfolio.R;
 
 public class RecordTransactionActivity extends AppCompatActivity {
 
-    String coin;
-    String symbol;
-    TextView symbolTxtView;
-    Button validateButton;
-    DatabaseManager databaseManager;
+    private String coin;
+    private String symbol;
+    private TextView symbolTxtView;
+    private TextView amountTxtView;
+    private Button validateButton;
+    private DatabaseManager databaseManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +34,16 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
         validateButton = findViewById(R.id.validateButton);
 
+        amountTxtView = findViewById(R.id.currencyAmount);
+
         validateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //databaseManager.addCurrencyToManualCurrency();
+                databaseManager.addCurrencyToManualCurrency(symbol, Double.parseDouble(amountTxtView.getText().toString()));
+                Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                finish();
             }
         });
     }

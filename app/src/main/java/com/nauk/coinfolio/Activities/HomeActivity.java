@@ -150,7 +150,6 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         databaseManager = new DatabaseManager(this);
-        databaseManager.getAllCurrencyFromManualCurrency();
 
         updateViewButtonIcon();
     }
@@ -232,7 +231,6 @@ public class HomeActivity extends AppCompatActivity {
                     {
                         currencyLayout.addView(layoutGenerator.getInfoLayout(currency, 12369084));
                     }
-
                 }
             }
         }
@@ -409,7 +407,7 @@ public class HomeActivity extends AppCompatActivity {
 
                     final List<Currency> balance = balanceManager.getTotalBalance();
 
-                    if(balanceManager.getTotalBalance().size() < 0)
+                    if(balanceManager.getTotalBalance().size() > 0)
                     {
                         for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                         {

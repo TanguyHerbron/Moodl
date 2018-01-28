@@ -18,7 +18,7 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     private static final String DATABASE_NAME = "Currencies.db";
 
@@ -99,9 +99,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            //Currency currency = new Currency(resultatList.getString(1), resultatList.getString(2));
-            Log.d("CrystalVault", "Database result : " + resultatList.getString(1) + " " + resultatList.getString(2) + " " + resultatList.getCount());
-            //currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(2)));
+            currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(3)));
         }
 
         resultatList.close();

@@ -2,8 +2,8 @@
     <string name="app_name">Coinfolio</string>
     <string name="action_settings">Settings</string>
     <string name="donation">Fais un don wallah</string>
-    <string name="debug">CrystalVault_debug</string>
-    <string name="debug_volley">CrystalVault_debugVolley</string>
+    <string name="debug">Coinfolio_debug</string>
+    <string name="debug_volley">Coinfolio_debugVolley</string>
     <string name="quick_button">Switch view</string>
     <string name="title_activity_settings">Settings</string>
 
@@ -115,5 +115,5 @@
 
     <!--Add transaction activity-->
     <string name="activity_add_amount">Amount</string>
-    <string name="activity_purchased_price">Purchased prive</string>
+    <string name="activity_purchased_price">Purchased price</string>
 </resources>

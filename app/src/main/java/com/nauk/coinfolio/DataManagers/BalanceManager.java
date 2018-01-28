@@ -43,12 +43,13 @@ public class BalanceManager {
     final private String binanceTimeUrl = "https://api.binance.com/api/v1/time";
     private RequestQueue requestQueue;
     private List<Currency> hitBalance;
-    private List<Currency> otherBalances;
+    private List<Currency> manualBalances;
     private List<Currency> totalBalance;
     private android.content.Context context;
     private Map<String, String> iconUrlList;
     private Map<String, String> coinList;
     private PreferencesManager preferenceManager;
+    private DatabaseManager databaseManager;
 
     public BalanceManager(android.content.Context context)
     {
@@ -56,7 +57,8 @@ public class BalanceManager {
         preferenceManager = new PreferencesManager(context);
         requestQueue = Volley.newRequestQueue(context);
         hitBalance = new ArrayList<Currency>();
-        otherBalances = new ArrayList<Currency>();
+        manualBalances = new ArrayList<Currency>();
+        databaseManager = new DatabaseManager(context);
     }
 
     public List<String> getCurrenciesName()
@@ -107,13 +109,15 @@ public class BalanceManager {
         return hitBalance;
     }
 
-    public List<Currency> getOtherBalances()
+    public List<Currency> getManualBalances()
     {
-        return otherBalances;
+        return manualBalances;
     }
 
     public void updateTotalBalance(final VolleyCallBack callBack)
     {
+        manualBalances = databaseManager.getAllCurrencyFromManualCurrency();
+
         if(privateHitKey != null && publicHitKey != null && preferenceManager.isHitBTCActivated())
         {
             updateHitBalance(callBack);
@@ -190,15 +194,15 @@ public class BalanceManager {
 
         totalBalance.addAll(hitBalance);
 
-        for(int i = 0; i < otherBalances.size(); i++)
+        for(int i = 0; i < manualBalances.size(); i++)
         {
             boolean isIn = false;
 
             for(int j = 0; j < totalBalance.size(); j++)
             {
-                if(otherBalances.get(i).getSymbol().equals(totalBalance.get(j).getSymbol()))
+                if(manualBalances.get(i).getSymbol().equals(totalBalance.get(j).getSymbol()))
                 {
-                    totalBalance.get(j).setBalance(totalBalance.get(j).getBalance() + otherBalances.get(i).getBalance());
+                    totalBalance.get(j).setBalance(totalBalance.get(j).getBalance() + manualBalances.get(i).getBalance());
 
                     isIn = true;
                 }
@@ -206,7 +210,7 @@ public class BalanceManager {
 
             if(!isIn)
             {
-                totalBalance.add(otherBalances.get(i));
+                totalBalance.add(manualBalances.get(i));
             }
         }
 
@@ -284,7 +288,7 @@ public class BalanceManager {
 
                 coinList.put(jsonObject.getString("Symbol"), jsonObject.getString("CoinName"));
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.d(context.getResources().getString(R.string.debug), "ImageUrl not found.");
             }
         }
 

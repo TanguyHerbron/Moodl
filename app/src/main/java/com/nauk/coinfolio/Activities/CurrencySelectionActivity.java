@@ -3,6 +3,7 @@ package com.nauk.coinfolio.Activities;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
@@ -46,9 +47,10 @@ public class CurrencySelectionActivity extends AppCompatActivity {
         searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Currency selectedCurrency = (Currency) adapterView.getItemAtPosition(i);
                 Intent intent = new Intent(CurrencySelectionActivity.this, RecordTransactionActivity.class);
-                intent.putExtra("coin", searchAutoComplete.getText().toString());
-                intent.putExtra("symbol", searchAutoComplete.getCompletionHint().toString());
+                intent.putExtra("coin", selectedCurrency.getName());
+                intent.putExtra("symbol", selectedCurrency.getSymbol());
                 startActivity(intent);
                 finish();
             }

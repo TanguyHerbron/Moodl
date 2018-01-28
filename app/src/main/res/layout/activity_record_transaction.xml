@@ -18,6 +18,7 @@
             android:textSize="25dp"/>
 
         <EditText
+            android:id="@+id/currencyAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/activity_add_amount"/>

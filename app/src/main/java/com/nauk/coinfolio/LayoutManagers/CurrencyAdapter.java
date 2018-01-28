@@ -54,7 +54,6 @@ public class CurrencyAdapter extends ArrayAdapter<Currency> {
             return convertView;
         }
 
-
         @Override
         public Filter getFilter() {
             return myFilter;
