@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#000046</color>
+    <color name="colorPrimaryDark">#111124</color>
+    <color name="colorAccent">#1CB5E0</color>
+    <color name="mainTextViewColor">#FF000000</color>
+    <color name="secondaryTextViewColor">#FF222222</color>
+    <color name="transparent">#00000000</color>
+    <color name="decrease">#FFED143D</color>
+    <color name="increase">#FF00E000</color>
+    <color name="listBackground">#FFEEEEEE</color>
+    <color name="listBackground2">#FFFFFFFF</color>
+    <color name="separationLine">#FF999999</color>
+</resources>

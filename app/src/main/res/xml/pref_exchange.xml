@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_title_exchange_hitbtc">
+        <SwitchPreference
+            android:key="enable_hitbtc"
+            android:title="@string/pref_title_enable_synchronization_hitbtc" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_hitbtc"
+            android:inputType="text"
+            android:key="hitbtc_publickey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_hitbtc_publickey" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_hitbtc"
+            android:inputType="text"
+            android:key="hitbtc_privatekey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_hitbtc_privatekey" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_exchange_gdax"
+        android:enabled="false">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="enable_gdax"
+            android:title="@string/pref_title_enable_synchronization_gdax" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_gdax"
+            android:inputType="text"
+            android:key="gdax_publickey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_gdax_publickey" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_gdax"
+            android:inputType="text"
+            android:key="gdax_privatekey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_gdax_privatekey" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_exchange_binance"
+        android:enabled="false">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="enable_binance"
+            android:title="@string/pref_title_enable_synchronization_binance" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_binance"
+            android:inputType="text"
+            android:key="binance_publickey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_binance_publickey" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_binance"
+            android:inputType="text"
+            android:key="binance_privatekey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_binance_privatekey" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_exchange_poloniex"
+        android:enabled="false">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="enable_poloniex"
+            android:title="@string/pref_title_enable_synchronization_poloniex" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_poloniex"
+            android:inputType="text"
+            android:key="poloniex_publickey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_poloniex_publickey" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_poloniex"
+            android:inputType="text"
+            android:key="poloniex_privatekey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_poloniex_privatekey" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_exchange_kraken"
+        android:enabled="false">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="enable_kraken"
+            android:title="@string/pref_title_enable_synchronization_kraken" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_kraken"
+            android:inputType="text"
+            android:key="kraken_publickey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_kraken_publickey" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_kraken"
+            android:inputType="text"
+            android:key="kraken_privatekey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_kraken_privatekey" />
+    </PreferenceCategory>
+
+    <!--Bittrex-->
+    <!--KuCoin-->
+
+</PreferenceScreen>
