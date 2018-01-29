@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.nauk.coinfolio.Activities.HomeActivity"
+            android:name=".Activities.HomeActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -22,10 +22,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.nauk.coinfolio.Activities.SettingsActivity"
+            android:name=".Activities.SettingsActivity"
             android:label="@string/title_activity_settings" />
-        <activity android:name="com.nauk.coinfolio.Activities.CurrencySelectionActivity" />
-        <activity android:name="com.nauk.coinfolio.Activities.RecordTransactionActivity"></activity>
+        <activity android:name=".Activities.CurrencySelectionActivity" />
+        <activity android:name=".Activities.RecordTransactionActivity" />
+        <activity
+            android:name=".Activities.CurrencyDetailsActivity"
+            android:label="@string/title_activity_currency_details"></activity>
     </application>
 
 </manifest>

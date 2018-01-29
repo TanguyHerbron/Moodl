@@ -3,6 +3,7 @@ package com.nauk.coinfolio.LayoutManagers;
 import android.animation.AnimatorInflater;
 import android.animation.StateListAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import com.db.chart.model.LineSet;
 import com.db.chart.renderer.AxisRenderer;
 import com.db.chart.view.LineChartView;
+import com.nauk.coinfolio.Activities.CurrencyDetailsActivity;
+import com.nauk.coinfolio.Activities.HomeActivity;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.R;
@@ -39,7 +42,7 @@ public class HomeLayoutGenerator {
         this.context = context;
     }
 
-    public CardView getInfoLayout(Currency currency, int chartColor)
+    public CardView getInfoLayout(final Currency currency, int chartColor)
     {
         CardView mainCard = new CardView(context);
         LinearLayout mainLinear = new LinearLayout(context);
@@ -63,8 +66,9 @@ public class HomeLayoutGenerator {
             @Override
             public void onClick(View view) {
                 view.animate();
-                Snackbar.make(view, "This feature is not yet available...", Snackbar.LENGTH_LONG)
-                        .show();
+                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                intent.putExtra("symbol", currency.getSymbol());
+                context.getApplicationContext().startActivity(intent);
             }
         });
         mainCard.setClickable(true);

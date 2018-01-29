@@ -10,6 +10,7 @@ import android.util.Log;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -107,5 +108,34 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.close();
 
         return currencyList;
+    }
+
+    public HashMap<Integer, Double> getCurrencyTransactions(String symbol)
+    {
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE symbol='" + symbol.toUpperCase() + "'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor resultatList = db.rawQuery(searchQuerry, null);
+
+        HashMap<Integer, Double> transactionList = new HashMap<>();
+
+        while(resultatList.moveToNext())
+        {
+            transactionList.put(resultatList.getInt(0), resultatList.getDouble(3));
+        }
+
+        resultatList.close();
+
+        db.close();
+
+        return transactionList;
+    }
+
+    public void deleteTransactionFromId(int id)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_MANUAL_CURRENCIES, KEY_CURRENCY_ID + "=" + id, null);
+
+        db.close();
     }
 }

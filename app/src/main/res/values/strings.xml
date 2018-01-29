@@ -116,4 +116,8 @@
     <!--Add transaction activity-->
     <string name="activity_add_amount">Amount</string>
     <string name="activity_purchased_price">Purchased price</string>
+    <string name="title_activity_currency_details">CurrencyDetailsActivity</string>
+    <string name="title_charts">Charts</string>
+    <string name="title_infos">Infos</string>
+    <string name="title_transactions">Transactions</string>
 </resources>
