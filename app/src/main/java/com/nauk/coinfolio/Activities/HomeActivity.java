@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.daimajia.swipe.SwipeLayout;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;

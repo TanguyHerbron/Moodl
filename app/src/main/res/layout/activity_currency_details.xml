@@ -37,7 +37,22 @@
 
         </ScrollView>
 
-        <ScrollView
+        <RelativeLayout
+            android:id="@+id/rlTransactions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/listTransactions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <!--<ScrollView
             android:id="@+id/svTransactions"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -50,7 +65,7 @@
 
             </LinearLayout>
 
-        </ScrollView>
+        </ScrollView>-->
 
     </ViewFlipper>
 

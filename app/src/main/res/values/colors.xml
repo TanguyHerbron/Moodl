@@ -11,4 +11,6 @@
     <color name="listBackground">#FFEEEEEE</color>
     <color name="listBackground2">#FFFFFFFF</color>
     <color name="separationLine">#FF999999</color>
+    <color name="red">#FFF44336</color>
+    <color name="green">#FF4CAF50</color>
 </resources>
