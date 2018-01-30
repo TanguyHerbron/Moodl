@@ -109,33 +109,45 @@ public class CurrencyDataRetriver  {
     {
         List<CurrencyDataChart> dataChart = new ArrayList<>();
 
-        response = response.substring(response.indexOf("Data\":[{") + 7, response.lastIndexOf("}],\"TimeTo"));
-        String[] tab = response.split(Pattern.quote("},{"));
-        for(int i = 0; i < tab.length; i++)
+        Log.d("coinfolio", "Result : " + response);
+
+        if(response.length() > 200)
         {
-
-            if(i == 0)
+            response = response.substring(response.indexOf("Data\":[{") + 7, response.lastIndexOf("}],\"TimeTo"));
+            String[] tab = response.split(Pattern.quote("},{"));
+            for(int i = 0; i < tab.length; i++)
             {
-                tab[i] = tab[i] + "}";
+
+                if(i == 0)
+                {
+                    tab[i] = tab[i] + "}";
+                }
+                else
+                {
+                    tab[i] = "{" + tab[i] + "}";
+                }
+
+                try {
+                    JSONObject jsonObject = new JSONObject(tab[i]);
+
+                    long timestamp = Long.parseLong(jsonObject.getString("time"));
+                    double close = Double.parseDouble(jsonObject.getString("close"));
+                    double high = Double.parseDouble(jsonObject.getString("high"));
+                    double low = Double.parseDouble(jsonObject.getString("low"));
+                    double open = Double.parseDouble(jsonObject.getString("open"));
+
+                    dataChart.add(new CurrencyDataChart(timestamp, close, high, low, open));
+
+                } catch (JSONException e) {
+                    Log.d(context.getResources().getString(R.string.debug_volley), "API Request error: " + e + " index: " + i);
+                }
             }
-            else
+        }
+        else
+        {
+            for(int i = 1; i <= 1440; i++)
             {
-                tab[i] = "{" + tab[i] + "}";
-            }
-
-            try {
-                JSONObject jsonObject = new JSONObject(tab[i]);
-
-                long timestamp = Long.parseLong(jsonObject.getString("time"));
-                double close = Double.parseDouble(jsonObject.getString("close"));
-                double high = Double.parseDouble(jsonObject.getString("high"));
-                double low = Double.parseDouble(jsonObject.getString("low"));
-                double open = Double.parseDouble(jsonObject.getString("open"));
-
-                dataChart.add(new CurrencyDataChart(timestamp, close, high, low, open));
-
-            } catch (JSONException e) {
-                Log.d(context.getResources().getString(R.string.debug_volley), "API Request error: " + e + " index: " + i);
+                dataChart.add(new CurrencyDataChart(i, 1, 1, 1, 1));
             }
         }
 

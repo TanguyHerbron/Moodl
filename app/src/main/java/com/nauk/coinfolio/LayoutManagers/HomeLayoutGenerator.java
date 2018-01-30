@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.db.chart.model.LineSet;
+import com.db.chart.model.Point;
 import com.db.chart.renderer.AxisRenderer;
 import com.db.chart.view.LineChartView;
 import com.nauk.coinfolio.Activities.CurrencyDetailsActivity;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.floorDiv;
 
 /**
  * Created by Tiji on 05/01/2018.
@@ -257,6 +259,12 @@ public class HomeLayoutGenerator {
             {
                 valMin = dataChartList.get(i).getOpen();
             }
+        }
+
+        if(valMax == valMin)
+        {
+            valMin = 0;
+            valMax *= 2;
         }
 
         chartView.setAxisBorderValues((float) valMin, (float) valMax);

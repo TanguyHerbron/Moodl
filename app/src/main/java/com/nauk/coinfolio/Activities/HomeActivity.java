@@ -340,6 +340,21 @@ public class HomeActivity extends AppCompatActivity {
             {
                 loadingDialog.dismiss();
             }
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    toolbarLayout.setTitle("US$0.00");
+
+                    toolbarSubtitle.setText("US$0.00");
+
+                    toolbarSubtitle.setTextColor(-1275068417);
+                }
+            });
+
+            //toolbarSubtitle.setText("US$0.00");
+
+            Log.d(this.getResources().getString(R.string.debug), "Colors : " + toolbarSubtitle.getTextColors());
         }
     }
 
