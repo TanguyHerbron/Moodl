@@ -8,8 +8,10 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,12 +26,15 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.R;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.floorDiv;
+import static java.lang.Math.incrementExact;
+import static java.sql.Types.NULL;
 
 /**
  * Created by Tiji on 05/01/2018.
@@ -45,6 +50,7 @@ public class HomeLayoutGenerator {
     }
 
     public CardView getInfoLayout(final Currency currency, int chartColor)
+    //public CardView getInfoLayout(int index)
     {
         CardView mainCard = new CardView(context);
         LinearLayout mainLinear = new LinearLayout(context);
@@ -57,6 +63,8 @@ public class HomeLayoutGenerator {
         StateListAnimator stateListAnimator = AnimatorInflater.loadStateListAnimator(context, R.drawable.cardview_animator);
         mainCard.setStateListAnimator(stateListAnimator);
 
+        //mainCard.setTag("full." + index);
+
         /*int[] attrs = new int[] { R.attr.selectableItemBackground };
         TypedArray ta = context.obtainStyledAttributes(attrs);
         Drawable drawable = ta.getDrawable(0);
@@ -67,12 +75,14 @@ public class HomeLayoutGenerator {
         mainCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //switchingView(view);
                 view.animate();
                 Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
                 intent.putExtra("symbol", currency.getSymbol());
                 context.getApplicationContext().startActivity(intent);
             }
         });
+
         mainCard.setClickable(true);
 
         CardView.LayoutParams paramsCard = new CardView.LayoutParams(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
@@ -106,25 +116,95 @@ public class HomeLayoutGenerator {
 
         mainLinear.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         mainLinear.setOrientation(LinearLayout.VERTICAL);
+        mainLinear.setTag("mainLinear");
 
         mainCard.setLayoutParams(paramsCard);
         mainCard.setRadius(8);
+
+        //infoLayout.addView(topLayoutGenerator(currencyList.get(index).getName(), currencyList.get(index).getSymbol(), currencyList.get(index).getValue(), currencyList.get(index).getIcon()));
+        //infoLayout.addView(bottomLayoutGenerator(currencyList.get(index).getSymbol(), currencyList.get(index).getBalance(), currencyList.get(index).getValue() * currencyList.get(index).getBalance(), currencyList.get(index).getDayFluctuationPercentage(), currencyList.get(index).getDayFluctuation()));
 
         infoLayout.addView(topLayoutGenerator(currency.getName(), currency.getSymbol(), currency.getValue(), currency.getIcon()));
         infoLayout.addView(bottomLayoutGenerator(currency.getSymbol(), currency.getBalance(), currency.getValue() * currency.getBalance(), currency.getDayFluctuationPercentage(), currency.getDayFluctuation()));
 
         mainLinear.addView(infoLayout);
 
-        LineChartView lineChartView = chartGenerator(currency.getDayPriceHistory(), chartColor);
-        chartLayout.setTag("chart_layout");
-        chartLayout.addView(lineChartView);
-        lineChartView.show();
         mainLinear.addView(separatorLayout);
-        mainLinear.addView(chartLayout);
+
+        mainLinear.addView(generateChart(currency, chartLayout, chartColor));
+
+        mainLinear.setClickable(false);
 
         mainCard.addView(mainLinear);
 
         return mainCard;
+    }
+
+    /*public void resetCurrencyList()
+    {
+        currencyList = new ArrayList<>();
+    }
+
+    public void addCurrencyToList(Currency currency)
+    {
+        currencyList.add(currency);
+    }
+
+    public void setCurrencyList(List<Currency> currencyList)
+    {
+        this.currencyList = currencyList;
+    }
+
+    private void switchingView(View view)
+    {
+        String[] tag = view.getTag().toString().split("\\.");
+
+        Log.d("coinfolio", "Design : " + currencyList.get(Integer.parseInt(tag[1])).getSymbol());
+
+        if(tag[0].equals("full"))
+        {
+            LinearLayout mLayout = view.findViewWithTag("mainLinear");
+            mLayout.removeViewAt(mLayout.getChildCount()-1);
+            mLayout.addView(generateChart(currencyList.get(Integer.parseInt(tag[1])), chartLayout, currencyList.get(Integer.parseInt(tag[1])).getChartColor()));
+            Log.d("coinfolio", "Data : " + currencyList.get(Integer.parseInt(tag[1])).getSymbol() + " " + currencyList.get(Integer.parseInt(tag[1])).getChartColor());
+            view.setTag("half." + tag[1]);
+            mLayout.findViewWithTag("separator_layout").setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            LinearLayout mLayout = view.findViewWithTag("mainLinear");
+            mLayout.findViewWithTag("chart_layout").setVisibility(View.GONE);
+            mLayout.findViewWithTag("separator_layout").setVisibility(View.GONE);
+            view.setTag("full." + tag[1]);
+        }
+    }*/
+
+    private View generateChart(Currency currency, LinearLayout chartLayout, int chartColor)
+    {
+        View toReturn;
+
+        if(currency.getDayPriceHistory() != null)
+        {
+            LineChartView lineChartView = chartGenerator(currency.getDayPriceHistory(), chartColor);
+            chartLayout.setTag("chart_layout");
+            chartLayout.addView(lineChartView);
+            lineChartView.show();
+            toReturn = chartLayout;
+            //mainLinear.addView(chartLayout);
+        }
+        else
+        {
+            TextView errorTextView = new TextView(context);
+            errorTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 500));
+            errorTextView.setText("Error");
+            errorTextView.setTag("chart_layout");
+            errorTextView.setGravity(Gravity.CENTER);
+
+            toReturn = errorTextView;
+            //mainLinear.addView(errorTextView);
+        }
+
+        return toReturn;
     }
 
     private LinearLayout topLayoutGenerator(String name, String symbol, double value, Bitmap logo)
@@ -159,7 +239,15 @@ public class HomeLayoutGenerator {
         valueTextView.setTextSize(context.getResources().getDimension(R.dimen.mainText));
         valueTextView.setTextColor(context.getResources().getColor(R.color.secondaryTextViewColor));
         valueTextView.setGravity(Gravity.RIGHT);
-        valueTextView.setText("US$" + value);
+
+        if(value != NULL)
+        {
+            valueTextView.setText("US$" + value);
+        }
+        else
+        {
+            valueTextView.setText("ERROR");
+        }
 
         mainLayout.addView(currencyIcon);
         mainLayout.addView(nameTextView);
@@ -212,6 +300,7 @@ public class HomeLayoutGenerator {
 
         fluctuationTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         fluctuationTextView.setTextSize(context.getResources().getDimension(R.dimen.secondaryText));
+
         if(fluctuation > 0)
         {
             fluctuationTextView.setTextColor(context.getResources().getColor(R.color.increase));

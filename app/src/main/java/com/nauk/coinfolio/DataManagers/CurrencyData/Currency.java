@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 
 import java.util.List;
 
+import static java.sql.Types.NULL;
+
 /**
  * Created by Tiji on 25/12/2017.
  */
@@ -19,6 +21,7 @@ public class Currency {
     private List<CurrencyDataChart> dayPriceHistory;
     private CurrencyDataRetriver dataRetriver;
     private Bitmap icon;
+    private int chartColor;
 
     public Currency(String symbol, double balance)
     {
@@ -48,7 +51,14 @@ public class Currency {
                 setDayPriceHistory(dataChart);
                 updateDayFluctuation();
 
-                setValue(dataChart.get(dataChart.size() - 1).getClose());
+                if(dataChart != null)
+                {
+                    setValue(dataChart.get(dataChart.size() - 1).getClose());
+                }
+                else
+                {
+                    value = NULL;
+                }
 
                 callBack.onSuccess(Currency.this);
             }
@@ -73,6 +83,21 @@ public class Currency {
                 callBack.onSuccess(Currency.this);
             }
         });
+    }
+
+    public void setChartColor(int chartColor)
+    {
+        this.chartColor = chartColor;
+    }
+
+    public int getChartColor()
+    {
+        return chartColor;
+    }
+
+    public CurrencyDataRetriver getDataRetriver()
+    {
+        return dataRetriver;
     }
 
     public List<CurrencyDataChart> getDayPriceHistory()
@@ -142,9 +167,12 @@ public class Currency {
 
     private void updateDayFluctuation()
     {
-        dayFluctuation = dayPriceHistory.get(dayPriceHistory.size() - 1).getOpen() - dayPriceHistory.get(0).getOpen();
+        if(dayPriceHistory != null)
+        {
+            dayFluctuation = dayPriceHistory.get(dayPriceHistory.size() - 1).getOpen() - dayPriceHistory.get(0).getOpen();
 
-        dayFluctuationPercentage = (float) (dayFluctuation / dayPriceHistory.get(0).getOpen() * 100);
+            dayFluctuationPercentage = (float) (dayFluctuation / dayPriceHistory.get(0).getOpen() * 100);
+        }
     }
 
     public interface CurrencyCallBack {

@@ -109,8 +109,6 @@ public class CurrencyDataRetriver  {
     {
         List<CurrencyDataChart> dataChart = new ArrayList<>();
 
-        Log.d("coinfolio", "Result : " + response);
-
         if(response.length() > 200)
         {
             response = response.substring(response.indexOf("Data\":[{") + 7, response.lastIndexOf("}],\"TimeTo"));
@@ -145,10 +143,12 @@ public class CurrencyDataRetriver  {
         }
         else
         {
-            for(int i = 1; i <= 1440; i++)
+            /*for(int i = 1; i <= 1440; i++)
             {
                 dataChart.add(new CurrencyDataChart(i, 1, 1, 1, 1));
-            }
+            }*/
+
+            dataChart = null;
         }
 
         return dataChart;

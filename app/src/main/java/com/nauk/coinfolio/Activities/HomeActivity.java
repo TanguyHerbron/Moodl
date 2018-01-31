@@ -26,6 +26,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.daimajia.swipe.SwipeLayout;
+import com.db.chart.view.LineChartView;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
@@ -63,6 +64,7 @@ public class HomeActivity extends AppCompatActivity {
     private boolean iconChecker;
     private PreferencesManager preferencesManager;
     private DatabaseManager databaseManager;
+    private long lastTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,13 +155,20 @@ public class HomeActivity extends AppCompatActivity {
         databaseManager = new DatabaseManager(this);
 
         updateViewButtonIcon();
+
+        lastTimestamp = 0;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        updateAll();
+        if(System.currentTimeMillis()/1000 - lastTimestamp > 60)
+        {
+            lastTimestamp = System.currentTimeMillis()/1000;
+
+            updateAll();
+        }
     }
 
     @Override
@@ -216,21 +225,31 @@ public class HomeActivity extends AppCompatActivity {
         {
             currencyLayout.removeAllViews();
 
+            //layoutGenerator.setCurrencyList(balanceManager.getTotalBalance());
+            //layoutGenerator.resetCurrencyList();
+
             for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
             {
                 final Currency currency = balanceManager.getTotalBalance().get(i);
 
-                if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001)
+                if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getDayPriceHistory() == null))
                 {
                     if(currency.getIcon() != null)
                     {
                         Palette.Builder builder = Palette.from(currency.getIcon());
 
+                        currency.setChartColor(builder.generate().getDominantColor(0));
+
+                        //layoutGenerator.addCurrencyToList(currency);
+
                         currencyLayout.addView(layoutGenerator.getInfoLayout(currency, builder.generate().getDominantColor(0)));
+                        //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
                     }
                     else
                     {
+                        //currency.setChartColor(12369084);
                         currencyLayout.addView(layoutGenerator.getInfoLayout(currency, 12369084));
+                        //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
                     }
                 }
             }
@@ -296,6 +315,8 @@ public class HomeActivity extends AppCompatActivity {
 
                 currencyLayout.removeAllViews();
 
+                //layoutGenerator.setCurrencyList(balanceManager.getTotalBalance());
+
                 for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                 {
                     if(!balanceManager.getTotalBalance().get(i).getSymbol().equals("USD") && (balanceManager.getTotalBalance().get(i).getBalance() * balanceManager.getTotalBalance().get(i).getValue()) > 0.001)
@@ -303,7 +324,15 @@ public class HomeActivity extends AppCompatActivity {
                         totalValue += balanceManager.getTotalBalance().get(i).getValue() * balanceManager.getTotalBalance().get(i).getBalance();
                         totalFluctuation += (balanceManager.getTotalBalance().get(i).getValue() * balanceManager.getTotalBalance().get(i).getBalance()) * (balanceManager.getTotalBalance().get(i).getDayFluctuationPercentage() / 100);
                         balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
-                        currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(i),0));
+                        //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
+                        currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(i), 0));
+                    }
+
+                    if(!balanceManager.getTotalBalance().get(i).getSymbol().equals("USD") && balanceManager.getTotalBalance().get(i).getDayPriceHistory() == null)
+                    {
+                        balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
+                        //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
+                        currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(i), 0));
                     }
                 }
 
@@ -328,33 +357,29 @@ public class HomeActivity extends AppCompatActivity {
                     loadingDialog.dismiss();
                 }
             }
-        }
 
-        if(balanceManager.getTotalBalance().size() == 0)
-        {
-            refreshLayout.setRefreshing(false);
-
-            currencyLayout.removeAllViews();
-
-            if(loadingDialog.isShowing())
+            if(balanceManager.getTotalBalance().size() == 0)
             {
-                loadingDialog.dismiss();
-            }
+                refreshLayout.setRefreshing(false);
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    toolbarLayout.setTitle("US$0.00");
+                currencyLayout.removeAllViews();
 
-                    toolbarSubtitle.setText("US$0.00");
-
-                    toolbarSubtitle.setTextColor(-1275068417);
+                if(loadingDialog.isShowing())
+                {
+                    loadingDialog.dismiss();
                 }
-            });
 
-            //toolbarSubtitle.setText("US$0.00");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toolbarLayout.setTitle("US$0.00");
 
-            Log.d(this.getResources().getString(R.string.debug), "Colors : " + toolbarSubtitle.getTextColors());
+                        toolbarSubtitle.setText("US$0.00");
+
+                        toolbarSubtitle.setTextColor(-1275068417);
+                    }
+                });
+            }
         }
     }
 

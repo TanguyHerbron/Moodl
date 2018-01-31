@@ -16,20 +16,27 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.daimajia.swipe.SwipeLayout;
+import com.db.chart.model.LineSet;
+import com.db.chart.view.LineChartView;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.R;
 
 import org.w3c.dom.Text;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+
+/**Create a Parcelable**/
 
 public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
     private LinearLayout transactionLayout;
+    private LinearLayout chartLayout;
     private DatabaseManager databaseManager;
     private String symbol;
 
@@ -66,11 +73,26 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         viewFlipper = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
+        chartLayout = findViewById(R.id.chartLayout);
 
         drawTransactionList();
 
+        //drawChart();
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+    }
+
+    private void drawChart()
+    {
+        LineChartView chartView = new LineChartView(this);
+        LineSet lineSet = new LineSet();
+        double valMin;
+        double valMax;
+        int counter = 0;
+        Calendar calendar = Calendar.getInstance(Locale.FRANCE);
+        String hour;
+        String minute;
     }
 
     private void drawTransactionList()
