@@ -234,23 +234,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getDayPriceHistory() == null))
                 {
-                    if(currency.getIcon() != null)
-                    {
-                        Palette.Builder builder = Palette.from(currency.getIcon());
-
-                        currency.setChartColor(builder.generate().getDominantColor(0));
-
-                        //layoutGenerator.addCurrencyToList(currency);
-
-                        currencyLayout.addView(layoutGenerator.getInfoLayout(currency, builder.generate().getDominantColor(0)));
-                        //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
-                    }
-                    else
-                    {
-                        //currency.setChartColor(12369084);
-                        currencyLayout.addView(layoutGenerator.getInfoLayout(currency, 12369084));
-                        //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
-                    }
+                    currencyLayout.addView(layoutGenerator.getInfoLayout(currency, currency.getChartColor()));
                 }
             }
         }
@@ -290,7 +274,7 @@ public class HomeActivity extends AppCompatActivity {
         return null;
     }
 
-    private void countCoins(boolean isCoin, boolean isIcon)
+    private void countCoins(boolean isCoin, boolean isDetails)
     {
         float totalValue = 0;
         float totalFluctuation = 0;
@@ -300,9 +284,15 @@ public class HomeActivity extends AppCompatActivity {
             coinCounter++;
         }
 
-        if(isIcon)
+        if(isDetails)
         {
             iconChecker = true;
+        }
+
+
+        for(int i = 0; i < coinCounter; i++)
+        {
+            balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
         }
 
         if(balanceManager.getTotalBalance() != null)
@@ -319,18 +309,37 @@ public class HomeActivity extends AppCompatActivity {
 
                 for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                 {
+                    if(balanceManager.getTotalBalance().get(i).getIcon() != null)
+                    {
+                        //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
+
+                        Palette.Builder builder = Palette.from(balanceManager.getTotalBalance().get(i).getIcon());
+
+                        balanceManager.getTotalBalance().get(i).setChartColor(builder.generate().getDominantColor(0));
+
+                        //layoutGenerator.addCurrencyToList(currency);
+                        //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
+                    }
+                    else
+                    {
+                        //currency.setChartColor(12369084);
+                        balanceManager.getTotalBalance().get(i).setChartColor(12369084);
+                        //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
+                    }
+
                     if(!balanceManager.getTotalBalance().get(i).getSymbol().equals("USD") && (balanceManager.getTotalBalance().get(i).getBalance() * balanceManager.getTotalBalance().get(i).getValue()) > 0.001)
                     {
+                        balanceManager.getTotalBalance().get(i).setName(balanceManager.getCurrencyName(balanceManager.getTotalBalance().get(i).getSymbol()));
                         totalValue += balanceManager.getTotalBalance().get(i).getValue() * balanceManager.getTotalBalance().get(i).getBalance();
                         totalFluctuation += (balanceManager.getTotalBalance().get(i).getValue() * balanceManager.getTotalBalance().get(i).getBalance()) * (balanceManager.getTotalBalance().get(i).getDayFluctuationPercentage() / 100);
-                        balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
+                        //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
                         //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
                         currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(i), 0));
                     }
 
                     if(!balanceManager.getTotalBalance().get(i).getSymbol().equals("USD") && balanceManager.getTotalBalance().get(i).getDayPriceHistory() == null)
                     {
-                        balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
+                        //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
                         //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
                         currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(i), 0));
                     }

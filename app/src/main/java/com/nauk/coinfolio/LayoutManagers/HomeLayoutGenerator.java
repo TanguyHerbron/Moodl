@@ -78,7 +78,8 @@ public class HomeLayoutGenerator {
                 //switchingView(view);
                 view.animate();
                 Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra("symbol", currency.getSymbol());
+                //intent.putExtra("symbol", currency.getSymbol());
+                intent.putExtra("currency", currency);
                 context.getApplicationContext().startActivity(intent);
             }
         });

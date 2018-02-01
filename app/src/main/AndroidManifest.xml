@@ -14,7 +14,8 @@
         <activity
             android:name=".Activities.HomeActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,12 +24,16 @@
         </activity>
         <activity
             android:name=".Activities.SettingsActivity"
-            android:label="@string/title_activity_settings" />
-        <activity android:name=".Activities.CurrencySelectionActivity" />
-        <activity android:name=".Activities.RecordTransactionActivity" />
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.CurrencySelectionActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Activities.RecordTransactionActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.CurrencyDetailsActivity"
-            android:label="@string/title_activity_currency_details"></activity>
+            android:label="@string/title_activity_currency_details"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

@@ -1,7 +1,10 @@
 package com.nauk.coinfolio.DataManagers.CurrencyData;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.sql.Types.NULL;
@@ -10,7 +13,7 @@ import static java.sql.Types.NULL;
  * Created by Tiji on 25/12/2017.
  */
 
-public class Currency {
+public class Currency implements Parcelable {
 
     private String name;
     private String symbol;
@@ -179,4 +182,47 @@ public class Currency {
         void onSuccess(Currency currency);
     }
 
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.name);
+        dest.writeString(this.symbol);
+        dest.writeDouble(this.value);
+        dest.writeDouble(this.balance);
+        dest.writeFloat(this.dayFluctuationPercentage);
+        dest.writeDouble(this.dayFluctuation);
+        dest.writeList(this.dayPriceHistory);
+        dest.writeParcelable(this.icon, flags);
+        dest.writeInt(this.chartColor);
+    }
+
+    protected Currency(Parcel in) {
+        this.name = in.readString();
+        this.symbol = in.readString();
+        this.value = in.readDouble();
+        this.balance = in.readDouble();
+        this.dayFluctuationPercentage = in.readFloat();
+        this.dayFluctuation = in.readDouble();
+        this.dayPriceHistory = new ArrayList<CurrencyDataChart>();
+        in.readList(this.dayPriceHistory, CurrencyDataChart.class.getClassLoader());
+        this.icon = in.readParcelable(Bitmap.class.getClassLoader());
+        this.chartColor = in.readInt();
+    }
+
+    public static final Parcelable.Creator<Currency> CREATOR = new Parcelable.Creator<Currency>() {
+        @Override
+        public Currency createFromParcel(Parcel source) {
+            return new Currency(source);
+        }
+
+        @Override
+        public Currency[] newArray(int size) {
+            return new Currency[size];
+        }
+    };
 }

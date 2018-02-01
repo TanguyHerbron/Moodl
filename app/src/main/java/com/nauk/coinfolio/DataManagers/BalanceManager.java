@@ -268,6 +268,11 @@ public class BalanceManager {
         return iconUrlList.get(symbol);
     }
 
+    public String getCurrencyName(String symbol)
+    {
+        return coinList.get(symbol);
+    }
+
     private void processDetailResult(String response, final IconCallBack callBack)
     {
         response = response.substring(response.indexOf("\"Data\"") + 7, response.lastIndexOf("},\"Type\":100}"));

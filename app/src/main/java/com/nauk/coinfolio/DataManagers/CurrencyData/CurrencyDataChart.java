@@ -1,10 +1,13 @@
 package com.nauk.coinfolio.DataManagers.CurrencyData;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Tiji on 05/01/2018.
  */
 
-public class CurrencyDataChart {
+public class CurrencyDataChart implements Parcelable {
 
     long timestamp;
     double close;
@@ -35,4 +38,38 @@ public class CurrencyDataChart {
     {
         return timestamp;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(this.timestamp);
+        dest.writeDouble(this.close);
+        dest.writeDouble(this.high);
+        dest.writeDouble(this.low);
+        dest.writeDouble(this.open);
+    }
+
+    protected CurrencyDataChart(Parcel in) {
+        this.timestamp = in.readLong();
+        this.close = in.readDouble();
+        this.high = in.readDouble();
+        this.low = in.readDouble();
+        this.open = in.readDouble();
+    }
+
+    public static final Parcelable.Creator<CurrencyDataChart> CREATOR = new Parcelable.Creator<CurrencyDataChart>() {
+        @Override
+        public CurrencyDataChart createFromParcel(Parcel source) {
+            return new CurrencyDataChart(source);
+        }
+
+        @Override
+        public CurrencyDataChart[] newArray(int size) {
+            return new CurrencyDataChart[size];
+        }
+    };
 }

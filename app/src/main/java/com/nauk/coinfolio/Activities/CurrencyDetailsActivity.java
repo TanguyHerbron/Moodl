@@ -1,6 +1,8 @@
 package com.nauk.coinfolio.Activities;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -17,7 +19,10 @@ import android.widget.ViewFlipper;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.db.chart.model.LineSet;
+import com.db.chart.renderer.AxisRenderer;
 import com.db.chart.view.LineChartView;
+import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
+import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.R;
@@ -38,7 +43,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private LinearLayout transactionLayout;
     private LinearLayout chartLayout;
     private DatabaseManager databaseManager;
-    private String symbol;
+    //private String symbol;
+    private Currency currency;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -67,7 +73,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        symbol = intent.getStringExtra("symbol");
+        //symbol = intent.getStringExtra("symbol");
+        currency = (Currency) intent.getParcelableExtra("currency");
 
         databaseManager = new DatabaseManager(this);
 
@@ -77,10 +84,14 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         drawTransactionList();
 
-        //drawChart();
+        drawChart();
+
+        setTitle(currency.getName());
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        Log.d("coinfolio", "Color received : " + currency.getChartColor());
     }
 
     private void drawChart()
@@ -93,17 +104,102 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance(Locale.FRANCE);
         String hour;
         String minute;
+
+        List<CurrencyDataChart> dataChartList = currency.getDayPriceHistory();
+
+        valMin = dataChartList.get(0).getOpen();
+        valMax = dataChartList.get(0).getOpen();
+
+        for(int i = 1; i < dataChartList.size(); i++)
+        {
+            if(valMax < dataChartList.get(i).getOpen())
+            {
+                valMax = dataChartList.get(i).getOpen();
+            }
+
+            if(valMin > dataChartList.get(i).getOpen())
+            {
+                valMin = dataChartList.get(i).getOpen();
+            }
+        }
+
+        if(valMax == valMin)
+        {
+            valMin = 0;
+            valMax *= 2;
+        }
+
+        chartView.setAxisBorderValues((float) valMin, (float) valMax);
+        chartView.setYLabels(AxisRenderer.LabelPosition.OUTSIDE);
+        chartView.setYAxis(false);
+        chartView.setXAxis(false);
+
+        for(int i = 0; i < dataChartList.size(); i+=10)
+        {
+            if(counter == 30)
+            {
+                calendar.setTimeInMillis(dataChartList.get(i).getTimestamp()*1000);
+
+                hour = String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+                minute = String.valueOf(calendar.get(Calendar.MINUTE));
+
+                if(hour.length() < 2)
+                {
+                    hour = "0" + hour;
+                }
+
+                if(minute.length() < 2)
+                {
+                    minute = "0" + minute;
+                }
+
+                lineSet.addPoint(hour + ":" + minute, (float) dataChartList.get(i).getOpen());
+                counter = 0;
+            }
+            else
+            {
+                counter++;
+                lineSet.addPoint("", (float) dataChartList.get(i).getOpen());
+            }
+        }
+
+        lineSet.setSmooth(true);
+        lineSet.setThickness(4);
+        lineSet.setFill(getColorWitchAlpha(currency.getChartColor(), 0.5f));
+        lineSet.setColor(currency.getChartColor());
+
+        chartView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 500));
+
+        chartView.addData(lineSet);
+
+        chartLayout.addView(chartView);
+
+        Log.d("coinfolio", "Color : " + currency.getChartColor());
+
+        chartView.show();
+    }
+
+    private int getColorWitchAlpha(int color, float ratio)
+    {
+        int transColor;
+        int alpha = Math.round(Color.alpha(color) * ratio);
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+
+        transColor = Color.argb(alpha, r, g, b);
+
+        return transColor;
     }
 
     private void drawTransactionList()
     {
         transactionLayout.removeAllViews();
 
-        List<Transaction> transactionList = databaseManager.getCurrencyTransactions(symbol);
+        List<Transaction> transactionList = databaseManager.getCurrencyTransactions(currency.getSymbol());
 
         for(int i = 0; i < transactionList.size(); i++)
         {
-            Log.d("coinfoliobeta", "test");
             View view = LayoutInflater.from(this).inflate(R.layout.custom_transaction_row, null);
             TextView amountTxtView = view.findViewById(R.id.amountPurchased);
             TextView valueTxtView = view.findViewById(R.id.puchasedValue);
