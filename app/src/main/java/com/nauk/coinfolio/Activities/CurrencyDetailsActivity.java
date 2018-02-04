@@ -3,23 +3,32 @@ package com.nauk.coinfolio.Activities;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.BounceInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.daimajia.swipe.SwipeLayout;
+import com.db.chart.animation.Animation;
 import com.db.chart.model.LineSet;
+import com.db.chart.model.Point;
 import com.db.chart.renderer.AxisRenderer;
+import com.db.chart.tooltip.Tooltip;
+import com.db.chart.util.Tools;
 import com.db.chart.view.LineChartView;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
@@ -45,6 +54,10 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private DatabaseManager databaseManager;
     //private String symbol;
     private Currency currency;
+    private boolean hasBeenModified;
+    private Tooltip tip;
+    private int indexMax;
+    private int indexMin;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -67,6 +80,17 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     };
 
     @Override
+    public void onBackPressed()
+    {
+        Log.d(this.getResources().getString(R.string.debug), "Back pressed");
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.putExtra("update", hasBeenModified);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currency_details);
@@ -80,23 +104,36 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         viewFlipper = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
-        chartLayout = findViewById(R.id.chartLayout);
+        chartLayout = findViewById(R.id.chartsLayout);
 
         drawTransactionList();
 
-        drawChart();
+        if(currency.getDayPriceHistory().size() > 0)
+        {
+            drawChart();
+        }
+        else
+        {
+            TextView errorTextView = new TextView(this);
+            errorTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 500));
+            errorTextView.setText("Not enough data");
+            errorTextView.setTag("chart_layout");
+            errorTextView.setGravity(Gravity.CENTER);
+
+            chartLayout.addView(errorTextView);
+        }
 
         setTitle(currency.getName());
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        Log.d("coinfolio", "Color received : " + currency.getChartColor());
+        hasBeenModified = false;
     }
 
     private void drawChart()
     {
-        LineChartView chartView = new LineChartView(this);
+        final LineChartView chartView = new LineChartView(this);
         LineSet lineSet = new LineSet();
         double valMin;
         double valMax;
@@ -105,8 +142,10 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         String hour;
         String minute;
 
-        List<CurrencyDataChart> dataChartList = currency.getDayPriceHistory();
+        final List<CurrencyDataChart> dataChartList = currency.getDayPriceHistory();
 
+        indexMin = 0;
+        indexMax = 0;
         valMin = dataChartList.get(0).getOpen();
         valMax = dataChartList.get(0).getOpen();
 
@@ -115,11 +154,13 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             if(valMax < dataChartList.get(i).getOpen())
             {
                 valMax = dataChartList.get(i).getOpen();
+                indexMax = i;
             }
 
             if(valMin > dataChartList.get(i).getOpen())
             {
                 valMin = dataChartList.get(i).getOpen();
+                indexMin = i;
             }
         }
 
@@ -130,7 +171,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         }
 
         chartView.setAxisBorderValues((float) valMin, (float) valMax);
-        chartView.setYLabels(AxisRenderer.LabelPosition.OUTSIDE);
+        chartView.setYLabels(AxisRenderer.LabelPosition.NONE);
         chartView.setYAxis(false);
         chartView.setXAxis(false);
 
@@ -168,15 +209,48 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         lineSet.setFill(getColorWitchAlpha(currency.getChartColor(), 0.5f));
         lineSet.setColor(currency.getChartColor());
 
-        chartView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 500));
+        final LinearLayout.LayoutParams chartParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 500);
+        chartParams.setMargins(0, 15, 0, 15);
+
+        chartView.setLayoutParams(chartParams);
+
+        tip = new Tooltip(this, R.layout.tooltip_layout, R.id.value);
+
+        RelativeLayout.LayoutParams tipParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+        tip.setLayoutParams(tipParams);
+        tip.setVerticalAlignment(Tooltip.Alignment.BOTTOM_TOP);
+        tip.setDimensions((int) Tools.fromDpToPx(75), (int) Tools.fromDpToPx(25));
+        tip.setClickable(false);
+        /*tip.setVerticalAlignment(Tooltip.Alignment.CENTER);
+        tip.setHorizontalAlignment(Tooltip.Alignment.CENTER);
+        tip.setDimensions((int) Tools.fromDpToPx(4), (int) Tools.fromDpToPx(4));
+        tip.setClickable(false);*/
+
+        final Tooltip tip2 = tip;
 
         chartView.addData(lineSet);
+        chartView.setFadingEdgeLength(15);
+        chartView.setLongClickable(true);
+
+        //tip.prepare(chartView.getEntriesArea(0).get(0), (float) dataChartList.get(0).getOpen());
+
+        chartView.setTooltips(tip);
+        chartView.setTooltips(tip2);
+
+        Runnable launchAction = new Runnable() {
+            @Override
+            public void run() {
+                tip.prepare(chartView.getEntriesArea(0).get((int) indexMin/10), (float) dataChartList.get(indexMin).getOpen());
+                tip2.prepare(chartView.getEntriesArea(0).get((int) indexMax/10), (float) dataChartList.get(indexMax).getOpen());
+                chartView.showTooltip(tip, true);
+                //chartView.showTooltip(tip2, true);
+            }
+        };
+
+        chartView.show(new Animation().fromAlpha(0).withEndAction(launchAction));
 
         chartLayout.addView(chartView);
-
-        Log.d("coinfolio", "Color : " + currency.getChartColor());
-
-        chartView.show();
     }
 
     private int getColorWitchAlpha(int color, float ratio)
@@ -214,6 +288,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                     databaseManager.deleteTransactionFromId(Integer.parseInt(view.getTag().toString()));
                     Log.d(CurrencyDetailsActivity.this.getResources().getString(R.string.debug), "Id : " + view.getTag());
                     drawTransactionList();
+                    hasBeenModified = true;
                 }
             });
 

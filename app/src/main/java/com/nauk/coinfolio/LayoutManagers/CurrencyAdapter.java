@@ -19,12 +19,11 @@ import com.nauk.coinfolio.R;
 
 public class CurrencyAdapter extends ArrayAdapter<Currency> {
 
-        private ArrayList<Currency> Currencys, tempCurrency, suggestions;
+        private ArrayList<Currency> tempCurrency, suggestions;
         private Context context;
 
         public CurrencyAdapter(Context context, ArrayList<Currency> objects) {
             super(context, android.R.layout.simple_list_item_1, objects);
-            this.Currencys = objects;
             this.tempCurrency = new ArrayList<Currency>(objects);
             this.suggestions = new ArrayList<Currency>(objects);
 

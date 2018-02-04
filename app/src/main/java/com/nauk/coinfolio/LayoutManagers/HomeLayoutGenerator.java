@@ -49,7 +49,7 @@ public class HomeLayoutGenerator {
         this.context = context;
     }
 
-    public CardView getInfoLayout(final Currency currency, int chartColor)
+    public CardView getInfoLayout(final Currency currency)
     //public CardView getInfoLayout(int index)
     {
         CardView mainCard = new CardView(context);
@@ -132,7 +132,7 @@ public class HomeLayoutGenerator {
 
         mainLinear.addView(separatorLayout);
 
-        mainLinear.addView(generateChart(currency, chartLayout, chartColor));
+        mainLinear.addView(generateChart(currency, chartLayout));
 
         mainLinear.setClickable(false);
 
@@ -180,13 +180,13 @@ public class HomeLayoutGenerator {
         }
     }*/
 
-    private View generateChart(Currency currency, LinearLayout chartLayout, int chartColor)
+    private View generateChart(Currency currency, LinearLayout chartLayout)
     {
         View toReturn;
 
         if(currency.getDayPriceHistory() != null)
         {
-            LineChartView lineChartView = chartGenerator(currency.getDayPriceHistory(), chartColor);
+            LineChartView lineChartView = chartGenerator(currency.getDayPriceHistory(), currency.getChartColor());
             chartLayout.setTag("chart_layout");
             chartLayout.addView(lineChartView);
             lineChartView.show();

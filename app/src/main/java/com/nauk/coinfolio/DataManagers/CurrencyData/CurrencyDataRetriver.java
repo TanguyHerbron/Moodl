@@ -98,7 +98,7 @@ public class CurrencyDataRetriver  {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        callBack.onSuccess(null);
                     }
                 });
 

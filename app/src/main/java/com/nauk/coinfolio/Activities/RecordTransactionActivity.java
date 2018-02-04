@@ -41,6 +41,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
             public void onClick(View view) {
                 databaseManager.addCurrencyToManualCurrency(symbol, Double.parseDouble(amountTxtView.getText().toString()));
                 Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
+                intent.putExtra("update", true);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 finish();

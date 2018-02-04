@@ -48,6 +48,7 @@ public class BalanceManager {
     private android.content.Context context;
     private Map<String, String> iconUrlList;
     private Map<String, String> coinList;
+    private Map<String, Integer> coinIdList;
     private PreferencesManager preferenceManager;
     private DatabaseManager databaseManager;
 
@@ -265,12 +266,26 @@ public class BalanceManager {
 
     public String getIconUrl(String symbol)
     {
-        return iconUrlList.get(symbol);
+        String url;
+
+        try {
+            url = iconUrlList.get(symbol);
+        } catch (NullPointerException e) {
+            Log.d(context.getResources().getString(R.string.debug), symbol + " has no icon URL");
+            url = null;
+        }
+
+        return url;
     }
 
     public String getCurrencyName(String symbol)
     {
         return coinList.get(symbol);
+    }
+
+    public int getCurrencyId(String symbol)
+    {
+        return coinIdList.get(symbol);
     }
 
     private void processDetailResult(String response, final IconCallBack callBack)
@@ -280,6 +295,7 @@ public class BalanceManager {
 
         iconUrlList = new HashMap<>();
         coinList = new HashMap<>();
+        coinIdList = new HashMap<>();
 
         for(int i = 0; i < tab.length; i++)
         {
@@ -292,6 +308,8 @@ public class BalanceManager {
                 iconUrlList.put(jsonObject.getString("Symbol"), "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50");
 
                 coinList.put(jsonObject.getString("Symbol"), jsonObject.getString("CoinName"));
+
+                coinIdList.put(jsonObject.getString("Symbol"), jsonObject.getInt("Id"));
             } catch (JSONException e) {
                 Log.d(context.getResources().getString(R.string.debug), "ImageUrl not found.");
             }

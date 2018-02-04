@@ -15,6 +15,7 @@ import static java.sql.Types.NULL;
 
 public class Currency implements Parcelable {
 
+    private int id;
     private String name;
     private String symbol;
     private double value;
@@ -25,6 +26,21 @@ public class Currency implements Parcelable {
     private CurrencyDataRetriver dataRetriver;
     private Bitmap icon;
     private int chartColor;
+
+    public Currency(Currency currency)
+    {
+        this.id = currency.id;
+        this.name = currency.name;
+        this.symbol = currency.symbol;
+        this.value = currency.value;
+        this.balance = currency.balance;
+        this.dayFluctuationPercentage = currency.getDayFluctuationPercentage();
+        this.dayFluctuation = currency.getDayFluctuation();
+        this.dayPriceHistory = currency.dayPriceHistory;
+        this.dataRetriver = currency.getDataRetriver();
+        this.icon = currency.icon;
+        this.chartColor = currency.chartColor;
+    }
 
     public Currency(String symbol, double balance)
     {
@@ -86,6 +102,16 @@ public class Currency implements Parcelable {
                 callBack.onSuccess(Currency.this);
             }
         });
+    }
+
+    public void setId(int id)
+    {
+        this.id = id;
+    }
+
+    public int getId()
+    {
+        return id;
     }
 
     public void setChartColor(int chartColor)
@@ -190,6 +216,7 @@ public class Currency implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.id);
         dest.writeString(this.name);
         dest.writeString(this.symbol);
         dest.writeDouble(this.value);
@@ -202,6 +229,7 @@ public class Currency implements Parcelable {
     }
 
     protected Currency(Parcel in) {
+        this.id = in.readInt();
         this.name = in.readString();
         this.symbol = in.readString();
         this.value = in.readDouble();

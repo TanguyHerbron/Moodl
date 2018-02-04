@@ -7,11 +7,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -21,6 +24,7 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -38,6 +42,7 @@ import com.nauk.coinfolio.R;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.List;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
@@ -67,6 +72,8 @@ public class HomeActivity extends AppCompatActivity {
     private PreferencesManager preferencesManager;
     private DatabaseManager databaseManager;
     private long lastTimestamp;
+    private Handler handler;
+    private Runnable updateRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,7 +133,7 @@ public class HomeActivity extends AppCompatActivity {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        updateAll();
+                        updateAll(false);
                     }
                 }
         );
@@ -156,6 +163,41 @@ public class HomeActivity extends AppCompatActivity {
 
         databaseManager = new DatabaseManager(this);
 
+        handler = new Handler();
+
+        updateRunnable = new  Runnable() {
+            @Override
+            public void run() {
+                if (refreshLayout.isRefreshing())
+                {
+                    refreshLayout.setRefreshing(false);
+
+                    Snackbar.make(findViewById(R.id.currencyListLayout), "Error while updating data", Snackbar.LENGTH_LONG)
+                            .setAction("Update", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    updateAll(true);
+                                }
+                            })
+                            .show();
+                }
+
+                if (loadingDialog.isShowing())
+                {
+                    loadingDialog.dismiss();
+
+                    Snackbar.make(findViewById(R.id.currencyListLayout), "Error while updating data", Snackbar.LENGTH_LONG)
+                            .setAction("Update", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    updateAll(true);
+                                }
+                            })
+                            .show();
+                }
+            }
+        };
+
         updateViewButtonIcon();
 
         lastTimestamp = 0;
@@ -165,12 +207,16 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if(System.currentTimeMillis()/1000 - lastTimestamp > 60)
+        Intent intent = getIntent();
+
+        updateAll(intent.getBooleanExtra("update", false));
+
+        /*if(System.currentTimeMillis()/1000 - lastTimestamp > 60 || intent.getBooleanExtra("update", false))
         {
             lastTimestamp = System.currentTimeMillis()/1000;
 
             updateAll();
-        }
+        }*/
     }
 
     @Override
@@ -236,7 +282,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getDayPriceHistory() == null))
                 {
-                    currencyLayout.addView(layoutGenerator.getInfoLayout(currency, currency.getChartColor()));
+                    currencyLayout.addView(layoutGenerator.getInfoLayout(currency));
                 }
             }
         }
@@ -246,13 +292,26 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-    private void updateAll()
+    private void updateAll(boolean mustUpdate)
     {
-        resetCounter();
-        balanceManager.updateExchangeKeys();
-        DataUpdater updater = new DataUpdater();
-        updater.execute();
-        refreshLayout.setRefreshing(true);
+        if(System.currentTimeMillis()/1000 - lastTimestamp > 60 || mustUpdate)
+        {
+            lastTimestamp = System.currentTimeMillis() / 1000;
+            resetCounter();
+            balanceManager.updateExchangeKeys();
+            DataUpdater updater = new DataUpdater();
+            updater.execute();
+            refreshLayout.setRefreshing(true);
+
+            handler.postDelayed(updateRunnable, 10000);
+        }
+        else
+        {
+            if(refreshLayout.isRefreshing())
+            {
+                refreshLayout.setRefreshing(false);
+            }
+        }
     }
 
     private void resetCounter()
@@ -283,84 +342,16 @@ public class HomeActivity extends AppCompatActivity {
 
     private void countIcons()
     {
-        float totalValue = 0;
-        float totalFluctuation = 0;
-
         iconCounter++;
 
-        if(iconCounter == balanceManager.getTotalBalance().size())
+        if(iconCounter == balanceManager.getTotalBalance().size() - 1)
         {
-
             if(balanceManager.getTotalBalance() != null)
             {
-                if(coinCounter == balanceManager.getTotalBalance().size()-1 && iconChecker)
+                if(coinCounter == balanceManager.getTotalBalance().size() - 1 && iconChecker)
                 {
-                    refreshLayout.setRefreshing(false);
-
-                    balanceManager.sortCoins();
-
-                    currencyLayout.removeAllViews();
-
-                    //layoutGenerator.setCurrencyList(balanceManager.getTotalBalance());
-
-                    for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-                    {
-                        if(balanceManager.getTotalBalance().get(i).getIcon() != null)
-                        {
-                            //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
-
-                            Palette.Builder builder = Palette.from(balanceManager.getTotalBalance().get(i).getIcon());
-
-                            balanceManager.getTotalBalance().get(i).setChartColor(builder.generate().getDominantColor(0));
-
-                            //layoutGenerator.addCurrencyToList(currency);
-                            //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
-                        }
-                        else
-                        {
-                            //currency.setChartColor(12369084);
-                            balanceManager.getTotalBalance().get(i).setChartColor(12369084);
-                            //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
-                        }
-
-                        if(!balanceManager.getTotalBalance().get(i).getSymbol().equals("USD") && (balanceManager.getTotalBalance().get(i).getBalance() * balanceManager.getTotalBalance().get(i).getValue()) > 0.001)
-                        {
-                            balanceManager.getTotalBalance().get(i).setName(balanceManager.getCurrencyName(balanceManager.getTotalBalance().get(i).getSymbol()));
-                            totalValue += balanceManager.getTotalBalance().get(i).getValue() * balanceManager.getTotalBalance().get(i).getBalance();
-                            totalFluctuation += (balanceManager.getTotalBalance().get(i).getValue() * balanceManager.getTotalBalance().get(i).getBalance()) * (balanceManager.getTotalBalance().get(i).getDayFluctuationPercentage() / 100);
-                            //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
-                            //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
-                            currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(i), 0));
-                        }
-
-                        if(!balanceManager.getTotalBalance().get(i).getSymbol().equals("USD") && balanceManager.getTotalBalance().get(i).getDayPriceHistory() == null)
-                        {
-                            //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
-                            //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
-                            currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(i), 0));
-                        }
-                    }
-
-                    adaptView();
-
-                    toolbarLayout.setTitle("US$" + String.format("%.2f", totalValue));
-
-                    if(totalFluctuation > 0)
-                    {
-                        toolbarSubtitle.setTextColor(getResources().getColor(R.color.increase));
-                    }
-                    else
-                    {
-                        toolbarSubtitle.setTextColor(getResources().getColor(R.color.decrease));
-                    }
-
-                    toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation));
-
-
-                    if(loadingDialog.isShowing())
-                    {
-                        loadingDialog.dismiss();
-                    }
+                    UiHeavyLoadCalculator uiHeavyLoadCalculator = new UiHeavyLoadCalculator();
+                    uiHeavyLoadCalculator.execute();
                 }
 
                 if(balanceManager.getTotalBalance().size() == 0)
@@ -387,6 +378,31 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         }
+        else
+        {
+            if(balanceManager.getTotalBalance().size() == 0)
+            {
+                currencyLayout.removeAllViews();
+
+                refreshLayout.setRefreshing(false);
+
+                if(loadingDialog.isShowing())
+                {
+                    loadingDialog.dismiss();
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toolbarLayout.setTitle("US$0.00");
+
+                        toolbarSubtitle.setText("US$0.00");
+
+                        toolbarSubtitle.setTextColor(-1275068417);
+                    }
+                });
+            }
+        }
     }
 
     private void countCoins(boolean isCoin, boolean isDetails)
@@ -401,19 +417,32 @@ public class HomeActivity extends AppCompatActivity {
             iconChecker = true;
         }
 
-        if(coinCounter == balanceManager.getTotalBalance().size()-1)
+        if(balanceManager.getTotalBalance() != null)
         {
-            for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+            if(coinCounter == balanceManager.getTotalBalance().size()-1)
             {
-                final int index = i;
+                for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+                {
+                    final int index = i;
 
-                getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol()), new IconCallBack() {
-                    @Override
-                    public void onSuccess(Bitmap bitmapIcon) {
-                        balanceManager.getTotalBalance().get(index).setIcon(bitmapIcon);
-                        countIcons();
+                    if(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol()) != null)
+                    {
+                        getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol()), new IconCallBack() {
+                            @Override
+                            public void onSuccess(Bitmap bitmapIcon) {
+                                balanceManager.getTotalBalance().get(index).setIcon(bitmapIcon);
+                                countIcons();
+                            }
+                        });
                     }
-                });
+                }
+            }
+            else
+            {
+                if(balanceManager.getTotalBalance().size() == 0)
+                {
+                    countIcons();
+                }
             }
         }
     }
@@ -460,6 +489,146 @@ public class HomeActivity extends AppCompatActivity {
         loadingDialog.show();
     }
 
+    private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
+    {
+
+        private float totalValue;
+        private float totalFluctuation;
+        private float totalFluctuationPercentage;
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+
+            totalValue = 0;
+            totalFluctuation = 0;
+            totalFluctuationPercentage = 0;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values)
+        {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            final List<CardView> cardList = new ArrayList<>();
+
+            Looper.prepare();
+
+            balanceManager.sortCoins();
+
+            //layoutGenerator.setCurrencyList(balanceManager.getTotalBalance());
+
+            for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+            {
+                final Currency localCurrency = balanceManager.getTotalBalance().get(i);
+
+                if(localCurrency.getIcon() != null)
+                {
+                    //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
+
+                    Palette.Builder builder = Palette.from(localCurrency.getIcon());
+
+                    localCurrency.setChartColor(builder.generate().getDominantColor(0));
+
+                    //layoutGenerator.addCurrencyToList(currency);
+                    //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
+                }
+                else
+                {
+                    //currency.setChartColor(12369084);
+                    localCurrency.setChartColor(12369084);
+                    //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
+                }
+
+                if(!localCurrency.getSymbol().equals("USD") && (localCurrency.getBalance() * localCurrency.getValue()) > 0.001)
+                {
+                    localCurrency.setName(balanceManager.getCurrencyName(localCurrency.getSymbol()));
+                    localCurrency.setId(balanceManager.getCurrencyId(localCurrency.getSymbol()));
+                    totalValue += localCurrency.getValue() * localCurrency.getBalance();
+                    totalFluctuation += (localCurrency.getValue() * localCurrency.getBalance()) * (localCurrency.getDayFluctuationPercentage() / 100);
+                    //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
+                    //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
+
+                    cardList.add(layoutGenerator.getInfoLayout(localCurrency));
+                }
+
+                if(!localCurrency.getSymbol().equals("USD") && localCurrency.getDayPriceHistory() == null)
+                {
+                    //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
+                    //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
+
+                    cardList.add(layoutGenerator.getInfoLayout(localCurrency));
+                }
+
+                balanceManager.getTotalBalance().set(i, localCurrency);
+            }
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshLayout.setRefreshing(false);
+                    currencyLayout.removeAllViews();
+
+                    for(int i = 0; i < cardList.size(); i++)
+                    {
+                        currencyLayout.addView(cardList.get(i));
+                    }
+
+                    adaptView();
+                }
+            });
+
+            toolbarLayout.setTitle("US$" + String.format("%.2f", totalValue));
+
+            if(totalFluctuation > 0)
+            {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toolbarSubtitle.setTextColor(getResources().getColor(R.color.increase));
+                    }
+                });
+            }
+            else
+            {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toolbarSubtitle.setTextColor(getResources().getColor(R.color.decrease));
+                    }
+                });
+            }
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) *100;
+
+                    toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
+
+                    if(loadingDialog.isShowing())
+                    {
+                        loadingDialog.dismiss();
+                    }
+                }
+            });
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result)
+        {
+            handler.removeCallbacks(updateRunnable);
+        }
+    }
+
     private class DataUpdater extends AsyncTask<Void, Integer, Void>
     {
         @Override
@@ -490,12 +659,13 @@ public class HomeActivity extends AppCompatActivity {
                             balance.get(i).updateDayPriceHistory(getApplicationContext(), new Currency.CurrencyCallBack() {
                                 @Override
                                 public void onSuccess(Currency currency) {
-                                    currency.updateName(getApplicationContext(), new Currency.CurrencyCallBack() {
+                                    countCoins(true, false);
+                                    /*currency.updateName(getApplicationContext(), new Currency.CurrencyCallBack() {
                                         @Override
                                         public void onSuccess(Currency currency) {
                                             countCoins(true, false);
                                         }
-                                    });
+                                    });*/
                                 }
                             });
                         }
@@ -515,10 +685,10 @@ public class HomeActivity extends AppCompatActivity {
                             Snackbar.make(findViewById(R.id.currencyListLayout), "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
                                     .show();
                             refreshLayout.setRefreshing(false);
-                            updateAll();
+                            updateAll(true);
                             break;
                         default:
-                            updateAll();
+                            updateAll(true);
                     }
                     //updateAll();
                 }
