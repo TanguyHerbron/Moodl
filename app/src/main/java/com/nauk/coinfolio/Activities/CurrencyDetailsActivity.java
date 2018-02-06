@@ -77,7 +77,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed()
     {
-        Log.d(this.getResources().getString(R.string.debug), "Back pressed");
         Intent intent = new Intent(this, HomeActivity.class);
         intent.putExtra("update", hasBeenModified);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -538,7 +537,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     databaseManager.deleteTransactionFromId(Integer.parseInt(view.getTag().toString()));
-                    Log.d(CurrencyDetailsActivity.this.getResources().getString(R.string.debug), "Id : " + view.getTag());
                     drawTransactionList();
                     hasBeenModified = true;
                 }

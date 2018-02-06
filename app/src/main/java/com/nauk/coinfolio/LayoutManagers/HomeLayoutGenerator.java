@@ -43,7 +43,7 @@ public class HomeLayoutGenerator {
         this.context = context;
     }
 
-    public CardView getInfoLayout(final Currency currency)
+    public CardView getInfoLayout(final Currency currency, boolean isExtended)
     //public CardView getInfoLayout(int index)
     {
         CardView mainCard = new CardView(context);
@@ -69,10 +69,8 @@ public class HomeLayoutGenerator {
         mainCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //switchingView(view);
                 view.animate();
                 Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                //intent.putExtra("symbol", currency.getSymbol());
                 intent.putExtra("currency", currency);
                 context.getApplicationContext().startActivity(intent);
             }
@@ -115,9 +113,6 @@ public class HomeLayoutGenerator {
 
         mainCard.setLayoutParams(paramsCard);
         mainCard.setRadius(8);
-
-        //infoLayout.addView(topLayoutGenerator(currencyList.get(index).getName(), currencyList.get(index).getSymbol(), currencyList.get(index).getValue(), currencyList.get(index).getIcon()));
-        //infoLayout.addView(bottomLayoutGenerator(currencyList.get(index).getSymbol(), currencyList.get(index).getBalance(), currencyList.get(index).getValue() * currencyList.get(index).getBalance(), currencyList.get(index).getDayFluctuationPercentage(), currencyList.get(index).getDayFluctuation()));
 
         infoLayout.addView(topLayoutGenerator(currency.getName(), currency.getSymbol(), currency.getValue(), currency.getIcon()));
         infoLayout.addView(bottomLayoutGenerator(currency.getSymbol(), currency.getBalance(), currency.getValue() * currency.getBalance(), currency.getDayFluctuationPercentage(), currency.getDayFluctuation()));
