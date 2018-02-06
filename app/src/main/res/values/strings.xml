@@ -120,4 +120,15 @@
     <string name="title_charts">Charts</string>
     <string name="title_infos">Infos</string>
     <string name="title_transactions">Transactions</string>
+
+    <!--Chart buttons texts-->
+    <string name="button1h">1h</string>
+    <string name="button3h">3h</string>
+    <string name="button1d">1d</string>
+    <string name="button3d">3d</string>
+    <string name="button1w">1w</string>
+    <string name="button1m">1M</string>
+    <string name="button3m">3M</string>
+    <string name="button6m">6M</string>
+    <string name="button1y">1y</string>
 </resources>

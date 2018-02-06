@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
@@ -24,17 +22,13 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.daimajia.swipe.SwipeLayout;
-import com.db.chart.view.LineChartView;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
-import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.R;
@@ -50,28 +44,28 @@ import java.util.List;
 //Auto refresh with predefined intervals
 //Adding manually currencies (date, purchased price)
 //Multiple portfolio (exchanges & custom)
-//Add currency details (market cap, 1h, 3h, 3d, 1w, 1m, 3m, 1y)
+//Add currency details (market cap, 1h, 3h, 1d, 3d, 1w, 1m, 3m, 1y)
 //Add roadmap to buy a coin
 //Add reddit link ?
 //
 
 public class HomeActivity extends AppCompatActivity {
 
+    private PreferencesManager preferencesManager;
+    private HomeLayoutGenerator layoutGenerator;
     private BalanceManager balanceManager;
+
     private int coinCounter;
     private int iconCounter;
-    private HomeLayoutGenerator layoutGenerator;
-    private LinearLayout currencyLayout;
-    private Toolbar toolbar;
+    private long lastTimestamp;
+    private boolean detailsChecker;
+    private boolean isDetailed;
+
     private CollapsingToolbarLayout toolbarLayout;
     private SwipeRefreshLayout refreshLayout;
+    private LinearLayout currencyLayout;
     private TextView toolbarSubtitle;
-    private boolean view;
     private Dialog loadingDialog;
-    private boolean iconChecker;
-    private PreferencesManager preferencesManager;
-    private DatabaseManager databaseManager;
-    private long lastTimestamp;
     private Handler handler;
     private Runnable updateRunnable;
 
@@ -79,26 +73,51 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        /**Interface setup**/
+
+        //Setup main interface
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_currency_summary);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        preferencesManager = new PreferencesManager(this);
-
-        view = preferencesManager.getDetailOption();
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         generateSplash();
 
+        //Objects initializatoin
+        preferencesManager = new PreferencesManager(this);
+        layoutGenerator = new HomeLayoutGenerator(this);
+        balanceManager = new BalanceManager(this);
+        handler = new Handler();
+        updateRunnable = new  Runnable() {
+            @Override
+            public void run() {
+                if (refreshLayout.isRefreshing())
+                {
+                    refreshLayout.setRefreshing(false);
+
+                    showErrorSnackbar();
+                }
+
+                if (loadingDialog.isShowing())
+                {
+                    loadingDialog.dismiss();
+
+                    showErrorSnackbar();
+                }
+            }
+        };
+
+        isDetailed = preferencesManager.getDetailOption();
+
+        //Layouts setup
+        refreshLayout = findViewById(R.id.swiperefresh);
+        toolbarLayout = findViewById(R.id.toolbar_layout);
+        toolbarSubtitle = findViewById(R.id.toolbarSubtitle);
+        currencyLayout = findViewById(R.id.currencyListLayout);
+
+        ImageButton addCurrencyButton = findViewById(R.id.addCurrencyButton);
         ImageButton detailsButton = findViewById(R.id.switch_button);
         ImageButton settingsButton = findViewById(R.id.settings_button);
-
-        refreshLayout = findViewById(R.id.swiperefresh);
-
-        toolbarLayout = findViewById(R.id.toolbar_layout);
-
-        toolbarSubtitle = findViewById(R.id.toolbarSubtitle);
 
         toolbarLayout.setExpandedTitleGravity(Gravity.CENTER);
         toolbarLayout.setCollapsedTitleGravity(Gravity.CENTER);
@@ -107,6 +126,7 @@ public class HomeActivity extends AppCompatActivity {
 
         toolbarSubtitle.setText("US$0.00");
 
+        //Events setup
         detailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,12 +143,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        layoutGenerator = new HomeLayoutGenerator(this);
-
-        balanceManager = new BalanceManager(this);
-
-        currencyLayout = findViewById(R.id.currencyListLayout);
-
         refreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
@@ -137,8 +151,6 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 }
         );
-
-        final ImageButton addCurrencyButton = findViewById(R.id.addCurrencyButton);
 
         addCurrencyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,53 +166,24 @@ public class HomeActivity extends AppCompatActivity {
                 addIntent.putExtra("currencyListNames", nameList);
 
                 startActivity(addIntent);
-
-
-                /*Snackbar.make(findViewById(R.id.currencyListLayout), "This feature is not yet available...", Snackbar.LENGTH_LONG)
-                        .show();*/
             }
         });
-
-        databaseManager = new DatabaseManager(this);
-
-        handler = new Handler();
-
-        updateRunnable = new  Runnable() {
-            @Override
-            public void run() {
-                if (refreshLayout.isRefreshing())
-                {
-                    refreshLayout.setRefreshing(false);
-
-                    Snackbar.make(findViewById(R.id.currencyListLayout), "Error while updating data", Snackbar.LENGTH_LONG)
-                            .setAction("Update", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    updateAll(true);
-                                }
-                            })
-                            .show();
-                }
-
-                if (loadingDialog.isShowing())
-                {
-                    loadingDialog.dismiss();
-
-                    Snackbar.make(findViewById(R.id.currencyListLayout), "Error while updating data", Snackbar.LENGTH_LONG)
-                            .setAction("Update", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    updateAll(true);
-                                }
-                            })
-                            .show();
-                }
-            }
-        };
 
         updateViewButtonIcon();
 
         lastTimestamp = 0;
+    }
+
+    private void showErrorSnackbar()
+    {
+        Snackbar.make(findViewById(R.id.currencyListLayout), "Error while updating data", Snackbar.LENGTH_LONG)
+                .setAction("Update", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        updateAll(true);
+                    }
+                })
+                .show();
     }
 
     @Override
@@ -210,13 +193,6 @@ public class HomeActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         updateAll(intent.getBooleanExtra("update", false));
-
-        /*if(System.currentTimeMillis()/1000 - lastTimestamp > 60 || intent.getBooleanExtra("update", false))
-        {
-            lastTimestamp = System.currentTimeMillis()/1000;
-
-            updateAll();
-        }*/
     }
 
     @Override
@@ -245,15 +221,15 @@ public class HomeActivity extends AppCompatActivity {
 
     private void switchView()
     {
-        if(!view)
+        if(isDetailed)
         {
-            view = true;
+            isDetailed = false;
 
             adaptView();
         }
         else
         {
-            view = false;
+            isDetailed = true;
 
             adaptView();
         }
@@ -261,29 +237,26 @@ public class HomeActivity extends AppCompatActivity {
 
     private void adaptView()
     {
-        if(!view)
-        {
-            for(int i = 0; i < currencyLayout.getChildCount(); i++)
-            {
-                currencyLayout.getChildAt(i).findViewWithTag("chart_layout").setVisibility(View.GONE);
-                currencyLayout.getChildAt(i).findViewWithTag("separator_layout").setVisibility(View.GONE);
-            }
-        }
-        else
+        if(isDetailed)
         {
             currencyLayout.removeAllViews();
-
-            //layoutGenerator.setCurrencyList(balanceManager.getTotalBalance());
-            //layoutGenerator.resetCurrencyList();
 
             for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
             {
                 final Currency currency = balanceManager.getTotalBalance().get(i);
 
-                if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getDayPriceHistory() == null))
+                if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
                 {
                     currencyLayout.addView(layoutGenerator.getInfoLayout(currency));
                 }
+            }
+        }
+        else
+        {
+            for(int i = 0; i < currencyLayout.getChildCount(); i++)
+            {
+                currencyLayout.getChildAt(i).findViewWithTag("chart_layout").setVisibility(View.GONE);
+                currencyLayout.getChildAt(i).findViewWithTag("separator_layout").setVisibility(View.GONE);
             }
         }
 
@@ -297,11 +270,12 @@ public class HomeActivity extends AppCompatActivity {
         if(System.currentTimeMillis()/1000 - lastTimestamp > 60 || mustUpdate)
         {
             lastTimestamp = System.currentTimeMillis() / 1000;
-            resetCounter();
             balanceManager.updateExchangeKeys();
+            refreshLayout.setRefreshing(true);
+
+            resetCounters();
             DataUpdater updater = new DataUpdater();
             updater.execute();
-            refreshLayout.setRefreshing(true);
 
             handler.postDelayed(updateRunnable, 10000);
         }
@@ -314,11 +288,11 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void resetCounter()
+    private void resetCounters()
     {
         coinCounter = 0;
         iconCounter = 0;
-        iconChecker = false;
+        detailsChecker = false;
     }
 
     private void getBitmapFromURL(String src, IconCallBack callBack) {
@@ -344,11 +318,11 @@ public class HomeActivity extends AppCompatActivity {
     {
         iconCounter++;
 
-        if(iconCounter == balanceManager.getTotalBalance().size() - 1)
+        if(balanceManager.getTotalBalance() != null)
         {
-            if(balanceManager.getTotalBalance() != null)
+            if(iconCounter == balanceManager.getTotalBalance().size() - 1)
             {
-                if(coinCounter == balanceManager.getTotalBalance().size() - 1 && iconChecker)
+                if(coinCounter == balanceManager.getTotalBalance().size() - 1 && detailsChecker)
                 {
                     UiHeavyLoadCalculator uiHeavyLoadCalculator = new UiHeavyLoadCalculator();
                     uiHeavyLoadCalculator.execute();
@@ -356,9 +330,16 @@ public class HomeActivity extends AppCompatActivity {
 
                 if(balanceManager.getTotalBalance().size() == 0)
                 {
-                    refreshLayout.setRefreshing(false);
-
+                    updateNoBalance();
+                }
+            }
+            /*else
+            {
+                if(balanceManager.getTotalBalance().size() == 0)
+                {
                     currencyLayout.removeAllViews();
+
+                    refreshLayout.setRefreshing(false);
 
                     if(loadingDialog.isShowing())
                     {
@@ -376,33 +357,31 @@ public class HomeActivity extends AppCompatActivity {
                         }
                     });
                 }
-            }
+            }*/
         }
-        else
+    }
+
+    private void updateNoBalance()
+    {
+        refreshLayout.setRefreshing(false);
+
+        currencyLayout.removeAllViews();
+
+        if(loadingDialog.isShowing())
         {
-            if(balanceManager.getTotalBalance().size() == 0)
-            {
-                currencyLayout.removeAllViews();
-
-                refreshLayout.setRefreshing(false);
-
-                if(loadingDialog.isShowing())
-                {
-                    loadingDialog.dismiss();
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toolbarLayout.setTitle("US$0.00");
-
-                        toolbarSubtitle.setText("US$0.00");
-
-                        toolbarSubtitle.setTextColor(-1275068417);
-                    }
-                });
-            }
+            loadingDialog.dismiss();
         }
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                toolbarLayout.setTitle("US$0.00");
+
+                toolbarSubtitle.setText("US$0.00");
+
+                toolbarSubtitle.setTextColor(-1275068417);
+            }
+        });
     }
 
     private void countCoins(boolean isCoin, boolean isDetails)
@@ -414,7 +393,7 @@ public class HomeActivity extends AppCompatActivity {
 
         if(isDetails)
         {
-            iconChecker = true;
+            detailsChecker = true;
         }
 
         if(balanceManager.getTotalBalance() != null)
@@ -423,14 +402,14 @@ public class HomeActivity extends AppCompatActivity {
             {
                 for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                 {
-                    final int index = i;
+                    final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                    if(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol()) != null)
+                    if(balanceManager.getIconUrl(localCurrency.getSymbol()) != null)
                     {
-                        getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol()), new IconCallBack() {
+                        getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new IconCallBack() {
                             @Override
                             public void onSuccess(Bitmap bitmapIcon) {
-                                balanceManager.getTotalBalance().get(index).setIcon(bitmapIcon);
+                                localCurrency.setIcon(bitmapIcon);
                                 countIcons();
                             }
                         });
@@ -451,7 +430,7 @@ public class HomeActivity extends AppCompatActivity {
     {
         ImageButton imgButton = findViewById(R.id.switch_button);
 
-        if(view)
+        if(isDetailed)
         {
             imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_unfold_less_black_24dp));
             preferencesManager.setDetailOption(true);
@@ -521,28 +500,19 @@ public class HomeActivity extends AppCompatActivity {
 
             balanceManager.sortCoins();
 
-            //layoutGenerator.setCurrencyList(balanceManager.getTotalBalance());
-
             for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
                 if(localCurrency.getIcon() != null)
                 {
-                    //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
-
                     Palette.Builder builder = Palette.from(localCurrency.getIcon());
 
                     localCurrency.setChartColor(builder.generate().getDominantColor(0));
-
-                    //layoutGenerator.addCurrencyToList(currency);
-                    //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
                 }
                 else
                 {
-                    //currency.setChartColor(12369084);
                     localCurrency.setChartColor(12369084);
-                    //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
                 }
 
                 if(!localCurrency.getSymbol().equals("USD") && (localCurrency.getBalance() * localCurrency.getValue()) > 0.001)
@@ -551,17 +521,12 @@ public class HomeActivity extends AppCompatActivity {
                     localCurrency.setId(balanceManager.getCurrencyId(localCurrency.getSymbol()));
                     totalValue += localCurrency.getValue() * localCurrency.getBalance();
                     totalFluctuation += (localCurrency.getValue() * localCurrency.getBalance()) * (localCurrency.getDayFluctuationPercentage() / 100);
-                    //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
-                    //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
 
                     cardList.add(layoutGenerator.getInfoLayout(localCurrency));
                 }
 
-                if(!localCurrency.getSymbol().equals("USD") && localCurrency.getDayPriceHistory() == null)
+                if(!localCurrency.getSymbol().equals("USD") && localCurrency.getHistoryMinutes() == null)
                 {
-                    //balanceManager.getTotalBalance().get(i).setIcon(getBitmapFromURL(balanceManager.getIconUrl(balanceManager.getTotalBalance().get(i).getSymbol())));
-                    //currencyLayout.addView(layoutGenerator.getInfoLayout(i));
-
                     cardList.add(layoutGenerator.getInfoLayout(localCurrency));
                 }
 
@@ -656,7 +621,7 @@ public class HomeActivity extends AppCompatActivity {
                     {
                         for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                         {
-                            balance.get(i).updateDayPriceHistory(getApplicationContext(), new Currency.CurrencyCallBack() {
+                            balance.get(i).updateHistoryMinutes(getApplicationContext(), new Currency.CurrencyCallBack() {
                                 @Override
                                 public void onSuccess(Currency currency) {
                                     countCoins(true, false);

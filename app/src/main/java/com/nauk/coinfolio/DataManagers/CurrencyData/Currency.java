@@ -3,6 +3,7 @@ package com.nauk.coinfolio.DataManagers.CurrencyData;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,10 @@ public class Currency implements Parcelable {
     private double balance;
     private float dayFluctuationPercentage;
     private double dayFluctuation;
-    private List<CurrencyDataChart> dayPriceHistory;
-    private CurrencyDataRetriver dataRetriver;
+    private List<CurrencyDataChart> historyMinutes;
+    private List<CurrencyDataChart> historyHours;
+    private List<CurrencyDataChart> historyDays;
+    private CurrencyDataRetriever dataRetriver;
     private Bitmap icon;
     private int chartColor;
 
@@ -36,7 +39,7 @@ public class Currency implements Parcelable {
         this.balance = currency.balance;
         this.dayFluctuationPercentage = currency.getDayFluctuationPercentage();
         this.dayFluctuation = currency.getDayFluctuation();
-        this.dayPriceHistory = currency.dayPriceHistory;
+        this.historyMinutes = currency.historyMinutes;
         this.dataRetriver = currency.getDataRetriver();
         this.icon = currency.icon;
         this.chartColor = currency.chartColor;
@@ -61,13 +64,13 @@ public class Currency implements Parcelable {
         this.symbol = symbol;
     }
 
-    public void updateDayPriceHistory(android.content.Context context, final CurrencyCallBack callBack)
+    public void updateHistoryMinutes(android.content.Context context, final CurrencyCallBack callBack)
     {
-        dataRetriver = new CurrencyDataRetriver(context);
-        dataRetriver.updateLastDayHistory(symbol, new CurrencyDataRetriver.DataChartCallBack() {
+        dataRetriver = new CurrencyDataRetriever(context);
+        dataRetriver.updateHistory(symbol, new CurrencyDataRetriever.DataChartCallBack() {
             @Override
             public void onSuccess(List<CurrencyDataChart> dataChart) {
-                setDayPriceHistory(dataChart);
+                setHistoryMinutes(dataChart);
                 updateDayFluctuation();
 
                 if(dataChart != null)
@@ -81,27 +84,33 @@ public class Currency implements Parcelable {
 
                 callBack.onSuccess(Currency.this);
             }
-        });
+        }, CurrencyDataRetriever.MINUTES);
     }
 
-    public void updateName(android.content.Context context, final CurrencyCallBack callBack)
+    public void updateHistoryHours(android.content.Context context, final CurrencyCallBack callBack)
     {
-        dataRetriver = new CurrencyDataRetriver(context);
-        dataRetriver.updateCurrencyName(symbol, new CurrencyDataRetriver.NameCallBack() {
+        dataRetriver = new CurrencyDataRetriever(context);
+        dataRetriver.updateHistory(symbol, new CurrencyDataRetriever.DataChartCallBack() {
             @Override
-            public void onSuccess(String name) {
-                if(name != null)
-                {
-                    setName(name);
-                }
-                else
-                {
-                    setName("NameNotFound");
-                }
+            public void onSuccess(List<CurrencyDataChart> dataChart) {
+                setHistoryHours(dataChart);
 
                 callBack.onSuccess(Currency.this);
             }
-        });
+        }, CurrencyDataRetriever.HOURS);
+    }
+
+    public void updateHistoryDays(android.content.Context context, final CurrencyCallBack callBack)
+    {
+        dataRetriver = new CurrencyDataRetriever(context);
+        dataRetriver.updateHistory(symbol, new CurrencyDataRetriever.DataChartCallBack() {
+            @Override
+            public void onSuccess(List<CurrencyDataChart> dataChart) {
+                setHistoryDays(dataChart);
+
+                callBack.onSuccess(Currency.this);
+            }
+        }, CurrencyDataRetriever.DAYS);
     }
 
     public void setId(int id)
@@ -124,14 +133,24 @@ public class Currency implements Parcelable {
         return chartColor;
     }
 
-    public CurrencyDataRetriver getDataRetriver()
+    public CurrencyDataRetriever getDataRetriver()
     {
         return dataRetriver;
     }
 
-    public List<CurrencyDataChart> getDayPriceHistory()
+    public List<CurrencyDataChart> getHistoryMinutes()
     {
-        return dayPriceHistory;
+        return historyMinutes;
+    }
+
+    public List<CurrencyDataChart> getHistoryHours()
+    {
+        return historyHours;
+    }
+
+    public List<CurrencyDataChart> getHistoryDays()
+    {
+        return historyDays;
     }
 
     public String getName()
@@ -179,9 +198,19 @@ public class Currency implements Parcelable {
         balance = newBalance;
     }
 
-    private void setDayPriceHistory(List<CurrencyDataChart> newDataChart)
+    private void setHistoryMinutes(List<CurrencyDataChart> newDataChart)
     {
-        dayPriceHistory = newDataChart;
+        historyMinutes = newDataChart;
+    }
+
+    private void setHistoryHours(List<CurrencyDataChart> newDataChart)
+    {
+        historyHours = newDataChart;
+    }
+
+    private void setHistoryDays(List<CurrencyDataChart> newDataChart)
+    {
+        historyDays = newDataChart;
     }
 
     public void setIcon(Bitmap newIcon)
@@ -196,11 +225,11 @@ public class Currency implements Parcelable {
 
     private void updateDayFluctuation()
     {
-        if(dayPriceHistory != null)
+        if(historyMinutes != null)
         {
-            dayFluctuation = dayPriceHistory.get(dayPriceHistory.size() - 1).getOpen() - dayPriceHistory.get(0).getOpen();
+            dayFluctuation = historyMinutes.get(historyMinutes.size() - 1).getOpen() - historyMinutes.get(0).getOpen();
 
-            dayFluctuationPercentage = (float) (dayFluctuation / dayPriceHistory.get(0).getOpen() * 100);
+            dayFluctuationPercentage = (float) (dayFluctuation / historyMinutes.get(0).getOpen() * 100);
         }
     }
 
@@ -223,7 +252,7 @@ public class Currency implements Parcelable {
         dest.writeDouble(this.balance);
         dest.writeFloat(this.dayFluctuationPercentage);
         dest.writeDouble(this.dayFluctuation);
-        dest.writeList(this.dayPriceHistory);
+        dest.writeList(this.historyMinutes);
         dest.writeParcelable(this.icon, flags);
         dest.writeInt(this.chartColor);
     }
@@ -236,8 +265,8 @@ public class Currency implements Parcelable {
         this.balance = in.readDouble();
         this.dayFluctuationPercentage = in.readFloat();
         this.dayFluctuation = in.readDouble();
-        this.dayPriceHistory = new ArrayList<CurrencyDataChart>();
-        in.readList(this.dayPriceHistory, CurrencyDataChart.class.getClassLoader());
+        this.historyMinutes = new ArrayList<CurrencyDataChart>();
+        in.readList(this.historyMinutes, CurrencyDataChart.class.getClassLoader());
         this.icon = in.readParcelable(Bitmap.class.getClassLoader());
         this.chartColor = in.readInt();
     }

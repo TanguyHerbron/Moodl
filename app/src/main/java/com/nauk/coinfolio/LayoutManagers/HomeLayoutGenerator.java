@@ -6,27 +6,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.db.chart.model.LineSet;
-import com.db.chart.model.Point;
 import com.db.chart.renderer.AxisRenderer;
 import com.db.chart.view.LineChartView;
 import com.nauk.coinfolio.Activities.CurrencyDetailsActivity;
-import com.nauk.coinfolio.Activities.HomeActivity;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.R;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -184,9 +178,9 @@ public class HomeLayoutGenerator {
     {
         View toReturn;
 
-        if(currency.getDayPriceHistory() != null)
+        if(currency.getHistoryMinutes() != null)
         {
-            LineChartView lineChartView = chartGenerator(currency.getDayPriceHistory(), currency.getChartColor());
+            LineChartView lineChartView = chartGenerator(currency.getHistoryMinutes(), currency.getChartColor());
             chartLayout.setTag("chart_layout");
             chartLayout.addView(lineChartView);
             lineChartView.show();
