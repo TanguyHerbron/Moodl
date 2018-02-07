@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
@@ -237,30 +238,18 @@ public class HomeActivity extends AppCompatActivity {
 
     private void adaptView()
     {
-        if(isDetailed)
+
+        currencyLayout.removeAllViews();
+
+        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
         {
-            currencyLayout.removeAllViews();
+            final Currency currency = balanceManager.getTotalBalance().get(i);
 
-            for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+            if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
             {
-                final Currency currency = balanceManager.getTotalBalance().get(i);
-
-                if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
-                {
-                    //currencyLayout.addView(layoutGenerator.getInfoLayout(currency));
-                    currencyLayout.addView(layoutGenerator.getInfoLayout(currency, true));
-                }
+                //currencyLayout.addView(layoutGenerator.getInfoLayout(currency));
+                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed));
             }
-
-            //currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(0), true));
-        }
-        else
-        {
-            /*for(int i = 0; i < currencyLayout.getChildCount(); i++)
-            {
-                currencyLayout.getChildAt(i).findViewWithTag("chart_layout").setVisibility(View.GONE);
-                currencyLayout.getChildAt(i).findViewWithTag("separator_layout").setVisibility(View.GONE);
-            }*/
         }
 
         updateViewButtonIcon();
@@ -301,6 +290,8 @@ public class HomeActivity extends AppCompatActivity {
     private void getBitmapFromURL(String src, IconCallBack callBack) {
         Bitmap result;
 
+        Log.d("coinfolio", "Downloading bitmap");
+
         try {
             java.net.URL url = new java.net.URL(src);
             HttpURLConnection connection = (HttpURLConnection) url
@@ -321,12 +312,17 @@ public class HomeActivity extends AppCompatActivity {
     {
         iconCounter++;
 
+        Log.d("coinfolio", "Icon ++");
+
         if(balanceManager.getTotalBalance() != null)
         {
             if(iconCounter == balanceManager.getTotalBalance().size() - 1)
             {
+                Log.d("coinfolio", "1");
                 if(coinCounter == balanceManager.getTotalBalance().size() - 1 && detailsChecker)
                 {
+                    Log.d("coinfolio", "Loading heavy");
+
                     UiHeavyLoadCalculator uiHeavyLoadCalculator = new UiHeavyLoadCalculator();
                     uiHeavyLoadCalculator.execute();
                 }
@@ -389,6 +385,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private void countCoins(boolean isCoin, boolean isDetails)
     {
+        Log.d("coinfolio", "Coin++ " + coinCounter + " " + balanceManager.getTotalBalance().size());
+
         if(isCoin)
         {
             coinCounter++;
@@ -409,6 +407,8 @@ public class HomeActivity extends AppCompatActivity {
 
                     if(balanceManager.getIconUrl(localCurrency.getSymbol()) != null)
                     {
+                        Log.d("coinfolio", "Downloading bitmap");
+
                         getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new IconCallBack() {
                             @Override
                             public void onSuccess(Bitmap bitmapIcon) {
@@ -622,6 +622,7 @@ public class HomeActivity extends AppCompatActivity {
 
                     if(balanceManager.getTotalBalance().size() > 0)
                     {
+
                         for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                         {
                             balance.get(i).updateHistoryMinutes(getApplicationContext(), new Currency.CurrencyCallBack() {

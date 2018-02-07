@@ -5,15 +5,14 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:paddingBottom="4dp">
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:layout_marginBottom="8dp"
         android:clickable="false"
-        android:padding="10dp"
         app:cardCornerRadius="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -21,7 +20,6 @@
             android:id="@+id/mainLinear"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
             android:clickable="false"
             android:orientation="vertical"
             android:tag="mainLinear">
@@ -30,6 +28,7 @@
                 android:id="@+id/currencyInfoLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="5dp"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -124,8 +123,7 @@
                 android:id="@+id/separationLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_margin="5dp"
                 android:visibility="gone">
 
                 <TextView
@@ -144,17 +142,37 @@
 
             </LinearLayout>
 
-            <com.db.chart.view.LineChartView
+            <FrameLayout
+                android:id="@+id/frameLayoutChart"
                 android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:visibility="gone" />
+                android:layout_height="@dimen/cardViewChartSize"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:gravity="center"
-                android:text="Error"
-                android:visibility="gone" />
+                <com.db.chart.view.LineChartView
+                    android:id="@+id/LineChartView"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/cardViewChartSize"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/errorTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/cardViewChartSize"
+                    android:gravity="center"
+                    android:text="Error"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/detailsArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_keyboard_arrow_right_grey_48dp"
+                    android:visibility="gone"
+                    android:layout_gravity="center_vertical|end"/>
+
+            </FrameLayout>
 
         </LinearLayout>
 
