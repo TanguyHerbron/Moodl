@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:clickable="true"
+    android:focusable="true">
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
+        android:layout_margin="10dp"
+        android:layout_marginBottom="8dp"
+        android:clickable="false"
+        android:padding="10dp"
         app:cardCornerRadius="8dp"
-        android:layout_margin="10dp">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:id="@+id/mainLinear"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:clickable="false"
             android:orientation="vertical"
-            android:tag="mainLinear"
-            android:layout_margin="10dp"
-            android:clickable="false">
+            android:tag="mainLinear">
 
             <LinearLayout
                 android:id="@+id/currencyInfoLayout"
@@ -36,31 +42,33 @@
                         android:id="@+id/currencyIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"/>
+                        android:layout_margin="1dp" />
 
                     <TextView
                         android:id="@+id/currencyNameTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/mainText"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="start"
                         android:textColor="@color/mainTextViewColor"
-                        android:gravity="left"/>
+                        android:textSize="@dimen/cardViewMainText" />
 
                     <TextView
                         android:id="@+id/currencySymbolTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/secondaryText"
+                        android:layout_marginStart="2dp"
+                        android:gravity="left"
                         android:textColor="@color/secondaryTextViewColor"
-                        android:gravity="left"/>
+                        android:textSize="@dimen/cardViewSecondaryText" />
 
                     <TextView
                         android:id="@+id/currencyValueTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/mainText"
+                        android:gravity="right"
                         android:textColor="@color/secondaryTextViewColor"
-                        android:gravity="right"/>
+                        android:textSize="@dimen/cardViewMainText" />
 
                 </LinearLayout>
 
@@ -74,34 +82,37 @@
                         android:id="@+id/currencyOwnedTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/mainText"
+                        android:gravity="left"
                         android:textColor="@color/mainTextViewColor"
-                        android:gravity="left" />
+                        android:textSize="@dimen/cardViewMainText" />
 
                     <TextView
                         android:id="@+id/currencyValueOwnedTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/secondaryText"
+                        android:layout_marginStart="2dp"
+                        android:gravity="left"
                         android:textColor="@color/secondaryTextViewColor"
-                        android:gravity="left"/>
+                        android:textSize="@dimen/cardViewSecondaryText" />
 
                     <LinearLayout
                         android:id="@+id/secondaryLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="right">
+                        android:gravity="right"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/currencyFluctuationPercentageTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="@dimen/mainText"/>
+                            android:textSize="@dimen/cardViewMainText" />
 
                         <TextView
+                            android:id="@+id/currencyFluctuationTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="@dimen/secondaryText"/>
+                            android:textSize="@dimen/cardViewSecondaryText" />
 
                     </LinearLayout>
 
@@ -114,35 +125,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp">
+                android:layout_marginRight="10dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Day history"
-                    android:textSize="@dimen/secondaryText"/>
+                    android:textSize="@dimen/cardViewSecondaryText" />
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="3dp"
+                    android:layout_height="1dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:background="@color/separationLine"/>
+                    android:background="@color/separationLine" />
 
             </LinearLayout>
 
             <com.db.chart.view.LineChartView
                 android:layout_width="match_parent"
                 android:layout_height="500dp"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="500dp"
-                android:text="Error"
                 android:gravity="center"
-                android:visibility="gone"/>
+                android:text="Error"
+                android:visibility="gone" />
 
         </LinearLayout>
 

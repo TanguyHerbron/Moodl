@@ -247,17 +247,20 @@ public class HomeActivity extends AppCompatActivity {
 
                 if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
                 {
-                    currencyLayout.addView(layoutGenerator.getInfoLayout(currency));
+                    //currencyLayout.addView(layoutGenerator.getInfoLayout(currency));
+                    currencyLayout.addView(layoutGenerator.getInfoLayout(currency, true));
                 }
             }
+
+            //currencyLayout.addView(layoutGenerator.getInfoLayout(balanceManager.getTotalBalance().get(0), true));
         }
         else
         {
-            for(int i = 0; i < currencyLayout.getChildCount(); i++)
+            /*for(int i = 0; i < currencyLayout.getChildCount(); i++)
             {
                 currencyLayout.getChildAt(i).findViewWithTag("chart_layout").setVisibility(View.GONE);
                 currencyLayout.getChildAt(i).findViewWithTag("separator_layout").setVisibility(View.GONE);
-            }
+            }*/
         }
 
         updateViewButtonIcon();
@@ -494,7 +497,7 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params)
         {
-            final List<CardView> cardList = new ArrayList<>();
+            final List<View> cardList = new ArrayList<>();
 
             Looper.prepare();
 
@@ -522,12 +525,12 @@ public class HomeActivity extends AppCompatActivity {
                     totalValue += localCurrency.getValue() * localCurrency.getBalance();
                     totalFluctuation += (localCurrency.getValue() * localCurrency.getBalance()) * (localCurrency.getDayFluctuationPercentage() / 100);
 
-                    cardList.add(layoutGenerator.getInfoLayout(localCurrency));
+                    cardList.add(layoutGenerator.getInfoLayout(localCurrency, true));
                 }
 
                 if(!localCurrency.getSymbol().equals("USD") && localCurrency.getHistoryMinutes() == null)
                 {
-                    cardList.add(layoutGenerator.getInfoLayout(localCurrency));
+                    cardList.add(layoutGenerator.getInfoLayout(localCurrency, true));
                 }
 
                 balanceManager.getTotalBalance().set(i, localCurrency);

@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,7 +44,65 @@ public class HomeLayoutGenerator {
         this.context = context;
     }
 
-    public CardView getInfoLayout(final Currency currency, boolean isExtended)
+    public View getInfoLayout(final Currency currency, boolean isExtended)
+    {
+
+        View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, null);
+
+
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.animate();
+                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                intent.putExtra("currency", currency);
+                context.getApplicationContext().startActivity(intent);
+            }
+        });
+
+        ((ImageView) view.findViewById(R.id.currencyIcon))
+                .setImageBitmap(currency.getIcon());
+        ((TextView) view.findViewById(R.id.currencyNameTextView))
+                .setText(currency.getName());
+        ((TextView) view.findViewById(R.id.currencySymbolTextView))
+                .setText(context.getResources().getString(R.string.currencySymbolPlaceholder, currency.getSymbol()));
+        ((TextView) view.findViewById(R.id.currencyOwnedTextView))
+                .setText(context.getResources().getString(R.string.currencyBalancePlaceholder, numberConformer(currency.getBalance()), currency.getSymbol()));
+        ((TextView) view.findViewById(R.id.currencyValueOwnedTextView))
+                .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getValue() * currency.getBalance())));
+
+        ((TextView) view.findViewById(R.id.currencyValueTextView))
+                .setText(context.getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(currency.getValue())));
+        ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView))
+                .setText(context.getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(currency.getDayFluctuationPercentage())));
+        ((TextView) view.findViewById(R.id.currencyFluctuationTextView))
+                .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
+
+        updateColor(view, currency);
+
+        return view;
+    }
+
+    private void updateColor(View view, Currency currency)
+    {
+        if(currency.getDayFluctuationPercentage() > 0)
+        {
+            ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView))
+                    .setTextColor(context.getResources().getColor(R.color.increase));
+            ((TextView) view.findViewById(R.id.currencyFluctuationTextView))
+                    .setTextColor(context.getResources().getColor(R.color.increase));
+        }
+        else
+        {
+            ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView))
+                    .setTextColor(context.getResources().getColor(R.color.decrease));
+            ((TextView) view.findViewById(R.id.currencyFluctuationTextView))
+                    .setTextColor(context.getResources().getColor(R.color.decrease));
+        }
+    }
+
+    public CardView getInfoLayout(final Currency currency)
     //public CardView getInfoLayout(int index)
     {
         CardView mainCard = new CardView(context);

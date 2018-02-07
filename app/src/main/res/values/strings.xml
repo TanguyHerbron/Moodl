@@ -131,4 +131,12 @@
     <string name="button3m">3M</string>
     <string name="button6m">6M</string>
     <string name="button1y">1y</string>
+
+    <!--Cardview placeholders-->
+    <string name="currencySymbolPlaceholder">(%1$s)</string>
+    <string name="currencyBalancePlaceholder">%1$s%2$s</string>
+    <string name="currencyDollarParenthesisPlaceholder">(US$%1$s)</string>
+    <string name="currencyDollarPlaceholder">US$%1$s</string>
+    <string name="currencyPercentagePlaceholder">%1$s%%</string>
+
 </resources>
