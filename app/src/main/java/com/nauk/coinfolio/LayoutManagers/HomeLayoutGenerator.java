@@ -95,25 +95,28 @@ public class HomeLayoutGenerator {
         ((ImageView) view.findViewById(R.id.detailsArrow))
                 .getDrawable().setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
 
-        List<Double> borders = getAxisBorders(currency);
-        LineChartView chartView = (LineChartView) view.findViewById(R.id.LineChartView);
+        if(currency.getHistoryMinutes() != null)
+        {
+            List<Double> borders = getAxisBorders(currency);
+            LineChartView chartView = (LineChartView) view.findViewById(R.id.LineChartView);
 
-        chartView.setAxisBorderValues(borders.get(0).floatValue(), borders.get(1).floatValue())
-                .setYLabels(AxisRenderer.LabelPosition.NONE)
-                .setYAxis(false)
-                .setXAxis(false)
-                .setVisibility(View.VISIBLE);
+            chartView.setAxisBorderValues(borders.get(0).floatValue(), borders.get(1).floatValue())
+                    .setYLabels(AxisRenderer.LabelPosition.NONE)
+                    .setYAxis(false)
+                    .setXAxis(false)
+                    .setVisibility(View.VISIBLE);
 
-        chartView.addData(generateChartSet(currency));
+            chartView.addData(generateChartSet(currency));
 
-        chartView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                context.getApplicationContext().startActivity(intent);
-            }
-        });
+            chartView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                    intent.putExtra("currency", currency);
+                    context.getApplicationContext().startActivity(intent);
+                }
+            });
+        }
 
         if(isExtended)
         {
