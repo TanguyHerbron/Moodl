@@ -121,7 +121,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         setTitle(currency.getName());
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation_details);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         hasBeenModified = false;

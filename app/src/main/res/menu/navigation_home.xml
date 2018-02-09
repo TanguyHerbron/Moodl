@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:icon="@drawable/ic_pie_chart_black_24dp"
+        android:title="@string/title_market_cap" />
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_show_chart_black_24dp"
+        android:title="@string/title_charts" />
+
+    <item
+        android:id="@+id/navigation_view_list"
+        android:icon="@drawable/ic_view_list_black_24dp"
+        android:title="@string/title_home" />
+
+    <item
+        android:id="@+id/navigation_market_cap"
+        android:icon="@drawable/ic_pie_chart_black_24dp"
+        android:title="@string/title_market_cap" />
+
+    <item
+        android:icon="@drawable/ic_pie_chart_black_24dp"
+        android:title="@string/title_market_cap" />
+
+</menu>

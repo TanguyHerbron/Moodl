@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -70,6 +72,26 @@ public class HomeActivity extends AppCompatActivity {
     private Handler handler;
     private Runnable updateRunnable;
 
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_home:
+                    //viewFlipper.setDisplayedChild(1);
+                    return true;
+                case R.id.navigation_view_list:
+                    //viewFlipper.setDisplayedChild(1);
+                    return true;
+                case R.id.navigation_market_cap:
+                    //viewFlipper.setDisplayedChild(2);
+                    return true;
+            }
+            return false;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,6 +148,10 @@ public class HomeActivity extends AppCompatActivity {
         toolbarLayout.setTitle("US$0.00");
 
         toolbarSubtitle.setText("US$0.00");
+
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation_home);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigation.setSelectedItemId(R.id.navigation_view_list);
 
         //Events setup
         detailsButton.setOnClickListener(new View.OnClickListener() {

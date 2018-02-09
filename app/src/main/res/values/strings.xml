@@ -120,6 +120,8 @@
     <string name="title_charts">Charts</string>
     <string name="title_infos">Infos</string>
     <string name="title_transactions">Transactions</string>
+    <string name="title_home">Home</string>
+    <string name="title_market_cap">Market Capitalization</string>
 
     <!--Chart buttons texts-->
     <string name="button1h">1h</string>
@@ -138,5 +140,6 @@
     <string name="currencyDollarParenthesisPlaceholder">(US$%1$s)</string>
     <string name="currencyDollarPlaceholder">US$%1$s</string>
     <string name="currencyPercentagePlaceholder">%1$s%%</string>
+    <string name="title_activity_main">MainActivity</string>
 
 </resources>
