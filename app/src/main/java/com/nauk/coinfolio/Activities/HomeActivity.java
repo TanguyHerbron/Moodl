@@ -1,6 +1,7 @@
 package com.nauk.coinfolio.Activities;
 
 import android.app.Dialog;
+import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,8 +10,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -25,10 +28,12 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import com.luseen.spacenavigation.SpaceItem;
 import com.luseen.spacenavigation.SpaceNavigationView;
@@ -222,6 +227,7 @@ public class HomeActivity extends AppCompatActivity {
         spaceNavigationView.setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
         spaceNavigationView.setCentreButtonColor(getResources().getColor(R.color.colorAccent));
         spaceNavigationView.setCentreButtonIconColorFilterEnabled(false);
+        spaceNavigationView.changeCurrentItem(-1);
 
         spaceNavigationView.setSpaceOnClickListener(new SpaceOnClickListener() {
             @Override
@@ -231,12 +237,20 @@ public class HomeActivity extends AppCompatActivity {
                 SpaceNavigationView nav = findViewById(R.id.space);
 
                 nav.changeCurrentItem(-1);
+                ((AppBarLayout) findViewById(R.id.app_bar)).setNestedScrollingEnabled(true);
+                ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
             }
 
             @Override
             public void onItemClick(int itemIndex, String itemName) {
                 ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
                 ((SpaceNavigationView) findViewById(R.id.space)).setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
+
+                //0 : Unknown
+                //1 : Market cap
+                ((AppBarLayout) findViewById(R.id.app_bar)).setNestedScrollingEnabled(false);
+                ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+
             }
 
             @Override
