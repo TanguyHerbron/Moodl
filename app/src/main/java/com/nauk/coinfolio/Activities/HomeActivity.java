@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -78,13 +79,16 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.navigation_home:
-                    //viewFlipper.setDisplayedChild(1);
+                case R.id.navigation_something:
+
+                    ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
                     return true;
                 case R.id.navigation_view_list:
+                    ((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
                     //viewFlipper.setDisplayedChild(1);
                     return true;
                 case R.id.navigation_market_cap:
+                    ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
                     //viewFlipper.setDisplayedChild(2);
                     return true;
             }
@@ -152,6 +156,8 @@ public class HomeActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation_home);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setSelectedItemId(R.id.navigation_view_list);
+        navigation.setFitsSystemWindows(true);
+        navigation.setItemBackgroundResource(R.color.colorAccent);
 
         //Events setup
         detailsButton.setOnClickListener(new View.OnClickListener() {
@@ -338,14 +344,14 @@ public class HomeActivity extends AppCompatActivity {
     {
         iconCounter++;
 
-        Log.d("coinfolio", "Icon ++");
+        Log.d("coinfolio", "Icon ++ " + iconCounter);
 
         if(balanceManager.getTotalBalance() != null)
         {
-            if(iconCounter == balanceManager.getTotalBalance().size() - 1)
+            if(iconCounter == balanceManager.getTotalBalance().size())
             {
                 Log.d("coinfolio", "1");
-                if(coinCounter == balanceManager.getTotalBalance().size() - 1 && detailsChecker)
+                if(coinCounter == balanceManager.getTotalBalance().size())
                 {
                     Log.d("coinfolio", "Loading heavy");
 
@@ -425,8 +431,10 @@ public class HomeActivity extends AppCompatActivity {
 
         if(balanceManager.getTotalBalance() != null)
         {
-            if(coinCounter == balanceManager.getTotalBalance().size()-1)
+            if(coinCounter == balanceManager.getTotalBalance().size())
             {
+                Log.d("coinfolio", "Going through");
+
                 for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                 {
                     final Currency localCurrency = balanceManager.getTotalBalance().get(i);
