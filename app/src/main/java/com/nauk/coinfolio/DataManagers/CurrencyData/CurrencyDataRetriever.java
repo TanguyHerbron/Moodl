@@ -42,7 +42,7 @@ public class CurrencyDataRetriever {
         requestQueue = Volley.newRequestQueue(context);
     }
 
-    private void updateHistory(String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
+    private void updateHistory(final String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
     {
         String requestUrl = null;
 
@@ -122,7 +122,11 @@ public class CurrencyDataRetriever {
 
     void updateHistory(String symbolCurrencyFrom, final DataChartCallBack callBack, int timeUnit)
     {
-        if(!symbolCurrencyFrom.equals("USD"))
+        if(symbolCurrencyFrom.equals("USD"))
+        {
+            callBack.onSuccess(null);
+        }
+        else
         {
             updateHistory(symbolCurrencyFrom, "USD", callBack, timeUnit);
         }

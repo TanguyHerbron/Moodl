@@ -16,7 +16,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -31,6 +30,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.luseen.spacenavigation.SpaceItem;
+import com.luseen.spacenavigation.SpaceNavigationView;
+import com.luseen.spacenavigation.SpaceOnClickListener;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
@@ -81,14 +83,14 @@ public class HomeActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_something:
 
-                    ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
+                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
                     return true;
                 case R.id.navigation_view_list:
-                    ((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
+                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
                     //viewFlipper.setDisplayedChild(1);
                     return true;
                 case R.id.navigation_market_cap:
-                    ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
+                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
                     //viewFlipper.setDisplayedChild(2);
                     return true;
             }
@@ -142,7 +144,7 @@ public class HomeActivity extends AppCompatActivity {
         toolbarSubtitle = findViewById(R.id.toolbarSubtitle);
         currencyLayout = findViewById(R.id.currencyListLayout);
 
-        ImageButton addCurrencyButton = findViewById(R.id.addCurrencyButton);
+        ImageButton addCurrencyButton = findViewById(R.id.floatingAddButton);
         ImageButton detailsButton = findViewById(R.id.switch_button);
         ImageButton settingsButton = findViewById(R.id.settings_button);
 
@@ -205,6 +207,49 @@ public class HomeActivity extends AppCompatActivity {
         updateViewButtonIcon();
 
         lastTimestamp = 0;
+
+        setupNavBar(savedInstanceState);
+    }
+
+    private void setupNavBar(Bundle savedInstanceState)
+    {
+        final SpaceNavigationView spaceNavigationView = (SpaceNavigationView) findViewById(R.id.space);
+        spaceNavigationView.initWithSaveInstanceState(savedInstanceState);
+        spaceNavigationView.addSpaceItem(new SpaceItem("Charts", R.drawable.ic_show_chart_black_24dp));
+        spaceNavigationView.addSpaceItem(new SpaceItem("Market Cap.", R.drawable.ic_pie_chart_black_24dp));
+        spaceNavigationView.setSpaceBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        //spaceNavigationView.setCentreButtonIcon(R.drawable.ic_add_white_24dp);
+        spaceNavigationView.setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
+        spaceNavigationView.setCentreButtonColor(getResources().getColor(R.color.colorAccent));
+        spaceNavigationView.setCentreButtonIconColorFilterEnabled(false);
+
+        spaceNavigationView.setSpaceOnClickListener(new SpaceOnClickListener() {
+            @Override
+            public void onCentreButtonClick() {
+                //Toast.makeText(MainActivity.this,"onCentreButtonClick", Toast.LENGTH_SHORT).show();
+                ((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
+                SpaceNavigationView nav = findViewById(R.id.space);
+
+                nav.changeCurrentItem(-1);
+            }
+
+            @Override
+            public void onItemClick(int itemIndex, String itemName) {
+                ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
+                ((SpaceNavigationView) findViewById(R.id.space)).setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
+            }
+
+            @Override
+            public void onItemReselected(int itemIndex, String itemName) {
+                //Toast.makeText(MainActivity.this, itemIndex + " " + itemName, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ((SpaceNavigationView) findViewById(R.id.space)).onSaveInstanceState(outState);
     }
 
     private void showErrorSnackbar()
@@ -226,6 +271,7 @@ public class HomeActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         updateAll(intent.getBooleanExtra("update", false));
+        ((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
     }
 
     @Override
@@ -342,53 +388,34 @@ public class HomeActivity extends AppCompatActivity {
 
     private void countIcons()
     {
-        iconCounter++;
+        int offset = 0;
 
-        Log.d("coinfolio", "Icon ++ " + iconCounter);
+        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+        {
+            if(balanceManager.getTotalBalance().get(i).getSymbol().equals("USD"))
+            {
+                offset++;
+            }
+        }
+
+        iconCounter++;
 
         if(balanceManager.getTotalBalance() != null)
         {
-            if(iconCounter == balanceManager.getTotalBalance().size())
+            if(iconCounter == balanceManager.getTotalBalance().size() - offset)
             {
-                Log.d("coinfolio", "1");
-                if(coinCounter == balanceManager.getTotalBalance().size())
+                if(balanceManager.getTotalBalance().size() == 0)
+                {
+                    updateNoBalance();
+                }
+                else
                 {
                     Log.d("coinfolio", "Loading heavy");
 
                     UiHeavyLoadCalculator uiHeavyLoadCalculator = new UiHeavyLoadCalculator();
                     uiHeavyLoadCalculator.execute();
                 }
-
-                if(balanceManager.getTotalBalance().size() == 0)
-                {
-                    updateNoBalance();
-                }
             }
-            /*else
-            {
-                if(balanceManager.getTotalBalance().size() == 0)
-                {
-                    currencyLayout.removeAllViews();
-
-                    refreshLayout.setRefreshing(false);
-
-                    if(loadingDialog.isShowing())
-                    {
-                        loadingDialog.dismiss();
-                    }
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            toolbarLayout.setTitle("US$0.00");
-
-                            toolbarSubtitle.setText("US$0.00");
-
-                            toolbarSubtitle.setTextColor(-1275068417);
-                        }
-                    });
-                }
-            }*/
         }
     }
 
@@ -417,8 +444,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private void countCoins(boolean isCoin, boolean isDetails)
     {
-        Log.d("coinfolio", "Coin++ " + coinCounter + " " + balanceManager.getTotalBalance().size());
-
         if(isCoin)
         {
             coinCounter++;
@@ -433,16 +458,12 @@ public class HomeActivity extends AppCompatActivity {
         {
             if(coinCounter == balanceManager.getTotalBalance().size())
             {
-                Log.d("coinfolio", "Going through");
-
                 for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                 {
                     final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
                     if(balanceManager.getIconUrl(localCurrency.getSymbol()) != null)
                     {
-                        Log.d("coinfolio", "Downloading bitmap");
-
                         getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new IconCallBack() {
                             @Override
                             public void onSuccess(Bitmap bitmapIcon) {
@@ -656,7 +677,6 @@ public class HomeActivity extends AppCompatActivity {
 
                     if(balanceManager.getTotalBalance().size() > 0)
                     {
-
                         for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                         {
                             balance.get(i).updateHistoryMinutes(getApplicationContext(), new Currency.CurrencyCallBack() {

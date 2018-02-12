@@ -60,10 +60,6 @@ public class HomeLayoutGenerator {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*view.animate();
-                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                context.getApplicationContext().startActivity(intent);*/
                 if(view.findViewById(R.id.LineChartView).getVisibility() == View.VISIBLE || view.findViewById(R.id.errorTextView).getVisibility() == View.VISIBLE)
                 {
                     collapseView(view);
@@ -94,6 +90,15 @@ public class HomeLayoutGenerator {
                 .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
         ((ImageView) view.findViewById(R.id.detailsArrow))
                 .getDrawable().setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+
+        view.findViewById(R.id.errorTextView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                intent.putExtra("currency", currency);
+                context.getApplicationContext().startActivity(intent);
+            }
+        });
 
         if(currency.getHistoryMinutes() != null)
         {

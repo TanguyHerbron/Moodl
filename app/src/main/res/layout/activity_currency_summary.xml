@@ -98,20 +98,29 @@
             app:layout_constraintRight_toRightOf="parent"
             app:menu="@menu/navigation_home"
             android:layout_alignParentBottom="true"
-            android:layout_gravity="bottom" />
+            android:layout_gravity="bottom"
+            android:visibility="gone"/>
+
+        <com.luseen.spacenavigation.SpaceNavigationView
+            android:id="@+id/space"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"/>
 
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingAddButton"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:elevation="0dp"
         app:borderWidth="0dp"
         android:background="@color/cardview_light_background"
         android:src="@drawable/ic_add_white_24dp"
         android:layout_gravity="bottom|center_horizontal"
         android:clickable="true"
-        android:focusable="true"/>
+        android:focusable="true"
+        android:layout_margin="8dp"
+        android:visibility="visible"/>
 
 </FrameLayout>

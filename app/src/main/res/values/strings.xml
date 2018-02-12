@@ -140,6 +140,5 @@
     <string name="currencyDollarParenthesisPlaceholder">(US$%1$s)</string>
     <string name="currencyDollarPlaceholder">US$%1$s</string>
     <string name="currencyPercentagePlaceholder">%1$s%%</string>
-    <string name="title_activity_main">MainActivity</string>
 
 </resources>

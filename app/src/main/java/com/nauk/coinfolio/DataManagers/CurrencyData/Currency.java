@@ -67,15 +67,16 @@ public class Currency implements Parcelable {
     public void updateHistoryMinutes(android.content.Context context, final CurrencyCallBack callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
+
         dataRetriver.updateHistory(symbol, new CurrencyDataRetriever.DataChartCallBack() {
             @Override
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryMinutes(dataChart);
-                updateDayFluctuation();
 
                 if(dataChart != null)
                 {
                     setValue(dataChart.get(dataChart.size() - 1).getClose());
+                    updateDayFluctuation();
                 }
                 else
                 {
