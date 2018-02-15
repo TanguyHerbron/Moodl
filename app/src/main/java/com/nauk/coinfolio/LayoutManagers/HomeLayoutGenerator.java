@@ -1,20 +1,13 @@
 package com.nauk.coinfolio.LayoutManagers;
 
-import android.animation.AnimatorInflater;
-import android.animation.StateListAnimator;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.support.v7.widget.CardView;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.db.chart.model.ChartSet;
@@ -26,18 +19,12 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.R;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.floorDiv;
-import static java.lang.Math.floorMod;
-import static java.lang.Math.incrementExact;
-import static java.sql.Types.NULL;
 
 /**
  * Created by Tiji on 05/01/2018.

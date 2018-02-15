@@ -44,8 +44,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     app:layout_collapseMode="pin"
-                    app:popupTheme="@style/AppTheme.PopupOverlay"
-                    android:background="@drawable/gradient_background">
+                    app:popupTheme="@style/AppTheme.PopupOverlay">
 
                 </android.support.v7.widget.Toolbar>
 
@@ -61,7 +60,8 @@
                         android:id="@+id/switch_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/quick_button"/>
+                        android:text="@string/quick_button"
+                        android:visibility="visible"/>
 
                 </LinearLayout>
 
@@ -77,7 +77,8 @@
                         android:id="@+id/settings_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/action_settings" />
+                        android:text="@string/action_settings"
+                        android:visibility="visible"/>
 
                 </LinearLayout>
 
@@ -86,7 +87,7 @@
 
         <include layout="@layout/content_currency_summary" />
 
-        <android.support.design.widget.BottomNavigationView
+        <!--<android.support.design.widget.BottomNavigationView
             android:id="@+id/navigation_home"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -99,7 +100,7 @@
             app:menu="@menu/navigation_home"
             android:layout_alignParentBottom="true"
             android:layout_gravity="bottom"
-            android:visibility="gone"/>
+            android:visibility="gone"/>-->
 
         <com.luseen.spacenavigation.SpaceNavigationView
             android:id="@+id/space"

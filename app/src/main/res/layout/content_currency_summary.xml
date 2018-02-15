@@ -4,35 +4,94 @@
     android:id="@+id/swiperefresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:layout_marginBottom="50dp">
 
-    <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <ViewFlipper
+        android:id="@+id/viewFlipperSummary"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="com.nauk.coinfolio.Activities.HomeActivity"
-        tools:showIn="@layout/activity_currency_summary"
-        android:background="@color/listBackground">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp">
+            android:layout_height="match_parent">
 
-            <LinearLayout
-                android:id="@+id/currencyListLayout"
+            <ProgressBar
+                android:id="@+id/progressBarWatchlist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"/>
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_gravity="center"
+                android:background="@drawable/circular_progress_bar" />
 
-            <Space
+            <!--<TextView
                 android:layout_width="match_parent"
-                android:layout_height="10dp" />
+                android:layout_height="wrap_content"
+                android:text="Watch list"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal"/>-->
 
         </LinearLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+        <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/nestedScrollViewLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.nauk.coinfolio.Activities.HomeActivity"
+            tools:showIn="@layout/activity_currency_summary"
+            android:background="@color/listBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp">
+
+                <LinearLayout
+                    android:id="@+id/currencyListLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+            </LinearLayout>
+
+        </android.support.v4.widget.NestedScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!--<TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Market cap"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal"/>-->
+
+            <LinearLayout
+                android:id="@+id/layoutProgressMarketCap"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+
+                <ProgressBar
+                    android:id="@+id/progressBarMarketCap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circular_progress_bar" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ViewFlipper>
 
 </android.support.v4.widget.SwipeRefreshLayout>

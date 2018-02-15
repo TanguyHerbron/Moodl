@@ -8,10 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.R;
+
+import java.util.ArrayList;
 
 /**
  * Created by Guitoune on 17/01/2018.
@@ -46,9 +46,9 @@ public class CurrencyAdapter extends ArrayAdapter<Currency> {
             }
             // Now assign alternate color for rows
             if (position % 2 == 0)
-                convertView.setBackgroundColor(context.getResources().getColor(R.color.listBackground));
-            else
                 convertView.setBackgroundColor(context.getResources().getColor(R.color.listBackground2));
+            else
+                convertView.setBackgroundColor(context.getResources().getColor(R.color.listBackground));
 
             return convertView;
         }
@@ -70,13 +70,28 @@ public class CurrencyAdapter extends ArrayAdapter<Currency> {
                 if (constraint != null) {
                     suggestions.clear();
 
+                    int i = 0;
+                    int found = 0;
                     String temp = constraint.toString().toLowerCase();
-                    for (Currency currency : tempCurrency) {
+
+                    while(i < tempCurrency.size() && found < 25)
+                    {
+                        Currency currency = tempCurrency.get(i);
+                        if (currency.getName().toLowerCase().startsWith(temp)
+                                || currency.getSymbol().toLowerCase().startsWith(temp)) {
+                            suggestions.add(currency);
+                            found++;
+                        }
+                        i++;
+                    }
+
+
+                    /*for (Currency currency : tempCurrency) {
                         if (currency.getName().toLowerCase().startsWith(temp)
                                 || currency.getSymbol().toLowerCase().startsWith(temp)) {
                             suggestions.add(currency);
                         }
-                    }
+                    }*/
 
                     FilterResults filterResults = new FilterResults();
                     filterResults.values = suggestions;

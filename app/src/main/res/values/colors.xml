@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+<resources>
+    <color name="colorPrimary">#093e93</color>
+    <color name="colorPrimaryDark">#000046</color>
+    <color name="colorAccent">#1cb5e0</color>
+    <color name="mainTextViewColor">#FFFFFFFF</color>
+    <color name="secondaryTextViewColor">#FFDDDDDD</color>
+    <color name="transparent">#00000000</color>
+    <color name="decrease">#FFED143D</color>
+    <color name="increase">#FF00E000</color>
+    <color name="buttonColor">#FFFFFFFF</color>
+    <color name="listBackground">#000046</color>
+    <color name="listBackground2">#000046</color>
+    <color name="separationLine">#FF999999</color>
+    <color name="red">#FFF44336</color>
+    <color name="green">#FF4CAF50</color>
+</resources>
+-->
+
 <resources>
     <color name="colorPrimary">#000046</color>
     <color name="colorPrimaryDark">#111124</color>
@@ -11,6 +30,7 @@
     <color name="listBackground">#FFEEEEEE</color>
     <color name="listBackground2">#FFFFFFFF</color>
     <color name="separationLine">#FF999999</color>
+    <color name="buttonColor">#FFFFFFFF</color>
     <color name="red">#FFF44336</color>
     <color name="green">#FF4CAF50</color>
 </resources>

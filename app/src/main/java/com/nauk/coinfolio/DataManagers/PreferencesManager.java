@@ -65,4 +65,25 @@ public class PreferencesManager {
         editor.apply();
     }
 
+    public String getBinancePublicKey()
+    {
+        return settingPreferences.getString("binance_publickey", null);
+    }
+
+    public String getBinancePrivateKey()
+    {
+        return settingPreferences.getString("binance_privatekey", null);
+    }
+
+    public boolean isBinanceActivated()
+    {
+        return settingPreferences.getBoolean("enable_binance", false);
+    }
+
+    public void disableBinance()
+    {
+        SharedPreferences.Editor editor = settingPreferences.edit();
+        editor.putBoolean("enable_binance", false);
+        editor.apply();
+    }
 }

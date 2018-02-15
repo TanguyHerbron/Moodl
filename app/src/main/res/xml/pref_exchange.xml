@@ -59,7 +59,7 @@
 
     <PreferenceCategory
         android:title="@string/pref_title_exchange_binance"
-        android:enabled="false">
+        android:enabled="true">
         <SwitchPreference
             android:defaultValue="false"
             android:key="enable_binance"
@@ -79,7 +79,7 @@
             android:capitalize="words"
             android:dependency="enable_binance"
             android:inputType="text"
-            android:key="binance_privatekey"
+            android:key="binance_publickey"
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"

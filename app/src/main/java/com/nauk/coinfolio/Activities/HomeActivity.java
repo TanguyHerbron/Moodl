@@ -1,10 +1,10 @@
 package com.nauk.coinfolio.Activities;
 
 import android.app.Dialog;
-import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,22 +13,21 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -40,8 +39,8 @@ import com.luseen.spacenavigation.SpaceNavigationView;
 import com.luseen.spacenavigation.SpaceOnClickListener;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
-import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
+import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
 import com.nauk.coinfolio.R;
 
 import java.io.IOException;
@@ -79,6 +78,7 @@ public class HomeActivity extends AppCompatActivity {
     private Dialog loadingDialog;
     private Handler handler;
     private Runnable updateRunnable;
+    private ViewFlipper viewFlipper;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -148,6 +148,8 @@ public class HomeActivity extends AppCompatActivity {
         toolbarLayout = findViewById(R.id.toolbar_layout);
         toolbarSubtitle = findViewById(R.id.toolbarSubtitle);
         currencyLayout = findViewById(R.id.currencyListLayout);
+        viewFlipper = findViewById(R.id.viewFlipperSummary);
+        viewFlipper.setDisplayedChild(1);
 
         ImageButton addCurrencyButton = findViewById(R.id.floatingAddButton);
         ImageButton detailsButton = findViewById(R.id.switch_button);
@@ -160,11 +162,11 @@ public class HomeActivity extends AppCompatActivity {
 
         toolbarSubtitle.setText("US$0.00");
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation_home);
+        /*BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation_home);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setSelectedItemId(R.id.navigation_view_list);
         navigation.setFitsSystemWindows(true);
-        navigation.setItemBackgroundResource(R.color.colorAccent);
+        navigation.setItemBackgroundResource(R.color.colorAccent);*/
 
         //Events setup
         detailsButton.setOnClickListener(new View.OnClickListener() {
@@ -223,7 +225,6 @@ public class HomeActivity extends AppCompatActivity {
         spaceNavigationView.addSpaceItem(new SpaceItem("Charts", R.drawable.ic_show_chart_black_24dp));
         spaceNavigationView.addSpaceItem(new SpaceItem("Market Cap.", R.drawable.ic_pie_chart_black_24dp));
         spaceNavigationView.setSpaceBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        //spaceNavigationView.setCentreButtonIcon(R.drawable.ic_add_white_24dp);
         spaceNavigationView.setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
         spaceNavigationView.setCentreButtonColor(getResources().getColor(R.color.colorAccent));
         spaceNavigationView.setCentreButtonIconColorFilterEnabled(false);
@@ -237,8 +238,13 @@ public class HomeActivity extends AppCompatActivity {
                 SpaceNavigationView nav = findViewById(R.id.space);
 
                 nav.changeCurrentItem(-1);
-                ((AppBarLayout) findViewById(R.id.app_bar)).setNestedScrollingEnabled(true);
+
+                ((NestedScrollView) findViewById(R.id.nestedScrollViewLayout)).setNestedScrollingEnabled(true);
                 ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
+
+                findViewById(R.id.switch_button).setVisibility(View.VISIBLE);
+
+                viewFlipper.setDisplayedChild(1);
             }
 
             @Override
@@ -248,9 +254,14 @@ public class HomeActivity extends AppCompatActivity {
 
                 //0 : Unknown
                 //1 : Market cap
-                ((AppBarLayout) findViewById(R.id.app_bar)).setNestedScrollingEnabled(false);
+                ((NestedScrollView) findViewById(R.id.nestedScrollViewLayout)).setNestedScrollingEnabled(false);
                 ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
 
+                findViewById(R.id.switch_button).setVisibility(View.GONE);
+
+
+
+                viewFlipper.setDisplayedChild(itemIndex * 2);
             }
 
             @Override
@@ -394,7 +405,9 @@ public class HomeActivity extends AppCompatActivity {
             result = BitmapFactory.decodeStream(input);
         } catch (IOException e) {
             e.printStackTrace();
-            result = null;
+            result = BitmapFactory.decodeResource(this.getResources(),
+                    R.mipmap.icon_coinfolio);
+            result = Bitmap.createScaledBitmap(result, 50, 50, false);
         }
 
         callBack.onSuccess(result);
@@ -470,7 +483,7 @@ public class HomeActivity extends AppCompatActivity {
 
         if(balanceManager.getTotalBalance() != null)
         {
-            if(coinCounter == balanceManager.getTotalBalance().size())
+            if(coinCounter == balanceManager.getTotalBalance().size() && detailsChecker)
             {
                 for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                 {
@@ -502,6 +515,8 @@ public class HomeActivity extends AppCompatActivity {
     {
         ImageButton imgButton = findViewById(R.id.switch_button);
 
+        imgButton.setBackgroundColor(this.getResources().getColor(R.color.buttonColor));
+
         if(isDetailed)
         {
             imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_unfold_less_black_24dp));
@@ -517,6 +532,7 @@ public class HomeActivity extends AppCompatActivity {
     private void generateSplash()
     {
         LinearLayout loadingLayout = new LinearLayout(this);
+
         loadingLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         loadingLayout.setGravity(Gravity.CENTER);
         loadingLayout.setOrientation(LinearLayout.VERTICAL);
@@ -683,6 +699,14 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params)
         {
+            balanceManager.updateDetails(new BalanceManager.IconCallBack() {
+                @Override
+                public void onSuccess()
+                {
+                    countCoins(false, true);
+                }
+            });
+
             balanceManager.updateTotalBalance(new BalanceManager.VolleyCallBack() {
                 @Override
                 public void onSuccess() {
@@ -728,14 +752,6 @@ public class HomeActivity extends AppCompatActivity {
                             updateAll(true);
                     }
                     //updateAll();
-                }
-            });
-
-            balanceManager.updateDetails(new BalanceManager.IconCallBack() {
-                @Override
-                public void onSuccess()
-                {
-                    countCoins(false, true);
                 }
             });
 
