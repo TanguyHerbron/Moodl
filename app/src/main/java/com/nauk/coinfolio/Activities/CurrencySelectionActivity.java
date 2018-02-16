@@ -2,6 +2,7 @@ package com.nauk.coinfolio.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -83,6 +84,18 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         listView.setAdapter(adapter);
         listView.setTextFilterEnabled(false);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Currency selectedCurrency = (Currency) adapterView.getItemAtPosition(i);
+                Intent intent = new Intent(CurrencySelectionActivity.this, RecordTransactionActivity.class);
+                intent.putExtra("coin", selectedCurrency.getName());
+                intent.putExtra("symbol", selectedCurrency.getSymbol());
+                startActivity(intent);
+                finish();
+            }
+        });
 
         filter = adapter.getFilter();
     }

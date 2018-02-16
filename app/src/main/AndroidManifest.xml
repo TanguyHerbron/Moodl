@@ -15,7 +15,8 @@
             android:name=".Activities.HomeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,14 +29,26 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.CurrencySelectionActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nauk.coinfolio.Activities.HomeActivity"/>
+        </activity>
         <activity
             android:name=".Activities.RecordTransactionActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nauk.coinfolio.Activities.HomeActivity"/>
+        </activity>
         <activity
             android:name=".Activities.CurrencyDetailsActivity"
             android:label="@string/title_activity_currency_details"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nauk.coinfolio.Activities.HomeActivity"/>
+        </activity>
     </application>
 
 </manifest>
