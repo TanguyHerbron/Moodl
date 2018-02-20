@@ -25,9 +25,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -82,6 +84,24 @@ public class BalanceManager {
         }
 
         return currenciesName;
+    }
+
+    public List<String> getBiggestCurrencies()
+    {
+        List<String> currenciesDetails = new ArrayList<>();
+
+        int index = 0;
+        Iterator<String> coinIterator = coinInfosHashmap.keySet().iterator();
+
+        while(index < 11)
+        {
+            //currenciesDetails.add(index, coinInfosHashmap.keySet().iterator().next());
+            index++;
+
+            Log.d("coinfolio", "For " + index + " : " + coinIterator.next());
+        }
+
+        return currenciesDetails;
     }
 
     public List<String> getOrders()
@@ -332,6 +352,27 @@ public class BalanceManager {
                 }
             }
         }
+    }
+
+    public void updateMarketCap(final VolleyCallBack callBack)
+    {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, detailUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (response.length() > 0) {
+
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        requestQueue.add(strRequest);
     }
 
     public void updateDetails(final IconCallBack callBack)

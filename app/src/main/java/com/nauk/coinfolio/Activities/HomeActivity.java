@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -754,6 +753,17 @@ public class HomeActivity extends AppCompatActivity {
                     //updateAll();
                 }
             });
+
+            balanceManager.updateMarketCap(new BalanceManager.VolleyCallBack() {
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onError(String error) {
+
+                }});
 
             return null;
         }
