@@ -1,1 +1,1 @@
-gource --frameless --key --title Coinfolio
+gource --frameless --key --auto-skip-seconds 1 -e 0.001 --title Coinfolio
