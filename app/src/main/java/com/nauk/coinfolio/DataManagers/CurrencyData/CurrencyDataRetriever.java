@@ -80,7 +80,7 @@ public class CurrencyDataRetriever {
     {
         List<CurrencyDataChart> dataChart = new ArrayList<>();
 
-        if(response.length() > 200)
+        if(response.length() > 250)
         {
             response = response.substring(response.indexOf("Data\":[{") + 7, response.lastIndexOf("}],\"TimeTo"));
             String[] tab = response.split(Pattern.quote("},{"));

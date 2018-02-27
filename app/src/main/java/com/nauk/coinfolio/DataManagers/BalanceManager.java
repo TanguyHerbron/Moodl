@@ -17,6 +17,8 @@ import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.account.Account;
 import com.binance.api.client.domain.account.AssetBalance;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
+import com.nauk.coinfolio.DataManagers.ExchangeManager.BinanceManager;
+import com.nauk.coinfolio.DataManagers.ExchangeManager.HitBtcManager;
 import com.nauk.coinfolio.R;
 
 import org.json.JSONArray;
@@ -56,17 +58,26 @@ public class BalanceManager {
     private PreferencesManager preferenceManager;
     private DatabaseManager databaseManager;
 
-    private BinanceApiClientFactory binanceApiClientFactory;
+    private int balanceCounter;
+
+    //NEW IMPLEMENTATION
+    private List<HitBtcManager> hitBtcManagers;
+    private List<BinanceManager> binanceManagers;
 
     public BalanceManager(android.content.Context context)
     {
         this.context = context;
+
         preferenceManager = new PreferencesManager(context);
         requestQueue = Volley.newRequestQueue(context);
         binanceBalance = new ArrayList<Currency>();
         hitBalance = new ArrayList<Currency>();
         manualBalances = new ArrayList<Currency>();
         databaseManager = new DatabaseManager(context);
+        hitBtcManagers = new ArrayList<>();
+        binanceManagers = new ArrayList<>();
+
+        balanceCounter = 0;
     }
 
     public List<String> getCurrenciesName()
@@ -128,45 +139,25 @@ public class BalanceManager {
 
     public void updateExchangeKeys()
     {
-        publicHitKey = preferenceManager.getHitBTCPublicKey();
-        privateHitKey = preferenceManager.getHitBTCPrivateKey();
+        String publicKey = preferenceManager.getHitBTCPublicKey();
+        String privateKey = preferenceManager.getHitBTCPrivateKey();
 
-        publicBinanceKey = preferenceManager.getBinancePublicKey();
-        privateBinanceKey = preferenceManager.getBinancePrivateKey();
-    }
+        hitBtcManagers.clear();
 
-    public boolean isBinanceConfigured()
-    {
-        boolean isConfigured = true;
-
-        if(publicBinanceKey == null || privateBinanceKey == null)
+        if(publicKey != null && privateKey != null && preferenceManager.isHitBTCActivated())
         {
-            isConfigured = false;
+            hitBtcManagers.add(new HitBtcManager(context, publicKey, privateKey));
         }
 
-        return isConfigured;
-    }
+        publicKey = preferenceManager.getBinancePublicKey();
+        privateKey = preferenceManager.getBinancePrivateKey();
 
-    public boolean isHitBTCConfigured()
-    {
-        boolean isConfigured = true;
+        binanceManagers.clear();
 
-        if(publicHitKey == null || privateHitKey == null)
+        if(publicKey != null && privateKey != null && preferenceManager.isBinanceActivated())
         {
-            isConfigured = false;
+            binanceManagers.add(new BinanceManager(publicKey, privateKey));
         }
-
-        return isConfigured;
-    }
-
-    public void setPublicHitKey(String newKey)
-    {
-        publicHitKey = newKey;
-    }
-
-    public void setPrivateHitKey(String newKey)
-    {
-        privateHitKey = newKey;
     }
 
     public List<Currency> getTotalBalance()
@@ -174,38 +165,50 @@ public class BalanceManager {
         return totalBalance;
     }
 
-    public List<Currency> getHitBalance()
-    {
-        return hitBalance;
-    }
-
-    public List<Currency> getManualBalances()
-    {
-        return manualBalances;
-    }
-
     public void updateTotalBalance(final VolleyCallBack callBack)
     {
         boolean isUpdated = false;
+
         manualBalances = databaseManager.getAllCurrencyFromManualCurrency();
 
-        Log.d("coinfolio", "Updating balances " + (privateBinanceKey != null && publicBinanceKey != null && preferenceManager.isBinanceActivated()));
-
-        if(privateHitKey != null && publicHitKey != null && preferenceManager.isHitBTCActivated())
+        if(binanceManagers.size() > 0)
         {
-            updateHitBalance(callBack);
             isUpdated = true;
-        }
-        else
-        {
-            hitBalance = new ArrayList<Currency>();
+
+            for(int i = 0; i < binanceManagers.size(); i++)
+            {
+                binanceManagers.get(i).updateBalance(new BinanceManager.BinanceCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        countBalances(callBack);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+
+                    }
+                });
+            }
         }
 
-        if(privateBinanceKey != null && publicBinanceKey != null && preferenceManager.isBinanceActivated())
+        if(hitBtcManagers.size() > 0)
         {
-            Log.d("coinfolio", "Updating Binance");
-            updateBinanceBalance();
             isUpdated = true;
+
+            for(int i = 0; i < hitBtcManagers.size(); i++)
+            {
+                hitBtcManagers.get(i).updateBalance(new HitBtcManager.HitBtcCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        countBalances(callBack);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+
+                    }
+                });
+            }
         }
 
         if(!isUpdated)
@@ -214,89 +217,15 @@ public class BalanceManager {
         }
     }
 
-    private void updateBinanceBalance()
+    private void countBalances(VolleyCallBack callBack)
     {
-        Map<String, AssetBalance> accountBalanceCache;
-        BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicBinanceKey, privateBinanceKey);
-        BinanceApiRestClient client = factory.newRestClient();
+        balanceCounter++;
 
-        Account account = client.getAccount();
-        List<AssetBalance> assets = account.getBalances();
-
-        binanceBalance = new ArrayList<Currency>();
-
-        for(int i = 0; i < assets.size(); i++)
+        if(balanceCounter == hitBtcManagers.size() + binanceManagers.size())
         {
-            if(Double.parseDouble(assets.get(i).getFree()) > 0)
-            {
-                binanceBalance.add(new Currency(assets.get(i).getAsset(), assets.get(i).getFree()));
-            }
-        }
+            refreshAllBalances(callBack);
 
-        Log.d("coinfolio", "Binance size : " + binanceBalance.size());
-
-        for(int i = 0; i < binanceBalance.size(); i++)
-        {
-            Log.d("coinfolio", "Binance : " + binanceBalance.get(i).getSymbol() + " " + binanceBalance.get(i).getBalance());
-        }
-    }
-
-    private void updateHitBalance(final VolleyCallBack callBack)
-    {
-        JsonArrayRequest arrReq = new JsonArrayRequest(Request.Method.GET, hitBalanceUrl,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        if (response.length() > 0) {
-
-                            parseHitBalance(response);
-                            refreshAllBalances(callBack);
-
-                        } else {
-                            //No balance
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e(context.getResources().getString(R.string.debug_volley), "API Error : " + error.toString() + ":");
-                        callBack.onError(error.toString());
-                    }
-                }
-        ) {
-            @Override
-            public Map<String, String> getHeaders()throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                String credentials = publicHitKey + ":" + privateHitKey;
-                String auth = "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
-                headers.put("Content-Type", "application/json");
-                headers.put("Authorization", auth);
-
-                return headers;
-            }
-        };
-
-        requestQueue.add(arrReq);
-    }
-
-    private void parseHitBalance(JSONArray response)
-    {
-        hitBalance = new ArrayList<>();
-
-        for (int i = 0; i < response.length(); i++)
-        {
-            try {
-                JSONObject jsonObj = response.getJSONObject(i);
-
-                if(Float.parseFloat(jsonObj.getString("available")) > 0)
-                {
-                    hitBalance.add(new Currency(jsonObj.getString("currency"), Double.parseDouble(jsonObj.getString("available"))));
-                }
-
-            } catch (JSONException e) {
-                Log.e(context.getResources().getString(R.string.debug_volley), "Invalid JSON Object");
-            }
+            balanceCounter = 0;
         }
     }
 
@@ -304,17 +233,34 @@ public class BalanceManager {
     {
         totalBalance = new ArrayList<>();
 
-        totalBalance.addAll(hitBalance);
+        for(int i = 0; i < hitBtcManagers.size(); i++)
+        {
+            mergeBalanceTotal(hitBtcManagers.get(i).getBalance());
+        }
 
-        for(int i = 0; i < manualBalances.size(); i++)
+        for(int i = 0; i < binanceManagers.size(); i++)
+        {
+            Log.d("coinfolio", "Merging binance " + i);
+
+            mergeBalanceTotal(binanceManagers.get(i).getBalance());
+        }
+
+        mergeBalanceTotal(manualBalances);
+
+        callBack.onSuccess();
+    }
+
+    private void mergeBalanceTotal(List<Currency> balance)
+    {
+        for(int i = 0; i < balance.size(); i++)
         {
             boolean isIn = false;
 
             for(int j = 0; j < totalBalance.size(); j++)
             {
-                if(manualBalances.get(i).getSymbol().equals(totalBalance.get(j).getSymbol()))
+                if(balance.get(i).getSymbol().equals(totalBalance.get(j).getSymbol()))
                 {
-                    totalBalance.get(j).setBalance(totalBalance.get(j).getBalance() + manualBalances.get(i).getBalance());
+                    totalBalance.get(j).setBalance(totalBalance.get(j).getBalance() + balance.get(i).getBalance());
 
                     isIn = true;
                 }
@@ -322,11 +268,9 @@ public class BalanceManager {
 
             if(!isIn)
             {
-                totalBalance.add(manualBalances.get(i));
+                totalBalance.add(balance.get(i));
             }
         }
-
-        callBack.onSuccess();
     }
 
     public interface VolleyCallBack {

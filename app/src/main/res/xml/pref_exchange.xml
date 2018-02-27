@@ -70,6 +70,22 @@
             android:dependency="enable_binance"
             android:inputType="text"
             android:key="binance_publickey"
+            android:selectAllOnFocus="true"
+            android:title="@string/pref_title_binance_publickey" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_binance"
+            android:inputType="text"
+            android:key="binance_privatekey"
+            android:selectAllOnFocus="true"
+            android:title="@string/pref_title_binance_privatekey" />
+
+        <!--<EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_binance"
+            android:inputType="text"
+            android:key="binance_publickey"
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -83,7 +99,7 @@
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/pref_title_binance_privatekey" />
+            android:title="@string/pref_title_binance_privatekey" />-->
     </PreferenceCategory>
 
     <PreferenceCategory

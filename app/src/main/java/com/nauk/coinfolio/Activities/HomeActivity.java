@@ -720,12 +720,6 @@ public class HomeActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Currency currency) {
                                     countCoins(true, false);
-                                    /*currency.updateName(getApplicationContext(), new Currency.CurrencyCallBack() {
-                                        @Override
-                                        public void onSuccess(Currency currency) {
-                                            countCoins(true, false);
-                                        }
-                                    });*/
                                 }
                             });
                         }
@@ -750,7 +744,6 @@ public class HomeActivity extends AppCompatActivity {
                         default:
                             updateAll(true);
                     }
-                    //updateAll();
                 }
             });
 
