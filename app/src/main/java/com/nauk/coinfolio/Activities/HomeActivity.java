@@ -181,6 +181,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent settingIntent = new Intent(HomeActivity.this, SettingsActivity.class);
                 startActivity(settingIntent);
+                //overridePendingTransition(R.anim.activity_enter, R.anim.activity_exit);
             }
         });
 
@@ -428,15 +429,15 @@ public class HomeActivity extends AppCompatActivity {
 
         if(balanceManager.getTotalBalance() != null)
         {
-            if(iconCounter == balanceManager.getTotalBalance().size() - offset)
+            if(balanceManager.getTotalBalance().size() == 0)
             {
-                if(balanceManager.getTotalBalance().size() == 0)
+                updateNoBalance();
+            }
+            else
+            {
+                if(iconCounter == balanceManager.getTotalBalance().size() - offset)
                 {
-                    updateNoBalance();
-                }
-                else
-                {
-                    Log.d("coinfolio", "Loading heavy");
+                    Log.d(getResources().getString(R.string.debug), "Loading heavy");
 
                     UiHeavyLoadCalculator uiHeavyLoadCalculator = new UiHeavyLoadCalculator();
                     uiHeavyLoadCalculator.execute();
@@ -504,6 +505,8 @@ public class HomeActivity extends AppCompatActivity {
             {
                 if(balanceManager.getTotalBalance().size() == 0)
                 {
+                    Log.d("coinfolio", "Empty");
+
                     countIcons();
                 }
             }

@@ -215,6 +215,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             bindPreferenceSummaryToValue(findPreference("hitbtc_publickey"));
             bindPreferenceSummaryToValue(findPreference("hitbtc_privatekey"));
+
+            bindPreferenceSummaryToValue(findPreference("binance_publickey"));
+            bindPreferenceSummaryToValue(findPreference("binance_privatekey"));
         }
 
         @Override

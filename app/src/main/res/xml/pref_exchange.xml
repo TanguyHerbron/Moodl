@@ -29,6 +29,53 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/pref_title_exchange_binance">
+        <SwitchPreference
+            android:key="enable_binance"
+            android:title="@string/pref_title_enable_synchronization_binance" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_binance"
+            android:inputType="text"
+            android:key="binance_publickey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_binance_publickey" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_binance"
+            android:inputType="text"
+            android:key="binance_privatekey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_binance_privatekey" />
+
+        <!--<EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_binance"
+            android:inputType="text"
+            android:key="binance_publickey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_binance_publickey" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:dependency="enable_binance"
+            android:inputType="text"
+            android:key="binance_publickey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_binance_privatekey" />-->
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/pref_title_exchange_gdax"
         android:enabled="false">
         <SwitchPreference
@@ -55,51 +102,6 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/pref_title_gdax_privatekey" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/pref_title_exchange_binance"
-        android:enabled="true">
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="enable_binance"
-            android:title="@string/pref_title_enable_synchronization_binance" />
-
-        <EditTextPreference
-            android:capitalize="words"
-            android:dependency="enable_binance"
-            android:inputType="text"
-            android:key="binance_publickey"
-            android:selectAllOnFocus="true"
-            android:title="@string/pref_title_binance_publickey" />
-
-        <EditTextPreference
-            android:capitalize="words"
-            android:dependency="enable_binance"
-            android:inputType="text"
-            android:key="binance_privatekey"
-            android:selectAllOnFocus="true"
-            android:title="@string/pref_title_binance_privatekey" />
-
-        <!--<EditTextPreference
-            android:capitalize="words"
-            android:dependency="enable_binance"
-            android:inputType="text"
-            android:key="binance_publickey"
-            android:maxLines="1"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/pref_title_binance_publickey" />
-
-        <EditTextPreference
-            android:capitalize="words"
-            android:dependency="enable_binance"
-            android:inputType="text"
-            android:key="binance_publickey"
-            android:maxLines="1"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/pref_title_binance_privatekey" />-->
     </PreferenceCategory>
 
     <PreferenceCategory
