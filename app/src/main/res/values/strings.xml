@@ -79,6 +79,9 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
 
+    <!--Fingerprint authentification-->
+    <string name="fingerprint_verification">Verify your fingerprint</string>
+
 
     <!--Exchange strings-->
     <string name="pref_header_exchange">Exchanges settings</string>

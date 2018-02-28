@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <SwitchPreference
+        android:id="@+id/fingerprint_switch"
+        android:key="enable_fingerprint"
+        android:title="@string/pref_fingerprint" />
+
     <PreferenceCategory
         android:title="@string/pref_title_exchange_hitbtc">
         <SwitchPreference

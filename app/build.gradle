@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.nauk.coinfolio"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -41,6 +41,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-jackson:2.2.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
     implementation 'org.apache.commons:commons-lang3:3.6'
+    implementation 'com.mattprecious.swirl:swirl:1.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'

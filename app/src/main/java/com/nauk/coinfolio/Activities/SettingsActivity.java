@@ -1,9 +1,13 @@
 package com.nauk.coinfolio.Activities;
 
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.hardware.fingerprint.FingerprintManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -15,13 +19,34 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore.KeyProperties;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
+import com.nauk.coinfolio.FingerprintHelper.FingerprintHandler;
 import com.nauk.coinfolio.R;
 
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.List;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -35,6 +60,14 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
+    private static final String KEY_NAME = "NAUKEY";
+    private Cipher cipher;
+    private KeyStore keyStore;
+    private KeyGenerator keyGenerator;
+    private FingerprintManager.CryptoObject cryptoObject;
+    private FingerprintManager fingerprintManager;
+    private KeyguardManager keyguardManager;
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -131,6 +164,105 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
+
+            if(!fingerprintManager.isHardwareDetected())
+            {
+                findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
+            }
+
+            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
+            {
+                findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
+            }
+
+            if(!fingerprintManager.hasEnrolledFingerprints())
+            {
+                findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
+            }
+
+            if(!keyguardManager.isKeyguardSecure())
+            {
+                findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
+            }
+            else
+            {
+                try {
+                    generateKey();
+                } catch (FingerprintException e) {
+                    e.printStackTrace();
+                }
+
+                if(initCipher())
+                {
+                    cryptoObject = new FingerprintManager.CryptoObject(cipher);
+
+                    FingerprintHandler helper = new FingerprintHandler(this);
+                    helper.startAuth(fingerprintManager, cryptoObject);
+                }
+            }
+        }
+    }
+
+    private void generateKey() throws FingerprintException
+    {
+        try {
+            keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+            keyStore.load(null);
+            keyGenerator.init(new KeyGenParameterSpec.Builder(KEY_NAME, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+            .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+            .setUserAuthenticationRequired(true)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+            .build());
+
+            keyGenerator.generateKey();
+
+        } catch (KeyStoreException
+                | NoSuchAlgorithmException
+                | NoSuchProviderException
+                | InvalidAlgorithmParameterException
+                | CertificateException
+                | IOException e) {
+            e.printStackTrace();
+            throw new FingerprintException(e);
+        }
+    }
+
+    public boolean initCipher()
+    {
+        try {
+            cipher = Cipher.getInstance(
+                    KeyProperties.KEY_ALGORITHM_AES + "/"
+                    + KeyProperties.BLOCK_MODE_CBC + "/"
+                    + KeyProperties.ENCRYPTION_PADDING_PKCS7);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new RuntimeException("Failed to get Cipher", e);
+        }
+
+        try {
+            keyStore.load(null);
+            SecretKey key = (SecretKey) keyStore.getKey(KEY_NAME, null);
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            return true;
+        } catch (KeyPermanentlyInvalidatedException e) {
+            return false;
+        } catch (KeyStoreException | CertificateException
+                | UnrecoverableKeyException | IOException
+                | NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new RuntimeException("Failed to init Cipher", e);
+        }
+    }
+
+    private class FingerprintException extends Exception {
+        public FingerprintException(Exception e)
+        {
+            super(e);
+        }
     }
 
     /**
