@@ -185,7 +185,7 @@ public class BalanceManager {
 
                     @Override
                     public void onError(String error) {
-
+                        callBack.onError(error);
                     }
                 });
             }
@@ -205,7 +205,7 @@ public class BalanceManager {
 
                     @Override
                     public void onError(String error) {
-
+                        callBack.onError(error);
                     }
                 });
             }
@@ -240,8 +240,6 @@ public class BalanceManager {
 
         for(int i = 0; i < binanceManagers.size(); i++)
         {
-            Log.d("coinfolio", "Merging binance " + i);
-
             mergeBalanceTotal(binanceManagers.get(i).getBalance());
         }
 

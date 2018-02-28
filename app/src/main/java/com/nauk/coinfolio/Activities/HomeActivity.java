@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -729,7 +730,12 @@ public class HomeActivity extends AppCompatActivity {
                     }
                     else
                     {
-                        countCoins(false, false);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                countCoins(false, false);
+                            }
+                        });
                     }
                 }
 
@@ -739,12 +745,21 @@ public class HomeActivity extends AppCompatActivity {
                     {
                         case "com.android.volley.AuthFailureError":
                             preferencesManager.disableHitBTC();
-                            Snackbar.make(findViewById(R.id.currencyListLayout), "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
                                     .show();
                             refreshLayout.setRefreshing(false);
                             updateAll(true);
                             break;
+                        case "API-key format invalid.":
+                            preferencesManager.disableBinance();
+                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                                    .show();
+                            updateAll(true);
+                            break;
                         default:
+                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "Unexpected error", Snackbar.LENGTH_LONG)
+                                    .show();
+                            Log.d("coinfolio", error);
                             updateAll(true);
                     }
                 }

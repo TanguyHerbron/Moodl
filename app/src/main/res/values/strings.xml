@@ -82,6 +82,7 @@
 
     <!--Exchange strings-->
     <string name="pref_header_exchange">Exchanges settings</string>
+    <string name="pref_fingerprint">Touch ID</string>
 
     <!--HitBTC-->
     <string name="pref_title_enable_synchronization_hitbtc">Enable synchronization</string>
