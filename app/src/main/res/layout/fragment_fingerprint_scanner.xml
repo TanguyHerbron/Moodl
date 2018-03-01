@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <com.mattprecious.swirl.SwirlView
+    <!--<com.mattprecious.swirl.SwirlView
         android:layout_width="60dp"
-        android:layout_height="60dp" />
+        android:layout_height="60dp" />-->
 </LinearLayout>

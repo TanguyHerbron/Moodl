@@ -2,9 +2,11 @@ package com.nauk.coinfolio.Activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.DialogFragment;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.fingerprint.FingerprintManager;
@@ -27,9 +29,9 @@ import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
-import com.nauk.coinfolio.FingerprintHelper.FingerprintHandler;
+import com.nauk.coinfolio.FingerprintToolkit.FingerprintDialogFragment;
+import com.nauk.coinfolio.FingerprintToolkit.FingerprintHandler;
 import com.nauk.coinfolio.R;
 
 import java.io.IOException;
@@ -165,44 +167,54 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         super.onCreate(savedInstanceState);
         setupActionBar();
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if(preferences.getBoolean("enable_fingerprint", false))
         {
-            keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-            fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
 
-            if(!fingerprintManager.isHardwareDetected())
-            {
-                findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-            }
+            DialogFragment newFragment = FingerprintDialogFragment.newInstance(
+                    R.layout.fragment_fingerprint_scanner);
+            newFragment.show(getFragmentManager(), "dialog");
 
-            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             {
-                findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-            }
+                keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+                fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
 
-            if(!fingerprintManager.hasEnrolledFingerprints())
-            {
-                findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-            }
-
-            if(!keyguardManager.isKeyguardSecure())
-            {
-                findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-            }
-            else
-            {
-                try {
-                    generateKey();
-                } catch (FingerprintException e) {
-                    e.printStackTrace();
+                if(!fingerprintManager.isHardwareDetected())
+                {
+                    findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
                 }
 
-                if(initCipher())
+                if(ActivityCompat.checkSelfPermission(this, Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
                 {
-                    cryptoObject = new FingerprintManager.CryptoObject(cipher);
+                    findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
+                }
 
-                    FingerprintHandler helper = new FingerprintHandler(this);
-                    helper.startAuth(fingerprintManager, cryptoObject);
+                if(!fingerprintManager.hasEnrolledFingerprints())
+                {
+                    findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
+                }
+
+                if(!keyguardManager.isKeyguardSecure())
+                {
+                    findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
+                }
+                else
+                {
+                    try {
+                        generateKey();
+                    } catch (FingerprintException e) {
+                        e.printStackTrace();
+                    }
+
+                    if(initCipher())
+                    {
+                        cryptoObject = new FingerprintManager.CryptoObject(cipher);
+
+                        FingerprintHandler helper = new FingerprintHandler(this);
+                        helper.startAuth(fingerprintManager, cryptoObject);
+                    }
                 }
             }
         }
