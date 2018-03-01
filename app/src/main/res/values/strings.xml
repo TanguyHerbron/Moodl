@@ -146,4 +146,6 @@
     <string name="currencyPercentagePlaceholder">%1$s%%</string>
     <string name="title_activity_main">MainActivity</string>
 
+    <string name="fingerprint_dialog_cancel">Cancel</string>
+
 </resources>

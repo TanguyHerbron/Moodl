@@ -3,6 +3,7 @@ package com.nauk.coinfolio.Activities;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -172,8 +173,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         if(preferences.getBoolean("enable_fingerprint", false))
         {
 
-            DialogFragment newFragment = FingerprintDialogFragment.newInstance(
-                    R.layout.fragment_fingerprint_scanner);
+            FingerprintDialogFragment newFragment = FingerprintDialogFragment.newInstance();
+            newFragment.setCancelable(false);
             newFragment.show(getFragmentManager(), "dialog");
 
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
@@ -212,7 +213,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     {
                         cryptoObject = new FingerprintManager.CryptoObject(cipher);
 
-                        FingerprintHandler helper = new FingerprintHandler(this);
+                        FingerprintHandler helper = new FingerprintHandler(this, newFragment);
                         helper.startAuth(fingerprintManager, cryptoObject);
                     }
                 }
