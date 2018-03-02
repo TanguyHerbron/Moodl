@@ -28,6 +28,7 @@ import android.security.keystore.KeyProperties;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -219,6 +220,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("coinfolio", "Hello");
     }
 
     private void generateKey() throws FingerprintException
