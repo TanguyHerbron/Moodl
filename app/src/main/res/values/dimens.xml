@@ -13,4 +13,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
 
     <dimen name="swirl_size">60dp</dimen>
+    <dimen name="fingerprint_dialog_height">125dp</dimen>
+    <dimen name="fingerprint_dialog_width">250dp</dimen>
 </resources>

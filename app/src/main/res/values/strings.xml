@@ -147,5 +147,6 @@
     <string name="title_activity_main">MainActivity</string>
 
     <string name="fingerprint_dialog_cancel">Cancel</string>
+    <string name="fingerprint_dialog_title">Verify your fingerprint to continue</string>
 
 </resources>

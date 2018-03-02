@@ -1,44 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/edit_name"
-    android:layout_width="250dp"
-    android:layout_height="125dp"
-    android:layout_gravity="center"
-    android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center">
 
-    <TextView
-        android:id="@+id/fingerprint_textview"
-        android:text="@string/pref_fingerprint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <FrameLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="@dimen/fingerprint_dialog_width"
         android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:orientation="vertical">
 
-        <com.mattprecious.swirl.SwirlView
-            android:id="@+id/swirlBackground"
-            android:layout_width="@dimen/swirl_size"
-            android:layout_height="@dimen/swirl_size"
-            tools:swirl_state="on"/>
+        <TextView
+            android:id="@+id/fingerprint_textview"
+            android:text="@string/fingerprint_dialog_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="@dimen/mainText"/>
 
-        <com.mattprecious.swirl.SwirlView
-            android:id="@+id/swirl"
-            android:layout_width="@dimen/swirl_size"
-            android:layout_height="@dimen/swirl_size"
-            tools:swirl_state="on"/>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
 
-    </FrameLayout>
+            <com.mattprecious.swirl.SwirlView
+                android:id="@+id/swirlBackground"
+                android:layout_width="@dimen/swirl_size"
+                android:layout_height="@dimen/swirl_size"
+                tools:swirl_state="on"/>
 
-    <Button
-        android:id="@+id/cancelButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/fingerprint_dialog_cancel"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_gravity="end"/>
+            <com.mattprecious.swirl.SwirlView
+                android:id="@+id/swirl"
+                android:layout_width="@dimen/swirl_size"
+                android:layout_height="@dimen/swirl_size"
+                tools:swirl_state="on"/>
 
-</LinearLayout>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <TextView
+                android:id="@+id/fingerprint_error"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:textColor="@color/red"
+                android:layout_margin="5dp"/>
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/fingerprint_dialog_cancel"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_alignParentEnd="true"/>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</RelativeLayout>

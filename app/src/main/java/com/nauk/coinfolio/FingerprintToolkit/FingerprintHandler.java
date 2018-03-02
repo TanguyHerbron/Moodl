@@ -40,32 +40,58 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     public void onAuthenticationError(int errMsgId, CharSequence errString)
     {
         //Toast.makeText(context, "Authentification error\n" + errString, Toast.LENGTH_LONG).show();
-        dialogFragment.wrongFingerprint();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                dialogFragment.resetFingerprint();
-            }
-        }, 500);
+        if(dialogFragment.isVisible())
+        {
+            dialogFragment.wrongFingerprint("Error");
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(dialogFragment.isVisible())
+                    {
+                        dialogFragment.resetFingerprint();
+                    }
+                }
+            }, 500);
+        }
     }
 
     @Override
     public void onAuthenticationFailed()
     {
         //Toast.makeText(context, "Authentification failed", Toast.LENGTH_LONG).show();
-        dialogFragment.wrongFingerprint();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                dialogFragment.resetFingerprint();
-            }
-        }, 500);
+        if(dialogFragment.isVisible())
+        {
+            dialogFragment.wrongFingerprint("Wrong fingerprint");
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(dialogFragment.isVisible())
+                    {
+                        dialogFragment.resetFingerprint();
+                    }
+                }
+            }, 500);
+        }
     }
 
     @Override
     public void onAuthenticationHelp(int helpMsgIf, CharSequence helpString)
     {
-        Toast.makeText(context, "Authentification help\n" + helpString, Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, "Authentification help\n" + helpString, Toast.LENGTH_LONG).show();
+
+        if(dialogFragment.isVisible())
+        {
+            dialogFragment.wrongFingerprint(helpString.toString());
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(dialogFragment.isVisible())
+                    {
+                        dialogFragment.resetFingerprint();
+                    }
+                }
+            }, 500);
+        }
     }
 
     @Override
