@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,11 +16,14 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -27,18 +32,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
+import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.luseen.spacenavigation.SpaceItem;
 import com.luseen.spacenavigation.SpaceNavigationView;
 import com.luseen.spacenavigation.SpaceOnClickListener;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
+import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
 import com.nauk.coinfolio.R;
@@ -47,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
@@ -64,9 +76,11 @@ public class HomeActivity extends AppCompatActivity {
     private PreferencesManager preferencesManager;
     private HomeLayoutGenerator layoutGenerator;
     private BalanceManager balanceManager;
+    private MarketCapManager marketCapManager;
 
     private int coinCounter;
     private int iconCounter;
+    private int marketCapCounter;
     private long lastTimestamp;
     private boolean detailsChecker;
     private boolean isDetailed;
@@ -117,10 +131,11 @@ public class HomeActivity extends AppCompatActivity {
 
         generateSplash();
 
-        //Objects initializatoin
+        //Objects initialization
         preferencesManager = new PreferencesManager(this);
         layoutGenerator = new HomeLayoutGenerator(this);
         balanceManager = new BalanceManager(this);
+        marketCapManager = new MarketCapManager(this);
         handler = new Handler();
         updateRunnable = new  Runnable() {
             @Override
@@ -190,7 +205,21 @@ public class HomeActivity extends AppCompatActivity {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        updateAll(false);
+                        switch (viewFlipper.getDisplayedChild())
+                        {
+                            case 0:
+                                Log.d(getResources().getString(R.string.debug), "Watchlist");
+                                refreshLayout.setRefreshing(false);
+                                break;
+                            case 1:
+                                updateAll(false);
+                                break;
+                            case 2:
+                                Log.d(getResources().getString(R.string.debug), "Market cap");
+                                refreshLayout.setRefreshing(false);
+                                break;
+                        }
+
                     }
                 }
         );
@@ -221,7 +250,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupNavBar(Bundle savedInstanceState)
     {
-        final SpaceNavigationView spaceNavigationView = (SpaceNavigationView) findViewById(R.id.space);
+        final SpaceNavigationView spaceNavigationView = findViewById(R.id.space);
         spaceNavigationView.initWithSaveInstanceState(savedInstanceState);
         spaceNavigationView.addSpaceItem(new SpaceItem("Charts", R.drawable.ic_show_chart_black_24dp));
         spaceNavigationView.addSpaceItem(new SpaceItem("Market Cap.", R.drawable.ic_pie_chart_black_24dp));
@@ -240,7 +269,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 nav.changeCurrentItem(-1);
 
-                ((NestedScrollView) findViewById(R.id.nestedScrollViewLayout)).setNestedScrollingEnabled(true);
+                findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
                 ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
 
                 findViewById(R.id.switch_button).setVisibility(View.VISIBLE);
@@ -255,8 +284,8 @@ public class HomeActivity extends AppCompatActivity {
 
                 //0 : Unknown
                 //1 : Market cap
-                ((NestedScrollView) findViewById(R.id.nestedScrollViewLayout)).setNestedScrollingEnabled(false);
                 ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+                findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
 
                 findViewById(R.id.switch_button).setVisibility(View.GONE);
 
@@ -358,8 +387,6 @@ public class HomeActivity extends AppCompatActivity {
 
         updateViewButtonIcon();
     }
-
-
 
     private void updateAll(boolean mustUpdate)
     {
@@ -470,6 +497,77 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    private void updateMarketCap()
+    {
+        marketCapCounter = 0;
+
+        marketCapManager.updateTopCurrencies(new MarketCapManager.VolleyCallBack() {
+            @Override
+            public void onSuccess()
+            {
+                countCompletedMarketCapRequest();
+            }
+        });
+
+        marketCapManager.updateMarketCap(new MarketCapManager.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                countCompletedMarketCapRequest();
+            }
+        });
+    }
+
+    private void countCompletedMarketCapRequest()
+    {
+        marketCapCounter++;
+
+        if(marketCapCounter == 2)
+        {
+            findViewById(R.id.progressBarMarketCap).setVisibility(View.GONE);
+
+            List<PieEntry> entries = new ArrayList<>();
+
+            PieChart pieChart = findViewById(R.id.marketCapPieChart);
+
+            float otherCurrenciesDominance = 0;
+
+            for(Iterator i = marketCapManager.getDominance().keySet().iterator(); i.hasNext(); )
+            {
+                String key = (String) i.next();
+                Log.d(getResources().getString(R.string.debug), "Sym : " + key + " " + marketCapManager.getDominance().get(key));
+                entries.add(new PieEntry(marketCapManager.getDominance().get(key), key));
+                otherCurrenciesDominance += marketCapManager.getDominance().get(key);
+            }
+
+            entries.add(new PieEntry(100-otherCurrenciesDominance, "Others"));
+
+            PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
+            PieData data = new PieData(set);
+            pieChart.setData(data);
+
+            pieChart.setDrawSlicesUnderHole(true);
+            pieChart.setUsePercentValues(true);
+            pieChart.setTouchEnabled(false);
+
+            pieChart.getDescription().setEnabled(false);
+            pieChart.setCenterText(generateCenterSpannableText());
+            pieChart.setVisibility(View.VISIBLE);
+            pieChart.invalidate(); // refresh
+        }
+    }
+
+    private SpannableString generateCenterSpannableText() {
+
+        SpannableString s = new SpannableString("MPAndroidChart\ndeveloped by Philipp Jahoda");
+        s.setSpan(new RelativeSizeSpan(1.7f), 0, 14, 0);
+        s.setSpan(new StyleSpan(Typeface.NORMAL), 14, s.length() - 15, 0);
+        s.setSpan(new ForegroundColorSpan(Color.GRAY), 14, s.length() - 15, 0);
+        s.setSpan(new RelativeSizeSpan(.8f), 14, s.length() - 15, 0);
+        s.setSpan(new StyleSpan(Typeface.ITALIC), s.length() - 14, s.length(), 0);
+        s.setSpan(new ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length() - 14, s.length(), 0);
+        return s;
+    }
+
     private void countCoins(boolean isCoin, boolean isDetails)
     {
         if(isCoin)
@@ -486,21 +584,8 @@ public class HomeActivity extends AppCompatActivity {
         {
             if(coinCounter == balanceManager.getTotalBalance().size() && detailsChecker)
             {
-                for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-                {
-                    final Currency localCurrency = balanceManager.getTotalBalance().get(i);
-
-                    if(balanceManager.getIconUrl(localCurrency.getSymbol()) != null)
-                    {
-                        getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new IconCallBack() {
-                            @Override
-                            public void onSuccess(Bitmap bitmapIcon) {
-                                localCurrency.setIcon(bitmapIcon);
-                                countIcons();
-                            }
-                        });
-                    }
-                }
+                IconDownloader iconDownloader = new IconDownloader();
+                iconDownloader.execute();
             }
             else
             {
@@ -557,6 +642,49 @@ public class HomeActivity extends AppCompatActivity {
 
         loadingDialog.setContentView(loadingLayout);
         loadingDialog.show();
+    }
+
+    private class IconDownloader extends AsyncTask<Void, Integer, Void>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values)
+        {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+            {
+                final Currency localCurrency = balanceManager.getTotalBalance().get(i);
+
+                if(balanceManager.getIconUrl(localCurrency.getSymbol()) != null)
+                {
+                    getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new IconCallBack() {
+                        @Override
+                        public void onSuccess(Bitmap bitmapIcon) {
+                            localCurrency.setIcon(bitmapIcon);
+                            countIcons();
+                        }
+                    });
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result)
+        {
+
+        }
     }
 
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
@@ -765,7 +893,9 @@ public class HomeActivity extends AppCompatActivity {
                 }
             });
 
-            balanceManager.updateMarketCap(new BalanceManager.VolleyCallBack() {
+            updateMarketCap();
+
+            /*marketCapManager.updateTopCurrencies(new BalanceManager.VolleyCallBack() {
                 @Override
                 public void onSuccess() {
 
@@ -774,7 +904,7 @@ public class HomeActivity extends AppCompatActivity {
                 @Override
                 public void onError(String error) {
 
-                }});
+                }});*/
 
             return null;
         }

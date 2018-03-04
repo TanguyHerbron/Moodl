@@ -90,7 +90,7 @@ public class HomeLayoutGenerator {
         if(currency.getHistoryMinutes() != null)
         {
             List<Double> borders = getAxisBorders(currency);
-            LineChartView chartView = (LineChartView) view.findViewById(R.id.LineChartView);
+            LineChartView chartView = view.findViewById(R.id.LineChartView);
 
             chartView.setAxisBorderValues(borders.get(0).floatValue(), borders.get(1).floatValue())
                     .setYLabels(AxisRenderer.LabelPosition.NONE)
@@ -141,7 +141,7 @@ public class HomeLayoutGenerator {
 
         if(currency.getHistoryMinutes() != null)
         {
-            ((LineChartView) view.findViewById(R.id.LineChartView)).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.LineChartView).setVisibility(View.VISIBLE);
             ((LineChartView) view.findViewById(R.id.LineChartView)).show();
             view.findViewById(R.id.errorTextView).setVisibility(View.GONE);
         }

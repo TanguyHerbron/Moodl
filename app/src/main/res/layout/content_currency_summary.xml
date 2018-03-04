@@ -79,7 +79,8 @@
                 android:id="@+id/layoutProgressMarketCap"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="visible">
+                android:visibility="visible"
+                android:orientation="vertical">
 
                 <ProgressBar
                     android:id="@+id/progressBarMarketCap"
@@ -88,6 +89,11 @@
                     style="?android:attr/progressBarStyleLarge"
                     android:layout_gravity="center"
                     android:background="@drawable/circular_progress_bar" />
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/marketCapPieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"/>
 
             </LinearLayout>
 

@@ -7,8 +7,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
-import android.app.DialogFragment;
-import android.widget.Toast;
 
 /**
  * Created by Guitoune on 28/02/2018.

@@ -36,8 +36,8 @@ public class CurrencyAdapter extends ArrayAdapter<Currency> {
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_currency_row, parent, false);
             }
-            TextView currencyName = (TextView) convertView.findViewById(R.id.currencyName);
-            TextView currencySymbol = (TextView) convertView.findViewById(R.id.currencySymbol);
+            TextView currencyName = convertView.findViewById(R.id.currencyName);
+            TextView currencySymbol = convertView.findViewById(R.id.currencySymbol);
             if (currencyName != null)
                 currencyName.setText(currency.getName());
             if(currencySymbol != null)

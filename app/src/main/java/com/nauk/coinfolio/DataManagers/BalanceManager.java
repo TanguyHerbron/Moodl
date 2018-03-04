@@ -1,37 +1,26 @@
 package com.nauk.coinfolio.DataManagers;
 
 import android.os.StrictMode;
-import android.util.Base64;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.binance.api.client.BinanceApiClientFactory;
-import com.binance.api.client.BinanceApiRestClient;
-import com.binance.api.client.domain.account.Account;
-import com.binance.api.client.domain.account.AssetBalance;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.ExchangeManager.BinanceManager;
 import com.nauk.coinfolio.DataManagers.ExchangeManager.HitBtcManager;
 import com.nauk.coinfolio.R;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -294,27 +283,6 @@ public class BalanceManager {
                 }
             }
         }
-    }
-
-    public void updateMarketCap(final VolleyCallBack callBack)
-    {
-        StringRequest strRequest = new StringRequest(Request.Method.GET, detailUrl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        if (response.length() > 0) {
-
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-        requestQueue.add(strRequest);
     }
 
     public void updateDetails(final IconCallBack callBack)

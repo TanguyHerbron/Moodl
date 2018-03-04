@@ -2,8 +2,6 @@ package com.nauk.coinfolio.Activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +19,6 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;

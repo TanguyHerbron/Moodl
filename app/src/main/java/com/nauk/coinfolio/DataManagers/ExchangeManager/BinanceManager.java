@@ -1,8 +1,5 @@
 package com.nauk.coinfolio.DataManagers.ExchangeManager;
 
-import android.util.Log;
-
-import com.android.volley.RequestQueue;
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.account.Account;

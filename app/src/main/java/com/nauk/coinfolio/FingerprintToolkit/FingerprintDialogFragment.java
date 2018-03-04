@@ -1,30 +1,15 @@
 package com.nauk.coinfolio.FingerprintToolkit;
 
-import android.Manifest;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.KeyguardManager;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.hardware.fingerprint.FingerprintManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mattprecious.swirl.SwirlView;
-import com.nauk.coinfolio.Activities.SettingsActivity;
 import com.nauk.coinfolio.R;
 
 /**
@@ -49,7 +34,7 @@ public class FingerprintDialogFragment extends DialogFragment{
 
         //getDialog().getWindow().setLayout(getResources().getDimensionPixelSize(R.dimen.fingerprint_dialog_width), getResources().getDimensionPixelSize(R.dimen.fingerprint_dialog_height));
 
-        ((Button) view.findViewById(R.id.cancelButton)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dismiss();

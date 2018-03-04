@@ -102,7 +102,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         //symbol = intent.getStringExtra("symbol");
-        currency = (Currency) intent.getParcelableExtra("currency");
+        currency = intent.getParcelableExtra("currency");
 
         databaseManager = new DatabaseManager(this);
 
@@ -131,7 +131,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         setTitle(currency.getName());
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation_details);
+        BottomNavigationView navigation = findViewById(R.id.navigation_details);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         hasBeenModified = false;
@@ -297,7 +297,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         chartView.reset();
 
-        chartView.setAxisBorderValues((float) valMin, (float) valMax);
+        chartView.setAxisBorderValues(valMin, valMax);
         chartView.setYLabels(AxisRenderer.LabelPosition.NONE);
         chartView.setYAxis(false);
         chartView.setXAxis(false);

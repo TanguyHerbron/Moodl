@@ -121,7 +121,7 @@
     <string name="activity_add_amount">Amount</string>
     <string name="activity_purchased_price">Purchased price</string>
     <string name="title_activity_currency_details">CurrencyDetailsActivity</string>
-    <string name="title_charts">Charts</string>
+    <string name="title_watchlist">Watchlist</string>
     <string name="title_infos">Infos</string>
     <string name="title_transactions">Transactions</string>
     <string name="title_home">Home</string>
