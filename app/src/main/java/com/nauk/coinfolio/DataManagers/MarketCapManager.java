@@ -28,6 +28,7 @@ public class MarketCapManager {
     private RequestQueue requestQueue;
     private String topRequestResult[];
     private long marketCap;
+    private long dayVolume;
 
     public MarketCapManager(android.content.Context context)
     {
@@ -88,6 +89,8 @@ public class MarketCapManager {
             JSONObject jsonObject = new JSONObject(response);
 
             marketCap = new BigDecimal(jsonObject.getString("total_market_cap_usd")).longValue();
+
+            dayVolume = new BigDecimal(jsonObject.getString("total_24h_volume_usd")).longValue();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -111,6 +114,11 @@ public class MarketCapManager {
         return dominance;
     }
 
+    public long getDayVolume()
+    {
+        return dayVolume;
+    }
+
     private void processTopCurrencies(String response)
     {
         response = response.substring(response.indexOf('[')+1, response.lastIndexOf(']'));
@@ -124,12 +132,17 @@ public class MarketCapManager {
 
                 JSONObject jsonObject = new JSONObject(topRequestResult[i]);
 
-                Log.d("coinfolio", "Symbol : " + jsonObject.getString("symbol") + " " + jsonObject.getString("rank"));
+                //Log.d("coinfolio", "Symbol : " + jsonObject.getString("symbol") + " " + jsonObject.getString("rank"));
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public long getMarketCap()
+    {
+        return marketCap;
     }
 
     public interface VolleyCallBack

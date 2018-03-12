@@ -239,23 +239,26 @@ public class BalanceManager {
 
     private void mergeBalanceTotal(List<Currency> balance)
     {
-        for(int i = 0; i < balance.size(); i++)
+        if(balance != null)
         {
-            boolean isIn = false;
-
-            for(int j = 0; j < totalBalance.size(); j++)
+            for(int i = 0; i < balance.size(); i++)
             {
-                if(balance.get(i).getSymbol().equals(totalBalance.get(j).getSymbol()))
+                boolean isIn = false;
+
+                for(int j = 0; j < totalBalance.size(); j++)
                 {
-                    totalBalance.get(j).setBalance(totalBalance.get(j).getBalance() + balance.get(i).getBalance());
+                    if(balance.get(i).getSymbol().equals(totalBalance.get(j).getSymbol()))
+                    {
+                        totalBalance.get(j).setBalance(totalBalance.get(j).getBalance() + balance.get(i).getBalance());
 
-                    isIn = true;
+                        isIn = true;
+                    }
                 }
-            }
 
-            if(!isIn)
-            {
-                totalBalance.add(balance.get(i));
+                if(!isIn)
+                {
+                    totalBalance.add(balance.get(i));
+                }
             }
         }
     }

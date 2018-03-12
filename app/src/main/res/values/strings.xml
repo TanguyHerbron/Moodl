@@ -149,4 +149,8 @@
     <string name="fingerprint_dialog_cancel">Cancel</string>
     <string name="fingerprint_dialog_title">Verify your fingerprint to continue</string>
 
+
+    <string name="market_cap_textview">Total Market Capitalization :\nUS$%1$s</string>
+    <string name="volume_market_cap_textview">24h volume :\nUS$%1$s</string>
+
 </resources>

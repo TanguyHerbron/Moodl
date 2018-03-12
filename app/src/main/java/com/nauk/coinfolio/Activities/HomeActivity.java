@@ -57,9 +57,15 @@ import com.nauk.coinfolio.R;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
 
@@ -93,6 +99,8 @@ public class HomeActivity extends AppCompatActivity {
     private Handler handler;
     private Runnable updateRunnable;
     private ViewFlipper viewFlipper;
+
+    private HashMap<String, Integer> dominantCurrenciesColors;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -246,6 +254,29 @@ public class HomeActivity extends AppCompatActivity {
         lastTimestamp = 0;
 
         setupNavBar(savedInstanceState);
+
+        setupDominantCurrenciesColors();
+    }
+
+    private void setupDominantCurrenciesColors()
+    {
+        dominantCurrenciesColors = new HashMap<>();
+
+        dominantCurrenciesColors.put("BTC", -489456);
+        dominantCurrenciesColors.put("ETH", -13619152);
+        dominantCurrenciesColors.put("XRP", -16744256);
+        dominantCurrenciesColors.put("BCH", -1011696);
+        dominantCurrenciesColors.put("LTC", -4671304);
+        dominantCurrenciesColors.put("ADA", -16773080);
+        dominantCurrenciesColors.put("NEO", -9390048);
+        dominantCurrenciesColors.put("XLM", -11509656);
+        dominantCurrenciesColors.put("XMR", -499712);
+        dominantCurrenciesColors.put("EOS", -1513240);
+        dominantCurrenciesColors.put("IOT", -1513240);
+        dominantCurrenciesColors.put("DASH", -15175496);
+        dominantCurrenciesColors.put("XEM", -7829368);
+        dominantCurrenciesColors.put("TRX", -7829360);
+        dominantCurrenciesColors.put("ETC", -10448784);
     }
 
     private void setupNavBar(Bundle savedInstanceState)
@@ -269,6 +300,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 nav.changeCurrentItem(-1);
 
+                findViewById(R.id.toolbar_layout).setFocusable(true);
                 findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
                 ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
 
@@ -284,6 +316,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 //0 : Unknown
                 //1 : Market cap
+                findViewById(R.id.toolbar_layout).setFocusable(false);
                 ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
                 findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
 
@@ -421,8 +454,6 @@ public class HomeActivity extends AppCompatActivity {
     private void getBitmapFromURL(String src, IconCallBack callBack) {
         Bitmap result;
 
-        Log.d("coinfolio", "Downloading bitmap");
-
         try {
             java.net.URL url = new java.net.URL(src);
             HttpURLConnection connection = (HttpURLConnection) url
@@ -523,9 +554,14 @@ public class HomeActivity extends AppCompatActivity {
 
         if(marketCapCounter == 2)
         {
+            setupTextViewMarketCap();
+
             findViewById(R.id.progressBarMarketCap).setVisibility(View.GONE);
+            findViewById(R.id.layoutProgressMarketCap).setVisibility(View.VISIBLE);
 
             List<PieEntry> entries = new ArrayList<>();
+
+            ArrayList<Integer> colors = new ArrayList<>();
 
             PieChart pieChart = findViewById(R.id.marketCapPieChart);
 
@@ -534,14 +570,16 @@ public class HomeActivity extends AppCompatActivity {
             for(Iterator i = marketCapManager.getDominance().keySet().iterator(); i.hasNext(); )
             {
                 String key = (String) i.next();
-                Log.d(getResources().getString(R.string.debug), "Sym : " + key + " " + marketCapManager.getDominance().get(key));
                 entries.add(new PieEntry(marketCapManager.getDominance().get(key), key));
                 otherCurrenciesDominance += marketCapManager.getDominance().get(key);
+                colors.add(dominantCurrenciesColors.get(key));
             }
-
             entries.add(new PieEntry(100-otherCurrenciesDominance, "Others"));
+            colors.add(-12369084);
 
             PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
+            set.setColors(colors);
+            set.setSliceSpace(1);
             PieData data = new PieData(set);
             pieChart.setData(data);
 
@@ -550,21 +588,28 @@ public class HomeActivity extends AppCompatActivity {
             pieChart.setTouchEnabled(false);
 
             pieChart.getDescription().setEnabled(false);
+            pieChart.getLegend().setEnabled(false);
             pieChart.setCenterText(generateCenterSpannableText());
-            pieChart.setVisibility(View.VISIBLE);
             pieChart.invalidate(); // refresh
         }
     }
 
+    private void setupTextViewMarketCap()
+    {
+        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
+        DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
+
+        symbols.setGroupingSeparator(' ');
+        formatter.setDecimalFormatSymbols(symbols);
+
+        ((TextView) findViewById(R.id.marketCapTextView)).setText(getResources().getString(R.string.market_cap_textview, formatter.format(marketCapManager.getMarketCap())));
+
+        ((TextView) findViewById(R.id.dayVolumeTotalMarketCap)).setText(getResources().getString(R.string.volume_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
+    }
+
     private SpannableString generateCenterSpannableText() {
 
-        SpannableString s = new SpannableString("MPAndroidChart\ndeveloped by Philipp Jahoda");
-        s.setSpan(new RelativeSizeSpan(1.7f), 0, 14, 0);
-        s.setSpan(new StyleSpan(Typeface.NORMAL), 14, s.length() - 15, 0);
-        s.setSpan(new ForegroundColorSpan(Color.GRAY), 14, s.length() - 15, 0);
-        s.setSpan(new RelativeSizeSpan(.8f), 14, s.length() - 15, 0);
-        s.setSpan(new StyleSpan(Typeface.ITALIC), s.length() - 14, s.length(), 0);
-        s.setSpan(new ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length() - 14, s.length(), 0);
+        SpannableString s = new SpannableString("Market Capitalization Dominance");
         return s;
     }
 
@@ -728,6 +773,7 @@ public class HomeActivity extends AppCompatActivity {
                     Palette.Builder builder = Palette.from(localCurrency.getIcon());
 
                     localCurrency.setChartColor(builder.generate().getDominantColor(0));
+
                 }
                 else
                 {

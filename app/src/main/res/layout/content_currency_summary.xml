@@ -66,7 +66,8 @@
         <LinearLayout
             android:id="@+id/layoutMarketCap"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <!--<TextView
                 android:layout_width="match_parent"
@@ -75,25 +76,47 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_horizontal"/>-->
 
+            <ProgressBar
+                android:id="@+id/progressBarMarketCap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_gravity="center"
+                android:background="@drawable/circular_progress_bar" />
+
             <LinearLayout
                 android:id="@+id/layoutProgressMarketCap"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="visible"
+                android:visibility="gone"
                 android:orientation="vertical">
 
-                <ProgressBar
-                    android:id="@+id/progressBarMarketCap"
+                <TextView
+                    android:id="@+id/marketCapTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="?android:attr/progressBarStyleLarge"
-                    android:layout_gravity="center"
-                    android:background="@drawable/circular_progress_bar" />
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="5dp"
+                    android:textSize="20dp"
+                    android:gravity="center_horizontal"/>
+
+                <TextView
+                    android:id="@+id/dayVolumeTotalMarketCap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:textSize="18dp"
+                    android:gravity="center_horizontal"/>
+
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/marketCapPieChart"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone"/>
+                    android:layout_height="350dp"/>
 
             </LinearLayout>
 
