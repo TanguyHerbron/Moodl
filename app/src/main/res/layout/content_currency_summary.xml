@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    android:layout_marginBottom="50dp">
+    android:layout_marginBottom="50dp"
+    android:background="@drawable/gradient_second_background">
 
     <ViewFlipper
         android:id="@+id/viewFlipperSummary"
@@ -39,10 +40,7 @@
             android:id="@+id/nestedScrollViewLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="com.nauk.coinfolio.Activities.HomeActivity"
-            tools:showIn="@layout/activity_currency_summary"
-            android:background="@color/listBackground">
-
+            tools:context="com.nauk.coinfolio.Activities.HomeActivity">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -1,5 +1,6 @@
 package com.nauk.coinfolio.Activities;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -25,9 +26,11 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -283,7 +286,7 @@ public class HomeActivity extends AppCompatActivity {
     {
         final SpaceNavigationView spaceNavigationView = findViewById(R.id.space);
         spaceNavigationView.initWithSaveInstanceState(savedInstanceState);
-        spaceNavigationView.addSpaceItem(new SpaceItem("Charts", R.drawable.ic_show_chart_black_24dp));
+        spaceNavigationView.addSpaceItem(new SpaceItem("WatchList", R.drawable.ic_remove_red_eye_black_24dp));
         spaceNavigationView.addSpaceItem(new SpaceItem("Market Cap.", R.drawable.ic_pie_chart_black_24dp));
         spaceNavigationView.setSpaceBackgroundColor(getResources().getColor(R.color.colorPrimary));
         spaceNavigationView.setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
@@ -325,6 +328,11 @@ public class HomeActivity extends AppCompatActivity {
 
 
                 viewFlipper.setDisplayedChild(itemIndex * 2);
+
+                if(itemIndex == 1)
+                {
+                    ((PieChart) findViewById(R.id.marketCapPieChart)).animateX(1000);
+                }
             }
 
             @Override
@@ -548,6 +556,7 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void countCompletedMarketCapRequest()
     {
         marketCapCounter++;
@@ -563,7 +572,7 @@ public class HomeActivity extends AppCompatActivity {
 
             ArrayList<Integer> colors = new ArrayList<>();
 
-            PieChart pieChart = findViewById(R.id.marketCapPieChart);
+            final PieChart pieChart = findViewById(R.id.marketCapPieChart);
 
             float otherCurrenciesDominance = 0;
 
@@ -580,12 +589,34 @@ public class HomeActivity extends AppCompatActivity {
             PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
             set.setColors(colors);
             set.setSliceSpace(1);
+            set.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+            set.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
             PieData data = new PieData(set);
             pieChart.setData(data);
 
-            pieChart.setDrawSlicesUnderHole(true);
+            pieChart.setDrawSlicesUnderHole(false);
             pieChart.setUsePercentValues(true);
-            pieChart.setTouchEnabled(false);
+            pieChart.setTouchEnabled(true);
+
+            pieChart.setEntryLabelColor(Color.parseColor("#FF000000"));
+
+            pieChart.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    switch (motionEvent.getAction())
+                    {
+                        case MotionEvent.ACTION_DOWN:
+                            refreshLayout.setEnabled(false);
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            break;
+                        default:
+                            refreshLayout.setEnabled(true);
+                            break;
+                    }
+                    return false;
+                }
+            });
 
             pieChart.getDescription().setEnabled(false);
             pieChart.getLegend().setEnabled(false);
