@@ -150,11 +150,17 @@
                 android:focusable="true"
                 android:visibility="gone">
 
-                <com.db.chart.view.LineChartView
+                <!--<com.db.chart.view.LineChartView
                     android:id="@+id/LineChartView"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/cardViewChartSize"
-                    android:visibility="gone" />
+                    android:visibility="gone" />-->
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/LineChartView"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/errorTextView"

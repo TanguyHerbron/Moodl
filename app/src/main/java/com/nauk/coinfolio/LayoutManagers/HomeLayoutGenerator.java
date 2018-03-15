@@ -14,6 +14,10 @@ import com.db.chart.model.ChartSet;
 import com.db.chart.model.LineSet;
 import com.db.chart.renderer.AxisRenderer;
 import com.db.chart.view.LineChartView;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.nauk.coinfolio.Activities.CurrencyDetailsActivity;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
@@ -21,6 +25,7 @@ import com.nauk.coinfolio.R;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -90,17 +95,24 @@ public class HomeLayoutGenerator {
         if(currency.getHistoryMinutes() != null)
         {
             List<Double> borders = getAxisBorders(currency);
-            LineChartView chartView = view.findViewById(R.id.LineChartView);
+            LineChart lineChart = view.findViewById(R.id.LineChartView);
 
-            chartView.setAxisBorderValues(borders.get(0).floatValue(), borders.get(1).floatValue())
-                    .setYLabels(AxisRenderer.LabelPosition.NONE)
-                    .setYAxis(false)
-                    .setXAxis(false)
-                    .setVisibility(View.VISIBLE);
+            lineChart.setDrawGridBackground(false);
+            lineChart.setDrawBorders(false);
+            lineChart.setDrawMarkers(false);
+            lineChart.setDoubleTapToZoomEnabled(false);
+            lineChart.setPinchZoom(false);
+            lineChart.setScaleEnabled(false);
+            lineChart.setDragEnabled(false);
+            lineChart.getDescription().setEnabled(false);
+            lineChart.getAxisLeft().setEnabled(false);
+            lineChart.getAxisRight().setEnabled(false);
+            lineChart.getLegend().setEnabled(false);
+            lineChart.getXAxis().setEnabled(false);
+            lineChart.setViewPortOffsets(0, 0, 0, 0);
+            lineChart.setData(generateData(currency));
 
-            chartView.addData(generateChartSet(currency));
-
-            chartView.setOnClickListener(new View.OnClickListener() {
+            lineChart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
@@ -142,7 +154,7 @@ public class HomeLayoutGenerator {
         if(currency.getHistoryMinutes() != null)
         {
             view.findViewById(R.id.LineChartView).setVisibility(View.VISIBLE);
-            ((LineChartView) view.findViewById(R.id.LineChartView)).show();
+            ((LineChart) view.findViewById(R.id.LineChartView)).invalidate();
             view.findViewById(R.id.errorTextView).setVisibility(View.GONE);
         }
         else
@@ -197,52 +209,30 @@ public class HomeLayoutGenerator {
         }
     }
 
-    private ChartSet generateChartSet(Currency currency)
+    private LineData generateData(Currency currency)
     {
+        LineDataSet dataSet;
         List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
-        LineSet lineSet = new LineSet();
-        int counter = 0;
-        Calendar calendar = Calendar.getInstance(Locale.FRANCE);
-        String hour;
-        String minute;
+        ArrayList<Entry> values = new ArrayList<>();
 
         for(int i = 0; i < dataChartList.size(); i+=10)
         {
-            if(counter == 30)
-            {
-                calendar.setTimeInMillis(dataChartList.get(i).getTimestamp()*1000);
-
-                hour = String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
-                minute = String.valueOf(calendar.get(Calendar.MINUTE));
-
-                if(hour.length() < 2)
-                {
-                    hour = "0" + hour;
-                }
-
-                if(minute.length() < 2)
-                {
-                    minute = "0" + minute;
-                }
-
-                lineSet.addPoint(hour + ":" + minute, (float) dataChartList.get(i).getOpen());
-                counter = 0;
-            }
-            else
-            {
-                counter++;
-                lineSet.addPoint("", (float) dataChartList.get(i).getOpen());
-            }
-
-
+            values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
         }
 
-        lineSet.setSmooth(true);
-        lineSet.setThickness(4);
-        lineSet.setFill(getColorWithAplha(currency.getChartColor(), 0.5f));
-        lineSet.setColor(currency.getChartColor());
+        dataSet = new LineDataSet(values, "History");
+        dataSet.setDrawIcons(false);
+        dataSet.setColor(currency.getChartColor());
+        dataSet.setLineWidth(1);
+        dataSet.setDrawFilled(true);
+        dataSet.setFillColor(getColorWithAplha(currency.getChartColor(), 0.5f));
+        dataSet.setFormLineWidth(1);
+        dataSet.setFormSize(15);
+        dataSet.setDrawCircles(false);
+        dataSet.setDrawValues(false);
+        dataSet.setHighlightEnabled(false);
 
-        return lineSet;
+        return new LineData(dataSet);
     }
 
     private int getColorWithAplha(int color, float ratio)
@@ -262,11 +252,11 @@ public class HomeLayoutGenerator {
 
         if(abs(number) > 1)
         {
-            str = String.format("%.2f", number);
+            str = String.format( Locale.UK, "%.2f", number);
         }
         else
         {
-            str = String.format("%.4f", number);
+            str = String.format( Locale.UK, "%.4f", number);
         }
 
         return str;
