@@ -46,6 +46,7 @@ import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.luseen.spacenavigation.SpaceItem;
 import com.luseen.spacenavigation.SpaceNavigationView;
@@ -304,8 +305,12 @@ public class HomeActivity extends AppCompatActivity {
                 nav.changeCurrentItem(-1);
 
                 findViewById(R.id.toolbar_layout).setFocusable(true);
-                findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
                 ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
+                findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
+
+                findViewById(R.id.app_bar).setEnabled(true);
+                findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(true);
+                findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(true);
 
                 findViewById(R.id.switch_button).setVisibility(View.VISIBLE);
 
@@ -317,11 +322,15 @@ public class HomeActivity extends AppCompatActivity {
                 ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
                 ((SpaceNavigationView) findViewById(R.id.space)).setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
 
-                //0 : Unknown
+                //0 : Watchlist
                 //1 : Market cap
                 findViewById(R.id.toolbar_layout).setFocusable(false);
                 ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
                 findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
+
+                findViewById(R.id.app_bar).setEnabled(false);
+                findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(false);
+                findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(false);
 
                 findViewById(R.id.switch_button).setVisibility(View.GONE);
 
@@ -592,6 +601,8 @@ public class HomeActivity extends AppCompatActivity {
             set.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
             set.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
             PieData data = new PieData(set);
+            data.setValueTextSize(10);
+            data.setValueFormatter(new PercentFormatter());
             pieChart.setData(data);
 
             pieChart.setDrawSlicesUnderHole(false);

@@ -1,17 +1,27 @@
 package com.nauk.coinfolio.Activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
@@ -28,6 +38,7 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.R;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -129,7 +140,21 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             chartLayout.addView(errorTextView, 0);
         }
 
-        setTitle(currency.getName());
+        setTitle(" " + currency.getName());
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME |
+                ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_USE_LOGO);
+
+        Bitmap result = Bitmap.createBitmap(150, 150, currency.getIcon().getConfig());
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(ContextCompat.getColor(this, R.color.white));
+
+        Canvas canvas = new Canvas(result);
+        canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
+        canvas.drawBitmap(Bitmap.createScaledBitmap(currency.getIcon(), 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
+
+        getSupportActionBar().setIcon(new BitmapDrawable(Bitmap.createScaledBitmap(result, 120, 120, false)));
 
         BottomNavigationView navigation = findViewById(R.id.navigation_details);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -306,11 +331,38 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         chartView.setFadingEdgeLength(15);
         chartView.setLongClickable(true);
 
+        updateFluctuation(lineSet);
+
         findViewById(R.id.chartView).setVisibility(View.VISIBLE);
         findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
 
         //chartView.show(new Animation().fromAlpha(0).withEndAction(launchAction));
         chartView.show(new Animation().fromAlpha(0));
+    }
+
+    private void updateFluctuation(LineSet lineSet)
+    {
+        float fluctuation = lineSet.getEntry(lineSet.size() - 1).getValue() - lineSet.getEntry(0).getValue();
+        float percentageFluctuation = (float) (fluctuation / lineSet.getEntry(0).getValue() * 100);
+
+        /*
+        dayFluctuation = historyMinutes.get(historyMinutes.size() - 1).getOpen() - historyMinutes.get(0).getOpen();
+
+        dayFluctuationPercentage = (float) (dayFluctuation / historyMinutes.get(0).getOpen() * 100);
+        */
+
+        if(percentageFluctuation < 0)
+        {
+            ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.red));
+        }
+        else
+        {
+            ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.green));
+        }
+
+        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + lineSet.getEntry(0).getValue());
+        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + lineSet.getEntry(lineSet.size() - 1).getValue());
+        ((TextView) findViewById(R.id.txtViewPercentage)).setText(percentageFluctuation + "%");
     }
 
     private LineSet generateChartSet(int timeUnit, int amount)
