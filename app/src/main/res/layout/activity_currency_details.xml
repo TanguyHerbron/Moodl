@@ -36,7 +36,7 @@
             </LinearLayout>
 
 
-            <com.db.chart.view.LineChartView
+            <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/chartView"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"

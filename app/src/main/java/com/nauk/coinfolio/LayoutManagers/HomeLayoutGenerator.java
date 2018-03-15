@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -94,7 +95,6 @@ public class HomeLayoutGenerator {
 
         if(currency.getHistoryMinutes() != null)
         {
-            List<Double> borders = getAxisBorders(currency);
             LineChart lineChart = view.findViewById(R.id.LineChartView);
 
             lineChart.setDrawGridBackground(false);
