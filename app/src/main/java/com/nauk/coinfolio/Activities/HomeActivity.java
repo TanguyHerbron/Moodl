@@ -28,6 +28,7 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -57,6 +58,8 @@ import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
 import com.nauk.coinfolio.R;
+
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -372,6 +375,23 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+
+        View view = LayoutInflater.from(this).inflate(R.layout.cardview_watchlist, null);
+        ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView)).setText("3%");
+        ((TextView) view.findViewById(R.id.currencyFluctuationTextView)).setText("$3");
+        ((TextView) view.findViewById(R.id.currencyNameTextView)).setText("TanguyCoin");
+        ((TextView) view.findViewById(R.id.currencySymbolTextView)).setText("TGC");
+        ((TextView) view.findViewById(R.id.currencyValueTextView)).setText("$100");
+        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("coinfolio", "Clicked !");
+            }
+        });
+
+        ((LinearLayout) findViewById(R.id.linearLayoutWatchlist)).addView(view);
 
         Intent intent = getIntent();
 
