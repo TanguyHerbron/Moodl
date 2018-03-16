@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -30,6 +31,9 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
@@ -295,11 +299,11 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private void drawChart(int timeUnit, int amout)
     {
-        LineChart lineChart = findViewById(R.id.chartView);
+        final LineChart lineChart = findViewById(R.id.chartView);
 
         lineChart.setDrawGridBackground(false);
         lineChart.setDrawBorders(false);
-        lineChart.setDrawMarkers(false);
+        lineChart.setDrawMarkers(true);
         lineChart.setDoubleTapToZoomEnabled(true);
         lineChart.setPinchZoom(true);
         lineChart.setScaleEnabled(false);
@@ -312,8 +316,35 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         lineChart.setViewPortOffsets(0, 0, 0, 0);
 
         lineChart.setData(generateChartSet(timeUnit, amout));
+        lineChart.getAxisLeft().setAxisMinValue(lineChart.getData().getYMin());
 
-        updateFluctuation(lineChart.getData());
+        lineChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), e.getY());
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+
+        lineChart.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP)
+                {
+                    //lineChart.highlightValue(lineChart.getData().getDataSetCount()-1, 0);
+                    lineChart.highlightValue(null);
+                    updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
+
+                }
+                return false;
+            }
+        });
+
+        updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
 
         findViewById(R.id.chartView).setVisibility(View.VISIBLE);
         findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
@@ -525,66 +556,17 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         dataSet.setFormSize(15);
         dataSet.setDrawCircles(false);
         dataSet.setDrawValues(false);
-        dataSet.setHighlightEnabled(false);
+        dataSet.setHighlightEnabled(true);
+        dataSet.setDrawHorizontalHighlightIndicator(false);
+        dataSet.setHighLightColor(currency.getChartColor());
 
         return new LineData(dataSet);
     }
 
-
-    /*private void drawChart(int timeUnit, int amount)
+    private void updateFluctuation(float start, float end)
     {
-        final LineChartView chartView = findViewById(R.id.chartView);
-        LineSet lineSet = generateChartSet(timeUnit, amount);
-
-        float valMin = lineSet.getMin().getValue();
-        float valMax = lineSet.getMax().getValue();
-
-        int indexMinValue;
-        int indexMaxValue;
-
-        for(int i = 0; i < lineSet.size(); i++)
-        {
-            if(lineSet.getEntry(i).getValue() == valMin)
-            {
-                indexMinValue = i;
-            }
-
-            if(lineSet.getEntry(i).getValue() == valMax)
-            {
-                indexMaxValue = i;
-            }
-        }
-
-        chartView.reset();
-
-        chartView.setAxisBorderValues(valMin, valMax);
-        chartView.setYLabels(AxisRenderer.LabelPosition.NONE);
-        chartView.setYAxis(false);
-        chartView.setXAxis(false);
-
-        chartView.addData(lineSet);
-        chartView.setFadingEdgeLength(15);
-        chartView.setLongClickable(true);
-
-        updateFluctuation(lineSet);
-
-        findViewById(R.id.chartView).setVisibility(View.VISIBLE);
-        findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
-
-        //chartView.show(new Animation().fromAlpha(0).withEndAction(launchAction));
-        chartView.show(new Animation().fromAlpha(0));
-    }*/
-
-    private void updateFluctuation(LineSet lineSet)
-    {
-        float fluctuation = lineSet.getEntry(lineSet.size() - 1).getValue() - lineSet.getEntry(0).getValue();
-        float percentageFluctuation = (float) (fluctuation / lineSet.getEntry(0).getValue() * 100);
-
-        /*
-        dayFluctuation = historyMinutes.get(historyMinutes.size() - 1).getOpen() - historyMinutes.get(0).getOpen();
-
-        dayFluctuationPercentage = (float) (dayFluctuation / historyMinutes.get(0).getOpen() * 100);
-        */
+        float fluctuation = end - start;
+        float percentageFluctuation = (float) (fluctuation / start * 100);
 
         if(percentageFluctuation < 0)
         {
@@ -595,25 +577,19 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.green));
         }
 
-        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + lineSet.getEntry(0).getValue());
-        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + lineSet.getEntry(lineSet.size() - 1).getValue());
+        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + start);
+        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + end);
         ((TextView) findViewById(R.id.txtViewPercentage)).setText(percentageFluctuation + "%");
     }
 
     private void updateFluctuation(LineData lineData)
     {
-        //float fluctuation = lineSet.getEntry(lineSet.size() - 1).getValue() - lineSet.getEntry(0).getValue();
-        float fluctuation = lineData.getDataSetByIndex(lineData.getDataSetCount() - 1).getEntryCount();
-        //float percentageFluctuation = (float) (fluctuation / lineSet.getEntry(0).getValue() * 100);
+        ILineDataSet dataSet = lineData.getDataSets().get(0);
 
-        ArrayList<Entry> values = new ArrayList<Entry>(lineData.);
+        float fluctuation = dataSet.getEntryForIndex(dataSet.getEntryCount() - 1).getY() - dataSet.getEntryForIndex(0).getY();
+        float percentageFluctuation = (float) (fluctuation / dataSet.getEntryForIndex(0).getY() * 100);
 
-        /*dayFluctuation = historyMinutes.get(historyMinutes.size() - 1).getOpen() - historyMinutes.get(0).getOpen();
-
-        dayFluctuationPercentage = (float) (dayFluctuation / historyMinutes.get(0).getOpen() * 100);*/
-
-
-        /*if(percentageFluctuation < 0)
+        if(percentageFluctuation < 0)
         {
             ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.red));
         }
@@ -622,9 +598,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.green));
         }
 
-        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + lineSet.getEntry(0).getValue());
-        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + lineSet.getEntry(lineSet.size() - 1).getValue());
-        ((TextView) findViewById(R.id.txtViewPercentage)).setText(percentageFluctuation + "%");*/
+        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + dataSet.getEntryForIndex(0).getY());
+        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + dataSet.getEntryForIndex(dataSet.getEntryCount() - 1).getY());
+        ((TextView) findViewById(R.id.txtViewPercentage)).setText(percentageFluctuation + "%");
     }
 
     /*private LineSet generateChartSet(int timeUnit, int amount)
