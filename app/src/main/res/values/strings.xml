@@ -153,5 +153,6 @@
 
     <string name="market_cap_textview">Total Market Capitalization :\nUS$%1$s</string>
     <string name="volume_market_cap_textview">24h volume :\nUS$%1$s</string>
+    <string name="title_activity_scrolling">ScrollingActivity</string>
 
 </resources>

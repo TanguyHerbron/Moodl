@@ -140,7 +140,8 @@ public class HomeActivity extends AppCompatActivity {
 
         //Setup main interface
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_currency_summary);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
@@ -185,8 +186,6 @@ public class HomeActivity extends AppCompatActivity {
         ImageButton detailsButton = findViewById(R.id.switch_button);
         ImageButton settingsButton = findViewById(R.id.settings_button);
 
-        toolbarLayout.setExpandedTitleGravity(Gravity.CENTER);
-        toolbarLayout.setCollapsedTitleGravity(Gravity.CENTER);
         toolbarLayout.setForegroundGravity(Gravity.CENTER);
         toolbarLayout.setTitle("US$0.00");
 

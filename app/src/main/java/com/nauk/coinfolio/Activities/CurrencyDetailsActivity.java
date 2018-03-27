@@ -243,7 +243,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 });
                 break;
             case "1M":
-                currency.updateHistoryDays(this, new Currency.CurrencyCallBack() {
+                currency.updateHistoryHours(this, new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(Currency currency) {
                         runOnUiThread(new Runnable() {
@@ -398,6 +398,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 {
                     case 1:
                         dataChartList = currency.getHistoryHours();
+                        Log.d("coinfolio", "1 month");
                         offset = 124;
                         pointFormat = MONTH;
                         break;
