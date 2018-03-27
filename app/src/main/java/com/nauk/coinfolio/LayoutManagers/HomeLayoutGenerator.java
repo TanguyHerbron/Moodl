@@ -154,13 +154,12 @@ public class HomeLayoutGenerator {
         if(currency.getHistoryMinutes() != null)
         {
             view.findViewById(R.id.LineChartView).setVisibility(View.VISIBLE);
-            ((LineChart) view.findViewById(R.id.LineChartView)).invalidate();
+            view.findViewById(R.id.LineChartView).invalidate();
             view.findViewById(R.id.errorTextView).setVisibility(View.GONE);
         }
         else
         {
             view.findViewById(R.id.LineChartView).setVisibility(View.GONE);
-
             view.findViewById(R.id.errorTextView).setVisibility(View.VISIBLE);
         }
 

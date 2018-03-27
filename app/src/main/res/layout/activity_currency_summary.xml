@@ -29,7 +29,10 @@
                 android:fitsSystemWindows="true"
                 app:contentScrim="@drawable/gradient_background"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:toolbarId="@+id/toolbar">
+                app:toolbarId="@+id/toolbar"
+                app:collapsedTitleGravity="center"
+                app:expandedTitleGravity="center"
+                app:titleEnabled="true">
 
                 <TextView
                     android:id="@+id/toolbarSubtitle"
@@ -38,7 +41,7 @@
                     android:layout_gravity="center|bottom"
                     android:layout_marginBottom="35dp"
                     android:gravity="center"
-                    android:textSize="20dp"
+                    android:textSize="20sp"
                     app:layout_collapseMode="parallax"/>
 
                 <android.support.v7.widget.Toolbar
@@ -46,16 +49,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     app:layout_collapseMode="pin"
-                    app:popupTheme="@style/AppTheme.PopupOverlay">
+                    app:popupTheme="@style/AppTheme.PopupOverlay"
+                    android:layout_marginStart="-30dp">
 
                 </android.support.v7.widget.Toolbar>
 
-                <LinearLayout
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_collapseMode="pin"
-                    android:orientation="horizontal"
-                    android:gravity="left"
                     android:layout_margin="10dp">
 
                     <ImageButton
@@ -63,26 +65,18 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/quick_button"
-                        android:visibility="visible"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_collapseMode="pin"
-                    android:orientation="horizontal"
-                    android:gravity="right"
-                    android:layout_margin="10dp">
+                        android:visibility="visible"
+                        android:layout_gravity="start"/>
 
                     <ImageButton
                         android:id="@+id/settings_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/action_settings"
-                        android:visibility="visible"/>
+                        android:visibility="visible"
+                        android:layout_gravity="end"/>
 
-                </LinearLayout>
+                </FrameLayout>
 
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
