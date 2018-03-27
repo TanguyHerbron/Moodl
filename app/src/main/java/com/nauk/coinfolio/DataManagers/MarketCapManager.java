@@ -127,8 +127,8 @@ public class MarketCapManager {
 
         for(int i = 0; i < topRequestResult.length; i++)
         {
-            try {
-                topRequestResult[i] += "}";
+            topRequestResult[i] += "}";
+            /*try {
 
                 JSONObject jsonObject = new JSONObject(topRequestResult[i]);
 
@@ -136,7 +136,7 @@ public class MarketCapManager {
 
             } catch (JSONException e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 

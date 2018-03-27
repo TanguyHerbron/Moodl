@@ -569,10 +569,13 @@ public class HomeActivity extends AppCompatActivity {
     {
         marketCapCounter = 0;
 
+        Log.d("coinfolio", "Start update market cap");
+
         marketCapManager.updateTopCurrencies(new MarketCapManager.VolleyCallBack() {
             @Override
             public void onSuccess()
             {
+                Log.d("coinfolio", "Top updated");
                 countCompletedMarketCapRequest();
             }
         });
@@ -580,6 +583,7 @@ public class HomeActivity extends AppCompatActivity {
         marketCapManager.updateMarketCap(new MarketCapManager.VolleyCallBack() {
             @Override
             public void onSuccess() {
+                Log.d("coinfolio", "Marketcap updated");
                 countCompletedMarketCapRequest();
             }
         });
@@ -601,7 +605,7 @@ public class HomeActivity extends AppCompatActivity {
 
             ArrayList<Integer> colors = new ArrayList<>();
 
-            final PieChart pieChart = findViewById(R.id.marketCapPieChart);
+            PieChart pieChart = findViewById(R.id.marketCapPieChart);
 
             float otherCurrenciesDominance = 0;
 
@@ -624,7 +628,6 @@ public class HomeActivity extends AppCompatActivity {
             data.setValueTextSize(10);
             data.setValueFormatter(new PercentFormatter());
             pieChart.setData(data);
-
             pieChart.setDrawSlicesUnderHole(false);
             pieChart.setUsePercentValues(true);
             pieChart.setTouchEnabled(true);
