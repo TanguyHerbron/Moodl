@@ -104,8 +104,10 @@ public class CurrencyDataRetriever {
                     double high = Double.parseDouble(jsonObject.getString("high"));
                     double low = Double.parseDouble(jsonObject.getString("low"));
                     double open = Double.parseDouble(jsonObject.getString("open"));
+                    double volumeFrom = Double.parseDouble(jsonObject.getString("volumefrom"));
+                    double volumeTo = Double.parseDouble(jsonObject.getString("volumeto"));
 
-                    dataChart.add(new CurrencyDataChart(timestamp, close, high, low, open));
+                    dataChart.add(new CurrencyDataChart(timestamp, close, high, low, open, volumeFrom, volumeTo));
 
                 } catch (JSONException e) {
                     Log.d(context.getResources().getString(R.string.debug_volley), "API Request error: " + e + " index: " + i);

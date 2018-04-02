@@ -21,7 +21,7 @@
             <LinearLayout
                 android:id="@+id/progressLayoutChart"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="305dp"
                 android:layout_marginTop="15dp"
                 android:visibility="gone"
                 android:gravity="center">
@@ -37,10 +37,16 @@
 
 
             <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/chartView"
+                android:id="@+id/chartPriceView"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="250dp"
                 android:layout_marginTop="15dp" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/chartVolumeView"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp" />
 
             <LinearLayout
                 android:id="@+id/layoutChartButtons"

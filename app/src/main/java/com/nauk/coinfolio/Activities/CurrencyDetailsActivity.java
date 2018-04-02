@@ -14,7 +14,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -25,14 +24,16 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.daimajia.swipe.SwipeLayout;
-import com.db.chart.model.LineSet;
 import com.db.chart.tooltip.Tooltip;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
@@ -128,17 +129,18 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         if(currency.getHistoryMinutes().size() > 0)
         {
-            drawChart(DAY, 1);
+            drawPriceChart(DAY, 1);
+            drawVolumeChart(DAY, 1);
         }
         else
         {
-            TextView errorTextView = new TextView(this);
+            /*TextView errorTextView = new TextView(this);
             errorTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 750));
             errorTextView.setText("Not enough data");
             errorTextView.setTag("chart_layout");
             errorTextView.setGravity(Gravity.CENTER);
 
-            chartLayout.addView(errorTextView, 0);
+            chartLayout.addView(errorTextView, 0);*/
         }
 
         setTitle(" " + currency.getName());
@@ -182,6 +184,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private void buttonEvent(View v)
     {
         v.setEnabled(false);
+        v.setElevation(convertDpToPx(8));
 
         LinearLayout buttonLayout = (LinearLayout) v.getParent();
 
@@ -192,15 +195,22 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             if(button != v)
             {
                 button.setEnabled(true);
+                button.setElevation(convertDpToPx(2));
             }
         }
 
         chartEvent((Button) v);
     }
 
+    private float convertDpToPx(float dp)
+    {
+        return dp * this.getResources().getDisplayMetrics().density;
+    }
+
     private void chartEvent(Button button)
     {
-        findViewById(R.id.chartView).setVisibility(View.GONE);
+        findViewById(R.id.chartPriceView).setVisibility(View.GONE);
+        findViewById(R.id.chartVolumeView).setVisibility(View.GONE);
         findViewById(R.id.progressLayoutChart).setVisibility(View.VISIBLE);
 
         String interval = button.getText().toString().substring(button.getText().toString().length()-2);
@@ -208,13 +218,16 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         switch (interval)
         {
             case "1h":
-                drawChart(HOUR, 1);
+                drawPriceChart(HOUR, 1);
+                drawVolumeChart(HOUR, 1);
                 break;
             case "3h":
-                drawChart(HOUR, 3);
+                drawPriceChart(HOUR, 3);
+                drawVolumeChart(HOUR, 3);
                 break;
             case "1d":
-                drawChart(DAY, 1);
+                drawPriceChart(DAY, 1);
+                drawVolumeChart(DAY, 1);
                 break;
             case "3d":
                 currency.updateHistoryHours(this, new Currency.CurrencyCallBack() {
@@ -223,7 +236,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                drawChart(CurrencyDetailsActivity.DAY, 3);
+                                drawPriceChart(CurrencyDetailsActivity.DAY, 3);
+                                drawVolumeChart(CurrencyDetailsActivity.DAY, 3);
                             }
                         });
                     }
@@ -236,7 +250,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                drawChart(CurrencyDetailsActivity.WEEK, 1);
+                                drawPriceChart(CurrencyDetailsActivity.WEEK, 1);
+                                drawVolumeChart(CurrencyDetailsActivity.WEEK, 1);
                             }
                         });
                     }
@@ -249,7 +264,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                drawChart(CurrencyDetailsActivity.MONTH, 1);
+                                drawPriceChart(CurrencyDetailsActivity.MONTH, 1);
+                                drawVolumeChart(CurrencyDetailsActivity.MONTH, 1);
                             }
                         });
                     }
@@ -262,7 +278,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                drawChart(CurrencyDetailsActivity.MONTH, 3);
+                                drawPriceChart(CurrencyDetailsActivity.MONTH, 3);
+                                drawVolumeChart(CurrencyDetailsActivity.MONTH, 3);
                             }
                         });
                     }
@@ -275,7 +292,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                drawChart(CurrencyDetailsActivity.MONTH, 6);
+                                drawPriceChart(CurrencyDetailsActivity.MONTH, 6);
+                                drawVolumeChart(CurrencyDetailsActivity.MONTH, 6);
                             }
                         });
                     }
@@ -288,7 +306,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                drawChart(CurrencyDetailsActivity.YEAR, 1);
+                                drawPriceChart(CurrencyDetailsActivity.YEAR, 1);
+                                drawVolumeChart(CurrencyDetailsActivity.YEAR, 1);
                             }
                         });
                     }
@@ -297,9 +316,34 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void drawChart(int timeUnit, int amout)
+    private void drawVolumeChart(int timeUnit, int amout)
     {
-        final LineChart lineChart = findViewById(R.id.chartView);
+        final BarChart barChart = findViewById(R.id.chartVolumeView);
+
+        barChart.setDrawGridBackground(false);
+        barChart.setDrawBorders(false);
+        barChart.setDrawMarkers(true);
+        barChart.setDoubleTapToZoomEnabled(true);
+        barChart.setPinchZoom(true);
+        barChart.setScaleEnabled(false);
+        barChart.setDragEnabled(true);
+        barChart.getDescription().setEnabled(false);
+        barChart.getAxisLeft().setEnabled(false);
+        barChart.getAxisRight().setEnabled(false);
+        barChart.getLegend().setEnabled(false);
+        barChart.getXAxis().setEnabled(false);
+        barChart.setViewPortOffsets(0, 0, 0, 0);
+        barChart.setFitBars(true);
+
+        barChart.setData(generateVolumeChartSet(timeUnit, amout));
+        barChart.invalidate();
+
+        findViewById(R.id.chartVolumeView).setVisibility(View.VISIBLE);
+    }
+
+    private void drawPriceChart(int timeUnit, int amout)
+    {
+        final LineChart lineChart = findViewById(R.id.chartPriceView);
 
         lineChart.setDrawGridBackground(false);
         lineChart.setDrawBorders(false);
@@ -315,7 +359,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         lineChart.getXAxis().setEnabled(false);
         lineChart.setViewPortOffsets(0, 0, 0, 0);
 
-        lineChart.setData(generateChartSet(timeUnit, amout));
+        lineChart.setData(generatePriceChartSet(timeUnit, amout));
         lineChart.getAxisLeft().setAxisMinValue(lineChart.getData().getYMin());
 
         lineChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
@@ -346,11 +390,73 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
 
-        findViewById(R.id.chartView).setVisibility(View.VISIBLE);
+        findViewById(R.id.chartPriceView).setVisibility(View.VISIBLE);
         findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
     }
 
-    private LineData generateChartSet(int timeUnit, int amount)
+    private BarData generateVolumeChartSet(int timeUnit, int amount)
+    {
+        BarDataSet dataSet;
+        List<CurrencyDataChart> dataChartList = new ArrayList<>();
+        ArrayList<BarEntry> values = new ArrayList<>();
+
+        switch (timeUnit)
+        {
+            case HOUR:
+                dataChartList = currency.getHistoryMinutes().subList(currency.getHistoryMinutes().size()-(60*amount), currency.getHistoryMinutes().size());
+                break;
+            case DAY:
+                if(amount == 1)
+                {
+                    dataChartList = currency.getHistoryMinutes();
+                }
+                else
+                {
+                    dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-(24*amount), currency.getHistoryHours().size());
+                }
+                break;
+            case WEEK:
+                dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-168, currency.getHistoryHours().size());
+                break;
+            case MONTH:
+                switch (amount)
+                {
+                    case 1:
+                        dataChartList = currency.getHistoryHours();
+                        break;
+                    case 3:
+                        dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-93, currency.getHistoryDays().size());
+                        break;
+                    case 6:
+                        dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-186, currency.getHistoryDays().size());
+                        break;
+                }
+                break;
+            case YEAR:
+                dataChartList = currency.getHistoryDays();
+                break;
+        }
+
+        int offset = (int) Math.floor(dataChartList.size() / 50);
+
+        int loopNumber = 0;
+        for(int i = 0; i < dataChartList.size(); i += offset)
+        {
+            values.add(new BarEntry(loopNumber, (float) dataChartList.get(i).getVolumeTo()));
+            loopNumber++;
+        }
+
+        dataSet = new BarDataSet(values, "Volume");
+        dataSet.setDrawIcons(false);
+        dataSet.setColor(Color.GRAY);
+        dataSet.setDrawValues(false);
+        dataSet.setHighlightEnabled(true);
+        dataSet.setHighLightColor(currency.getChartColor());
+
+        return new BarData(dataSet);
+    }
+
+    private LineData generatePriceChartSet(int timeUnit, int amount)
     {
         LineDataSet dataSet;
         List<CurrencyDataChart> dataChartList = new ArrayList<>();
@@ -583,28 +689,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.txtViewPercentage)).setText(percentageFluctuation + "%");
     }
 
-    private void updateFluctuation(LineData lineData)
-    {
-        ILineDataSet dataSet = lineData.getDataSets().get(0);
-
-        float fluctuation = dataSet.getEntryForIndex(dataSet.getEntryCount() - 1).getY() - dataSet.getEntryForIndex(0).getY();
-        float percentageFluctuation = (float) (fluctuation / dataSet.getEntryForIndex(0).getY() * 100);
-
-        if(percentageFluctuation < 0)
-        {
-            ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.red));
-        }
-        else
-        {
-            ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.green));
-        }
-
-        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + dataSet.getEntryForIndex(0).getY());
-        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + dataSet.getEntryForIndex(dataSet.getEntryCount() - 1).getY());
-        ((TextView) findViewById(R.id.txtViewPercentage)).setText(percentageFluctuation + "%");
-    }
-
-    /*private LineSet generateChartSet(int timeUnit, int amount)
+    /*private LineSet generatePriceChartSet(int timeUnit, int amount)
     {
         List<CurrencyDataChart> dataChartList = new ArrayList<>();
         LineSet lineSet = new LineSet();

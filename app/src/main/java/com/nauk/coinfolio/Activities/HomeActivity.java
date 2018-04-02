@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -139,9 +141,11 @@ public class HomeActivity extends AppCompatActivity {
         /**Interface setup**/
 
         //Setup main interface
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
         setContentView(R.layout.activity_currency_summary);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
@@ -293,7 +297,7 @@ public class HomeActivity extends AppCompatActivity {
         spaceNavigationView.addSpaceItem(new SpaceItem("Market Cap.", R.drawable.ic_pie_chart_black_24dp));
         spaceNavigationView.setSpaceBackgroundColor(getResources().getColor(R.color.colorPrimary));
         spaceNavigationView.setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
-        spaceNavigationView.setCentreButtonColor(getResources().getColor(R.color.colorAccent));
+        spaceNavigationView.setCentreButtonColor(getResources().getColor(R.color.colorPrimary));
         spaceNavigationView.setCentreButtonIconColorFilterEnabled(false);
         spaceNavigationView.changeCurrentItem(-1);
 
@@ -390,7 +394,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        ((LinearLayout) findViewById(R.id.linearLayoutWatchlist)).addView(view);
+        //((LinearLayout) findViewById(R.id.linearLayoutWatchlist)).addView(view);
 
         Intent intent = getIntent();
 

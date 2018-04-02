@@ -14,14 +14,18 @@ public class CurrencyDataChart implements Parcelable {
     double high;
     double low;
     double open;
+    double volumeFrom;
+    double volumeTo;
 
-    public CurrencyDataChart(long timestamp, double close, double high, double low, double open)
+    public CurrencyDataChart(long timestamp, double close, double high, double low, double open, double volumeFrom, double volumeTo)
     {
         this.timestamp = timestamp;
         this.close = close;
         this.high = high;
         this.low = low;
         this.open = open;
+        this.volumeFrom = volumeFrom;
+        this.volumeTo = volumeTo;
     }
 
     public double getOpen()
@@ -32,6 +36,11 @@ public class CurrencyDataChart implements Parcelable {
     public double getClose()
     {
         return close;
+    }
+
+    public double getVolumeTo()
+    {
+        return volumeTo;
     }
 
     public long getTimestamp()
@@ -51,6 +60,8 @@ public class CurrencyDataChart implements Parcelable {
         dest.writeDouble(this.high);
         dest.writeDouble(this.low);
         dest.writeDouble(this.open);
+        dest.writeDouble(this.volumeFrom);
+        dest.writeDouble(this.volumeTo);
     }
 
     protected CurrencyDataChart(Parcel in) {
@@ -59,6 +70,8 @@ public class CurrencyDataChart implements Parcelable {
         this.high = in.readDouble();
         this.low = in.readDouble();
         this.open = in.readDouble();
+        this.volumeFrom = in.readDouble();
+        this.volumeTo = in.readDouble();
     }
 
     public static final Parcelable.Creator<CurrencyDataChart> CREATOR = new Parcelable.Creator<CurrencyDataChart>() {

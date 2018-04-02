@@ -20,7 +20,7 @@
             android:fitsSystemWindows="true"
             android:theme="@style/AppTheme.AppBarOverlay"
             android:background="@drawable/gradient_background"
-            app:elevation="0dp">
+            android:elevation="10dp">
 
             <android.support.design.widget.CollapsingToolbarLayout
                 android:id="@+id/toolbar_layout"
@@ -97,6 +97,7 @@
         android:layout_height="wrap_content"
         android:elevation="0dp"
         app:borderWidth="0dp"
+        android:backgroundTint="@color/colorPrimary"
         android:background="@color/cardview_light_background"
         android:src="@drawable/ic_add_white_24dp"
         android:layout_gravity="bottom|center_horizontal"
