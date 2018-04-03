@@ -43,6 +43,11 @@ public class CurrencyDataChart implements Parcelable {
         return volumeTo;
     }
 
+    public double getVolumeFrom()
+    {
+        return volumeFrom;
+    }
+
     public long getTimestamp()
     {
         return timestamp;

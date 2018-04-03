@@ -5,7 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -41,8 +43,10 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -344,6 +348,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private void drawPriceChart(int timeUnit, int amout)
     {
         final LineChart lineChart = findViewById(R.id.chartPriceView);
+        final BarChart barChart = findViewById(R.id.chartVolumeView);
 
         lineChart.setDrawGridBackground(false);
         lineChart.setDrawBorders(false);
@@ -366,6 +371,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
                 updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), e.getY());
+                int index = lineChart.getData().getDataSets().get(0).getEntryIndex(e);
+                barChart.highlightValue(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getX(), 0, index);
+                //((TextView) findViewById(R.id.timestampHightlight)).setText(getDate());
             }
 
             @Override
@@ -379,10 +387,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_UP)
                 {
-                    //lineChart.highlightValue(lineChart.getData().getDataSetCount()-1, 0);
                     lineChart.highlightValue(null);
                     updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
-
+                    barChart.highlightValues(null);
                 }
                 return false;
             }
@@ -392,6 +399,18 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         findViewById(R.id.chartPriceView).setVisibility(View.VISIBLE);
         findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
+    }
+
+    private String getDate(long timeStamp){
+
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            Date netDate = (new Date(timeStamp));
+            return sdf.format(netDate);
+        }
+        catch(Exception ex){
+            return "xx";
+        }
     }
 
     private BarData generateVolumeChartSet(int timeUnit, int amount)
@@ -437,13 +456,16 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 break;
         }
 
-        int offset = (int) Math.floor(dataChartList.size() / 50);
+        int offset = (int) Math.floor(dataChartList.size() / 200);
 
-        int loopNumber = 0;
-        for(int i = 0; i < dataChartList.size(); i += offset)
+        if(offset < 1)
         {
-            values.add(new BarEntry(loopNumber, (float) dataChartList.get(i).getVolumeTo()));
-            loopNumber++;
+            offset = 1;
+        }
+
+        for(int i = 0, j = 0; i < dataChartList.size(); i += offset, j++)
+        {
+            values.add(new BarEntry(j, (float) dataChartList.get(i).getVolumeFrom()));
         }
 
         dataSet = new BarDataSet(values, "Volume");
@@ -527,8 +549,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 break;
         }
 
-        for(int i = 0; i < dataChartList.size(); i++)
-        {
+        /*for(int i = 0; i < dataChartList.size(); i++)
+        {*/
             /*if(counter == offset)
             {
                 calendar.setTimeInMillis(dataChartList.get(i).getTimestamp()*1000);
@@ -650,7 +672,19 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 counter++;
                 lineSet.addPoint("", (float) dataChartList.get(i).getOpen());
             }*/
-            values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
+            /*values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
+        }*/
+
+        int offsetRange = (int) Math.floor(dataChartList.size() / 200);
+
+        if(offsetRange < 1)
+        {
+            offsetRange = 1;
+        }
+
+        for(int i = 0, j = 0; i < dataChartList.size(); i += offsetRange, j++)
+        {
+            values.add(new Entry(j, (float) dataChartList.get(i).getOpen()));
         }
 
         dataSet = new LineDataSet(values, "History");
@@ -666,6 +700,10 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         dataSet.setHighlightEnabled(true);
         dataSet.setDrawHorizontalHighlightIndicator(false);
         dataSet.setHighLightColor(currency.getChartColor());
+
+        Drawable fillDrawable = ContextCompat.getDrawable(this, R.drawable.linear_chart_gradient);
+        fillDrawable.setColorFilter(getColorWithAlpha(currency.getChartColor(), 0.5f), PorterDuff.Mode.SRC_ATOP);
+        //dataSet.setFillDrawable(fillDrawable);
 
         return new LineData(dataSet);
     }
