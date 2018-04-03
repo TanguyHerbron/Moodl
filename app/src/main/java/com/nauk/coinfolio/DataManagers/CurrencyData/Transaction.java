@@ -9,14 +9,16 @@ public class Transaction {
     private int transactionId;
     private String symbol;
     private double amount;
+    private long timestamp;
     private double purchasedPrice;
     private boolean isMined;
 
-    public Transaction(int transactionId, String symbol, double amount)
+    public Transaction(int transactionId, String symbol, double amount, long timestamp)
     {
         this.transactionId = transactionId;
         this.symbol = symbol;
         this.amount = amount;
+        this.timestamp = timestamp;
     }
 
     public int getTransactionId() {
@@ -37,6 +39,11 @@ public class Transaction {
 
     public double getAmount() {
         return amount;
+    }
+
+    public long getTimestamp()
+    {
+        return timestamp;
     }
 
     public void setAmount(double amount) {

@@ -398,6 +398,8 @@ public class HomeActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
+        Log.d("coinfolio", "Updated ? " + intent.getBooleanExtra("update", false));
+
         updateAll(intent.getBooleanExtra("update", false));
         ((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
     }

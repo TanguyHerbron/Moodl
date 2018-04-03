@@ -10,6 +10,7 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,7 +52,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
                 + KEY_CURRENCY_NAME + " VARCHAR(45),"
                 + KEY_CURRENCY_BALANCE + " TEXT,"
-                + KEY_CURRENCY_DATE + " DATE,"
+                + KEY_CURRENCY_DATE + " TEXT,"
                 + KEY_CURRENCY_PURCHASED_PRICE + " TEXT,"
                 + KEY_CURRENCY_IS_MINED + " INTEGER"
                 + ");");
@@ -75,14 +76,14 @@ public class DatabaseManager extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    public void addCurrencyToManualCurrency(String symbol, double balance)
+    public void addCurrencyToManualCurrency(String symbol, double balance, Date date)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(KEY_CURRENCY_SYMBOL, symbol);
         values.put(KEY_CURRENCY_BALANCE, balance);
-        //values.put(KEY_CURRENCY_DATE, getDate());
+        values.put(KEY_CURRENCY_DATE, date.getTime());
         //values.put(KEY_CURRENCY_PURCHASED_PRICE, something);
 
         db.insert(TABLE_MANUAL_CURRENCIES, null, values);
@@ -122,7 +123,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         while(resultatList.moveToNext())
         {
             //transactionList.put(resultatList.getInt(0), resultatList.getDouble(3));
-            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3)));
+            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4)));
         }
 
         resultatList.close();

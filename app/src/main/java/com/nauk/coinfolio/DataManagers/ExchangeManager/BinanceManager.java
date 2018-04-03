@@ -56,6 +56,11 @@ public class BinanceManager {
         }
     }
 
+    public void getTrades()
+    {
+
+    }
+
     public void setPublicKey(String publicKey)
     {
         this.publicKey = publicKey;

@@ -120,6 +120,7 @@
     <!--Add transaction activity-->
     <string name="activity_add_amount">Amount</string>
     <string name="activity_purchased_price">Purchased price</string>
+    <string name="activity_purchased_date">Purchased date</string>
     <string name="title_activity_currency_details">CurrencyDetailsActivity</string>
     <string name="title_history">History charts</string>
     <string name="title_watchlist">Watchlist</string>
