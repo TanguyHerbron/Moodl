@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.daimajia.swipe.SwipeLayout;
-import com.db.chart.tooltip.Tooltip;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.BarData;
@@ -45,10 +44,8 @@ import com.nauk.coinfolio.R;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**Create a Parcelable**/
 
@@ -67,6 +64,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private final static int MONTH = 3;
     private final static int YEAR = 4;
     private List<CurrencyDataChart> dataChartList;
+    private LineChart lineChart;
+    private BarChart barChart;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -122,6 +121,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         viewFlipper = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
         chartLayout = findViewById(R.id.chartsLayout);
+        lineChart = findViewById(R.id.chartPriceView);
+        barChart = findViewById(R.id.chartVolumeView);
 
         drawTransactionList();
 
@@ -129,6 +130,16 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         createCharts(DAY, 1);
 
+        setupActionBar();
+
+        BottomNavigationView navigation = findViewById(R.id.navigation_details);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        hasBeenModified = false;
+    }
+
+    private void setupActionBar()
+    {
         setTitle(" " + currency.getName() + " | " + currency.getBalance());
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME |
                 ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_USE_LOGO);
@@ -145,10 +156,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         getSupportActionBar().setIcon(new BitmapDrawable(Bitmap.createScaledBitmap(result, 120, 120, false)));
 
-        BottomNavigationView navigation = findViewById(R.id.navigation_details);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
-        hasBeenModified = false;
     }
 
     private void initializeButtons()
@@ -185,7 +192,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             }
         }
 
-        chartEvent((Button) v);
+        updateCharts((Button) v);
     }
 
     private float convertDpToPx(float dp)
@@ -193,7 +200,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return dp * this.getResources().getDisplayMetrics().density;
     }
 
-    private void chartEvent(Button button)
+    private void updateCharts(Button button)
     {
         findViewById(R.id.chartPriceView).setVisibility(View.GONE);
         findViewById(R.id.chartVolumeView).setVisibility(View.GONE);
@@ -344,8 +351,16 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private void drawVolumeChart()
     {
-        final BarChart barChart = findViewById(R.id.chartVolumeView);
+        initializeBarChart(barChart);
 
+        barChart.setData(generateVolumeChartSet());
+        barChart.invalidate();
+
+        findViewById(R.id.chartVolumeView).setVisibility(View.VISIBLE);
+    }
+
+    private void initializeBarChart(BarChart barChart)
+    {
         barChart.setDrawGridBackground(false);
         barChart.setDrawBorders(false);
         barChart.setDrawMarkers(true);
@@ -360,18 +375,42 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         barChart.getXAxis().setEnabled(false);
         barChart.setViewPortOffsets(0, 0, 0, 0);
         barChart.setFitBars(true);
-
-        barChart.setData(generateVolumeChartSet());
-        barChart.invalidate();
-
-        findViewById(R.id.chartVolumeView).setVisibility(View.VISIBLE);
     }
 
     private void drawPriceChart()
     {
-        final LineChart lineChart = findViewById(R.id.chartPriceView);
-        final BarChart barChart = findViewById(R.id.chartVolumeView);
+        initializeLineChart(lineChart);
 
+        lineChart.setData(generatePriceChartSet());
+        lineChart.getAxisLeft().setAxisMinValue(lineChart.getData().getYMin());
+
+        lineChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                valueSelectedEvent(e);
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+
+        lineChart.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return toucheEvent(motionEvent);
+            }
+        });
+
+        updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
+
+        findViewById(R.id.chartPriceView).setVisibility(View.VISIBLE);
+        findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
+    }
+
+    private void initializeLineChart(LineChart lineChart)
+    {
         lineChart.setDrawGridBackground(false);
         lineChart.setDrawBorders(false);
         lineChart.setDrawMarkers(true);
@@ -385,61 +424,57 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         lineChart.getLegend().setEnabled(false);
         lineChart.getXAxis().setEnabled(false);
         lineChart.setViewPortOffsets(0, 0, 0, 0);
+    }
 
-        lineChart.setData(generatePriceChartSet());
-        lineChart.getAxisLeft().setAxisMinValue(lineChart.getData().getYMin());
+    private void valueSelectedEvent(Entry e)
+    {
+        //updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), e.getY());
+        int index = lineChart.getData().getDataSets().get(0).getEntryIndex(e);
+        String date = null;
+        barChart.highlightValue(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getX(), 0, index);
 
-        lineChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                //updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), e.getY());
-                int index = lineChart.getData().getDataSets().get(0).getEntryIndex(e);
-                String date = null;
-                barChart.highlightValue(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getX(), 0, index);
-                findViewById(R.id.volumeHightlight).setVisibility(View.VISIBLE);
-                findViewById(R.id.priceHightlight).setVisibility(View.VISIBLE);
-                findViewById(R.id.timestampHightlight).setVisibility(View.VISIBLE);
+        if(dataChartList.size() > 200)
+        {
+            date = getDate(dataChartList.get((int) Math.floor(dataChartList.size() / 200) * index).getTimestamp() * 1000);
+        }
+        else
+        {
+            date = getDate(dataChartList.get(index).getTimestamp() * 1000);
+        }
 
-                if(dataChartList.size() > 200)
-                {
-                    date = getDate(dataChartList.get((int) Math.floor(dataChartList.size() / 200) * index).getTimestamp() * 1000);
-                }
-                else
-                {
-                    date = getDate(dataChartList.get(index).getTimestamp() * 1000);
-                }
+        displayDataIndicators();
 
-                ((TextView) findViewById(R.id.volumeHightlight)).setText("Volume : US$" + barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY());
-                ((TextView) findViewById(R.id.priceHightlight)).setText("Price : US$" + e.getY());
-                ((TextView) findViewById(R.id.timestampHightlight)).setText("Date : " + date);
-            }
+        ((TextView) findViewById(R.id.volumeHightlight)).setText("Volume : US$" + barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY());
+        ((TextView) findViewById(R.id.priceHightlight)).setText("Price : US$" + e.getY());
+        ((TextView) findViewById(R.id.timestampHightlight)).setText("Date : " + date);
 
-            @Override
-            public void onNothingSelected() {
+    }
 
-            }
-        });
+    private boolean toucheEvent(MotionEvent motionEvent)
+    {
+        if(motionEvent.getAction() == MotionEvent.ACTION_UP)
+        {
+            lineChart.highlightValue(null);
+            updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
+            barChart.highlightValues(null);
+            hideDataIndicators();
+        }
 
-        lineChart.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP)
-                {
-                    lineChart.highlightValue(null);
-                    updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
-                    barChart.highlightValues(null);
-                    findViewById(R.id.volumeHightlight).setVisibility(View.INVISIBLE);
-                    findViewById(R.id.priceHightlight).setVisibility(View.INVISIBLE);
-                    findViewById(R.id.timestampHightlight).setVisibility(View.INVISIBLE);
-                }
-                return false;
-            }
-        });
+        return false;
+    }
 
-        updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
+    private void displayDataIndicators()
+    {
+        findViewById(R.id.volumeHightlight).setVisibility(View.VISIBLE);
+        findViewById(R.id.priceHightlight).setVisibility(View.VISIBLE);
+        findViewById(R.id.timestampHightlight).setVisibility(View.VISIBLE);
+    }
 
-        findViewById(R.id.chartPriceView).setVisibility(View.VISIBLE);
-        findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
+    private void hideDataIndicators()
+    {
+        findViewById(R.id.volumeHightlight).setVisibility(View.INVISIBLE);
+        findViewById(R.id.priceHightlight).setVisibility(View.INVISIBLE);
+        findViewById(R.id.timestampHightlight).setVisibility(View.INVISIBLE);
     }
 
     private String getDate(long timeStamp){
@@ -514,7 +549,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         Drawable fillDrawable = ContextCompat.getDrawable(this, R.drawable.linear_chart_gradient);
         fillDrawable.setColorFilter(getColorWithAlpha(currency.getChartColor(), 0.5f), PorterDuff.Mode.SRC_ATOP);
-        //dataSet.setFillDrawable(fillDrawable);
 
         return new LineData(dataSet);
     }
@@ -582,49 +616,53 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
             amountTxtView.setText(transactionList.get(i).getAmount() + "");
 
-            SwipeLayout swipeLayout =  view.findViewById(R.id.swipeLayout);
-
-            //set show mode.
-            swipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
-
-            //add drag edge.(If the BottomView has 'layout_gravity' attribute, this line is unnecessary)
-            swipeLayout.addDrag(SwipeLayout.DragEdge.Left, view.findViewById(R.id.bottom_wrapper));
-
-            swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
-                @Override
-                public void onClose(SwipeLayout layout) {
-                    //when the SurfaceView totally cover the BottomView.
-                }
-
-                @Override
-                public void onUpdate(SwipeLayout layout, int leftOffset, int topOffset) {
-                    //you are swiping.
-                }
-
-                @Override
-                public void onStartOpen(SwipeLayout layout) {
-
-                }
-
-                @Override
-                public void onOpen(SwipeLayout layout) {
-                    //when the BottomView totally show.
-                }
-
-                @Override
-                public void onStartClose(SwipeLayout layout) {
-
-                }
-
-                @Override
-                public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
-                    //when user's hand released.
-                }
-            });
+            setupSwipeView(view);
 
             transactionLayout.addView(view);
         }
+    }
 
+    private void setupSwipeView(View view)
+    {
+        SwipeLayout swipeLayout =  view.findViewById(R.id.swipeLayout);
+
+        //set show mode.
+        swipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
+
+        //add drag edge.(If the BottomView has 'layout_gravity' attribute, this line is unnecessary)
+        swipeLayout.addDrag(SwipeLayout.DragEdge.Left, view.findViewById(R.id.bottom_wrapper));
+
+        swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
+            @Override
+            public void onClose(SwipeLayout layout) {
+                //when the SurfaceView totally cover the BottomView.
+            }
+
+            @Override
+            public void onUpdate(SwipeLayout layout, int leftOffset, int topOffset) {
+                //you are swiping.
+            }
+
+            @Override
+            public void onStartOpen(SwipeLayout layout) {
+
+            }
+
+            @Override
+            public void onOpen(SwipeLayout layout) {
+                //when the BottomView totally show.
+            }
+
+            @Override
+            public void onStartClose(SwipeLayout layout) {
+
+            }
+
+            @Override
+            public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
+                //when user's hand released.
+            }
+        });
     }
 
 }

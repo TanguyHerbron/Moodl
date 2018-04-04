@@ -95,7 +95,6 @@ public class BalanceManager {
 
         while(index < 11)
         {
-            //currenciesDetails.add(index, coinInfosHashmap.keySet().iterator().next());
             index++;
 
             Log.d("coinfolio", "For " + index + " : " + coinIterator.next());

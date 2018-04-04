@@ -44,20 +44,7 @@ public class CurrencyDataRetriever {
 
     private void updateHistory(final String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
     {
-        String requestUrl = null;
-
-        switch (timeUnit)
-        {
-            case MINUTES:
-                requestUrl = minuteHistoryUrl + "?fsym=" + symbolCurrencyFrom + "&tsym=" + symbolCyrrencyTo + "&limit=1440";
-                break;
-            case HOURS:
-                requestUrl = hourHistoryUrl + "?fsym=" + symbolCurrencyFrom + "&tsym=" + symbolCyrrencyTo + "&limit=744";
-                break;
-            case DAYS:
-                requestUrl = dayHistoryUrl + "?fsym=" + symbolCurrencyFrom + "&tsym=" + symbolCyrrencyTo + "&limit=365";
-                break;
-        }
+        String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
                 new Response.Listener<String>() {
@@ -74,6 +61,26 @@ public class CurrencyDataRetriever {
                 });
 
         requestQueue.add(stringRequest);
+    }
+
+    private String getRequestUrl(int timeUnit, String symbolCurrencyFrom, String symbolCyrrencyTo)
+    {
+        String requestUrl = null;
+
+        switch (timeUnit)
+        {
+            case MINUTES:
+                requestUrl = minuteHistoryUrl + "?fsym=" + symbolCurrencyFrom + "&tsym=" + symbolCyrrencyTo + "&limit=1440";
+                break;
+            case HOURS:
+                requestUrl = hourHistoryUrl + "?fsym=" + symbolCurrencyFrom + "&tsym=" + symbolCyrrencyTo + "&limit=744";
+                break;
+            case DAYS:
+                requestUrl = dayHistoryUrl + "?fsym=" + symbolCurrencyFrom + "&tsym=" + symbolCyrrencyTo + "&limit=365";
+                break;
+        }
+
+        return requestUrl;
     }
 
     private List<CurrencyDataChart> processHistoryResult(String response)
@@ -99,15 +106,7 @@ public class CurrencyDataRetriever {
                 try {
                     JSONObject jsonObject = new JSONObject(tab[i]);
 
-                    long timestamp = Long.parseLong(jsonObject.getString("time"));
-                    double close = Double.parseDouble(jsonObject.getString("close"));
-                    double high = Double.parseDouble(jsonObject.getString("high"));
-                    double low = Double.parseDouble(jsonObject.getString("low"));
-                    double open = Double.parseDouble(jsonObject.getString("open"));
-                    double volumeFrom = Double.parseDouble(jsonObject.getString("volumefrom"));
-                    double volumeTo = Double.parseDouble(jsonObject.getString("volumeto"));
-
-                    dataChart.add(new CurrencyDataChart(timestamp, close, high, low, open, volumeFrom, volumeTo));
+                    dataChart.add(parseJSON(jsonObject));
 
                 } catch (JSONException e) {
                     Log.d(context.getResources().getString(R.string.debug_volley), "API Request error: " + e + " index: " + i);
@@ -120,6 +119,19 @@ public class CurrencyDataRetriever {
         }
 
         return dataChart;
+    }
+
+    private CurrencyDataChart parseJSON(JSONObject jsonObject) throws JSONException {
+
+        long timestamp = Long.parseLong(jsonObject.getString("time"));
+        double close = Double.parseDouble(jsonObject.getString("close"));
+        double high = Double.parseDouble(jsonObject.getString("high"));
+        double low = Double.parseDouble(jsonObject.getString("low"));
+        double open = Double.parseDouble(jsonObject.getString("open"));
+        double volumeFrom = Double.parseDouble(jsonObject.getString("volumefrom"));
+        double volumeTo = Double.parseDouble(jsonObject.getString("volumeto"));
+
+        return new CurrencyDataChart(timestamp, close, high, low, open, volumeFrom, volumeTo);
     }
 
     void updateHistory(String symbolCurrencyFrom, final DataChartCallBack callBack, int timeUnit)

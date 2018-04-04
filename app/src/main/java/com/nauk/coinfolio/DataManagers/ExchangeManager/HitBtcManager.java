@@ -36,12 +36,6 @@ public class HitBtcManager {
     private List<Currency> balance;
     private android.content.Context context;
 
-    public HitBtcManager(android.content.Context context)
-    {
-        this.context = context;
-        requestQueue = Volley.newRequestQueue(context);
-    }
-
     public HitBtcManager(android.content.Context context, String publicKey, String privateKey)
     {
         this.context = context;
@@ -53,27 +47,9 @@ public class HitBtcManager {
 
     public void updateBalance(final HitBtcCallBack callBack)
     {
-        JsonArrayRequest arrayRequest = new JsonArrayRequest(Request.Method.GET, hitBalanceUrl,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        if (response.length() > 0) {
-                            parseBalance(response);
-                        } else {
-                            //No balance
-                        }
-
-                        callBack.onSuccess();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e(context.getResources().getString(R.string.debug), "API Error : " + error);
-                        callBack.onError(error.toString());
-                    }
-                }
-        ) {
+        JsonArrayRequest arrayRequest = new JsonArrayRequest(Request.Method.GET, hitBalanceUrl
+                , getResponseListener(callBack), getErrorResponseListener(callBack))
+        {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
@@ -87,6 +63,31 @@ public class HitBtcManager {
         };
 
         requestQueue.add(arrayRequest);
+    }
+
+    private Response.Listener<JSONArray> getResponseListener(final HitBtcCallBack callBack)
+    {
+        return new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                if (response.length() > 0) {
+                    parseBalance(response);
+                }
+
+                callBack.onSuccess();
+            }
+        };
+    }
+
+    private Response.ErrorListener getErrorResponseListener(final HitBtcCallBack callBack)
+    {
+        return new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(context.getResources().getString(R.string.debug), "API Error : " + error);
+                callBack.onError(error.toString());
+            }
+        };
     }
 
     private void parseBalance(JSONArray response)

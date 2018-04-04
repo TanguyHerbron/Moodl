@@ -110,19 +110,16 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return currencyList;
     }
 
-    //public HashMap<Integer, Double> getCurrencyTransactions(String symbol)
     public List<Transaction> getCurrencyTransactions(String symbol)
     {
         String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE symbol='" + symbol.toUpperCase() + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
-        //HashMap<Integer, Double> transactionList = new HashMap<>();
         List<Transaction> transactionList = new ArrayList<>();
 
         while(resultatList.moveToNext())
         {
-            //transactionList.put(resultatList.getInt(0), resultatList.getDouble(3));
             transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4)));
         }
 

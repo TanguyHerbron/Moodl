@@ -9,13 +9,13 @@ import android.os.Parcelable;
 
 public class CurrencyDataChart implements Parcelable {
 
-    long timestamp;
-    double close;
-    double high;
-    double low;
-    double open;
-    double volumeFrom;
-    double volumeTo;
+    private long timestamp;
+    private double close;
+    private double high;
+    private double low;
+    private double open;
+    private double volumeFrom;
+    private double volumeTo;
 
     public CurrencyDataChart(long timestamp, double close, double high, double low, double open, double volumeFrom, double volumeTo)
     {

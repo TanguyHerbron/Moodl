@@ -46,6 +46,11 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         setupList();
 
+        setupSearchView();
+    }
+
+    private void setupSearchView()
+    {
         SearchView searchView = findViewById(R.id.search_bar);
 
         searchView.setIconifiedByDefault(false);

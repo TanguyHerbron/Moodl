@@ -280,7 +280,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             if(preferences.getBoolean("enable_fingerprint", false))
             {
-
                 newFragment.setCancelable(false);
                 newFragment.show(getFragmentManager(), "dialog");
 

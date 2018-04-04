@@ -31,20 +31,25 @@ public class CurrencyAdapter extends ArrayAdapter<Currency> {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, ViewGroup parent)
+        {
             Currency currency = getItem(position);
+
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_currency_row, parent, false);
             }
+
             TextView currencyName = convertView.findViewById(R.id.currencyName);
             TextView currencySymbol = convertView.findViewById(R.id.currencySymbol);
+
             if (currencyName != null)
                 currencyName.setText(currency.getName());
+
             if(currencySymbol != null)
             {
                 currencySymbol.setText(currency.getSymbol());
             }
-            // Now assign alternate color for rows
+
             if (position % 2 == 0)
                 convertView.setBackgroundColor(context.getResources().getColor(R.color.listBackground2));
             else
@@ -74,7 +79,7 @@ public class CurrencyAdapter extends ArrayAdapter<Currency> {
                     int found = 0;
                     String temp = constraint.toString().toLowerCase();
 
-                    while(i < tempCurrency.size() && found < 25)
+                    while(i < tempCurrency.size() && found < 50)
                     {
                         Currency currency = tempCurrency.get(i);
                         if (currency.getName().toLowerCase().startsWith(temp)
@@ -84,14 +89,6 @@ public class CurrencyAdapter extends ArrayAdapter<Currency> {
                         }
                         i++;
                     }
-
-
-                    /*for (Currency currency : tempCurrency) {
-                        if (currency.getName().toLowerCase().startsWith(temp)
-                                || currency.getSymbol().toLowerCase().startsWith(temp)) {
-                            suggestions.add(currency);
-                        }
-                    }*/
 
                     FilterResults filterResults = new FilterResults();
                     filterResults.values = suggestions;

@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Outline;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,11 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,22 +29,17 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.luseen.spacenavigation.SpaceItem;
 import com.luseen.spacenavigation.SpaceNavigationView;
 import com.luseen.spacenavigation.SpaceOnClickListener;
@@ -60,8 +49,6 @@ import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
 import com.nauk.coinfolio.R;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,7 +61,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
 
@@ -149,7 +135,7 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_currency_summary);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
-        generateSplash();
+        generateSplashScreen();
 
         //Objects initialization
         preferencesManager = new PreferencesManager(this);
@@ -194,12 +180,6 @@ public class HomeActivity extends AppCompatActivity {
         toolbarLayout.setTitle("US$0.00");
 
         toolbarSubtitle.setText("US$0.00");
-
-        /*BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation_home);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        navigation.setSelectedItemId(R.id.navigation_view_list);
-        navigation.setFitsSystemWindows(true);
-        navigation.setItemBackgroundResource(R.color.colorAccent);*/
 
         //Events setup
         detailsButton.setOnClickListener(new View.OnClickListener() {
@@ -304,57 +284,64 @@ public class HomeActivity extends AppCompatActivity {
         spaceNavigationView.setSpaceOnClickListener(new SpaceOnClickListener() {
             @Override
             public void onCentreButtonClick() {
-                //Toast.makeText(MainActivity.this,"onCentreButtonClick", Toast.LENGTH_SHORT).show();
-                ((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
-                SpaceNavigationView nav = findViewById(R.id.space);
-
-                nav.changeCurrentItem(-1);
-
-                findViewById(R.id.toolbar_layout).setFocusable(true);
-                ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
-                findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
-
-                findViewById(R.id.app_bar).setEnabled(true);
-                findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(true);
-                findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(true);
-
-                findViewById(R.id.switch_button).setVisibility(View.VISIBLE);
-
-                viewFlipper.setDisplayedChild(1);
+                spaceNavigationCentreButtonEvent();
             }
 
             @Override
             public void onItemClick(int itemIndex, String itemName) {
-                ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
-                ((SpaceNavigationView) findViewById(R.id.space)).setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
-
-                //0 : Watchlist
-                //1 : Market cap
-                findViewById(R.id.toolbar_layout).setFocusable(false);
-                ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
-                findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
-
-                findViewById(R.id.app_bar).setEnabled(false);
-                findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(false);
-                findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(false);
-
-                findViewById(R.id.switch_button).setVisibility(View.GONE);
-
-
-
-                viewFlipper.setDisplayedChild(itemIndex * 2);
-
-                if(itemIndex == 1)
-                {
-                    ((PieChart) findViewById(R.id.marketCapPieChart)).animateX(1000);
-                }
             }
 
             @Override
             public void onItemReselected(int itemIndex, String itemName) {
-                //Toast.makeText(MainActivity.this, itemIndex + " " + itemName, Toast.LENGTH_SHORT).show();
+                spaceNavigationItemEvent(itemIndex);
             }
         });
+    }
+
+    private void spaceNavigationCentreButtonEvent()
+    {
+        //Toast.makeText(MainActivity.this,"onCentreButtonClick", Toast.LENGTH_SHORT).show();
+        ((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
+        SpaceNavigationView nav = findViewById(R.id.space);
+
+        nav.changeCurrentItem(-1);
+
+        findViewById(R.id.toolbar_layout).setFocusable(true);
+        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
+        findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
+
+        findViewById(R.id.app_bar).setEnabled(true);
+        findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(true);
+        findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(true);
+
+        findViewById(R.id.switch_button).setVisibility(View.VISIBLE);
+
+        viewFlipper.setDisplayedChild(1);
+    }
+
+    private void spaceNavigationItemEvent(int itemIndex)
+    {
+        ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
+        ((SpaceNavigationView) findViewById(R.id.space)).setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
+
+        //0 : Watchlist
+        //1 : Market cap
+        findViewById(R.id.toolbar_layout).setFocusable(false);
+        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+        findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
+
+        findViewById(R.id.app_bar).setEnabled(false);
+        findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(false);
+        findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(false);
+
+        findViewById(R.id.switch_button).setVisibility(View.GONE);
+
+        viewFlipper.setDisplayedChild(itemIndex * 2);
+
+        if(itemIndex == 1)
+        {
+            ((PieChart) findViewById(R.id.marketCapPieChart)).animateX(1000);
+        }
     }
 
     @Override
@@ -379,13 +366,24 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        //addTestWatchlistCardview();
 
+        Intent intent = getIntent();
+        updateAll(intent.getBooleanExtra("update", false));
+
+        ((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
+    }
+
+    private void addTestWatchlistCardview()
+    {
         View view = LayoutInflater.from(this).inflate(R.layout.cardview_watchlist, null);
+
         ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView)).setText("3%");
         ((TextView) view.findViewById(R.id.currencyFluctuationTextView)).setText("$3");
         ((TextView) view.findViewById(R.id.currencyNameTextView)).setText("TanguyCoin");
         ((TextView) view.findViewById(R.id.currencySymbolTextView)).setText("TGC");
         ((TextView) view.findViewById(R.id.currencyValueTextView)).setText("$100");
+
         view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -394,14 +392,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        //((LinearLayout) findViewById(R.id.linearLayoutWatchlist)).addView(view);
-
-        Intent intent = getIntent();
-
-        Log.d("coinfolio", "Updated ? " + intent.getBooleanExtra("update", false));
-
-        updateAll(intent.getBooleanExtra("update", false));
-        ((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
+        ((LinearLayout) findViewById(R.id.linearLayoutWatchlist)).addView(view);
     }
 
     @Override
@@ -455,7 +446,6 @@ public class HomeActivity extends AppCompatActivity {
 
             if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
             {
-                //currencyLayout.addView(layoutGenerator.getInfoLayout(currency));
                 currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed));
             }
         }
@@ -574,13 +564,10 @@ public class HomeActivity extends AppCompatActivity {
     {
         marketCapCounter = 0;
 
-        Log.d("coinfolio", "Start update market cap");
-
         marketCapManager.updateTopCurrencies(new MarketCapManager.VolleyCallBack() {
             @Override
             public void onSuccess()
             {
-                Log.d("coinfolio", "Top updated");
                 countCompletedMarketCapRequest();
             }
         });
@@ -588,7 +575,6 @@ public class HomeActivity extends AppCompatActivity {
         marketCapManager.updateMarketCap(new MarketCapManager.VolleyCallBack() {
             @Override
             public void onSuccess() {
-                Log.d("coinfolio", "Marketcap updated");
                 countCompletedMarketCapRequest();
             }
         });
@@ -610,8 +596,6 @@ public class HomeActivity extends AppCompatActivity {
 
             ArrayList<Integer> colors = new ArrayList<>();
 
-            PieChart pieChart = findViewById(R.id.marketCapPieChart);
-
             float otherCurrenciesDominance = 0;
 
             for(Iterator i = marketCapManager.getDominance().keySet().iterator(); i.hasNext(); )
@@ -632,36 +616,45 @@ public class HomeActivity extends AppCompatActivity {
             PieData data = new PieData(set);
             data.setValueTextSize(10);
             data.setValueFormatter(new PercentFormatter());
-            pieChart.setData(data);
-            pieChart.setDrawSlicesUnderHole(false);
-            pieChart.setUsePercentValues(true);
-            pieChart.setTouchEnabled(true);
 
-            pieChart.setEntryLabelColor(Color.parseColor("#FF000000"));
-
-            pieChart.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    switch (motionEvent.getAction())
-                    {
-                        case MotionEvent.ACTION_DOWN:
-                            refreshLayout.setEnabled(false);
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            break;
-                        default:
-                            refreshLayout.setEnabled(true);
-                            break;
-                    }
-                    return false;
-                }
-            });
-
-            pieChart.getDescription().setEnabled(false);
-            pieChart.getLegend().setEnabled(false);
-            pieChart.setCenterText(generateCenterSpannableText());
-            pieChart.invalidate(); // refresh
+            setupPieChart(data);
         }
+    }
+
+    private void setupPieChart(PieData data)
+    {
+        PieChart pieChart = findViewById(R.id.marketCapPieChart);
+
+        pieChart.setData(data);
+        pieChart.setDrawSlicesUnderHole(false);
+        pieChart.setUsePercentValues(true);
+        pieChart.setTouchEnabled(true);
+
+        pieChart.setEntryLabelColor(Color.parseColor("#FF000000"));
+
+        pieChart.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        refreshLayout.setEnabled(false);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        break;
+                    default:
+                        refreshLayout.setEnabled(true);
+                        break;
+                }
+                return false;
+            }
+        });
+
+        pieChart.getDescription().setEnabled(false);
+        pieChart.getLegend().setEnabled(false);
+        pieChart.setCenterText(generateCenterSpannableText());
+        pieChart.invalidate(); // refresh
+
     }
 
     private void setupTextViewMarketCap()
@@ -679,8 +672,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private SpannableString generateCenterSpannableText() {
 
-        SpannableString s = new SpannableString("Market Capitalization Dominance");
-        return s;
+        SpannableString spannableString = new SpannableString("Market Capitalization Dominance");
+        return spannableString;
     }
 
     private void countCoins(boolean isCoin, boolean isDetails)
@@ -706,8 +699,6 @@ public class HomeActivity extends AppCompatActivity {
             {
                 if(balanceManager.getTotalBalance().size() == 0)
                 {
-                    Log.d("coinfolio", "Empty");
-
                     countIcons();
                 }
             }
@@ -732,7 +723,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void generateSplash()
+    private void generateSplashScreen()
     {
         LinearLayout loadingLayout = new LinearLayout(this);
 
@@ -825,49 +816,40 @@ public class HomeActivity extends AppCompatActivity {
             super.onProgressUpdate(values);
         }
 
-        @Override
-        protected Void doInBackground(Void... params)
+        private void updateChartColor(Currency currency)
         {
-            final List<View> cardList = new ArrayList<>();
-
-            Looper.prepare();
-
-            balanceManager.sortCoins();
-
-            for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+            if(currency.getIcon() != null)
             {
-                final Currency localCurrency = balanceManager.getTotalBalance().get(i);
+                Palette.Builder builder = Palette.from(currency.getIcon());
 
-                if(localCurrency.getIcon() != null)
-                {
-                    Palette.Builder builder = Palette.from(localCurrency.getIcon());
+                currency.setChartColor(builder.generate().getDominantColor(0));
+            }
+            else
+            {
+                currency.setChartColor(12369084);
+            }
+        }
 
-                    localCurrency.setChartColor(builder.generate().getDominantColor(0));
+        private void loadCurrency(Currency currency, List<View> cardList)
+        {
+            if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001)
+            {
+                currency.setName(balanceManager.getCurrencyName(currency.getSymbol()));
+                currency.setId(balanceManager.getCurrencyId(currency.getSymbol()));
+                totalValue += currency.getValue() * currency.getBalance();
+                totalFluctuation += (currency.getValue() * currency.getBalance()) * (currency.getDayFluctuationPercentage() / 100);
 
-                }
-                else
-                {
-                    localCurrency.setChartColor(12369084);
-                }
-
-                if(!localCurrency.getSymbol().equals("USD") && (localCurrency.getBalance() * localCurrency.getValue()) > 0.001)
-                {
-                    localCurrency.setName(balanceManager.getCurrencyName(localCurrency.getSymbol()));
-                    localCurrency.setId(balanceManager.getCurrencyId(localCurrency.getSymbol()));
-                    totalValue += localCurrency.getValue() * localCurrency.getBalance();
-                    totalFluctuation += (localCurrency.getValue() * localCurrency.getBalance()) * (localCurrency.getDayFluctuationPercentage() / 100);
-
-                    cardList.add(layoutGenerator.getInfoLayout(localCurrency, true));
-                }
-
-                if(!localCurrency.getSymbol().equals("USD") && localCurrency.getHistoryMinutes() == null)
-                {
-                    cardList.add(layoutGenerator.getInfoLayout(localCurrency, true));
-                }
-
-                balanceManager.getTotalBalance().set(i, localCurrency);
+                cardList.add(layoutGenerator.getInfoLayout(currency, true));
             }
 
+            if(!currency.getSymbol().equals("USD") && currency.getHistoryMinutes() == null)
+            {
+                cardList.add(layoutGenerator.getInfoLayout(currency, true));
+            }
+        }
+
+        private void refreshCurrencyList(final List<View> cardList)
+        {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -882,9 +864,10 @@ public class HomeActivity extends AppCompatActivity {
                     adaptView();
                 }
             });
+        }
 
-            toolbarLayout.setTitle("US$" + String.format("%.2f", totalValue));
-
+        private void updateFluctuation()
+        {
             if(totalFluctuation > 0)
             {
                 runOnUiThread(new Runnable() {
@@ -903,7 +886,10 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 });
             }
+        }
 
+        private void updateTitle()
+        {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -918,6 +904,35 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 }
             });
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            final List<View> cardList = new ArrayList<>();
+
+            Looper.prepare();
+
+            balanceManager.sortCoins();
+
+            for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+            {
+                final Currency localCurrency = balanceManager.getTotalBalance().get(i);
+
+                updateChartColor(localCurrency);
+
+                loadCurrency(localCurrency, cardList);
+
+                balanceManager.getTotalBalance().set(i, localCurrency);
+            }
+
+            refreshCurrencyList(cardList);
+
+            toolbarLayout.setTitle("US$" + String.format("%.2f", totalValue));
+
+            updateFluctuation();
+
+            updateTitle();
 
             return null;
         }
@@ -1010,17 +1025,6 @@ public class HomeActivity extends AppCompatActivity {
             });
 
             updateMarketCap();
-
-            /*marketCapManager.updateTopCurrencies(new BalanceManager.VolleyCallBack() {
-                @Override
-                public void onSuccess() {
-
-                }
-
-                @Override
-                public void onError(String error) {
-
-                }});*/
 
             return null;
         }

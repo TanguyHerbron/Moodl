@@ -37,7 +37,6 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     @Override
     public void onAuthenticationError(int errMsgId, CharSequence errString)
     {
-        //Toast.makeText(context, "Authentification error\n" + errString, Toast.LENGTH_LONG).show();
         if(dialogFragment.isVisible())
         {
             dialogFragment.wrongFingerprint("Error");
@@ -56,7 +55,6 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     @Override
     public void onAuthenticationFailed()
     {
-        //Toast.makeText(context, "Authentification failed", Toast.LENGTH_LONG).show();
         if(dialogFragment.isVisible())
         {
             dialogFragment.wrongFingerprint("Wrong fingerprint");
@@ -75,8 +73,6 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     @Override
     public void onAuthenticationHelp(int helpMsgIf, CharSequence helpString)
     {
-        //Toast.makeText(context, "Authentification help\n" + helpString, Toast.LENGTH_LONG).show();
-
         if(dialogFragment.isVisible())
         {
             dialogFragment.wrongFingerprint(helpString.toString());
@@ -95,9 +91,6 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     @Override
     public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result)
     {
-        //Toast.makeText(context, "Success !", Toast.LENGTH_LONG).show();
-        //dialogFragment.dismiss();
-
         dialogFragment.correctFingerprint();
         new Handler().postDelayed(new Runnable() {
             @Override

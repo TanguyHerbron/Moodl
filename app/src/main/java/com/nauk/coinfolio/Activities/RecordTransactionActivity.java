@@ -49,9 +49,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
         databaseManager = new DatabaseManager(this);
 
         validateButton = findViewById(R.id.validateButton);
-
         amountTxtView = findViewById(R.id.currencyAmount);
-
         purchasedDate = findViewById(R.id.purchaseDate);
 
         purchasedDate.setText(sdf.format(calendar.getTime()));

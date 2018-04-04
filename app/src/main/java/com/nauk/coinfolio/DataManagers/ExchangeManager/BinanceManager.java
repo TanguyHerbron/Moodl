@@ -22,8 +22,6 @@ public class BinanceManager {
 
     private List<Currency> balance;
 
-    public BinanceManager(){}
-
     public BinanceManager(String publicKey, String privateKey)
     {
         this.publicKey = publicKey;
@@ -32,7 +30,6 @@ public class BinanceManager {
 
     public void updateBalance(BinanceCallBack callBack)
     {
-        Map<String, AssetBalance> accountBalanceCache;
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
         BinanceApiRestClient client = factory.newRestClient();
 

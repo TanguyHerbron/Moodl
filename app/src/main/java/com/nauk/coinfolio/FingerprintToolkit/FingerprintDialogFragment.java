@@ -32,8 +32,6 @@ public class FingerprintDialogFragment extends DialogFragment{
 
         View view = inflater.inflate(R.layout.fragment_fingerprint_scanner, container);
 
-        //getDialog().getWindow().setLayout(getResources().getDimensionPixelSize(R.dimen.fingerprint_dialog_width), getResources().getDimensionPixelSize(R.dimen.fingerprint_dialog_height));
-
         view.findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

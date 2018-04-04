@@ -64,6 +64,64 @@ public class HomeLayoutGenerator {
             }
         });
 
+        updateCardViewInfos(view, currency);
+
+        view.findViewById(R.id.errorTextView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                intent.putExtra("currency", currency);
+                context.getApplicationContext().startActivity(intent);
+            }
+        });
+
+        setupLineChart(view, currency);
+
+        if(isExtended)
+        {
+            extendView(currency, view);
+        }
+        else
+        {
+            collapseView(view);
+        }
+
+        updateColor(view, currency);
+
+        return view;
+    }
+
+    private void setupLineChart(View view, final Currency currency)
+    {
+        LineChart lineChart = view.findViewById(R.id.LineChartView);
+
+        lineChart.setDrawGridBackground(false);
+        lineChart.setDrawBorders(false);
+        lineChart.setDrawMarkers(false);
+        lineChart.setDoubleTapToZoomEnabled(false);
+        lineChart.setPinchZoom(false);
+        lineChart.setScaleEnabled(false);
+        lineChart.setDragEnabled(false);
+        lineChart.getDescription().setEnabled(false);
+        lineChart.getAxisLeft().setEnabled(false);
+        lineChart.getAxisRight().setEnabled(false);
+        lineChart.getLegend().setEnabled(false);
+        lineChart.getXAxis().setEnabled(false);
+        lineChart.setViewPortOffsets(0, 0, 0, 0);
+        lineChart.setData(generateData(currency));
+
+        lineChart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                intent.putExtra("currency", currency);
+                context.getApplicationContext().startActivity(intent);
+            }
+        });
+    }
+
+    private void updateCardViewInfos(View view, Currency currency)
+    {
         ((ImageView) view.findViewById(R.id.currencyIcon))
                 .setImageBitmap(currency.getIcon());
         ((TextView) view.findViewById(R.id.currencyNameTextView))
@@ -83,57 +141,6 @@ public class HomeLayoutGenerator {
                 .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
         ((ImageView) view.findViewById(R.id.detailsArrow))
                 .getDrawable().setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-
-        view.findViewById(R.id.errorTextView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                context.getApplicationContext().startActivity(intent);
-            }
-        });
-
-        if(currency.getHistoryMinutes() != null)
-        {
-            LineChart lineChart = view.findViewById(R.id.LineChartView);
-
-            lineChart.setDrawGridBackground(false);
-            lineChart.setDrawBorders(false);
-            lineChart.setDrawMarkers(false);
-            lineChart.setDoubleTapToZoomEnabled(false);
-            lineChart.setPinchZoom(false);
-            lineChart.setScaleEnabled(false);
-            lineChart.setDragEnabled(false);
-            lineChart.getDescription().setEnabled(false);
-            lineChart.getAxisLeft().setEnabled(false);
-            lineChart.getAxisRight().setEnabled(false);
-            lineChart.getLegend().setEnabled(false);
-            lineChart.getXAxis().setEnabled(false);
-            lineChart.setViewPortOffsets(0, 0, 0, 0);
-            lineChart.setData(generateData(currency));
-
-            lineChart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                    intent.putExtra("currency", currency);
-                    context.getApplicationContext().startActivity(intent);
-                }
-            });
-        }
-
-        if(isExtended)
-        {
-            extendView(currency, view);
-        }
-        else
-        {
-            collapseView(view);
-        }
-
-        updateColor(view, currency);
-
-        return view;
     }
 
     private void collapseView(View view)
@@ -241,7 +248,9 @@ public class HomeLayoutGenerator {
         int r = Color.red(color);
         int g = Color.green(color);
         int b = Color.blue(color);
+        
         transColor = Color.argb(alpha, r, g, b);
+
         return transColor ;
     }
 
