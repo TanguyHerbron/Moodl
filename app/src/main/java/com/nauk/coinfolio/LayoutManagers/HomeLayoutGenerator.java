@@ -248,7 +248,7 @@ public class HomeLayoutGenerator {
         int r = Color.red(color);
         int g = Color.green(color);
         int b = Color.blue(color);
-        
+
         transColor = Color.argb(alpha, r, g, b);
 
         return transColor ;

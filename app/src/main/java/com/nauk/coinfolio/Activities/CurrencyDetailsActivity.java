@@ -442,11 +442,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             date = getDate(dataChartList.get(index).getTimestamp() * 1000);
         }
 
-        displayDataIndicators();
-
-        ((TextView) findViewById(R.id.volumeHightlight)).setText("Volume : US$" + barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY());
-        ((TextView) findViewById(R.id.priceHightlight)).setText("Price : US$" + e.getY());
-        ((TextView) findViewById(R.id.timestampHightlight)).setText("Date : " + date);
+        ((TextView) findViewById(R.id.volumeHightlight)).setText("Volume\nUS$" + barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY());
+        ((TextView) findViewById(R.id.priceHightlight)).setText("Price\nUS$" + e.getY());
+        ((TextView) findViewById(R.id.timestampHightlight)).setText("Date\n" + date);
 
     }
 
@@ -463,18 +461,11 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return false;
     }
 
-    private void displayDataIndicators()
-    {
-        findViewById(R.id.volumeHightlight).setVisibility(View.VISIBLE);
-        findViewById(R.id.priceHightlight).setVisibility(View.VISIBLE);
-        findViewById(R.id.timestampHightlight).setVisibility(View.VISIBLE);
-    }
-
     private void hideDataIndicators()
     {
-        findViewById(R.id.volumeHightlight).setVisibility(View.INVISIBLE);
-        findViewById(R.id.priceHightlight).setVisibility(View.INVISIBLE);
-        findViewById(R.id.timestampHightlight).setVisibility(View.INVISIBLE);
+        ((TextView) findViewById(R.id.volumeHightlight)).setText("\n");
+        ((TextView) findViewById(R.id.priceHightlight)).setText("\n");
+        ((TextView) findViewById(R.id.timestampHightlight)).setText("\n");
     }
 
     private String getDate(long timeStamp){
