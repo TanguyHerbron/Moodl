@@ -42,9 +42,6 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.R;
 
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -62,7 +59,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
     private LinearLayout transactionLayout;
-    private LinearLayout chartLayout;
     private DatabaseManager databaseManager;
     //private String symbol;
     private Currency currency;
@@ -129,9 +125,10 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         viewFlipper = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
-        chartLayout = findViewById(R.id.chartsLayout);
         lineChart = findViewById(R.id.chartPriceView);
         barChart = findViewById(R.id.chartVolumeView);
+
+        ((BottomNavigationView) findViewById(R.id.navigation_details)).getMenu().getItem(1).setEnabled(false);
 
         drawTransactionList();
 
@@ -150,6 +147,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private void setupActionBar()
     {
         setTitle(" " + currency.getName() + " | " + currency.getBalance());
+
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME |
                 ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_USE_LOGO);
 
@@ -437,9 +435,12 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private void valueSelectedEvent(Entry e)
     {
-        //updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), e.getY());
         int index = lineChart.getData().getDataSets().get(0).getEntryIndex(e);
-        String date = null;
+        String date;
+        String volumePlaceholder;
+        String pricePlaceholder;
+        String timestampPlaceholder;
+
         barChart.highlightValue(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getX(), 0, index);
 
         if(dataChartList.size() > 200)
@@ -451,9 +452,13 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             date = getDate(dataChartList.get(index).getTimestamp() * 1000);
         }
 
-        ((TextView) findViewById(R.id.volumeHightlight)).setText("Volume\nUS$" + numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()));
-        ((TextView) findViewById(R.id.priceHightlight)).setText("Price\nUS$" + numberConformer(e.getY()));
-        ((TextView) findViewById(R.id.timestampHightlight)).setText("Date\n" + date);
+        volumePlaceholder = getResources().getString(R.string.volumePlaceholder, numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()));
+        pricePlaceholder = getResources().getString(R.string.pricePlaceholder, numberConformer(e.getY()));
+        timestampPlaceholder = getResources().getString(R.string.timestampPlaceholder, date);
+
+        ((TextView) findViewById(R.id.volumeHightlight)).setText(volumePlaceholder);
+        ((TextView) findViewById(R.id.priceHightlight)).setText(pricePlaceholder);
+        ((TextView) findViewById(R.id.timestampHightlight)).setText(timestampPlaceholder);
 
     }
 
@@ -480,7 +485,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private String getDate(long timeStamp){
 
         try{
-            SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy");
+            //SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy");
+            SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.getDefault());
             Date netDate = (new Date(timeStamp));
             return sdf.format(netDate);
         }
@@ -582,8 +588,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         updateFluctuation(start, end);
 
-        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + numberConformer(start));
-        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + numberConformer(end));
+        ((TextView) findViewById(R.id.txtViewPriceStart)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(start)));
+        ((TextView) findViewById(R.id.txtViewPriceNow)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(end)));
 
         for(int i = 1; i < dataChartList.size(); i++)
         {
@@ -600,9 +606,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             }
         }
 
-        ((TextView) findViewById(R.id.totalVolume)).setText("US$" + numberConformer(totalVolume));
-        ((TextView) findViewById(R.id.highestPrice)).setText("US$" + numberConformer(highestPrice));
-        ((TextView) findViewById(R.id.lowestPrice)).setText("US$" + numberConformer(lowestPrice));
+        ((TextView) findViewById(R.id.totalVolume)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(totalVolume)));
+        ((TextView) findViewById(R.id.highestPrice)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(highestPrice)));
+        ((TextView) findViewById(R.id.lowestPrice)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(lowestPrice)));
     }
 
     private void updateFluctuation(float start, float end)
@@ -619,7 +625,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.green));
         }
 
-        ((TextView) findViewById(R.id.txtViewPercentage)).setText(numberConformer(percentageFluctuation) + "%");
+        ((TextView) findViewById(R.id.txtViewPercentage)).setText(getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(percentageFluctuation)));
     }
 
     private int getColorWithAlpha(int color, float ratio)
@@ -664,7 +670,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 }
             });
 
-            amountTxtView.setText(transactionList.get(i).getAmount() + "");
+            amountTxtView.setText(String.valueOf(transactionList.get(i).getAmount()));
 
             setupSwipeView(view);
 

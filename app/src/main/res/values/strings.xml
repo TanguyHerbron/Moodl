@@ -146,6 +146,12 @@
     <string name="currencyDollarParenthesisPlaceholder">(US$%1$s)</string>
     <string name="currencyDollarPlaceholder">US$%1$s</string>
     <string name="currencyPercentagePlaceholder">%1$s%%</string>
+
+    <!--DetailsActivity placeholders-->
+    <string name="volumePlaceholder">Volume\nUS$%1$s</string>
+    <string name="pricePlaceholder">Price\nUS$%1$s</string>
+    <string name="timestampPlaceholder">Date\n%1$s</string>
+
     <string name="title_activity_main">MainActivity</string>
 
     <string name="fingerprint_dialog_cancel">Cancel</string>
