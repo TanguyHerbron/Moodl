@@ -61,11 +61,11 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
     private void setupAdapter()
     {
-        String[] currencyFullname = new String[currencyNames.length];
+        String[] currencyFullName = new String[currencyNames.length];
 
-        for(int i = 0; i < currencyFullname.length; i++)
+        for(int i = 0; i < currencyFullName.length; i++)
         {
-            currencyFullname[i] = currencyNames[i] + " " + currencySymbols[i];
+            currencyFullName[i] = currencyNames[i] + " " + currencySymbols[i];
         }
 
         ArrayList<Currency> currencyArrayList = new ArrayList<>();

@@ -177,9 +177,9 @@ public class HomeActivity extends AppCompatActivity {
         ImageButton settingsButton = findViewById(R.id.settings_button);
 
         toolbarLayout.setForegroundGravity(Gravity.CENTER);
-        toolbarLayout.setTitle("US$0.00");
+        toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
 
-        toolbarSubtitle.setText("US$0.00");
+        toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
 
         //Events setup
         detailsButton.setOnClickListener(new View.OnClickListener() {
@@ -551,9 +551,9 @@ public class HomeActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                toolbarLayout.setTitle("US$0.00");
+                toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
 
-                toolbarSubtitle.setText("US$0.00");
+                toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
 
                 toolbarSubtitle.setTextColor(-1275068417);
             }
@@ -896,6 +896,7 @@ public class HomeActivity extends AppCompatActivity {
 
                     totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) *100;
 
+                    //toolbarSubtitle.setText(String.format(getResources().getString(R.string.fluctuationDollarPercentagePlaceholder), totalFluctuation));
                     toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
 
                     if(loadingDialog.isShowing())
