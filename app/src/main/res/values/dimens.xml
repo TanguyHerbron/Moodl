@@ -16,5 +16,5 @@
     <dimen name="fingerprint_dialog_height">125dp</dimen>
     <dimen name="fingerprint_dialog_width">250dp</dimen>
 
-    <dimen name="testOutline">1dp</dimen>
+    <dimen name="separationLineSize">1dp</dimen>
 </resources>

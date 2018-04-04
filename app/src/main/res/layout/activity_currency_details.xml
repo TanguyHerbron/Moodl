@@ -154,44 +154,160 @@
 
             </LinearLayout>
 
-            <!--<ScrollView
-                android:id="@+id/svCharts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            </ScrollView>-->
-
             <LinearLayout
                 android:id="@+id/llCharts"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_weight="0.16">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Beginning price"
+                        android:layout_weight="0.75"/>
 
                     <TextView
                         android:id="@+id/txtViewPriceStart"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.33"
-                        android:gravity="center"/>
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal"
+                        android:layout_weight="0.25"/>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/separationLineSize"
+                    android:background="@color/separationLine"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_weight="0.16">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Current price"
+                        android:layout_weight="0.75"/>
 
                     <TextView
                         android:id="@+id/txtViewPriceNow"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.33"
-                        android:gravity="center"/>
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal"
+                        android:layout_weight="0.25"/>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/separationLineSize"
+                    android:background="@color/separationLine"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_weight="0.16">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Delta"
+                        android:layout_weight="0.75"/>
 
                     <TextView
                         android:id="@+id/txtViewPercentage"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.33"
-                        android:gravity="center"/>
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal"
+                        android:layout_weight="0.25"/>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/separationLineSize"
+                    android:background="@color/separationLine"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_weight="0.16">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Total volume"
+                        android:layout_weight="0.75"/>
+
+                    <TextView
+                        android:id="@+id/totalVolume"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal"
+                        android:layout_weight="0.25" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/separationLineSize"
+                    android:background="@color/separationLine"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_weight="0.16">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Highest price"
+                        android:layout_weight="0.75" />
+
+                    <TextView
+                        android:id="@+id/highestPrice"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal"
+                        android:layout_weight="0.25" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/separationLineSize"
+                    android:background="@color/separationLine"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_weight="0.16">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Lowest price"
+                        android:layout_weight="0.75"/>
+
+                    <TextView
+                        android:id="@+id/lowestPrice"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal"
+                        android:layout_weight="0.25" />
 
                 </LinearLayout>
 

@@ -42,10 +42,19 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.R;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
+import static java.lang.Math.abs;
 
 /**Create a Parcelable**/
 
@@ -403,7 +412,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             }
         });
 
-        updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
+        updateGeneralData(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
 
         findViewById(R.id.chartPriceView).setVisibility(View.VISIBLE);
         findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
@@ -442,8 +451,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             date = getDate(dataChartList.get(index).getTimestamp() * 1000);
         }
 
-        ((TextView) findViewById(R.id.volumeHightlight)).setText("Volume\nUS$" + barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY());
-        ((TextView) findViewById(R.id.priceHightlight)).setText("Price\nUS$" + e.getY());
+        ((TextView) findViewById(R.id.volumeHightlight)).setText("Volume\nUS$" + numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()));
+        ((TextView) findViewById(R.id.priceHightlight)).setText("Price\nUS$" + numberConformer(e.getY()));
         ((TextView) findViewById(R.id.timestampHightlight)).setText("Date\n" + date);
 
     }
@@ -507,6 +516,27 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return new BarData(dataSet);
     }
 
+    private String numberConformer(double number)
+    {
+        String str;
+        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
+        DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
+
+        symbols.setGroupingSeparator(' ');
+        formatter.setDecimalFormatSymbols(symbols);
+
+        if(abs(number) > 1)
+        {
+            str = formatter.format(number);
+        }
+        else
+        {
+            str = String.format( Locale.UK, "%.4f", number);
+        }
+
+        return str;
+    }
+
     private LineData generatePriceChartSet()
     {
         LineDataSet dataSet;
@@ -544,6 +574,37 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return new LineData(dataSet);
     }
 
+    private void updateGeneralData(float start, float end)
+    {
+        double totalVolume = dataChartList.get(0).getVolumeTo();
+        double highestPrice = dataChartList.get(0).getOpen();
+        double lowestPrice = dataChartList.get(0).getOpen();
+
+        updateFluctuation(start, end);
+
+        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + numberConformer(start));
+        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + numberConformer(end));
+
+        for(int i = 1; i < dataChartList.size(); i++)
+        {
+            totalVolume += dataChartList.get(i).getVolumeTo();
+
+            if(highestPrice < dataChartList.get(i).getOpen())
+            {
+                highestPrice = dataChartList.get(i).getOpen();
+            }
+
+            if(lowestPrice > dataChartList.get(i).getOpen())
+            {
+                lowestPrice = dataChartList.get(i).getOpen();
+            }
+        }
+
+        ((TextView) findViewById(R.id.totalVolume)).setText("US$" + numberConformer(totalVolume));
+        ((TextView) findViewById(R.id.highestPrice)).setText("US$" + numberConformer(highestPrice));
+        ((TextView) findViewById(R.id.lowestPrice)).setText("US$" + numberConformer(lowestPrice));
+    }
+
     private void updateFluctuation(float start, float end)
     {
         float fluctuation = end - start;
@@ -558,9 +619,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.txtViewPercentage)).setTextColor(getResources().getColor(R.color.green));
         }
 
-        ((TextView) findViewById(R.id.txtViewPriceStart)).setText("$" + start);
-        ((TextView) findViewById(R.id.txtViewPriceNow)).setText("$" + end);
-        ((TextView) findViewById(R.id.txtViewPercentage)).setText(percentageFluctuation + "%");
+        ((TextView) findViewById(R.id.txtViewPercentage)).setText(numberConformer(percentageFluctuation) + "%");
     }
 
     private int getColorWithAlpha(int color, float ratio)
