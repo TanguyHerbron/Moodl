@@ -130,13 +130,13 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         ((BottomNavigationView) findViewById(R.id.navigation_details)).getMenu().getItem(1).setEnabled(false);
 
+        setupActionBar();
+
         drawTransactionList();
 
         initializeButtons();
 
-        createCharts(DAY, 1);
-
-        setupActionBar();
+        updateChartTab(DAY, 1);
 
         BottomNavigationView navigation = findViewById(R.id.navigation_details);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -218,13 +218,13 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         switch (interval)
         {
             case "1h":
-                createCharts(HOUR, 1);
+                updateChartTab(HOUR, 1);
                 break;
             case "3h":
-                createCharts(HOUR, 3);
+                updateChartTab(HOUR, 3);
                 break;
             case "1d":
-                createCharts(DAY, 1);
+                updateChartTab(DAY, 1);
                 break;
             case "3d":
                 currency.updateHistoryHours(this, new Currency.CurrencyCallBack() {
@@ -233,7 +233,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                createCharts(CurrencyDetailsActivity.DAY, 3);
+                                updateChartTab(CurrencyDetailsActivity.DAY, 3);
                             }
                         });
                     }
@@ -246,7 +246,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                createCharts(CurrencyDetailsActivity.WEEK, 11);
+                                updateChartTab(CurrencyDetailsActivity.WEEK, 11);
                             }
                         });
                     }
@@ -259,7 +259,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                createCharts(CurrencyDetailsActivity.MONTH, 1);
+                                updateChartTab(CurrencyDetailsActivity.MONTH, 1);
                             }
                         });
                     }
@@ -272,7 +272,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                createCharts(CurrencyDetailsActivity.MONTH, 3);
+                                updateChartTab(CurrencyDetailsActivity.MONTH, 3);
                             }
                         });
                     }
@@ -285,7 +285,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                createCharts(CurrencyDetailsActivity.MONTH, 6);
+                                updateChartTab(CurrencyDetailsActivity.MONTH, 6);
                             }
                         });
                     }
@@ -298,7 +298,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                createCharts(CurrencyDetailsActivity.YEAR, 1);
+                                updateChartTab(CurrencyDetailsActivity.YEAR, 1);
                             }
                         });
                     }
@@ -307,7 +307,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void createCharts(int timeUnit, int amount)
+    private void updateChartTab(int timeUnit, int amount)
     {
         updateChartsData(timeUnit, amount);
         drawPriceChart();
@@ -509,7 +509,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         for(int i = 0, j = 0; i < dataChartList.size(); i += offset, j++)
         {
-            values.add(new BarEntry(j, (float) dataChartList.get(i).getVolumeTo()));
+            values.add(new BarEntry(j, (float) dataChartList.get(j).getVolumeTo()));
         }
 
         dataSet = new BarDataSet(values, "Volume");
@@ -614,7 +614,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private void updateFluctuation(float start, float end)
     {
         float fluctuation = end - start;
-        float percentageFluctuation = (float) (fluctuation / start * 100);
+        float percentageFluctuation = (fluctuation / start * 100);
 
         if(percentageFluctuation < 0)
         {

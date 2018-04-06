@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.db.chart.model.ChartSet;
@@ -45,9 +46,8 @@ public class HomeLayoutGenerator {
         this.context = context;
     }
 
-    public View getInfoLayout(final Currency currency, boolean isExtended)
+    public View getInfoLayout(final Currency currency, boolean isExtended, float totalValue, boolean isBalanceHidden)
     {
-
         View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, null);
 
         view.setOnClickListener(new View.OnClickListener() {
@@ -64,7 +64,7 @@ public class HomeLayoutGenerator {
             }
         });
 
-        updateCardViewInfos(view, currency);
+        updateCardViewInfos(view, currency, totalValue, isBalanceHidden);
 
         view.findViewById(R.id.errorTextView).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,7 +120,7 @@ public class HomeLayoutGenerator {
         });
     }
 
-    private void updateCardViewInfos(View view, Currency currency)
+    private void updateCardViewInfos(View view, Currency currency, float totalValue, boolean isBalanceHidden)
     {
         ((ImageView) view.findViewById(R.id.currencyIcon))
                 .setImageBitmap(currency.getIcon());
@@ -141,6 +141,20 @@ public class HomeLayoutGenerator {
                 .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
         ((ImageView) view.findViewById(R.id.detailsArrow))
                 .getDrawable().setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+
+        if(isBalanceHidden)
+        {
+            double value = currency.getValue() * currency.getBalance();
+            double percentage = value / totalValue * 100;
+
+            view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.VISIBLE);
+            ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).setProgress((int) Math.round(percentage));
+            ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).getIndeterminateDrawable().setColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_ATOP);
+        }
+        else
+        {
+            view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.GONE);
+        }
     }
 
     private void collapseView(View view)

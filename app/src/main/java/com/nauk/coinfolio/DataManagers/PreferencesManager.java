@@ -58,6 +58,11 @@ public class PreferencesManager {
         return settingPreferences.getBoolean("enable_hitbtc", false);
     }
 
+    public boolean isBalanceHidden()
+    {
+        return settingPreferences.getBoolean("hide_balance", false);
+    }
+
     public void disableHitBTC()
     {
         SharedPreferences.Editor editor = settingPreferences.edit();

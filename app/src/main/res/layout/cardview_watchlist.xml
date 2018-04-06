@@ -13,7 +13,7 @@
         android:layout_margin="10dp"
         android:clickable="false"
         android:backgroundTint="@color/listBackground2"
-        app:cardCornerRadius="8dp"
+        app:cardCornerRadius="2dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout

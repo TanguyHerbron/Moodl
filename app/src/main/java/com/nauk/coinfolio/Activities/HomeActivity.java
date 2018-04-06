@@ -85,6 +85,7 @@ public class HomeActivity extends AppCompatActivity {
     private long lastTimestamp;
     private boolean detailsChecker;
     private boolean isDetailed;
+    private float totalValue;
 
     private CollapsingToolbarLayout toolbarLayout;
     private SwipeRefreshLayout refreshLayout;
@@ -96,29 +97,6 @@ public class HomeActivity extends AppCompatActivity {
     private ViewFlipper viewFlipper;
 
     private HashMap<String, Integer> dominantCurrenciesColors;
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_something:
-
-                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
-                    return true;
-                case R.id.navigation_view_list:
-                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
-                    //viewFlipper.setDisplayedChild(1);
-                    return true;
-                case R.id.navigation_market_cap:
-                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
-                    //viewFlipper.setDisplayedChild(2);
-                    return true;
-            }
-            return false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -289,11 +267,11 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void onItemClick(int itemIndex, String itemName) {
+                spaceNavigationItemEvent(itemIndex);
             }
 
             @Override
             public void onItemReselected(int itemIndex, String itemName) {
-                spaceNavigationItemEvent(itemIndex);
             }
         });
     }
@@ -437,7 +415,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private void adaptView()
     {
-
         currencyLayout.removeAllViews();
 
         for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
@@ -446,7 +423,7 @@ public class HomeActivity extends AppCompatActivity {
 
             if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
             {
-                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed));
+                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
             }
         }
 
@@ -830,7 +807,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
 
-        private void loadCurrency(Currency currency, List<View> cardList)
+        private void loadCurrency(Currency currency)
         {
             if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001)
             {
@@ -838,30 +815,24 @@ public class HomeActivity extends AppCompatActivity {
                 currency.setId(balanceManager.getCurrencyId(currency.getSymbol()));
                 totalValue += currency.getValue() * currency.getBalance();
                 totalFluctuation += (currency.getValue() * currency.getBalance()) * (currency.getDayFluctuationPercentage() / 100);
-
-                cardList.add(layoutGenerator.getInfoLayout(currency, true));
-            }
-
-            if(!currency.getSymbol().equals("USD") && currency.getHistoryMinutes() == null)
-            {
-                cardList.add(layoutGenerator.getInfoLayout(currency, true));
             }
         }
 
-        private void refreshCurrencyList(final List<View> cardList)
+        private void refreshCurrencyList()
         {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    refreshLayout.setRefreshing(false);
                     currencyLayout.removeAllViews();
 
-                    for(int i = 0; i < cardList.size(); i++)
+                    for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                     {
-                        currencyLayout.addView(cardList.get(i));
-                    }
+                        Currency currency = balanceManager.getTotalBalance().get(i);
 
-                    adaptView();
+                        if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001) {
+                            currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                        }
+                    }
                 }
             });
         }
@@ -910,8 +881,6 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params)
         {
-            final List<View> cardList = new ArrayList<>();
-
             Looper.prepare();
 
             balanceManager.sortCoins();
@@ -922,12 +891,10 @@ public class HomeActivity extends AppCompatActivity {
 
                 updateChartColor(localCurrency);
 
-                loadCurrency(localCurrency, cardList);
+                loadCurrency(localCurrency);
 
                 balanceManager.getTotalBalance().set(i, localCurrency);
             }
-
-            refreshCurrencyList(cardList);
 
             toolbarLayout.setTitle("US$" + String.format("%.2f", totalValue));
 
@@ -941,6 +908,9 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result)
         {
+            refreshLayout.setRefreshing(false);
+            refreshCurrencyList();
+            HomeActivity.this.totalValue = totalValue;
             handler.removeCallbacks(updateRunnable);
         }
     }

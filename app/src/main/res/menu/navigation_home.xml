@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_something"
+        android:id="@+id/navigation_watchlist"
         android:icon="@drawable/ic_remove_red_eye_black_24dp"
         android:title="@string/title_watchlist" />
 
