@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -53,33 +56,24 @@ public class HomeLayoutGenerator {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(view.findViewById(R.id.LineChartView).getVisibility() == View.VISIBLE || view.findViewById(R.id.errorTextView).getVisibility() == View.VISIBLE)
+                if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
                 {
                     collapseView(view);
                 }
                 else
                 {
-                    extendView(currency, view);
+                    extendView(view);
                 }
             }
         });
 
         updateCardViewInfos(view, currency, totalValue, isBalanceHidden);
 
-        view.findViewById(R.id.errorTextView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                context.getApplicationContext().startActivity(intent);
-            }
-        });
-
         setupLineChart(view, currency);
 
         if(isExtended)
         {
-            extendView(currency, view);
+            extendView(view);
         }
         else
         {
@@ -89,6 +83,60 @@ public class HomeLayoutGenerator {
         updateColor(view, currency);
 
         return view;
+    }
+
+    public static void expand(final View v) {
+        v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? CardView.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+    public static void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
     }
 
     private void setupLineChart(View view, final Currency currency)
@@ -159,31 +207,13 @@ public class HomeLayoutGenerator {
 
     private void collapseView(View view)
     {
-        view.findViewById(R.id.separationLayout).setVisibility(View.GONE);
-        view.findViewById(R.id.frameLayoutChart).setVisibility(View.GONE);
-        view.findViewById(R.id.LineChartView).setVisibility(View.GONE);
-        view.findViewById(R.id.errorTextView).setVisibility(View.GONE);
-        view.findViewById(R.id.detailsArrow).setVisibility(View.GONE);
+        collapse(view.findViewById(R.id.collapsableLayout));
     }
 
-    private void extendView(Currency currency, View view)
+    private void extendView(View view)
     {
-        view.findViewById(R.id.separationLayout).setVisibility(View.VISIBLE);
-        view.findViewById(R.id.detailsArrow).setVisibility(View.VISIBLE);
-        view.findViewById(R.id.frameLayoutChart).setVisibility(View.VISIBLE);
-
-        if(currency.getHistoryMinutes() != null)
-        {
-            view.findViewById(R.id.LineChartView).setVisibility(View.VISIBLE);
-            view.findViewById(R.id.LineChartView).invalidate();
-            view.findViewById(R.id.errorTextView).setVisibility(View.GONE);
-        }
-        else
-        {
-            view.findViewById(R.id.LineChartView).setVisibility(View.GONE);
-            view.findViewById(R.id.errorTextView).setVisibility(View.VISIBLE);
-        }
-
+        expand(view.findViewById(R.id.collapsableLayout));
+        view.findViewById(R.id.LineChartView).invalidate();
     }
 
     private List<Double> getAxisBorders(Currency currency)

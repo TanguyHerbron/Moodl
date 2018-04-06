@@ -12,7 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:clickable="false"
-        android:backgroundTint="@color/listBackground2"
+        android:backgroundTint="@color/cardview_background"
+        android:elevation="@dimen/cardview_elevation"
         app:cardCornerRadius="2dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -127,65 +128,56 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/separationLayout"
+                android:id="@+id/collapsableLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:visibility="gone">
+                android:visibility="gone"
+                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Day history"
-                    android:textSize="@dimen/cardViewSecondaryText" />
-
-                <View
+                <LinearLayout
+                    android:id="@+id/separationLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/separationLineSize"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:background="@color/separationLine" />
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Day history"
+                        android:textSize="@dimen/cardViewSecondaryText" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/separationLineSize"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:background="@color/separationLine" />
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/frameLayoutChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/cardViewChartSize"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/LineChartView"
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"/>
+
+                    <ImageView
+                        android:id="@+id/detailsArrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_keyboard_arrow_right_grey_48dp"
+                        android:layout_gravity="center_vertical|end"/>
+
+                </FrameLayout>
 
             </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/frameLayoutChart"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/cardViewChartSize"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="gone">
-
-                <!--<com.db.chart.view.LineChartView
-                    android:id="@+id/LineChartView"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/cardViewChartSize"
-                    android:visibility="gone" />-->
-
-                <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/LineChartView"
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:visibility="gone"/>
-
-                <TextView
-                    android:id="@+id/errorTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/cardViewChartSize"
-                    android:gravity="center"
-                    android:text="Error"
-                    android:visibility="gone" />
-
-                <ImageView
-                    android:id="@+id/detailsArrow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_keyboard_arrow_right_grey_48dp"
-                    android:visibility="gone"
-                    android:layout_gravity="center_vertical|end"/>
-
-            </FrameLayout>
 
         </LinearLayout>
 

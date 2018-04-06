@@ -14,7 +14,7 @@
     <color name="listBackground2">#000046</color>
     <color name="separationLine">#FF999999</color>
     <color name="red">#FFF44336</color>
-    <color name="green">#FF4CAF50</color>
+    <color name="green">#FF4CAF50</color>#FBFCFF
 </resources>
 -->
 
@@ -34,4 +34,6 @@
     <color name="red">#FFF44336</color>
     <color name="green">#FF4CAF50</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="cardview_background">#FFFFFFFF</color>
+    <color name="summary_background">#FBFCFF</color>
 </resources>

@@ -17,4 +17,6 @@
     <dimen name="fingerprint_dialog_width">250dp</dimen>
 
     <dimen name="separationLineSize">1dp</dimen>
+
+    <dimen name="cardview_elevation">8dp</dimen>
 </resources>

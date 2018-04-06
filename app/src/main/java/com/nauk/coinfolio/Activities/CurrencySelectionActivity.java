@@ -13,7 +13,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
-import com.nauk.coinfolio.LayoutManagers.CurrencyAdapter;
+import com.nauk.coinfolio.LayoutManagers.CurrencyListAdapter;
 import com.nauk.coinfolio.R;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
     private String[] currencySymbols;
     private String[] currencyNames;
-    private CurrencyAdapter adapter;
+    private CurrencyListAdapter adapter;
     private ListView listView;
     private android.widget.Filter filter;
 
@@ -75,7 +75,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
             currencyArrayList.add(new Currency(currencyNames[i], currencySymbols[i]));
         }
 
-        adapter = new CurrencyAdapter(this, currencyArrayList);
+        adapter = new CurrencyListAdapter(this, currencyArrayList);
     }
 
     private void setupList()
