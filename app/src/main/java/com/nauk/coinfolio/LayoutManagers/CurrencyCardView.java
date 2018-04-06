@@ -5,13 +5,17 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -40,18 +44,21 @@ import static java.lang.Math.abs;
  * Created by Tiji on 05/01/2018.
  */
 
-public class HomeLayoutGenerator {
+public class CurrencyCardView extends CardView {
 
     android.content.Context context;
+    private LinearLayout rootLayout;
 
-    public HomeLayoutGenerator(Context context)
+    public CurrencyCardView(Context context, LinearLayout rootLayout)
     {
+        super(context);
         this.context = context;
+        this.rootLayout = rootLayout;
     }
 
     public View getInfoLayout(final Currency currency, boolean isExtended, float totalValue, boolean isBalanceHidden)
     {
-        View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, null);
+        View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, rootLayout, true);
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,31 +221,6 @@ public class HomeLayoutGenerator {
     {
         expand(view.findViewById(R.id.collapsableLayout));
         view.findViewById(R.id.LineChartView).invalidate();
-    }
-
-    private List<Double> getAxisBorders(Currency currency)
-    {
-        List<Double> borders = new ArrayList<>();
-
-        List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
-
-        borders.add(0, currency.getHistoryMinutes().get(0).getOpen());
-        borders.add(1, currency.getHistoryMinutes().get(0).getOpen());
-
-        for(int i = 0; i < dataChartList.size(); i++)
-        {
-            if(borders.get(0) > dataChartList.get(i).getOpen())
-            {
-                borders.set(0, dataChartList.get(i).getOpen());
-            }
-
-            if(borders.get(1) < dataChartList.get(i).getOpen())
-            {
-                borders.set(1, dataChartList.get(i).getOpen());
-            }
-        }
-
-        return borders;
     }
 
     private void updateColor(View view, Currency currency)

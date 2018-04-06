@@ -48,7 +48,7 @@ import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
-import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
+import com.nauk.coinfolio.LayoutManagers.CurrencyCardView;
 import com.nauk.coinfolio.R;
 
 import java.io.IOException;
@@ -76,7 +76,6 @@ import java.util.Locale;
 public class HomeActivity extends AppCompatActivity {
 
     private PreferencesManager preferencesManager;
-    private HomeLayoutGenerator layoutGenerator;
     private BalanceManager balanceManager;
     private MarketCapManager marketCapManager;
 
@@ -118,7 +117,6 @@ public class HomeActivity extends AppCompatActivity {
 
         //Objects initialization
         preferencesManager = new PreferencesManager(this);
-        layoutGenerator = new HomeLayoutGenerator(this);
         balanceManager = new BalanceManager(this);
         marketCapManager = new MarketCapManager(this);
         handler = new Handler();
@@ -424,7 +422,7 @@ public class HomeActivity extends AppCompatActivity {
 
             if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
             {
-                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                currencyLayout.addView(new CurrencyCardView(this, currencyLayout).getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
             }
         }
 
@@ -831,7 +829,7 @@ public class HomeActivity extends AppCompatActivity {
                         Currency currency = balanceManager.getTotalBalance().get(i);
 
                         if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001) {
-                            currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                            currencyLayout.addView(new CurrencyCardView(getApplicationContext(), currencyLayout).getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
                         }
                     }
                 }
