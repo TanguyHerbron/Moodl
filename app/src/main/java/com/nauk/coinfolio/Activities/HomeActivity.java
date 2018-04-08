@@ -397,12 +397,9 @@ public class HomeActivity extends AppCompatActivity {
         super.onResume();
 
         //addTestWatchlistCardview();
-
-        updateAll(preferencesManager.mustUpdate());
-
         displayBalance(preferencesManager.isBalanceHidden());
 
-        //((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
+        updateAll(preferencesManager.mustUpdate());
     }
 
     private void displayBalance(boolean hideBalance)
