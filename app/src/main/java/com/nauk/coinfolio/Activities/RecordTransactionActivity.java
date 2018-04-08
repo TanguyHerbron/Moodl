@@ -3,6 +3,7 @@ package com.nauk.coinfolio.Activities;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
+import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.R;
 
 import java.text.SimpleDateFormat;
@@ -30,6 +32,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
     private DatabaseManager databaseManager;
     private Calendar calendar;
     private SimpleDateFormat sdf;
+    private PreferencesManager preferenceManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
 
         databaseManager = new DatabaseManager(this);
+        preferenceManager = new PreferencesManager(this);
 
         validateButton = findViewById(R.id.validateButton);
         amountTxtView = findViewById(R.id.currencyAmount);
@@ -65,8 +69,8 @@ public class RecordTransactionActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 databaseManager.addCurrencyToManualCurrency(symbol, Double.parseDouble(amountTxtView.getText().toString()), calendar.getTime());
+                preferenceManager.setMustUpdate(true);
                 Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
-                intent.putExtra("update", true);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 finish();

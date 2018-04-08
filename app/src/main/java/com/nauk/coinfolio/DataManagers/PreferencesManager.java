@@ -92,15 +92,20 @@ public class PreferencesManager {
         editor.apply();
     }
 
+    public void setMustUpdate(boolean mustUpdate)
+    {
+        SharedPreferences.Editor editor = settingPreferences.edit();
+        editor.putBoolean("mustUpdate", mustUpdate);
+        editor.apply();
+    }
+
     public boolean mustUpdate()
     {
         boolean mustUpdate = settingPreferences.getBoolean("mustUpdate", false);
 
         if(mustUpdate)
         {
-            SharedPreferences.Editor editor = settingPreferences.edit();
-            editor.putBoolean("mustUpdate", false);
-            editor.apply();
+            setMustUpdate(false);
         }
 
         return mustUpdate;

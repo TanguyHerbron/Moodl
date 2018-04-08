@@ -40,6 +40,7 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
+import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.R;
 
 import java.text.DecimalFormat;
@@ -71,6 +72,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private List<CurrencyDataChart> dataChartList;
     private LineChart lineChart;
     private BarChart barChart;
+    private PreferencesManager preferencesManager;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -122,6 +124,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         currency = intent.getParcelableExtra("currency");
 
         databaseManager = new DatabaseManager(this);
+        preferencesManager = new PreferencesManager(this);
 
         viewFlipper = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
@@ -664,6 +667,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             deleteLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    preferencesManager.setMustUpdate(true);
                     databaseManager.deleteTransactionFromId(Integer.parseInt(view.getTag().toString()));
                     drawTransactionList();
                     hasBeenModified = true;
