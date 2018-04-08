@@ -91,4 +91,18 @@ public class PreferencesManager {
         editor.putBoolean("enable_binance", false);
         editor.apply();
     }
+
+    public boolean mustUpdate()
+    {
+        boolean mustUpdate = settingPreferences.getBoolean("mustUpdate", false);
+
+        if(mustUpdate)
+        {
+            SharedPreferences.Editor editor = settingPreferences.edit();
+            editor.putBoolean("mustUpdate", false);
+            editor.apply();
+        }
+
+        return mustUpdate;
+    }
 }

@@ -91,7 +91,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:textColor="@color/secondaryTextViewColor"
-                        android:textSize="@dimen/cardViewSecondaryText"
+                        android:textSize="@dimen/cardViewMainText"
                         android:visibility="gone"/>
 
                     <LinearLayout

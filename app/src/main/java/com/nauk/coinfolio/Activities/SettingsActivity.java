@@ -225,6 +225,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     SharedPreferences.Editor editor = preferences.edit();
 
                     editor.putBoolean("hide_balance", isChecked);
+                    editor.putBoolean("mustUpdate", true);
                     editor.apply();
 
                     return isChecked;
@@ -266,6 +267,38 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             bindPreferenceSummaryToValue(findPreference("hitbtc_privatekey"));
             bindPreferenceSummaryToValue(findPreference("binance_privatekey"));
+
+            ((SwitchPreference) findPreference("enable_hitbtc")).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    boolean isChecked = ((SwitchPreference) findPreference("enable_hitbtc")).isChecked();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+                    SharedPreferences.Editor editor = preferences.edit();
+
+                    editor.putBoolean("mustUpdate", true);
+                    editor.apply();
+
+                    return isChecked;
+                }
+            });
+
+            ((SwitchPreference) findPreference("enable_binance")).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    boolean isChecked = ((SwitchPreference) findPreference("enable_binance")).isChecked();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+                    SharedPreferences.Editor editor = preferences.edit();
+
+                    editor.putBoolean("mustUpdate", true);
+                    editor.apply();
+
+                    return isChecked;
+                }
+            });
 
             startFingerprintProtocol();
         }

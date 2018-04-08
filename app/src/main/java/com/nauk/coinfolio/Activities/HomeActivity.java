@@ -345,8 +345,7 @@ public class HomeActivity extends AppCompatActivity {
 
         //addTestWatchlistCardview();
 
-        Intent intent = getIntent();
-        updateAll(intent.getBooleanExtra("update", false));
+        updateAll(preferencesManager.mustUpdate());
 
         ((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
     }
@@ -884,7 +883,10 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params)
         {
-            Looper.prepare();
+            if(Looper.myLooper() == null)
+            {
+                Looper.prepare();
+            }
 
             balanceManager.sortCoins();
 
