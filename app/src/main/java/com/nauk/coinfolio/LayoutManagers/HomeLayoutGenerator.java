@@ -5,24 +5,16 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.os.Bundle;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.db.chart.model.ChartSet;
-import com.db.chart.model.LineSet;
-import com.db.chart.renderer.AxisRenderer;
-import com.db.chart.view.LineChartView;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -32,9 +24,8 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.R;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,21 +35,18 @@ import static java.lang.Math.abs;
  * Created by Tiji on 05/01/2018.
  */
 
-public class CurrencyCardView extends CardView {
+public class HomeLayoutGenerator {
 
-    android.content.Context context;
-    private LinearLayout rootLayout;
+    private android.content.Context context;
 
-    public CurrencyCardView(Context context, LinearLayout rootLayout)
+    public HomeLayoutGenerator(Context context)
     {
-        super(context);
         this.context = context;
-        this.rootLayout = rootLayout;
     }
 
     public View getInfoLayout(final Currency currency, boolean isExtended, float totalValue, boolean isBalanceHidden)
     {
-        View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, rootLayout, true);
+        View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, null, true);
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,21 +182,36 @@ public class CurrencyCardView extends CardView {
                 .setText(context.getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(currency.getDayFluctuationPercentage())));
         ((TextView) view.findViewById(R.id.currencyFluctuationTextView))
                 .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
-        ((ImageView) view.findViewById(R.id.detailsArrow))
-                .getDrawable().setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+
+        Drawable arrowDrawable = ((ImageView) view.findViewById(R.id.detailsArrow)).getDrawable();
+        arrowDrawable.mutate();
+        arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        arrowDrawable.invalidateSelf();
+
+        Drawable progressBarDrawable = ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).getProgressDrawable();
+        progressBarDrawable.mutate();
+        progressBarDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        progressBarDrawable.invalidateSelf();
 
         if(isBalanceHidden)
         {
             double value = currency.getValue() * currency.getBalance();
             double percentage = value / totalValue * 100;
+            DecimalFormat df = new DecimalFormat(".##");
 
             view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.VISIBLE);
             ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).setProgress((int) Math.round(percentage));
-            ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).getIndeterminateDrawable().setColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_ATOP);
+
+            view.findViewById(R.id.percentageOwnedTextView).setVisibility(View.VISIBLE);
+            ((TextView) view.findViewById(R.id.percentageOwnedTextView)).setText(context.getResources().getString(R.string.currencyPercentagePlaceholder, df.format(percentage)));
+
+            view.findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.GONE);
         }
         else
         {
             view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.GONE);
+            view.findViewById(R.id.percentageOwnedTextView).setVisibility(View.GONE);
+            view.findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.VISIBLE);
         }
     }
 

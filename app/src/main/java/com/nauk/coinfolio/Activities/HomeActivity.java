@@ -6,20 +6,18 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.util.Log;
@@ -48,7 +46,8 @@ import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
-import com.nauk.coinfolio.LayoutManagers.CurrencyCardView;
+import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
+import com.nauk.coinfolio.LayoutManagers.SummaryCurrencyCardView;
 import com.nauk.coinfolio.R;
 
 import java.io.IOException;
@@ -95,6 +94,7 @@ public class HomeActivity extends AppCompatActivity {
     private Handler handler;
     private Runnable updateRunnable;
     private ViewFlipper viewFlipper;
+    private HomeLayoutGenerator layoutGenerator;
 
     private HashMap<String, Integer> dominantCurrenciesColors;
 
@@ -148,6 +148,8 @@ public class HomeActivity extends AppCompatActivity {
         currencyLayout = findViewById(R.id.currencyListLayout);
         viewFlipper = findViewById(R.id.viewFlipperSummary);
         viewFlipper.setDisplayedChild(1);
+
+        layoutGenerator = new HomeLayoutGenerator(this);
 
         ImageButton addCurrencyButton = findViewById(R.id.floatingAddButton);
         ImageButton detailsButton = findViewById(R.id.switch_button);
@@ -422,7 +424,9 @@ public class HomeActivity extends AppCompatActivity {
 
             if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
             {
-                currencyLayout.addView(new CurrencyCardView(this, currencyLayout).getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                //currencyLayout.addView(new HomeLayoutGenerator(this, currencyLayout).getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                //currencyLayout.addView(new SummaryCurrencyCardView(this, currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
             }
         }
 
@@ -829,7 +833,9 @@ public class HomeActivity extends AppCompatActivity {
                         Currency currency = balanceManager.getTotalBalance().get(i);
 
                         if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001) {
-                            currencyLayout.addView(new CurrencyCardView(getApplicationContext(), currencyLayout).getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                            //currencyLayout.addView(new HomeLayoutGenerator(getApplicationContext(), currencyLayout).getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                            //currencyLayout.addView(new SummaryCurrencyCardView(getApplicationContext(), currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                            currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
                         }
                     }
                 }

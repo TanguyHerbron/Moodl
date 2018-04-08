@@ -86,27 +86,44 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/currencyOwnedTextView"
+                        android:id="@+id/percentageOwnedTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="left"
-                        android:textColor="@color/mainTextViewColor"
-                        android:textSize="@dimen/cardViewMainText" />
-
-                    <TextView
-                        android:id="@+id/currencyValueOwnedTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="2dp"
-                        android:gravity="left"
+                        android:gravity="start"
                         android:textColor="@color/secondaryTextViewColor"
-                        android:textSize="@dimen/cardViewSecondaryText" />
+                        android:textSize="@dimen/cardViewSecondaryText"
+                        android:visibility="gone"/>
+
+                    <LinearLayout
+                        android:id="@+id/currencyOwnedInfoLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/currencyOwnedTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:textColor="@color/mainTextViewColor"
+                            android:textSize="@dimen/cardViewMainText" />
+
+                        <TextView
+                            android:id="@+id/currencyValueOwnedTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:gravity="start"
+                            android:textColor="@color/secondaryTextViewColor"
+                            android:textSize="@dimen/cardViewSecondaryText" />
+
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/secondaryLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="right"
+                        android:gravity="end"
                         android:orientation="horizontal">
 
                         <TextView
