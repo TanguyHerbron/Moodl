@@ -154,9 +154,7 @@ public class HomeActivity extends AppCompatActivity {
         ImageButton settingsButton = findViewById(R.id.settings_button);
 
         toolbarLayout.setForegroundGravity(Gravity.CENTER);
-        toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
-
-        toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
+        updateTitle();
 
         //Events setup
         detailsButton.setOnClickListener(new View.OnClickListener() {
@@ -223,6 +221,27 @@ public class HomeActivity extends AppCompatActivity {
         setupNavBar(savedInstanceState);
 
         setupDominantCurrenciesColors();
+    }
+
+    protected void updateTitle(float totalValue, float totalFluctuation)
+    {
+        float totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) *100;
+
+        if(loadingDialog.isShowing())
+        {
+            loadingDialog.dismiss();
+        }
+
+        if(preferencesManager.isBalanceHidden())
+        {
+
+        }
+        else
+        {
+            toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
+            toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
+            toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
+        }
     }
 
     private void setupDominantCurrenciesColors()
@@ -347,7 +366,31 @@ public class HomeActivity extends AppCompatActivity {
 
         updateAll(preferencesManager.mustUpdate());
 
-        ((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
+        displayBalance(preferencesManager.isBalanceHidden());
+
+        //((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
+    }
+
+    private void displayBalance(boolean hideBalance)
+    {
+        if(hideBalance)
+        {
+            for(int i = 0; i < currencyLayout.getChildCount(); i++)
+            {
+                currencyLayout.getChildAt(i).findViewById(R.id.currencyPortfolioDominance).setVisibility(View.VISIBLE);
+                currencyLayout.getChildAt(i).findViewById(R.id.percentageOwnedTextView).setVisibility(View.VISIBLE);
+                currencyLayout.getChildAt(i).findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.GONE);
+            }
+        }
+        else
+        {
+            for(int i = 0; i < currencyLayout.getChildCount(); i++)
+            {
+                currencyLayout.getChildAt(i).findViewById(R.id.currencyPortfolioDominance).setVisibility(View.INVISIBLE);
+                currencyLayout.getChildAt(i).findViewById(R.id.percentageOwnedTextView).setVisibility(View.GONE);
+                currencyLayout.getChildAt(i).findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     private void addTestWatchlistCardview()
@@ -421,8 +464,6 @@ public class HomeActivity extends AppCompatActivity {
 
             if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
             {
-                //currencyLayout.addView(new HomeLayoutGenerator(this, currencyLayout).getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
-                //currencyLayout.addView(new SummaryCurrencyCardView(this, currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
                 currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
             }
         }
@@ -830,8 +871,6 @@ public class HomeActivity extends AppCompatActivity {
                         Currency currency = balanceManager.getTotalBalance().get(i);
 
                         if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001) {
-                            //currencyLayout.addView(new HomeLayoutGenerator(getApplicationContext(), currencyLayout).getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
-                            //currencyLayout.addView(new SummaryCurrencyCardView(getApplicationContext(), currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
                             currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
                         }
                     }

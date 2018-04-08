@@ -225,7 +225,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     SharedPreferences.Editor editor = preferences.edit();
 
                     editor.putBoolean("hide_balance", isChecked);
-                    editor.putBoolean("mustUpdate", true);
                     editor.apply();
 
                     return isChecked;

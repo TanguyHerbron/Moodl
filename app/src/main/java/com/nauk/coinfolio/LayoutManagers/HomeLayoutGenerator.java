@@ -165,6 +165,10 @@ public class HomeLayoutGenerator {
 
     private void updateCardViewInfos(View view, Currency currency, float totalValue, boolean isBalanceHidden)
     {
+        double value = currency.getValue() * currency.getBalance();
+        double percentage = value / totalValue * 100;
+        DecimalFormat df = new DecimalFormat(".##");
+
         ((ImageView) view.findViewById(R.id.currencyIcon))
                 .setImageBitmap(currency.getIcon());
         ((TextView) view.findViewById(R.id.currencyNameTextView))
@@ -193,23 +197,18 @@ public class HomeLayoutGenerator {
         progressBarDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
         progressBarDrawable.invalidateSelf();
 
+        ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).setProgress((int) Math.round(percentage));
+        ((TextView) view.findViewById(R.id.percentageOwnedTextView)).setText(context.getResources().getString(R.string.currencyPercentagePlaceholder, df.format(percentage)));
+
         if(isBalanceHidden)
         {
-            double value = currency.getValue() * currency.getBalance();
-            double percentage = value / totalValue * 100;
-            DecimalFormat df = new DecimalFormat(".##");
-
             view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.VISIBLE);
-            ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).setProgress((int) Math.round(percentage));
-
             view.findViewById(R.id.percentageOwnedTextView).setVisibility(View.VISIBLE);
-            ((TextView) view.findViewById(R.id.percentageOwnedTextView)).setText(context.getResources().getString(R.string.currencyPercentagePlaceholder, df.format(percentage)));
-
             view.findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.GONE);
         }
         else
         {
-            view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.GONE);
+            view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.INVISIBLE);
             view.findViewById(R.id.percentageOwnedTextView).setVisibility(View.GONE);
             view.findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.VISIBLE);
         }

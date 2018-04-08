@@ -657,8 +657,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             TextView valueTxtView = view.findViewById(R.id.puchasedValue);
             TextView dateTxtView = view.findViewById(R.id.purchaseDate);
 
-            Log.d("coinfolio", "Timestamp " + transactionList.get(i).getTimestamp());
-
             dateTxtView.setText(getDate(transactionList.get(i).getTimestamp()));
 
             LinearLayout deleteLayout = view.findViewById(R.id.deleteTransactionLayout);
