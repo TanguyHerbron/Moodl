@@ -82,7 +82,8 @@ public class HomeActivity extends AppCompatActivity {
     private long lastTimestamp;
     private boolean detailsChecker;
     private boolean isDetailed;
-    private float totalValue;
+    protected float totalValue;
+    protected float totalFluctuation;
 
     private CollapsingToolbarLayout toolbarLayout;
     private SwipeRefreshLayout refreshLayout;
@@ -154,6 +155,10 @@ public class HomeActivity extends AppCompatActivity {
         ImageButton settingsButton = findViewById(R.id.settings_button);
 
         toolbarLayout.setForegroundGravity(Gravity.CENTER);
+
+        totalValue = 0;
+        totalFluctuation = 0;
+
         updateTitle();
 
         //Events setup
@@ -223,24 +228,53 @@ public class HomeActivity extends AppCompatActivity {
         setupDominantCurrenciesColors();
     }
 
-    protected void updateTitle(float totalValue, float totalFluctuation)
+    protected void updateTitle()
     {
-        float totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) *100;
-
-        if(loadingDialog.isShowing())
-        {
-            loadingDialog.dismiss();
-        }
+        float totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) * 100;
 
         if(preferencesManager.isBalanceHidden())
         {
+            toolbarLayout.setTitle(getResources().getString(R.string.currencyPercentagePlaceholder, String.format("%.2f", totalFluctuationPercentage)));
+            toolbarSubtitle.setVisibility(View.GONE);
 
+            if(totalFluctuation > 0)
+            {
+                toolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.increase));
+                toolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.increase));
+            }
+            else
+            {
+                toolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.decrease));
+                toolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.decrease));
+            }
         }
         else
         {
-            toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
-            toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
-            toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
+            toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, String.format("%.2f", totalValue)));
+            toolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
+            toolbarLayout.setExpandedTitleColor(Color.WHITE);
+
+            toolbarSubtitle.setVisibility(View.VISIBLE);
+
+            if(totalFluctuation > 0)
+            {
+                toolbarSubtitle.setTextColor(getResources().getColor(R.color.increase));
+            }
+            else
+            {
+                toolbarSubtitle.setTextColor(getResources().getColor(R.color.decrease));
+            }
+
+            if(totalFluctuation == 0)
+            {
+                toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
+                toolbarSubtitle.setTextColor(-1275068417);
+
+            }
+            else
+            {
+                toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
+            }
         }
     }
 
@@ -373,6 +407,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private void displayBalance(boolean hideBalance)
     {
+        updateTitle();
+
         if(hideBalance)
         {
             for(int i = 0; i < currencyLayout.getChildCount(); i++)
@@ -499,6 +535,9 @@ public class HomeActivity extends AppCompatActivity {
         coinCounter = 0;
         iconCounter = 0;
         detailsChecker = false;
+
+        totalValue = 0;
+        totalFluctuation = 0;
     }
 
     private void getBitmapFromURL(String src, IconCallBack callBack) {
@@ -569,11 +608,8 @@ public class HomeActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
 
-                toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
-
-                toolbarSubtitle.setTextColor(-1275068417);
+                updateTitle();
             }
         });
     }
@@ -814,10 +850,6 @@ public class HomeActivity extends AppCompatActivity {
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
     {
 
-        private float totalValue;
-        private float totalFluctuation;
-        private float totalFluctuationPercentage;
-
         @Override
         protected void onPreExecute()
         {
@@ -825,7 +857,6 @@ public class HomeActivity extends AppCompatActivity {
 
             totalValue = 0;
             totalFluctuation = 0;
-            totalFluctuationPercentage = 0;
         }
 
         @Override
@@ -878,47 +909,6 @@ public class HomeActivity extends AppCompatActivity {
             });
         }
 
-        private void updateFluctuation()
-        {
-            if(totalFluctuation > 0)
-            {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toolbarSubtitle.setTextColor(getResources().getColor(R.color.increase));
-                    }
-                });
-            }
-            else
-            {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toolbarSubtitle.setTextColor(getResources().getColor(R.color.decrease));
-                    }
-                });
-            }
-        }
-
-        private void updateTitle()
-        {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) *100;
-
-                    //toolbarSubtitle.setText(String.format(getResources().getString(R.string.fluctuationDollarPercentagePlaceholder), totalFluctuation));
-                    toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
-
-                    if(loadingDialog.isShowing())
-                    {
-                        loadingDialog.dismiss();
-                    }
-                }
-            });
-        }
-
         @Override
         protected Void doInBackground(Void... params)
         {
@@ -940,11 +930,17 @@ public class HomeActivity extends AppCompatActivity {
                 balanceManager.getTotalBalance().set(i, localCurrency);
             }
 
-            toolbarLayout.setTitle("US$" + String.format("%.2f", totalValue));
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateTitle();
+                }
+            });
 
-            updateFluctuation();
-
-            updateTitle();
+            if(loadingDialog.isShowing())
+            {
+                loadingDialog.dismiss();
+            }
 
             return null;
         }
