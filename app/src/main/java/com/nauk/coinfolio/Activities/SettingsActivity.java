@@ -218,17 +218,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             ((SwitchPreference) findPreference("hide_balance")).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    boolean isChecked = !((SwitchPreference) findPreference("hide_balance")).isChecked();
-
-                    ((SwitchPreference) findPreference("hide_balance")).setChecked(isChecked);
+                    boolean isChecked = ((SwitchPreference) findPreference("hide_balance")).isChecked();
 
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-                    SharedPreferences.Editor editor = preference.getEditor();
+                    SharedPreferences.Editor editor = preferences.edit();
 
                     editor.putBoolean("hide_balance", isChecked);
                     editor.apply();
-                    return false;
+
+                    return isChecked;
                 }
             });
         }
