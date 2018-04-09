@@ -63,6 +63,21 @@ public class Currency implements Parcelable {
         this.symbol = symbol;
     }
 
+    public void getTimestampPrice(android.content.Context context, final PriceCallBack callBack, long timestamp)
+    {
+        dataRetriver = new CurrencyDataRetriever(context);
+
+        dataRetriver.getPriceTimestamp(symbol, new CurrencyDataRetriever.DataChartCallBack() {
+            @Override
+            public void onSuccess(List<CurrencyDataChart> dataChart) {}
+
+            @Override
+            public void onSuccess(String price) {
+                callBack.onSuccess(price);
+            }
+        }, timestamp);
+    }
+
     public void updateHistoryMinutes(android.content.Context context, final CurrencyCallBack callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
@@ -84,6 +99,9 @@ public class Currency implements Parcelable {
 
                 callBack.onSuccess(Currency.this);
             }
+
+            @Override
+            public void onSuccess(String result){}
         }, CurrencyDataRetriever.MINUTES);
     }
 
@@ -97,6 +115,9 @@ public class Currency implements Parcelable {
 
                 callBack.onSuccess(Currency.this);
             }
+
+            @Override
+            public void onSuccess(String price) {}
         }, CurrencyDataRetriever.HOURS);
     }
 
@@ -110,6 +131,9 @@ public class Currency implements Parcelable {
 
                 callBack.onSuccess(Currency.this);
             }
+
+            @Override
+            public void onSuccess(String price) {}
         }, CurrencyDataRetriever.DAYS);
     }
 
@@ -237,6 +261,9 @@ public class Currency implements Parcelable {
         void onSuccess(Currency currency);
     }
 
+    public interface PriceCallBack {
+        void onSuccess(String price);
+    }
 
     @Override
     public int describeContents() {

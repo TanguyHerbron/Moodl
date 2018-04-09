@@ -8,9 +8,11 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -25,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
+import com.binance.api.client.domain.account.Trade;
 import com.daimajia.swipe.SwipeLayout;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -36,10 +39,12 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
+import com.nauk.coinfolio.DataManagers.ExchangeManager.BinanceManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.R;
 
@@ -60,6 +65,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
     private LinearLayout transactionLayout;
+    private LinearLayout tradeLayout;
     private DatabaseManager databaseManager;
     //private String symbol;
     private Currency currency;
@@ -73,6 +79,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private LineChart lineChart;
     private BarChart barChart;
     private PreferencesManager preferencesManager;
+    private BinanceManager binanceManager;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -128,8 +135,10 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         viewFlipper = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
+        tradeLayout = findViewById(R.id.listTrades);
         lineChart = findViewById(R.id.chartPriceView);
         barChart = findViewById(R.id.chartVolumeView);
+        binanceManager = new BinanceManager(preferencesManager.getBinancePublicKey(), preferencesManager.getBinancePrivateKey());
 
         ((BottomNavigationView) findViewById(R.id.navigation_details)).getMenu().getItem(1).setEnabled(false);
 
@@ -145,6 +154,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         hasBeenModified = false;
+
+        TradeUpdater updater = new TradeUpdater();
+        updater.execute();
     }
 
     private void setupActionBar()
@@ -644,6 +656,39 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return transColor;
     }
 
+    private void drawTradeList(List<Trade> trades, String pairSymbol)
+    {
+        findViewById(R.id.tradeProgressBar).setVisibility(View.GONE);
+
+        tradeLayout.removeAllViews();
+
+        for(int i = trades.size()-1; i >= 0; i--)
+        {
+            View view = LayoutInflater.from(this).inflate(R.layout.custom_trade_row, null);
+            TextView amountTxtView = view.findViewById(R.id.amountPurchased);
+            TextView purchasedPrice = view.findViewById(R.id.purchasedPrice);
+            TextView tradePair = view.findViewById(R.id.pair);
+            TextView dateTxtView = view.findViewById(R.id.tradeDate);
+            View tradeIndicator = view.findViewById(R.id.tradeIndicator);
+
+            if(trades.get(i).isBuyer())
+            {
+                tradeIndicator.setBackgroundColor(getColor(R.color.green));
+            }
+            else
+            {
+                tradeIndicator.setBackgroundColor(getColor(R.color.red));
+            }
+
+            amountTxtView.setText(String.valueOf(trades.get(i).getQty()));
+            purchasedPrice.setText(trades.get(i).getPrice());
+            dateTxtView.setText(getDate(trades.get(i).getTime()));
+            tradePair.setText(currency.getSymbol() + "/" + pairSymbol);
+
+            tradeLayout.addView(view);
+        }
+    }
+
     private void drawTransactionList()
     {
         transactionLayout.removeAllViews();
@@ -723,6 +768,53 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         });
     }
 
+    private class TradeUpdater extends AsyncTask<Void, Integer, Void>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+
+            findViewById(R.id.tradeProgressBar).setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values)
+        {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
+                @Override
+                public void onSuccess() {
+                    final List<Trade> trades = binanceManager.getTrades();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            drawTradeList(trades, "ETH");
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+
+                }
+            }, currency.getSymbol());
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result)
+        {
+
+        }
+    }
 }
 /*for(int i = 0; i < dataChartList.size(); i++)
         {*/

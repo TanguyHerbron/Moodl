@@ -53,7 +53,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 + KEY_CURRENCY_NAME + " VARCHAR(45),"
                 + KEY_CURRENCY_BALANCE + " TEXT,"
                 + KEY_CURRENCY_DATE + " TEXT,"
-                + KEY_CURRENCY_PURCHASED_PRICE + " TEXT,"
+                + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
                 + KEY_CURRENCY_IS_MINED + " INTEGER"
                 + ");");
 
@@ -76,7 +76,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    public void addCurrencyToManualCurrency(String symbol, double balance, Date date)
+    public void addCurrencyToManualCurrency(String symbol, double balance, Date date, String purchasedPrice)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -84,6 +84,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         values.put(KEY_CURRENCY_SYMBOL, symbol);
         values.put(KEY_CURRENCY_BALANCE, balance);
         values.put(KEY_CURRENCY_DATE, date.getTime());
+        values.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
         //values.put(KEY_CURRENCY_PURCHASED_PRICE, something);
 
         db.insert(TABLE_MANUAL_CURRENCIES, null, values);
@@ -120,7 +121,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4)));
+            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5)));
         }
 
         resultatList.close();

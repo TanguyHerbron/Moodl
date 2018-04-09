@@ -1,9 +1,12 @@
 package com.nauk.coinfolio.DataManagers.ExchangeManager;
 
+import android.util.Log;
+
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.account.Account;
 import com.binance.api.client.domain.account.AssetBalance;
+import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.exception.BinanceApiException;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 
@@ -21,6 +24,7 @@ public class BinanceManager {
     private String privateKey;
 
     private List<Currency> balance;
+    private List<Trade> trades;
 
     public BinanceManager(String publicKey, String privateKey)
     {
@@ -53,9 +57,52 @@ public class BinanceManager {
         }
     }
 
-    public void getTrades()
+    public void updateTrades(BinanceCallBack callBack, String symbol)
     {
+        List<Trade> totalTrades = new ArrayList<>();
 
+        updateTrades(null, symbol, "BTC");
+        totalTrades.addAll(trades);
+
+        updateTrades(null, symbol, "ETH");
+        totalTrades.addAll(trades);
+
+        updateTrades(null, symbol, "USDT");
+        totalTrades.addAll(trades);
+
+        trades = totalTrades;
+
+        callBack.onSuccess();
+    }
+
+    public void updateTrades(BinanceCallBack callBack, String symbol, String pairSymbol)
+    {
+        BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
+        BinanceApiRestClient client = factory.newRestClient();
+
+        Log.d("coinfolio", symbol + pairSymbol);
+
+        trades = new ArrayList<>();
+
+        if(!symbol.equals(pairSymbol))
+        {
+            try {
+                trades = client.getMyTrades(symbol + pairSymbol);
+
+            } catch (BinanceApiException e) {
+                try {
+                    trades = client.getMyTrades(pairSymbol + symbol);
+
+                } catch (BinanceApiException f) {
+                    f.printStackTrace();
+                }
+            }
+        }
+
+        if(callBack != null)
+        {
+            callBack.onSuccess();
+        }
     }
 
     public void setPublicKey(String publicKey)
@@ -71,6 +118,11 @@ public class BinanceManager {
     public List<Currency> getBalance()
     {
         return balance;
+    }
+
+    public List<Trade> getTrades()
+    {
+        return trades;
     }
 
     public interface BinanceCallBack {

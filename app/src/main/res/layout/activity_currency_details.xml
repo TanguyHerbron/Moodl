@@ -329,59 +329,68 @@
                 android:layout_gravity="center"
                 android:background="@drawable/circular_progress_bar" />
 
-            <!--<ScrollView
-                android:id="@+id/svInfos"
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/transactionsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:text="Transaction history"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/cardview_elevation"/>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5">
 
                 <LinearLayout
+                    android:id="@+id/listTransactions"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:orientation="vertical"/>
+
+            </ScrollView>
+
+            <TextView
+                android:text="Trade history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/cardview_elevation" />
+
+            <ScrollView
+                android:id="@+id/svTransactions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5">
+
+                <LinearLayout
+                    android:id="@+id/listTrades"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <ProgressBar
-                        android:id="@+id/progressBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="?android:attr/progressBarStyleLarge"
-                        android:layout_gravity="center"
-                        android:background="@drawable/circular_progress_bar" />
+                        android:id="@+id/tradeProgressBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"/>
 
                 </LinearLayout>
 
-            </ScrollView>-->
+            </ScrollView>
 
         </LinearLayout>
 
         <ScrollView
-            android:id="@+id/svTransactions"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <LinearLayout
-                android:id="@+id/listTransactions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-            </LinearLayout>
 
         </ScrollView>
-
-        <!--<ScrollView
-            android:id="@+id/svTransactions"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:id="@+id/transactionsLinearLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-            </LinearLayout>
-
-        </ScrollView>-->
 
     </ViewFlipper>
 

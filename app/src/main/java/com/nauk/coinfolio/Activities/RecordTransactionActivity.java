@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.R;
@@ -33,6 +34,8 @@ public class RecordTransactionActivity extends AppCompatActivity {
     private Calendar calendar;
     private SimpleDateFormat sdf;
     private PreferencesManager preferenceManager;
+    private EditText purchasedPrice;
+    private Currency currency;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +52,17 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
         calendar = Calendar.getInstance();
 
+        currency = new Currency(coin, symbol);
+
         databaseManager = new DatabaseManager(this);
         preferenceManager = new PreferencesManager(this);
 
         validateButton = findViewById(R.id.validateButton);
         amountTxtView = findViewById(R.id.currencyAmount);
         purchasedDate = findViewById(R.id.purchaseDate);
+        purchasedPrice = findViewById(R.id.purchasePrice);
 
+        //purchasedPrice.setText();
         purchasedDate.setText(sdf.format(calendar.getTime()));
 
         purchasedDate.setOnClickListener(new View.OnClickListener() {
@@ -68,7 +75,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
         validateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                databaseManager.addCurrencyToManualCurrency(symbol, Double.parseDouble(amountTxtView.getText().toString()), calendar.getTime());
+                databaseManager.addCurrencyToManualCurrency(symbol, Double.parseDouble(amountTxtView.getText().toString()), calendar.getTime(), purchasedPrice.getText().toString());
                 preferenceManager.setMustUpdate(true);
                 Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -76,6 +83,13 @@ public class RecordTransactionActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        currency.getTimestampPrice(this, new Currency.PriceCallBack() {
+            @Override
+            public void onSuccess(String price) {
+                purchasedPrice.setText(price);
+            }
+        }, calendar.getTimeInMillis() / 1000);
     }
 
     private void createDatePicker()
@@ -108,6 +122,14 @@ public class RecordTransactionActivity extends AppCompatActivity {
                         calendar.set(Calendar.HOUR_OF_DAY, hour);
                         calendar.set(Calendar.MINUTE, minute);
                         purchasedDate.setText(sdf.format(calendar.getTime()));
+
+                        currency.getTimestampPrice(RecordTransactionActivity.this, new Currency.PriceCallBack() {
+                            @Override
+                            public void onSuccess(String price) {
+                                purchasedPrice.setText(price);
+                            }
+                        }, calendar.getTimeInMillis() / 1000);
+                        Log.d("coinfolio", "Time : " + calendar.getTimeInMillis());
                     }
                 },
                 calendar.get(Calendar.HOUR_OF_DAY),

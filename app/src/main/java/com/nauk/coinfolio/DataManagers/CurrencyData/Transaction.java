@@ -13,12 +13,13 @@ public class Transaction {
     private double purchasedPrice;
     private boolean isMined;
 
-    public Transaction(int transactionId, String symbol, double amount, long timestamp)
+    public Transaction(int transactionId, String symbol, double amount, long timestamp, double purchasedPrice)
     {
         this.transactionId = transactionId;
         this.symbol = symbol;
         this.amount = amount;
         this.timestamp = timestamp;
+        this.purchasedPrice = purchasedPrice;
     }
 
     public int getTransactionId() {
@@ -48,5 +49,15 @@ public class Transaction {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public void setPurchasedPrice(double purchasedPrice)
+    {
+        this.purchasedPrice = purchasedPrice;
+    }
+
+    public double getPurchasedPrice()
+    {
+        return purchasedPrice;
     }
 }

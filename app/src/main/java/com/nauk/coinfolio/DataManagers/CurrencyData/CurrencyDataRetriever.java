@@ -1,5 +1,6 @@
 package com.nauk.coinfolio.DataManagers.CurrencyData;
 
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -42,6 +43,36 @@ public class CurrencyDataRetriever {
         requestQueue = Volley.newRequestQueue(context);
     }
 
+    private void getPriceTimestamp(final String symbolCurrencyFrom, String symbolCurrencyTo, final DataChartCallBack callBack, long timestamp)
+    {
+        final String requestUrl = "https://min-api.cryptocompare.com/data/pricehistorical?fsym=" + symbolCurrencyFrom + "&tsyms=" + symbolCurrencyTo + "&ts=" + timestamp;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("coinfolio", response + " " + requestUrl);
+                        callBack.onSuccess(processPriceTimestampResult(response));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }
+
+    private String processPriceTimestampResult(String result)
+    {
+        result = result.substring(result.lastIndexOf(':')+1);
+        result = result.substring(0, result.indexOf('}'));
+
+        return result;
+    }
+
     private void updateHistory(final String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
     {
         String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
@@ -56,7 +87,7 @@ public class CurrencyDataRetriever {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        callBack.onSuccess(null);
+                        callBack.onSuccess((List<CurrencyDataChart>) null);
                     }
                 });
 
@@ -134,11 +165,16 @@ public class CurrencyDataRetriever {
         return new CurrencyDataChart(timestamp, close, high, low, open, volumeFrom, volumeTo);
     }
 
-    void updateHistory(String symbolCurrencyFrom, final DataChartCallBack callBack, int timeUnit)
+    public void getPriceTimestamp(String symbolCurrencyFrom, final DataChartCallBack callBack, long timestamp)
+    {
+        getPriceTimestamp(symbolCurrencyFrom, "USD", callBack, timestamp);
+    }
+
+    public void updateHistory(String symbolCurrencyFrom, final DataChartCallBack callBack, int timeUnit)
     {
         if(symbolCurrencyFrom.equals("USD"))
         {
-            callBack.onSuccess(null);
+            callBack.onSuccess((List<CurrencyDataChart>) null);
         }
         else
         {
@@ -148,5 +184,6 @@ public class CurrencyDataRetriever {
 
     public interface DataChartCallBack {
         void onSuccess(List<CurrencyDataChart> dataChart);
+        void onSuccess(String price);
     }
 }
