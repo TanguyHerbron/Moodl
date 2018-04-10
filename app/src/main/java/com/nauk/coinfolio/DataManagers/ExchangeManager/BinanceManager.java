@@ -11,6 +11,7 @@ import com.binance.api.client.exception.BinanceApiException;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public class BinanceManager {
     private String privateKey;
 
     private List<Currency> balance;
-    private List<Trade> trades;
+    private HashMap<String, List<Trade>> trades;
 
     public BinanceManager(String publicKey, String privateKey)
     {
@@ -59,39 +60,33 @@ public class BinanceManager {
 
     public void updateTrades(BinanceCallBack callBack, String symbol)
     {
-        List<Trade> totalTrades = new ArrayList<>();
+        trades = new HashMap<>();
 
-        updateTrades(null, symbol, "BTC");
-        totalTrades.addAll(trades);
+        trades.put("BTC", updateTrades(null, symbol, "BTC"));
 
-        updateTrades(null, symbol, "ETH");
-        totalTrades.addAll(trades);
+        trades.put("ETH", updateTrades(null, symbol, "ETH"));
 
-        updateTrades(null, symbol, "USDT");
-        totalTrades.addAll(trades);
-
-        trades = totalTrades;
+        trades.put("USDT", updateTrades(null, symbol, "USDT"));
 
         callBack.onSuccess();
     }
 
-    public void updateTrades(BinanceCallBack callBack, String symbol, String pairSymbol)
+    public List<Trade> updateTrades(BinanceCallBack callBack, String symbol, String pairSymbol)
     {
+        List<Trade> presentTrades = new ArrayList<>();
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
         BinanceApiRestClient client = factory.newRestClient();
 
         Log.d("coinfolio", symbol + pairSymbol);
 
-        trades = new ArrayList<>();
-
         if(!symbol.equals(pairSymbol))
         {
             try {
-                trades = client.getMyTrades(symbol + pairSymbol);
+                presentTrades = client.getMyTrades(symbol + pairSymbol);
 
             } catch (BinanceApiException e) {
                 try {
-                    trades = client.getMyTrades(pairSymbol + symbol);
+                    presentTrades = client.getMyTrades(pairSymbol + symbol);
 
                 } catch (BinanceApiException f) {
                     f.printStackTrace();
@@ -103,6 +98,8 @@ public class BinanceManager {
         {
             callBack.onSuccess();
         }
+
+        return presentTrades;
     }
 
     public void setPublicKey(String publicKey)
@@ -120,7 +117,7 @@ public class BinanceManager {
         return balance;
     }
 
-    public List<Trade> getTrades()
+    public HashMap<String, List<Trade>> getTrades()
     {
         return trades;
     }

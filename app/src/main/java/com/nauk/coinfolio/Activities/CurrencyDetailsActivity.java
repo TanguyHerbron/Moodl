@@ -10,14 +10,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.SwitchPreference;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -30,16 +29,19 @@ import android.widget.ViewFlipper;
 import com.binance.api.client.domain.account.Trade;
 import com.daimajia.swipe.SwipeLayout;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.CandleStickChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.CandleData;
+import com.github.mikephil.charting.data.CandleDataSet;
+import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
@@ -54,6 +56,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -77,9 +80,15 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private final static int YEAR = 4;
     private List<CurrencyDataChart> dataChartList;
     private LineChart lineChart;
+    private CandleStickChart candleStickChart;
     private BarChart barChart;
     private PreferencesManager preferencesManager;
     private BinanceManager binanceManager;
+
+    private boolean displayLineChart;
+
+    private Button lineChartButton;
+    private Button candleStickChartButton;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -133,12 +142,43 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         databaseManager = new DatabaseManager(this);
         preferencesManager = new PreferencesManager(this);
 
+        displayLineChart = true;
+
         viewFlipper = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
         tradeLayout = findViewById(R.id.listTrades);
         lineChart = findViewById(R.id.chartPriceView);
+        candleStickChart = findViewById(R.id.chartCandleStickView);
         barChart = findViewById(R.id.chartVolumeView);
+        lineChartButton = findViewById(R.id.lineChartButton);
+        candleStickChartButton = findViewById(R.id.candleStickChartButton);
         binanceManager = new BinanceManager(preferencesManager.getBinancePublicKey(), preferencesManager.getBinancePrivateKey());
+
+        lineChartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                lineChartButton.setEnabled(false);
+                candleStickChartButton.setEnabled(true);
+
+                lineChart.setVisibility(View.VISIBLE);
+                candleStickChart.setVisibility(View.GONE);
+
+                displayLineChart = true;
+            }
+        });
+
+        candleStickChartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                lineChartButton.setEnabled(true);
+                candleStickChartButton.setEnabled(false);
+
+                lineChart.setVisibility(View.GONE);
+                candleStickChart.setVisibility(View.VISIBLE);
+
+                displayLineChart = false;
+            }
+        });
 
         ((BottomNavigationView) findViewById(R.id.navigation_details)).getMenu().getItem(1).setEnabled(false);
 
@@ -147,6 +187,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         drawTransactionList();
 
         initializeButtons();
+        initializeLineChart(lineChart);
+        initializeCandleStickChart(candleStickChart);
 
         updateChartTab(DAY, 1);
 
@@ -225,6 +267,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private void updateCharts(Button button)
     {
         findViewById(R.id.chartPriceView).setVisibility(View.GONE);
+        findViewById(R.id.chartCandleStickView).setVisibility(View.GONE);
         findViewById(R.id.chartVolumeView).setVisibility(View.GONE);
         findViewById(R.id.progressLayoutChart).setVisibility(View.VISIBLE);
 
@@ -325,8 +368,22 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private void updateChartTab(int timeUnit, int amount)
     {
         updateChartsData(timeUnit, amount);
-        drawPriceChart();
+        drawPriceLineChart();
+        drawPriceCandleStickChart();
+
+        if(displayLineChart)
+        {
+            findViewById(R.id.chartPriceView).setVisibility(View.VISIBLE);
+            findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
+        }
+        else
+        {
+            findViewById(R.id.chartCandleStickView).setVisibility(View.VISIBLE);
+            findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
+        }
+
         drawVolumeChart();
+        updateGeneralData(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
     }
 
     private void updateChartsData(int timeUnit, int amount)
@@ -399,11 +456,14 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         barChart.setFitBars(true);
     }
 
-    private void drawPriceChart()
+    private void drawPriceCandleStickChart()
     {
-        initializeLineChart(lineChart);
+        candleStickChart.setData(generatePriceCandleStickChartSet());
+    }
 
-        lineChart.setData(generatePriceChartSet());
+    private void drawPriceLineChart()
+    {
+        lineChart.setData(generatePriceLineChartSet());
         lineChart.getAxisLeft().setAxisMinValue(lineChart.getData().getYMin());
 
         lineChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
@@ -424,11 +484,19 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 return toucheEvent(motionEvent);
             }
         });
+    }
 
-        updateGeneralData(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
-
-        findViewById(R.id.chartPriceView).setVisibility(View.VISIBLE);
-        findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
+    private void initializeCandleStickChart(CandleStickChart candleStickChart)
+    {
+        candleStickChart.setDrawGridBackground(false);
+        candleStickChart.setDrawBorders(false);
+        candleStickChart.setDrawMarkers(true);
+        candleStickChart.getDescription().setEnabled(false);
+        candleStickChart.getAxisLeft().setEnabled(true);
+        candleStickChart.getAxisRight().setEnabled(true);
+        candleStickChart.getLegend().setEnabled(false);
+        candleStickChart.getXAxis().setEnabled(true);
+        candleStickChart.setViewPortOffsets(0, 0, 0, 0);
     }
 
     private void initializeLineChart(LineChart lineChart)
@@ -472,8 +540,11 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         timestampPlaceholder = getResources().getString(R.string.timestampPlaceholder, date);
 
         ((TextView) findViewById(R.id.volumeHightlight)).setText(volumePlaceholder);
+        findViewById(R.id.volumeHightlight).setVisibility(View.VISIBLE);
         ((TextView) findViewById(R.id.priceHightlight)).setText(pricePlaceholder);
+        findViewById(R.id.priceHightlight).setVisibility(View.VISIBLE);
         ((TextView) findViewById(R.id.timestampHightlight)).setText(timestampPlaceholder);
+        findViewById(R.id.timestampHightlight).setVisibility(View.VISIBLE);
 
     }
 
@@ -492,9 +563,12 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private void hideDataIndicators()
     {
-        ((TextView) findViewById(R.id.volumeHightlight)).setText("\n");
-        ((TextView) findViewById(R.id.priceHightlight)).setText("\n");
-        ((TextView) findViewById(R.id.timestampHightlight)).setText("\n");
+        ((TextView) findViewById(R.id.volumeHightlight)).setText(".\n.");
+        findViewById(R.id.volumeHightlight).setVisibility(View.INVISIBLE);
+        ((TextView) findViewById(R.id.priceHightlight)).setText(".\n.");
+        findViewById(R.id.priceHightlight).setVisibility(View.INVISIBLE);
+        ((TextView) findViewById(R.id.timestampHightlight)).setText(".\n.");
+        findViewById(R.id.timestampHightlight).setVisibility(View.INVISIBLE);
     }
 
     private String getDate(long timeStamp){
@@ -558,7 +632,43 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return str;
     }
 
-    private LineData generatePriceChartSet()
+    private CandleData generatePriceCandleStickChartSet()
+    {
+        CandleDataSet dataSet;
+        ArrayList<CandleEntry> values = new ArrayList<>();
+
+        int offsetRange = (int) Math.floor(dataChartList.size() / 200);
+
+        if(offsetRange < 1)
+        {
+            offsetRange = 1;
+        }
+
+        for(int i = 0, j = 0; i < dataChartList.size(); i+= offsetRange, j++)
+        {
+            values.add(new CandleEntry(j, (float) dataChartList.get(i).getHigh()
+                    , (float) dataChartList.get(i).getLow()
+                    , (float) dataChartList.get(i).getOpen()
+                    , (float) dataChartList.get(i).getClose()));
+        }
+
+        dataSet = new CandleDataSet(values, "History");
+        dataSet.setDrawIcons(false);
+        dataSet.setDrawValues(false);
+        dataSet.setDecreasingColor(getColor(R.color.decreaseCandle));
+        dataSet.setShowCandleBar(true);
+        dataSet.setShadowColorSameAsCandle(true);
+        dataSet.setDecreasingPaintStyle(Paint.Style.FILL);
+        dataSet.setIncreasingColor(getColor(R.color.increaseCandle));
+        dataSet.setIncreasingPaintStyle(Paint.Style.STROKE);
+        dataSet.setNeutralColor(getColor(R.color.increaseCandle));
+        dataSet.setHighLightColor(getColor(R.color.colorAccent));
+        dataSet.setDrawHorizontalHighlightIndicator(false);
+
+        return new CandleData(dataSet);
+    }
+
+    private LineData generatePriceLineChartSet()
     {
         LineDataSet dataSet;
         ArrayList<Entry> values = new ArrayList<>();
@@ -656,36 +766,39 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return transColor;
     }
 
-    private void drawTradeList(List<Trade> trades, String pairSymbol)
+    private void drawTradeList(HashMap<String, List<Trade>> trades)
     {
         findViewById(R.id.tradeProgressBar).setVisibility(View.GONE);
 
         tradeLayout.removeAllViews();
 
-        for(int i = trades.size()-1; i >= 0; i--)
+        for(String key : trades.keySet())
         {
-            View view = LayoutInflater.from(this).inflate(R.layout.custom_trade_row, null);
-            TextView amountTxtView = view.findViewById(R.id.amountPurchased);
-            TextView purchasedPrice = view.findViewById(R.id.purchasedPrice);
-            TextView tradePair = view.findViewById(R.id.pair);
-            TextView dateTxtView = view.findViewById(R.id.tradeDate);
-            View tradeIndicator = view.findViewById(R.id.tradeIndicator);
-
-            if(trades.get(i).isBuyer())
+            for(int i = trades.get(key).size()-1; i >= 0; i--)
             {
-                tradeIndicator.setBackgroundColor(getColor(R.color.green));
-            }
-            else
-            {
-                tradeIndicator.setBackgroundColor(getColor(R.color.red));
-            }
+                View view = LayoutInflater.from(this).inflate(R.layout.custom_trade_row, null);
+                TextView amountTxtView = view.findViewById(R.id.amountPurchased);
+                TextView purchasedPrice = view.findViewById(R.id.purchasedPrice);
+                TextView tradePair = view.findViewById(R.id.pair);
+                TextView dateTxtView = view.findViewById(R.id.tradeDate);
+                View tradeIndicator = view.findViewById(R.id.tradeIndicator);
 
-            amountTxtView.setText(String.valueOf(trades.get(i).getQty()));
-            purchasedPrice.setText(trades.get(i).getPrice());
-            dateTxtView.setText(getDate(trades.get(i).getTime()));
-            tradePair.setText(currency.getSymbol() + "/" + pairSymbol);
+                if(trades.get(key).get(i).isBuyer())
+                {
+                    tradeIndicator.setBackgroundColor(getColor(R.color.green));
+                }
+                else
+                {
+                    tradeIndicator.setBackgroundColor(getColor(R.color.red));
+                }
 
-            tradeLayout.addView(view);
+                amountTxtView.setText(String.valueOf(trades.get(key).get(i).getQty()));
+                purchasedPrice.setText(trades.get(key).get(i).getPrice());
+                dateTxtView.setText(getDate(trades.get(key).get(i).getTime()));
+                tradePair.setText(currency.getSymbol() + "/" + key);
+
+                tradeLayout.addView(view);
+            }
         }
     }
 
@@ -790,12 +903,12 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
                 @Override
                 public void onSuccess() {
-                    final List<Trade> trades = binanceManager.getTrades();
+                    final HashMap<String, List<Trade>> trades = binanceManager.getTrades();
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            drawTradeList(trades, "ETH");
+                            drawTradeList(trades);
                         }
                     });
                 }

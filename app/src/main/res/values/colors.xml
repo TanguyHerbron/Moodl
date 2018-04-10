@@ -36,4 +36,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="cardview_background">#FFFFFFFF</color>
     <color name="summary_background">#FBFCFF</color>
+    <color name="decreaseCandle">#FFFF5754</color>
+    <color name="increaseCandle">#FF45B64A</color>
 </resources>

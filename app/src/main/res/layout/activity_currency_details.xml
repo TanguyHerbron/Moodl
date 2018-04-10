@@ -19,10 +19,32 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:text="Line chart"
+                    android:id="@+id/lineChartButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:enabled="false"
+                    style="@style/Widget.AppCompat.Button.Colored"/>
+
+                <Button
+                    android:text="Candle stick chart"
+                    android:id="@+id/candleStickChartButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    style="@style/Widget.AppCompat.Button.Colored"/>
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/progressLayoutChart"
                 android:layout_width="match_parent"
                 android:layout_height="305dp"
-                android:layout_marginTop="15dp"
                 android:visibility="gone"
                 android:gravity="center">
 
@@ -39,8 +61,13 @@
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/chartPriceView"
                 android:layout_width="match_parent"
+                android:layout_height="250dp"/>
+
+            <com.github.mikephil.charting.charts.CandleStickChart
+                android:id="@+id/chartCandleStickView"
+                android:layout_width="match_parent"
                 android:layout_height="250dp"
-                android:layout_marginTop="15dp" />
+                android:visibility="gone"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
