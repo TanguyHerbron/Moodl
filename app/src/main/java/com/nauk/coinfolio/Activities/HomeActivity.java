@@ -10,9 +10,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -38,9 +40,6 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
-import com.luseen.spacenavigation.SpaceItem;
-import com.luseen.spacenavigation.SpaceNavigationView;
-import com.luseen.spacenavigation.SpaceOnClickListener;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.MarketCapManager;
@@ -94,8 +93,31 @@ public class HomeActivity extends AppCompatActivity {
     private Runnable updateRunnable;
     private ViewFlipper viewFlipper;
     private HomeLayoutGenerator layoutGenerator;
+    private BottomNavigationView bottomNavigationView;
 
     private HashMap<String, Integer> dominantCurrenciesColors;
+
+    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            item.setChecked(true);
+            switch (item.getItemId())
+            {
+                case R.id.navigation_watchlist:
+                    switchSecondaryViews(0);
+                    break;
+                case R.id.navigation_currencies_list:
+                    switchMainView();
+                    break;
+                case R.id.navigation_market_cap:
+                    switchSecondaryViews(2);
+                    break;
+            }
+            return false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +129,7 @@ public class HomeActivity extends AppCompatActivity {
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         //getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        //getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         setContentView(R.layout.activity_currency_summary);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
@@ -146,11 +168,14 @@ public class HomeActivity extends AppCompatActivity {
         toolbarSubtitle = findViewById(R.id.toolbarSubtitle);
         currencyLayout = findViewById(R.id.currencyListLayout);
         viewFlipper = findViewById(R.id.viewFlipperSummary);
-        viewFlipper.setDisplayedChild(1);
+
+        bottomNavigationView = findViewById(R.id.navigationSummary);
+        bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_currencies_list);
 
         layoutGenerator = new HomeLayoutGenerator(this);
 
-        ImageButton addCurrencyButton = findViewById(R.id.floatingAddButton);
+        Button addCurrencyButton = findViewById(R.id.buttonAddTransaction);
         ImageButton detailsButton = findViewById(R.id.switch_button);
         ImageButton settingsButton = findViewById(R.id.settings_button);
 
@@ -222,8 +247,6 @@ public class HomeActivity extends AppCompatActivity {
         updateViewButtonIcon();
 
         lastTimestamp = 0;
-
-        setupNavBar(savedInstanceState);
 
         setupDominantCurrenciesColors();
     }
@@ -299,43 +322,8 @@ public class HomeActivity extends AppCompatActivity {
         dominantCurrenciesColors.put("ETC", -10448784);
     }
 
-    private void setupNavBar(Bundle savedInstanceState)
+    private void switchMainView()
     {
-        final SpaceNavigationView spaceNavigationView = findViewById(R.id.space);
-        spaceNavigationView.initWithSaveInstanceState(savedInstanceState);
-        spaceNavigationView.addSpaceItem(new SpaceItem("WatchList", R.drawable.ic_remove_red_eye_black_24dp));
-        spaceNavigationView.addSpaceItem(new SpaceItem("Market Cap.", R.drawable.ic_pie_chart_black_24dp));
-        spaceNavigationView.setSpaceBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        spaceNavigationView.setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
-        spaceNavigationView.setCentreButtonColor(getResources().getColor(R.color.colorPrimary));
-        spaceNavigationView.setCentreButtonIconColorFilterEnabled(false);
-        spaceNavigationView.changeCurrentItem(-1);
-
-        spaceNavigationView.setSpaceOnClickListener(new SpaceOnClickListener() {
-            @Override
-            public void onCentreButtonClick() {
-                spaceNavigationCentreButtonEvent();
-            }
-
-            @Override
-            public void onItemClick(int itemIndex, String itemName) {
-                spaceNavigationItemEvent(itemIndex);
-            }
-
-            @Override
-            public void onItemReselected(int itemIndex, String itemName) {
-            }
-        });
-    }
-
-    private void spaceNavigationCentreButtonEvent()
-    {
-        //Toast.makeText(MainActivity.this,"onCentreButtonClick", Toast.LENGTH_SHORT).show();
-        ((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
-        SpaceNavigationView nav = findViewById(R.id.space);
-
-        nav.changeCurrentItem(-1);
-
         findViewById(R.id.toolbar_layout).setFocusable(true);
         ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
         findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
@@ -349,13 +337,8 @@ public class HomeActivity extends AppCompatActivity {
         viewFlipper.setDisplayedChild(1);
     }
 
-    private void spaceNavigationItemEvent(int itemIndex)
+    private void switchSecondaryViews(int itemIndex)
     {
-        ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
-        ((SpaceNavigationView) findViewById(R.id.space)).setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
-
-        //0 : Watchlist
-        //1 : Market cap
         findViewById(R.id.toolbar_layout).setFocusable(false);
         ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
         findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
@@ -366,23 +349,12 @@ public class HomeActivity extends AppCompatActivity {
 
         findViewById(R.id.switch_button).setVisibility(View.GONE);
 
-        viewFlipper.setDisplayedChild(itemIndex * 2);
-
-        if(itemIndex == 1)
-        {
-            ((PieChart) findViewById(R.id.marketCapPieChart)).animateX(1000);
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        ((SpaceNavigationView) findViewById(R.id.space)).onSaveInstanceState(outState);
+        viewFlipper.setDisplayedChild(itemIndex);
     }
 
     private void showErrorSnackbar()
     {
-        Snackbar.make(findViewById(R.id.currencyListLayout), "Error while updating data", Snackbar.LENGTH_LONG)
+        Snackbar.make(findViewById(R.id.viewFlipperSummary), "Error while updating data", Snackbar.LENGTH_LONG)
                 .setAction("Update", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

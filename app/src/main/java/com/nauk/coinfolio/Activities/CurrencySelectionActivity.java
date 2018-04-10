@@ -1,7 +1,9 @@
 package com.nauk.coinfolio.Activities;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -25,6 +27,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
     private CurrencyListAdapter adapter;
     private ListView listView;
     private android.widget.Filter filter;
+    private Intent comingIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,18 +38,12 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         setContentView(R.layout.activity_add_currency);
 
-        Intent intent = getIntent();
-
-        currencySymbols = intent.getStringArrayExtra("currencyListSymbols");
-        currencyNames = intent.getStringArrayExtra("currencyListNames");
+        comingIntent = getIntent();
 
         setTitle("Select a coin");
 
-        setupAdapter();
-
-        setupList();
-
-        setupSearchView();
+        ListLoader listLoader = new ListLoader();
+        listLoader.execute();
     }
 
     private void setupSearchView()
@@ -140,5 +137,52 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
     public boolean onQueryTextSubmit(String query)
     {
         return false;
+    }
+
+    private class ListLoader extends AsyncTask<Void, Integer, Void>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values)
+        {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            if(Looper.myLooper() == null)
+            {
+                Looper.prepare();
+            }
+
+            currencySymbols = comingIntent.getStringArrayExtra("currencyListSymbols");
+            currencyNames = comingIntent.getStringArrayExtra("currencyListNames");
+
+            setupAdapter();
+
+            setupList();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setupSearchView();
+                }
+            });
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result)
+        {
+            findViewById(R.id.coinsPreview).setVisibility(View.VISIBLE);
+            findViewById(R.id.currencyListProgressBar).setVisibility(View.GONE);
+        }
     }
 }

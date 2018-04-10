@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    android:layout_marginBottom="50dp"
+    android:layout_marginBottom="56dp"
     android:background="@color/summary_background">
 
     <ViewFlipper
@@ -16,7 +16,24 @@
         <LinearLayout
             android:id="@+id/linearLayoutWatchlist"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/buttonAddWatchlist"
+                android:text="Add to watchlist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_dashed_background"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/separationColor"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
 
             <ProgressBar
                 android:id="@+id/progressBarWatchlist"
@@ -47,6 +64,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
+
+                <Button
+                    android:id="@+id/buttonAddTransaction"
+                    android:text="Add transaction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_dashed_background"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:textColor="@color/separationColor"
+                    style="@style/Widget.AppCompat.Button.Borderless"/>
 
                 <Space
                     android:layout_width="match_parent"

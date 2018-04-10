@@ -10,7 +10,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.SwitchPreference;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.NavUtils;
@@ -179,8 +178,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 displayLineChart = false;
             }
         });
-
-        ((BottomNavigationView) findViewById(R.id.navigation_details)).getMenu().getItem(1).setEnabled(false);
 
         setupActionBar();
 

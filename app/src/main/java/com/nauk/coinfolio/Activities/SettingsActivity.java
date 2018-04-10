@@ -215,7 +215,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
-            ((SwitchPreference) findPreference("hide_balance")).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            findPreference("hide_balance").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     boolean isChecked = ((SwitchPreference) findPreference("hide_balance")).isChecked();
@@ -267,7 +267,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("hitbtc_privatekey"));
             bindPreferenceSummaryToValue(findPreference("binance_privatekey"));
 
-            ((SwitchPreference) findPreference("enable_hitbtc")).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            findPreference("enable_hitbtc").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     boolean isChecked = ((SwitchPreference) findPreference("enable_hitbtc")).isChecked();
@@ -283,7 +283,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
 
-            ((SwitchPreference) findPreference("enable_binance")).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            findPreference("enable_binance").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     boolean isChecked = ((SwitchPreference) findPreference("enable_binance")).isChecked();
