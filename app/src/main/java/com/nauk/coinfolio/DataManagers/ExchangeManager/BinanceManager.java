@@ -77,8 +77,6 @@ public class BinanceManager {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
         BinanceApiRestClient client = factory.newRestClient();
 
-        Log.d("coinfolio", symbol + pairSymbol);
-
         if(!symbol.equals(pairSymbol))
         {
             try {
@@ -100,16 +98,6 @@ public class BinanceManager {
         }
 
         return presentTrades;
-    }
-
-    public void setPublicKey(String publicKey)
-    {
-        this.publicKey = publicKey;
-    }
-
-    public void setPrivateKey(String privateKey)
-    {
-        this.privateKey = privateKey;
     }
 
     public List<Currency> getBalance()

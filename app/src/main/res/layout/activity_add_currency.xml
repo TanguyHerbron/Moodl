@@ -19,11 +19,18 @@
             android:layout_gravity="center|top"
             android:background="@color/listBackground"/>
 
-        <ListView
-            android:id="@+id/coinsPreview"
+        <LinearLayout
+            android:id="@+id/listContainerLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"/>
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <ListView
+                android:id="@+id/coinsPreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/currencyListProgressBar"

@@ -26,7 +26,6 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
     private String coin;
     private String symbol;
-    private TextView symbolTxtView;
     private EditText amountTxtView;
     private TextView purchasedDate;
     private Button validateButton;

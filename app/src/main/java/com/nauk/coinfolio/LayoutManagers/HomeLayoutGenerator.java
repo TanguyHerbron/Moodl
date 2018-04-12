@@ -80,7 +80,7 @@ public class HomeLayoutGenerator {
         return view;
     }
 
-    public static void expand(final View v) {
+    private static void expand(final View v) {
         v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
         final int targetHeight = v.getMeasuredHeight();
 
@@ -108,7 +108,7 @@ public class HomeLayoutGenerator {
         v.startAnimation(a);
     }
 
-    public static void collapse(final View v) {
+    private static void collapse(final View v) {
         final int initialHeight = v.getMeasuredHeight();
 
         Animation a = new Animation()

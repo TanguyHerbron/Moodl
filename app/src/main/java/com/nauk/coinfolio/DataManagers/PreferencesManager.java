@@ -14,21 +14,12 @@ public class PreferencesManager {
     private SharedPreferences settingPreferences;
     private SharedPreferences currencyList;
     private SharedPreferences preferencesList;
-    android.content.Context context;
 
     public PreferencesManager(android.content.Context context)
     {
-        this.context = context;
         settingPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         currencyList = context.getSharedPreferences(currencyListFile, 0);
         preferencesList = context.getSharedPreferences(preferencesFile, 0);
-    }
-
-    public void addCurrency(String symbol, double balance)
-    {
-        SharedPreferences.Editor editor = currencyList.edit();
-        editor.putString(symbol, String.valueOf(balance));
-        editor.apply();
     }
 
     public void setDetailOption(boolean isExtended)

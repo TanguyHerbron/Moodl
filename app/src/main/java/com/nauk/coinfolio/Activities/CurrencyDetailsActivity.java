@@ -16,6 +16,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -43,6 +44,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
+import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.DataManagers.ExchangeManager.BinanceManager;
@@ -83,6 +85,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private BarChart barChart;
     private PreferencesManager preferencesManager;
     private BinanceManager binanceManager;
+    private CurrencyDetailsList currencyDetailsList;
 
     private boolean displayLineChart;
 
@@ -140,6 +143,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         databaseManager = new DatabaseManager(this);
         preferencesManager = new PreferencesManager(this);
+        currencyDetailsList = new CurrencyDetailsList(this);
 
         displayLineChart = true;
 
@@ -183,6 +187,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         drawTransactionList();
 
+        updateInfoTab();
+
         initializeButtons();
         initializeLineChart(lineChart);
         initializeCandleStickChart(candleStickChart);
@@ -196,6 +202,13 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         TradeUpdater updater = new TradeUpdater();
         updater.execute();
+
+        Log.d("coinfolio", "Details loaded for " + currency.getId());
+    }
+
+    private void updateInfoTab()
+    {
+        ((TextView) findViewById(R.id.txtViewTotalSupply)).setText("");
     }
 
     private void setupActionBar()

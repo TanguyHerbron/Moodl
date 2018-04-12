@@ -61,7 +61,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/quick_button"
                     android:visibility="visible"
-                    android:layout_gravity="start"/>
+                    android:layout_gravity="start"
+                    android:contentDescription="Switch view"/>
 
                 <ImageButton
                     android:id="@+id/settings_button"
@@ -69,7 +70,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/action_settings"
                     android:visibility="visible"
-                    android:layout_gravity="end"/>
+                    android:layout_gravity="end"
+                    android:contentDescription="Settings"/>
 
             </FrameLayout>
 

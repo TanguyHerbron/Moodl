@@ -24,7 +24,6 @@ public class MarketCapManager {
 
     private static final String topCurrenciesUrl = "https://api.coinmarketcap.com/v1/ticker/?limit=9";
     private static final String marketCapUrl = "https://api.coinmarketcap.com/v1/global/";
-    private android.content.Context context;
     private RequestQueue requestQueue;
     private String topRequestResult[];
     private long marketCap;
@@ -32,8 +31,6 @@ public class MarketCapManager {
 
     public MarketCapManager(android.content.Context context)
     {
-        this.context = context;
-
         requestQueue = Volley.newRequestQueue(context);
     }
 

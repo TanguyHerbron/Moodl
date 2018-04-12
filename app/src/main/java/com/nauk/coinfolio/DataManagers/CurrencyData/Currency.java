@@ -28,21 +28,12 @@ public class Currency implements Parcelable {
     private CurrencyDataRetriever dataRetriver;
     private Bitmap icon;
     private int chartColor;
-
-    public Currency(Currency currency)
-    {
-        this.id = currency.id;
-        this.name = currency.name;
-        this.symbol = currency.symbol;
-        this.value = currency.value;
-        this.balance = currency.balance;
-        this.dayFluctuationPercentage = currency.getDayFluctuationPercentage();
-        this.dayFluctuation = currency.getDayFluctuation();
-        this.historyMinutes = currency.historyMinutes;
-        this.dataRetriver = currency.getDataRetriver();
-        this.icon = currency.icon;
-        this.chartColor = currency.chartColor;
-    }
+    private int circulatingSupply;
+    private int totalSupply;
+    private double marketCapitalization;
+    private List<String> socialMediaLinks;
+    private String algorithm;
+    //private String proofType
 
     public Currency(String symbol, double balance)
     {
@@ -62,6 +53,8 @@ public class Currency implements Parcelable {
         this.name = name;
         this.symbol = symbol;
     }
+
+    //public Currency(int id, String symbol, String name, String algorithm, String proofType, )
 
     public void getTimestampPrice(android.content.Context context, final PriceCallBack callBack, long timestamp)
     {
@@ -135,6 +128,12 @@ public class Currency implements Parcelable {
             @Override
             public void onSuccess(String price) {}
         }, CurrencyDataRetriever.DAYS);
+    }
+
+    public void updateDetails(android.content.Context context, final CurrencyCallBack callBack)
+    {
+            dataRetriver = new CurrencyDataRetriever(context);
+
     }
 
     public void setId(int id)

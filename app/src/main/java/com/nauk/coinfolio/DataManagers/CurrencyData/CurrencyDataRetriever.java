@@ -182,6 +182,32 @@ public class CurrencyDataRetriever {
         }
     }
 
+    /*public void updateCryptocompareDetails(int id, final Currency.CurrencyCallBack callBack)
+    {
+        String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callBack.onSuccess();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        callBack.onSuccess();
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }*/
+
+    public void updateCoinMarketCapDetails()
+    {
+
+    }
+
     public interface DataChartCallBack {
         void onSuccess(List<CurrencyDataChart> dataChart);
         void onSuccess(String price);

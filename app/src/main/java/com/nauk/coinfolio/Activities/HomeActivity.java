@@ -232,14 +232,6 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent addIntent = new Intent(HomeActivity.this, CurrencySelectionActivity.class);
 
-                String[] symbolList = new String[balanceManager.getCurrenciesSymbol().size()];
-                symbolList = balanceManager.getCurrenciesSymbol().toArray(symbolList);
-                String[] nameList = new String[balanceManager.getCurrenciesName().size()];
-                nameList = balanceManager.getCurrenciesName().toArray(nameList);
-
-                addIntent.putExtra("currencyListSymbols", symbolList);
-                addIntent.putExtra("currencyListNames", nameList);
-
                 startActivity(addIntent);
             }
         });
@@ -324,8 +316,14 @@ public class HomeActivity extends AppCompatActivity {
 
     private void switchMainView()
     {
+        Log.d("coinfolio", "Should");
+        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
+        findViewById(R.id.swiperefresh).setNestedScrollingEnabled(true);
+
         findViewById(R.id.toolbar_layout).setFocusable(true);
         ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
+        ((AppBarLayout) findViewById(R.id.app_bar)).setActivated(true);
+        findViewById(R.id.app_bar).setClickable(true);
         findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
 
         findViewById(R.id.app_bar).setEnabled(true);
@@ -339,8 +337,14 @@ public class HomeActivity extends AppCompatActivity {
 
     private void switchSecondaryViews(int itemIndex)
     {
+        Log.d("coinfolio", "Should not");
+        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+        findViewById(R.id.swiperefresh).setNestedScrollingEnabled(false);
+
         findViewById(R.id.toolbar_layout).setFocusable(false);
         ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+        ((AppBarLayout) findViewById(R.id.app_bar)).setActivated(false);
+        findViewById(R.id.app_bar).setClickable(false);
         findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
 
         findViewById(R.id.app_bar).setEnabled(false);

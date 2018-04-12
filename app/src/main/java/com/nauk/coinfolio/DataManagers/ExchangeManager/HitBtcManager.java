@@ -110,16 +110,6 @@ public class HitBtcManager {
         }
     }
 
-    public void setPublicKey(String publicKey)
-    {
-        this.publicKey = publicKey;
-    }
-
-    private void setPrivateKey(String privateKey)
-    {
-        this.privateKey = privateKey;
-    }
-
     public List<Currency> getBalance()
     {
         return balance;

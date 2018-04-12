@@ -19,4 +19,6 @@
     <dimen name="separationLineSize">1dp</dimen>
 
     <dimen name="cardview_elevation">8dp</dimen>
+    <dimen name="toolbar_height">56dp</dimen>
+    <dimen name="toolbar_height_expand">70dp</dimen>
 </resources>
