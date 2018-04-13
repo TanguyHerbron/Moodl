@@ -19,12 +19,13 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     private static final String DATABASE_NAME = "Currencies.db";
 
     private static final String TABLE_MANUAL_CURRENCIES = "ManualCurrencies";
     private static final String TABLE_EXCHANGE_KEYS = "ExchangeKeys";
+    private static final String TABLE_WATCHLIST = "Watchlist";
 
     private static final String KEY_CURRENCY_ID = "idCurrency";
     private static final String KEY_CURRENCY_SYMBOL = "symbol";
@@ -38,6 +39,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
     private static final String KEY_EXCHANGE_NAME = "name";
     private static final String KEY_EXCHANGE_PUBLIC_KEY = "publicKey";
     private static final String KEY_EXCHANGE_SECRET_KEY = "secretKey";
+
+    private static final String KEY_WATCHLIST_ID = "idWatchlist";
+    private static final String KEY_WATCHLIST_SYMBOL = "symbol";
+    private static final String KEY_WATCHLIST_NAME = "name";
+    private static final String KEY_WATCHLIST_POSITION = "position";
 
     public DatabaseManager(Context context)
     {
@@ -64,6 +70,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 + KEY_EXCHANGE_SECRET_KEY + " TEXT"
                 + ");");
 
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_WATCHLIST + "("
+                + KEY_WATCHLIST_ID + " INTEGER PRIMARY KEY,"
+                + KEY_WATCHLIST_SYMBOL + " VARCHAR(4),"
+                + KEY_WATCHLIST_NAME + " TEXT,"
+                + KEY_WATCHLIST_POSITION + " INTEGER"
+                + ");");
+
         //loadSample(db);
     }
 
@@ -72,8 +85,37 @@ public class DatabaseManager extends SQLiteOpenHelper{
     {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANUAL_CURRENCIES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXCHANGE_KEYS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_WATCHLIST);
 
         onCreate(db);
+    }
+
+    public void addCurrencyToWatchlist(Currency currency)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_WATCHLIST_SYMBOL, currency.getSymbol());
+        values.put(KEY_WATCHLIST_NAME, currency.getName());
+
+        db.insert(TABLE_WATCHLIST, null, values);
+        db.close();
+    }
+
+    public List<Currency> getAllCurrenciesFromWatchlist()
+    {
+        String searchQuerry = "SELECT * FROM " + TABLE_WATCHLIST;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor resultatList = db.rawQuery(searchQuerry, null);
+
+        List<Currency> currencyList = new ArrayList<>();
+
+        while(resultatList.moveToNext())
+        {
+            currencyList.add(new Currency(resultatList.getString(2), resultatList.getString(1)));
+        }
+
+        return currencyList;
     }
 
     public void addCurrencyToManualCurrency(String symbol, double balance, Date date, String purchasedPrice)
@@ -91,7 +133,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.close();
     }
 
-    public List<Currency> getAllCurrencyFromManualCurrency()
+    public List<Currency> getAllCurrenciesFromManualCurrency()
     {
         String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES;
         SQLiteDatabase db = this.getWritableDatabase();

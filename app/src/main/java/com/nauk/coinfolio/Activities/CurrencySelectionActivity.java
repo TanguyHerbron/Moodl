@@ -21,6 +21,8 @@ import android.widget.SearchView;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
+import com.nauk.coinfolio.DataManagers.DatabaseManager;
+import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.LayoutManagers.CurrencyListAdapter;
 import com.nauk.coinfolio.R;
 
@@ -33,6 +35,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
     private ListView listView;
     private android.widget.Filter filter;
     private CurrencyDetailsList currencyDetailsList;
+    private boolean isWatchList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +50,11 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         setTitle("Select a coin");
 
+        Intent intent = getIntent();
+        isWatchList = intent.getBooleanExtra("isWatchList", false);
+
         ListLoader listLoader = new ListLoader();
         listLoader.execute();
-
-        Log.d("coinfolio", "Started");
     }
 
     private void setupSearchView()
@@ -89,10 +93,23 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Currency selectedCurrency = (Currency) adapterView.getItemAtPosition(i);
-                Intent intent = new Intent(CurrencySelectionActivity.this, RecordTransactionActivity.class);
-                intent.putExtra("coin", selectedCurrency.getName());
-                intent.putExtra("symbol", selectedCurrency.getSymbol());
-                startActivity(intent);
+
+                if(isWatchList)
+                {
+                    PreferencesManager preferencesManager = new PreferencesManager(getApplicationContext());
+                    DatabaseManager databaseManager = new DatabaseManager(getApplicationContext());
+
+                    databaseManager.addCurrencyToWatchlist(selectedCurrency);
+                    preferencesManager.setMustUpdate(true);
+                }
+                else
+                {
+                    Intent intent = new Intent(CurrencySelectionActivity.this, RecordTransactionActivity.class);
+                    intent.putExtra("coin", selectedCurrency.getName());
+                    intent.putExtra("symbol", selectedCurrency.getSymbol());
+                    startActivity(intent);
+                }
+
                 finish();
             }
         });

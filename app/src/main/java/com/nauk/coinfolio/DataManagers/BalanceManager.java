@@ -121,7 +121,7 @@ public class BalanceManager {
     {
         boolean isUpdated = false;
 
-        manualBalances = databaseManager.getAllCurrencyFromManualCurrency();
+        manualBalances = databaseManager.getAllCurrenciesFromManualCurrency();
 
         if(binanceManagers.size() > 0)
         {

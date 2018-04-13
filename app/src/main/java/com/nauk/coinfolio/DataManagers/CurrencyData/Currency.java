@@ -3,6 +3,12 @@ package com.nauk.coinfolio.DataManagers.CurrencyData;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
+import com.nauk.coinfolio.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +75,24 @@ public class Currency implements Parcelable {
                 callBack.onSuccess(price);
             }
         }, timestamp);
+    }
+
+    public static String getIconUrl(String currencyDetails)
+    {
+        String url;
+
+        try {
+            JSONObject jsonObject = new JSONObject(currencyDetails);
+            url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
+        } catch (NullPointerException e) {
+            //Log.d(context.getResources().getString(R.string.debug), symbol + " has no icon URL");
+            url = null;
+        } catch (JSONException e) {
+            //Log.d(context.getResources().getString(R.string.debug), "Url parsing error for " + symbol);
+            url = null;
+        }
+
+        return url;
     }
 
     public void updateHistoryMinutes(android.content.Context context, final CurrencyCallBack callBack)

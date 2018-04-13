@@ -6,7 +6,9 @@ import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.account.Account;
 import com.binance.api.client.domain.account.AssetBalance;
+import com.binance.api.client.domain.account.Order;
 import com.binance.api.client.domain.account.Trade;
+import com.binance.api.client.domain.account.request.OrderRequest;
 import com.binance.api.client.exception.BinanceApiException;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 
