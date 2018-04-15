@@ -7,6 +7,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -64,7 +65,19 @@ public class HomeLayoutGenerator {
 
         updateCardViewInfos(view, currency, totalValue, isBalanceHidden);
 
-        setupLineChart(view, currency);
+        view.findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                intent.putExtra("currency", currency);
+                context.getApplicationContext().startActivity(intent);
+            }
+        });
+
+        if(currency.getHistoryMinutes() != null)
+        {
+            setupLineChart(view, currency);
+        }
 
         if(isExtended)
         {
@@ -152,15 +165,6 @@ public class HomeLayoutGenerator {
         lineChart.getXAxis().setEnabled(false);
         lineChart.setViewPortOffsets(0, 0, 0, 0);
         lineChart.setData(generateData(currency));
-
-        lineChart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                context.getApplicationContext().startActivity(intent);
-            }
-        });
     }
 
     private void updateCardViewInfos(View view, Currency currency, float totalValue, boolean isBalanceHidden)
@@ -249,6 +253,7 @@ public class HomeLayoutGenerator {
         List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
         ArrayList<Entry> values = new ArrayList<>();
 
+        Log.d("coinfolio", "Generating data for " + currency.getSymbol());
         for(int i = 0; i < dataChartList.size(); i+=10)
         {
             values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
@@ -288,11 +293,11 @@ public class HomeLayoutGenerator {
 
         if(abs(number) > 1)
         {
-            str = String.format( Locale.UK, "%.2f", number);
+            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
         }
         else
         {
-            str = String.format( Locale.UK, "%.4f", number);
+            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
         }
 
         return str;

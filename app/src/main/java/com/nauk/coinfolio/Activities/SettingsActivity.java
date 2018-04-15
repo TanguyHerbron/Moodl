@@ -276,7 +276,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                     SharedPreferences.Editor editor = preferences.edit();
 
-                    editor.putBoolean("mustUpdate", true);
+                    editor.putBoolean("mustUpdateSummary", true);
                     editor.apply();
 
                     return isChecked;
@@ -292,7 +292,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                     SharedPreferences.Editor editor = preferences.edit();
 
-                    editor.putBoolean("mustUpdate", true);
+                    editor.putBoolean("mustUpdateSummary", true);
                     editor.apply();
 
                     return isChecked;

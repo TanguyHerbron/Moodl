@@ -3,24 +3,40 @@ package com.nauk.coinfolio.Activities.HomeActivityFragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.nauk.coinfolio.Activities.CurrencyDetailsActivity;
 import com.nauk.coinfolio.Activities.CurrencySelectionActivity;
 import com.nauk.coinfolio.Activities.HomeActivity;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
+import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.DataManagers.WatchlistManager;
@@ -32,6 +48,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static java.lang.Math.abs;
@@ -55,7 +73,7 @@ public class Watchlist extends Fragment {
     {
         view = inflater.inflate(R.layout.fragment_watchlist_homeactivity, container, false);
 
-        refreshLayout = view.findViewById(R.id.swiperefresh);
+        refreshLayout = view.findViewById(R.id.swiperefreshwatchlist);
         currencyDetailsList = new CurrencyDetailsList(getContext());
         preferencesManager = new PreferencesManager(getContext());
 
@@ -85,12 +103,78 @@ public class Watchlist extends Fragment {
         return view;
     }
 
+    private void collapseView(View view)
+    {
+        collapse(view.findViewById(R.id.collapsableLayout));
+    }
+
+    private void extendView(View view)
+    {
+        expand(view.findViewById(R.id.collapsableLayout));
+        view.findViewById(R.id.LineChartView).invalidate();
+    }
+
+    private static void expand(final View v) {
+        v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? CardView.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+    private static void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+
     @Override
     public void onResume()
     {
         super.onResume();
 
-        updateWatchlist(preferencesManager.mustUpdate());
+        updateWatchlist(preferencesManager.mustUpdateWatchlist());
     }
 
     private void updateWatchlist(boolean mustUpdate)
@@ -131,7 +215,7 @@ public class Watchlist extends Fragment {
         {
             ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).removeAllViews();
 
-            for(Currency currency : watchlistManager.getWatchlist())
+            for(final Currency currency : watchlistManager.getWatchlist())
             {
                 View card = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, null);
 
@@ -142,15 +226,41 @@ public class Watchlist extends Fragment {
                 ((ImageView) card.findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
                 ((TextView) card.findViewById(R.id.currencyValueTextView)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(currency.getValue())));
 
+                Drawable arrowDrawable = ((ImageView) card.findViewById(R.id.detailsArrow)).getDrawable();
+                arrowDrawable.mutate();
+                arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+                arrowDrawable.invalidateSelf();
+
                 updateColor(card, currency);
 
                 card.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 card.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.d("coinfolio", "Clicked !");
+                        if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
+                        {
+                            collapseView(view);
+                        }
+                        else
+                        {
+                            extendView(view);
+                        }
                     }
                 });
+
+                card.findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getActivity(), CurrencyDetailsActivity.class);
+                        intent.putExtra("currency", currency);
+                        getActivity().getApplicationContext().startActivity(intent);
+                    }
+                });
+
+                if(currency.getHistoryMinutes() != null)
+                {
+                    setupLineChart(card, currency);
+                }
 
                 ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(card, 0);
             }
@@ -160,6 +270,65 @@ public class Watchlist extends Fragment {
                 refreshLayout.setRefreshing(false);
             }
         }
+    }
+    private LineData generateData(Currency currency)
+    {
+        LineDataSet dataSet;
+        List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
+        ArrayList<Entry> values = new ArrayList<>();
+
+        Log.d("coinfolio", "Generating data for " + currency.getSymbol());
+        for(int i = 0; i < dataChartList.size(); i+=10)
+        {
+            values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
+        }
+
+        dataSet = new LineDataSet(values, "History");
+        dataSet.setDrawIcons(false);
+        dataSet.setColor(currency.getChartColor());
+        dataSet.setLineWidth(1);
+        dataSet.setDrawFilled(true);
+        dataSet.setFillColor(getColorWithAplha(currency.getChartColor(), 0.5f));
+        dataSet.setFormLineWidth(1);
+        dataSet.setFormSize(15);
+        dataSet.setDrawCircles(false);
+        dataSet.setDrawValues(false);
+        dataSet.setHighlightEnabled(false);
+
+        return new LineData(dataSet);
+    }
+
+    private int getColorWithAplha(int color, float ratio)
+    {
+        int transColor;
+        int alpha = Math.round(Color.alpha(color) * ratio);
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+
+        transColor = Color.argb(alpha, r, g, b);
+
+        return transColor ;
+    }
+
+    private void setupLineChart(View view, final Currency currency)
+    {
+        LineChart lineChart = view.findViewById(R.id.LineChartView);
+
+        lineChart.setDrawGridBackground(false);
+        lineChart.setDrawBorders(false);
+        lineChart.setDrawMarkers(false);
+        lineChart.setDoubleTapToZoomEnabled(false);
+        lineChart.setPinchZoom(false);
+        lineChart.setScaleEnabled(false);
+        lineChart.setDragEnabled(false);
+        lineChart.getDescription().setEnabled(false);
+        lineChart.getAxisLeft().setEnabled(false);
+        lineChart.getAxisRight().setEnabled(false);
+        lineChart.getLegend().setEnabled(false);
+        lineChart.getXAxis().setEnabled(false);
+        lineChart.setViewPortOffsets(0, 0, 0, 0);
+        lineChart.setData(generateData(currency));
     }
 
     private void updateColor(View card, Currency currency)
@@ -215,6 +384,20 @@ public class Watchlist extends Fragment {
         callBack.onSuccess(result);
     }
 
+    private void updateChartColor(Currency currency)
+    {
+        if(currency.getIcon() != null)
+        {
+            Palette.Builder builder = Palette.from(currency.getIcon());
+
+            currency.setChartColor(builder.generate().getDominantColor(0));
+        }
+        else
+        {
+            currency.setChartColor(12369084);
+        }
+    }
+
     private class WatchlistUpdater extends AsyncTask<Void, Integer, Void>
     {
         @Override
@@ -225,7 +408,7 @@ public class Watchlist extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            for(Currency currency : watchlistManager.getWatchlist())
+            for(final Currency currency : watchlistManager.getWatchlist())
             {
                 currency.updateHistoryMinutes(getActivity(), new Currency.CurrencyCallBack() {
                     @Override
@@ -236,6 +419,7 @@ public class Watchlist extends Fragment {
                                 @Override
                                 public void onSuccess(Bitmap bitmapIcon) {
                                     sucessCurrency.setIcon(bitmapIcon);
+                                    updateChartColor(currency);
                                     countWatchlist();
                                 }
                             });

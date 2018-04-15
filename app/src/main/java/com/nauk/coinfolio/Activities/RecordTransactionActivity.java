@@ -1,10 +1,7 @@
 package com.nauk.coinfolio.Activities;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -21,7 +18,6 @@ import com.nauk.coinfolio.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class RecordTransactionActivity extends AppCompatActivity {
 
@@ -76,7 +72,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 databaseManager.addCurrencyToManualCurrency(symbol, Double.parseDouble(amountTxtView.getText().toString()), calendar.getTime(), purchasedPrice.getText().toString());
-                preferenceManager.setMustUpdate(true);
+                preferenceManager.setMustUpdateSummary(true);
                 Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);

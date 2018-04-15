@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -19,6 +18,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import com.nauk.coinfolio.Activities.CurrencySelectionActivity;
 import com.nauk.coinfolio.Activities.HomeActivity;
-import com.nauk.coinfolio.Activities.SettingsActivity;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
@@ -45,7 +44,6 @@ import java.util.List;
 
 public class Summary extends Fragment {
 
-    private boolean isDetailed;
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
     private BalanceManager balanceManager;
@@ -76,11 +74,9 @@ public class Summary extends Fragment {
         preferencesManager = new PreferencesManager(getActivity());
         balanceManager = new BalanceManager(getActivity());
         layoutGenerator = new HomeLayoutGenerator(getActivity());
-        refreshLayout = view.findViewById(R.id.swiperefresh);
+        refreshLayout = view.findViewById(R.id.swiperefreshsummary);
         toolbarSubtitle = getActivity().findViewById(R.id.toolbarSubtitle);
         toolbarLayout = getActivity().findViewById(R.id.toolbar_layout);
-
-        isDetailed = preferencesManager.getDetailOption();
 
         totalValue = 0;
         totalFluctuation = 0;
@@ -133,6 +129,7 @@ public class Summary extends Fragment {
         detailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                preferencesManager.setDetailOption(!preferencesManager.getDetailOption());
                 updateViewButtonIcon();
                 switchView();
             }
@@ -140,18 +137,45 @@ public class Summary extends Fragment {
 
         updateTitle();
 
-        generateSplashScreen();
-
         updateAll(true);
 
+        generateSplashScreen();
+
         return view;
+    }
+
+    private void generateSplashScreen()
+    {
+        LinearLayout loadingLayout = new LinearLayout(getActivity());
+
+        loadingLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        loadingLayout.setGravity(Gravity.CENTER);
+        loadingLayout.setOrientation(LinearLayout.VERTICAL);
+
+        loadingDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+
+        TextView txtView = new TextView(getActivity());
+        txtView.setText("Loading data...");
+        txtView.setTextSize(20);
+        txtView.setGravity(Gravity.CENTER);
+        txtView.setTextColor(this.getResources().getColor(R.color.cardview_light_background));
+
+        ProgressBar progressBar = new ProgressBar(getActivity());
+        progressBar.setIndeterminate(true);
+
+        loadingLayout.setBackgroundColor(getActivity().getResources().getColor(R.color.colorPrimaryDark));
+        loadingLayout.addView(txtView);
+        loadingLayout.addView(progressBar);
+
+        loadingDialog.setContentView(loadingLayout);
+        loadingDialog.show();
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        updateAll(preferencesManager.mustUpdate());
+        updateAll(preferencesManager.mustUpdateSummary());
 
         updateViewButtonIcon();
 
@@ -207,45 +231,14 @@ public class Summary extends Fragment {
         totalFluctuation = 0;
     }
 
-    private void generateSplashScreen()
-    {
-        LinearLayout loadingLayout = new LinearLayout(getActivity());
-
-        loadingLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        loadingLayout.setGravity(Gravity.CENTER);
-        loadingLayout.setOrientation(LinearLayout.VERTICAL);
-
-        loadingDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-
-        TextView txtView = new TextView(getActivity());
-        txtView.setText("Loading data...");
-        txtView.setTextSize(20);
-        txtView.setGravity(Gravity.CENTER);
-        txtView.setTextColor(this.getResources().getColor(R.color.cardview_light_background));
-
-        ProgressBar progressBar = new ProgressBar(getActivity());
-        progressBar.setIndeterminate(true);
-
-        loadingLayout.setBackgroundColor(this.getResources().getColor(R.color.colorPrimaryDark));
-        loadingLayout.addView(txtView);
-        loadingLayout.addView(progressBar);
-
-        loadingDialog.setContentView(loadingLayout);
-        loadingDialog.show();
-    }
-
     private void switchView()
     {
-        if(isDetailed)
+        if(preferencesManager.getDetailOption())
         {
-            isDetailed = false;
-
             adaptView();
         }
         else
         {
-            isDetailed = true;
-
             adaptView();
         }
     }
@@ -260,7 +253,7 @@ public class Summary extends Fragment {
 
             if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
             {
-                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, preferencesManager.getDetailOption(), totalValue, preferencesManager.isBalanceHidden()));
             }
         }
     }
@@ -453,9 +446,11 @@ public class Summary extends Fragment {
                         Currency currency = balanceManager.getTotalBalance().get(i);
 
                         if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001) {
-                            currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed, totalValue, preferencesManager.isBalanceHidden()));
+                            currencyLayout.addView(layoutGenerator.getInfoLayout(currency, preferencesManager.getDetailOption(), totalValue, preferencesManager.isBalanceHidden()));
                         }
                     }
+
+                    adaptView();
                 }
             });
         }
@@ -502,7 +497,6 @@ public class Summary extends Fragment {
             refreshLayout.setRefreshing(false);
             refreshCurrencyList();
             handler.removeCallbacks(updateRunnable);
-            adaptView();
         }
     }
 
@@ -536,12 +530,10 @@ public class Summary extends Fragment {
         if(preferencesManager.getDetailOption())
         {
             imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_unfold_less_black_24dp));
-            preferencesManager.setDetailOption(false);
         }
         else
         {
             imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_details_black_24dp));
-            preferencesManager.setDetailOption(true);
         }
     }
 

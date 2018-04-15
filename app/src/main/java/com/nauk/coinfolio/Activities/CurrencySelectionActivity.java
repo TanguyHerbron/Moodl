@@ -7,8 +7,6 @@ import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -100,7 +98,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
                     DatabaseManager databaseManager = new DatabaseManager(getApplicationContext());
 
                     databaseManager.addCurrencyToWatchlist(selectedCurrency);
-                    preferencesManager.setMustUpdate(true);
+                    preferencesManager.setMustUpdateWatchlist(true);
                 }
                 else
                 {

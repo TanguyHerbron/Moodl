@@ -83,20 +83,39 @@ public class PreferencesManager {
         editor.apply();
     }
 
-    public void setMustUpdate(boolean mustUpdate)
+    public void setMustUpdateWatchlist(boolean mustUpdate)
     {
         SharedPreferences.Editor editor = settingPreferences.edit();
-        editor.putBoolean("mustUpdate", mustUpdate);
+        editor.putBoolean("mustUpdateWatchlist", mustUpdate);
         editor.apply();
     }
 
-    public boolean mustUpdate()
+    public boolean mustUpdateWatchlist()
     {
-        boolean mustUpdate = settingPreferences.getBoolean("mustUpdate", false);
+        boolean mustUpdate = settingPreferences.getBoolean("mustUpdateWatchlist", false);
 
         if(mustUpdate)
         {
-            setMustUpdate(false);
+            setMustUpdateWatchlist(false);
+        }
+
+        return mustUpdate;
+    }
+
+    public void setMustUpdateSummary(boolean mustUpdate)
+    {
+        SharedPreferences.Editor editor = settingPreferences.edit();
+        editor.putBoolean("mustUpdateSummary", mustUpdate);
+        editor.apply();
+    }
+
+    public boolean mustUpdateSummary()
+    {
+        boolean mustUpdate = settingPreferences.getBoolean("mustUpdateSummary", false);
+
+        if(mustUpdate)
+        {
+            setMustUpdateSummary(false);
         }
 
         return mustUpdate;

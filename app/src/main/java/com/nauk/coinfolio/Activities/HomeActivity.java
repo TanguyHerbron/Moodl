@@ -93,12 +93,14 @@ public class HomeActivity extends AppCompatActivity {
             switch (item.getItemId())
             {
                 case R.id.navigation_watchlist:
+                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
                     viewPager.setCurrentItem(0);
                     break;
                 case R.id.navigation_currencies_list:
                     viewPager.setCurrentItem(1);
                     break;
                 case R.id.navigation_market_cap:
+                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
                     viewPager.setCurrentItem(2);
                     break;
             }
@@ -125,10 +127,16 @@ public class HomeActivity extends AppCompatActivity {
         final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), 3);
 
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(2);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
+
+                if(position % 2 == 0)
+                {
+                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+                }
             }
 
             @Override
@@ -165,10 +173,7 @@ public class HomeActivity extends AppCompatActivity {
                 //overridePendingTransition(R.anim.activity_enter, R.anim.activity_exit);
             }
         });
-
     }
-
-
 
     private void switchMainView()
     {

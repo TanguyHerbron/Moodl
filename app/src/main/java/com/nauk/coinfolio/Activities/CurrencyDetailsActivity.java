@@ -202,8 +202,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         TradeUpdater updater = new TradeUpdater();
         updater.execute();
-
-        Log.d("coinfolio", "Details loaded for " + currency.getId());
     }
 
     private void updateInfoTab()
@@ -213,7 +211,14 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private void setupActionBar()
     {
-        setTitle(" " + currency.getName() + " | " + currency.getBalance());
+        if(currency.getBalance() == 0)
+        {
+            setTitle(" " + currency.getName());
+        }
+        else
+        {
+            setTitle(" " + currency.getName() + " | " + currency.getBalance());
+        }
 
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME |
                 ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_USE_LOGO);
@@ -584,7 +589,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private String getDate(long timeStamp){
 
         try{
-            //SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy");
             SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.getDefault());
             Date netDate = (new Date(timeStamp));
             return sdf.format(netDate);
@@ -833,7 +837,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             deleteLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    preferencesManager.setMustUpdate(true);
+                    preferencesManager.setMustUpdateSummary(true);
                     databaseManager.deleteTransactionFromId(Integer.parseInt(view.getTag().toString()));
                     drawTransactionList();
                     hasBeenModified = true;

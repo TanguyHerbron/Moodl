@@ -2,8 +2,10 @@ package com.nauk.coinfolio.Activities.HomeActivityFragments;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.SpannableString;
 import android.util.Log;
@@ -11,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
@@ -53,7 +56,7 @@ public class MarketCapitalization extends Fragment {
         setupDominantCurrenciesColors();
 
         marketCapManager = new MarketCapManager(getContext());
-        refreshLayout = view.findViewById(R.id.swiperefresh);
+        refreshLayout = view.findViewById(R.id.swiperefreshmarketcap);
 
         refreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -70,6 +73,12 @@ public class MarketCapitalization extends Fragment {
         updateMarketCap();
 
         return view;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
     }
 
     private void setupDominantCurrenciesColors()
@@ -196,11 +205,13 @@ public class MarketCapitalization extends Fragment {
                 {
                     case MotionEvent.ACTION_DOWN:
                         refreshLayout.setEnabled(false);
+                        getActivity().findViewById(R.id.viewPager).setEnabled(false);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     default:
                         refreshLayout.setEnabled(true);
+                        getActivity().findViewById(R.id.viewPager).setEnabled(true);
                         break;
                 }
                 return false;
@@ -210,8 +221,7 @@ public class MarketCapitalization extends Fragment {
         pieChart.getDescription().setEnabled(false);
         pieChart.getLegend().setEnabled(false);
         pieChart.setCenterText(generateCenterSpannableText());
-        pieChart.invalidate(); // refresh
-
+        pieChart.invalidate();
     }
 
     private SpannableString generateCenterSpannableText() {
@@ -228,8 +238,8 @@ public class MarketCapitalization extends Fragment {
         symbols.setGroupingSeparator(' ');
         formatter.setDecimalFormatSymbols(symbols);
 
-        ((TextView) view.findViewById(R.id.marketCapTextView)).setText(getResources().getString(R.string.market_cap_textview, formatter.format(marketCapManager.getMarketCap())));
+        ((TextView) view.findViewById(R.id.marketCapTextView)).setText(getActivity().getResources().getString(R.string.market_cap_textview, formatter.format(marketCapManager.getMarketCap())));
 
-        ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap)).setText(getResources().getString(R.string.volume_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
+        ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap)).setText(getActivity().getResources().getString(R.string.volume_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
     }
 }
