@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
@@ -144,6 +145,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         while(resultatList.moveToNext())
         {
             currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(3)));
+            Log.d("coinfolio", "Database output : " + resultatList.getString(1));
         }
 
         resultatList.close();

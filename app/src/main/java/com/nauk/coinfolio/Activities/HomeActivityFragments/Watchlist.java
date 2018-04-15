@@ -32,6 +32,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.Locale;
+
+import static java.lang.Math.abs;
 
 /**
  * Created by Tiji on 13/04/2018.
@@ -132,12 +135,14 @@ public class Watchlist extends Fragment {
             {
                 View card = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, null);
 
-                ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setText("3%");
-                ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setText("$3");
+                ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setText(getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(currency.getDayFluctuationPercentage())));
+                ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setText(getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
                 ((TextView) card.findViewById(R.id.currencyNameTextView)).setText(currency.getName());
-                ((TextView) card.findViewById(R.id.currencySymbolTextView)).setText(currency.getSymbol());
+                ((TextView) card.findViewById(R.id.currencySymbolTextView)).setText(getResources().getString(R.string.currencySymbolPlaceholder, currency.getSymbol()));
                 ((ImageView) card.findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
-                ((TextView) card.findViewById(R.id.currencyValueTextView)).setText("" + currency.getValue());
+                ((TextView) card.findViewById(R.id.currencyValueTextView)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(currency.getValue())));
+
+                updateColor(card, currency);
 
                 card.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 card.setOnClickListener(new View.OnClickListener() {
@@ -154,6 +159,20 @@ public class Watchlist extends Fragment {
             {
                 refreshLayout.setRefreshing(false);
             }
+        }
+    }
+
+    private void updateColor(View card, Currency currency)
+    {
+        if(currency.getDayFluctuation() > 0)
+        {
+            ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setTextColor(getResources().getColor(R.color.increase));
+            ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setTextColor(getResources().getColor(R.color.increase));
+        }
+        else
+        {
+            ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setTextColor(getResources().getColor(R.color.decrease));
+            ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setTextColor(getResources().getColor(R.color.decrease));
         }
     }
 
@@ -226,5 +245,21 @@ public class Watchlist extends Fragment {
             }
             return null;
         }
+    }
+
+    private String numberConformer(double number)
+    {
+        String str;
+
+        if(abs(number) > 1)
+        {
+            str = String.format( Locale.UK, "%.2f", number);
+        }
+        else
+        {
+            str = String.format( Locale.UK, "%.4f", number);
+        }
+
+        return str;
     }
 }

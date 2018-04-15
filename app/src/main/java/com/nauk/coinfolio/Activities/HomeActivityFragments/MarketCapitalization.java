@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.SpannableString;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -49,6 +50,8 @@ public class MarketCapitalization extends Fragment {
     {
         view = inflater.inflate(R.layout.fragment_marketcap_homeactivity, container, false);
 
+        setupDominantCurrenciesColors();
+
         marketCapManager = new MarketCapManager(getContext());
         refreshLayout = view.findViewById(R.id.swiperefresh);
 
@@ -64,8 +67,6 @@ public class MarketCapitalization extends Fragment {
 
         lastTimestamp = 0;
 
-        setupDominantCurrenciesColors();
-
         updateMarketCap();
 
         return view;
@@ -80,12 +81,12 @@ public class MarketCapitalization extends Fragment {
         dominantCurrenciesColors.put("XRP", -16744256);
         dominantCurrenciesColors.put("BCH", -1011696);
         dominantCurrenciesColors.put("LTC", -4671304);
-        dominantCurrenciesColors.put("ADA", -16773080);
-        dominantCurrenciesColors.put("NEO", -9390048);
-        dominantCurrenciesColors.put("XLM", -11509656);
-        dominantCurrenciesColors.put("XMR", -499712);
         dominantCurrenciesColors.put("EOS", -1513240);
-        dominantCurrenciesColors.put("IOT", -1513240);
+        dominantCurrenciesColors.put("ADA", -16773080);
+        dominantCurrenciesColors.put("XLM", -11509656);
+        dominantCurrenciesColors.put("MIOTA", -1513240);
+        dominantCurrenciesColors.put("NEO", -9390048);
+        dominantCurrenciesColors.put("XMR", -499712);
         dominantCurrenciesColors.put("DASH", -15175496);
         dominantCurrenciesColors.put("XEM", -7829368);
         dominantCurrenciesColors.put("TRX", -7829360);
@@ -154,6 +155,7 @@ public class MarketCapitalization extends Fragment {
                 otherCurrenciesDominance += marketCapManager.getDominance().get(key);
                 colors.add(dominantCurrenciesColors.get(key));
             }
+
             entries.add(new PieEntry(100-otherCurrenciesDominance, "Others"));
             colors.add(-12369084);
 
@@ -162,6 +164,7 @@ public class MarketCapitalization extends Fragment {
             set.setSliceSpace(1);
             set.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
             set.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+
             PieData data = new PieData(set);
             data.setValueTextSize(10);
             data.setValueFormatter(new PercentFormatter());

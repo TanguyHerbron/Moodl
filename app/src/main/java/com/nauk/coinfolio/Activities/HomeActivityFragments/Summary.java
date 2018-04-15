@@ -133,11 +133,10 @@ public class Summary extends Fragment {
         detailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                updateViewButtonIcon();
                 switchView();
             }
         });
-
-        displayBalance(preferencesManager.isBalanceHidden());
 
         updateTitle();
 
@@ -146,6 +145,17 @@ public class Summary extends Fragment {
         updateAll(true);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        updateAll(preferencesManager.mustUpdate());
+
+        updateViewButtonIcon();
+
+        displayBalance(preferencesManager.isBalanceHidden());
     }
 
     private void updateAll(boolean mustUpdate)
@@ -491,8 +501,8 @@ public class Summary extends Fragment {
         {
             refreshLayout.setRefreshing(false);
             refreshCurrencyList();
-            totalValue = totalValue;
             handler.removeCallbacks(updateRunnable);
+            adaptView();
         }
     }
 
@@ -515,6 +525,24 @@ public class Summary extends Fragment {
         }
 
         callBack.onSuccess(result);
+    }
+
+    private void updateViewButtonIcon()
+    {
+        ImageButton imgButton = getActivity().findViewById(R.id.switch_button);
+
+        imgButton.setBackgroundColor(this.getResources().getColor(R.color.buttonColor));
+
+        if(preferencesManager.getDetailOption())
+        {
+            imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_unfold_less_black_24dp));
+            preferencesManager.setDetailOption(false);
+        }
+        else
+        {
+            imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_details_black_24dp));
+            preferencesManager.setDetailOption(true);
+        }
     }
 
     private void displayBalance(boolean hideBalance)
@@ -654,6 +682,11 @@ public class Summary extends Fragment {
             });
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
         }
     }
 

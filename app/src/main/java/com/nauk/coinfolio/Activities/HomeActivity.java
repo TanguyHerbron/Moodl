@@ -166,26 +166,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        updateViewButtonIcon();
-
-    }
-
-    private void updateViewButtonIcon()
-    {
-        ImageButton imgButton = findViewById(R.id.switch_button);
-
-        imgButton.setBackgroundColor(this.getResources().getColor(R.color.buttonColor));
-
-        if(preferencesManager.getDetailOption())
-        {
-            imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_unfold_less_black_24dp));
-            preferencesManager.setDetailOption(true);
-        }
-        else
-        {
-            imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_details_black_24dp));
-            preferencesManager.setDetailOption(false);
-        }
     }
 
 
