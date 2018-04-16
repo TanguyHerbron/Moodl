@@ -31,6 +31,7 @@ public class CurrencyDataRetriever {
     private String minuteHistoryUrl = "https://min-api.cryptocompare.com/data/histominute";
     private String hourHistoryUrl = "https://min-api.cryptocompare.com/data/histohour";
     private String dayHistoryUrl = "https://min-api.cryptocompare.com/data/histoday";
+    private String priceUrl = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=";
 
     private RequestQueue requestQueue;
 
@@ -94,6 +95,27 @@ public class CurrencyDataRetriever {
         requestQueue.add(stringRequest);
     }
 
+    private void updatePrice(final String symbolCurrencyFrom, String symbolCurrencyTo, final PriceCallBack callBack)
+    {
+        String requestUrl = priceUrl + symbolCurrencyFrom + "&tsyms=" + symbolCurrencyTo;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callBack.onSuccess(processPriceResult(response));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }
+
     private String getRequestUrl(int timeUnit, String symbolCurrencyFrom, String symbolCyrrencyTo)
     {
         String requestUrl = null;
@@ -112,6 +134,27 @@ public class CurrencyDataRetriever {
         }
 
         return requestUrl;
+    }
+
+    private Currency processPriceResult(String response)
+    {
+        Currency currency = new Currency();
+        response = response.substring(response.indexOf("TYPE") - 2, response.length() - 3);
+
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            double open24 = jsonObject.getDouble("OPEN24HOUR");
+            double value = jsonObject.getDouble("PRICE");
+
+            currency.setDayFluctuation(value - open24);
+            currency.setDayFluctuationPercentage((float) (currency.getDayFluctuation() / open24 * 100));
+
+            currency.setValue(value);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return currency;
     }
 
     private List<CurrencyDataChart> processHistoryResult(String response)
@@ -182,6 +225,18 @@ public class CurrencyDataRetriever {
         }
     }
 
+    public void updatePrice(String symbolCurrencyFrom, final PriceCallBack callBack)
+    {
+        if(symbolCurrencyFrom.equals("USD"))
+        {
+            callBack.onSuccess(null);
+        }
+        else
+        {
+            updatePrice(symbolCurrencyFrom, "USD", callBack);
+        }
+    }
+
     /*public void updateCryptocompareDetails(int id, final Currency.CurrencyCallBack callBack)
     {
         String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
@@ -211,5 +266,9 @@ public class CurrencyDataRetriever {
     public interface DataChartCallBack {
         void onSuccess(List<CurrencyDataChart> dataChart);
         void onSuccess(String price);
+    }
+
+    public interface PriceCallBack {
+        void onSuccess(Currency currencyInfo);
     }
 }

@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -51,14 +52,24 @@ public class HomeLayoutGenerator {
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
-                {
+            public void onClick(final View view) {
+                if (view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE) {
                     collapseView(view);
-                }
-                else
-                {
-                    extendView(view);
+                } else {
+                    if (currency.getHistoryMinutes() == null) {
+                        currency.updateHistoryMinutes(context, new Currency.CurrencyCallBack() {
+                            @Override
+                            public void onSuccess(Currency currency) {
+                                //setupLineChart(view, currency);
+                                ChartLoader chartLoader = new ChartLoader(view, currency);
+                                chartLoader.execute();
+                            }
+                        });
+                    }
+                    else
+                    {
+                        extendView(view);
+                    }
                 }
             }
         });
@@ -74,11 +85,6 @@ public class HomeLayoutGenerator {
             }
         });
 
-        if(currency.getHistoryMinutes() != null)
-        {
-            setupLineChart(view, currency);
-        }
-
         if(isExtended)
         {
             extendView(view);
@@ -91,6 +97,39 @@ public class HomeLayoutGenerator {
         updateColor(view, currency);
 
         return view;
+    }
+
+    private class ChartLoader extends AsyncTask<Void, Integer, Void>
+    {
+        private View view;
+        private Currency currency;
+
+        ChartLoader(View view, Currency currency)
+        {
+            this.view = view;
+            this.currency = currency;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            extendView(view);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            setupLineChart(view, currency);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            view.findViewById(R.id.progressLineChart).setVisibility(View.GONE);
+            view.findViewById(R.id.LineChartView).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.LineChartView).invalidate();
+        }
     }
 
     private static void expand(final View v) {
@@ -226,7 +265,7 @@ public class HomeLayoutGenerator {
     private void extendView(View view)
     {
         expand(view.findViewById(R.id.collapsableLayout));
-        view.findViewById(R.id.LineChartView).invalidate();
+        //view.findViewById(R.id.LineChartView).invalidate();
     }
 
     private void updateColor(View view, Currency currency)

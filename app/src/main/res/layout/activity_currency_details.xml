@@ -45,7 +45,7 @@
                 android:id="@+id/progressLayoutChart"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.4"
+                android:layout_weight="0.405"
                 android:visibility="gone"
                 android:gravity="center">
 
@@ -122,72 +122,79 @@
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:autoSizeTextType="uniform"
+                    android:maxLines="1"
                     android:text="@string/button1h"/>
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:autoSizeTextType="uniform"
+                    android:maxLines="1"
                     android:text="@string/button3h"/>
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:enabled="false"
                     android:autoSizeTextType="uniform"
+                    android:maxLines="1"
                     android:text="@string/button1d"/>
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:autoSizeTextType="uniform"
+                    android:maxLines="1"
                     android:text="@string/button3d"/>
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:autoSizeTextType="uniform"
+                    android:maxLines="1"
                     android:text="@string/button1w"/>
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:autoSizeTextType="uniform"
+                    android:maxLines="1"
                     android:text="@string/button1m"/>
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:text="@string/button3m"/>
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:autoSizeTextType="uniform"
+                    android:maxLines="1"
                     android:text="@string/button6m"/>
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="11.1"
                     android:autoSizeTextType="uniform"
                     android:text="@string/button1y"/>
@@ -198,7 +205,7 @@
                 android:id="@+id/llCharts"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.7"
+                android:layout_weight="0.71"
                 android:orientation="horizontal"
                 android:paddingStart="4dp">
 

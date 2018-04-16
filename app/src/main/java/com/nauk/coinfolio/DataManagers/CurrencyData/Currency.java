@@ -41,6 +41,8 @@ public class Currency implements Parcelable {
     private String algorithm;
     //private String proofType
 
+    public Currency() {}
+
     public Currency(String symbol, double balance)
     {
         this.symbol = symbol;
@@ -95,6 +97,26 @@ public class Currency implements Parcelable {
         return url;
     }
 
+    public void updatePrice(android.content.Context context, final CurrencyCallBack callBack)
+    {
+        dataRetriver = new CurrencyDataRetriever(context);
+
+        dataRetriver.updatePrice(symbol, new CurrencyDataRetriever.PriceCallBack() {
+            @Override
+            public void onSuccess(Currency currencyInfo) {
+                if(currencyInfo != null)
+                {
+                    setValue(currencyInfo.getValue());
+                    setDayFluctuation(currencyInfo.getDayFluctuation());
+                    setDayFluctuationPercentage(currencyInfo.getDayFluctuationPercentage());
+                }
+                Log.d("coinfolio", this.toString());
+
+                callBack.onSuccess(Currency.this);
+            }
+        });
+    }
+
     public void updateHistoryMinutes(android.content.Context context, final CurrencyCallBack callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
@@ -103,18 +125,6 @@ public class Currency implements Parcelable {
             @Override
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryMinutes(dataChart);
-
-                if(dataChart != null)
-                {
-                    Log.d("coinfolio", "Success for : " + symbol);
-                    setValue(dataChart.get(dataChart.size() - 1).getClose());
-                    updateDayFluctuation();
-                }
-                else
-                {
-                    Log.d("coinfolio", "Error for : " + symbol);
-                    value = NULL;
-                }
 
                 callBack.onSuccess(Currency.this);
             }
@@ -262,6 +272,14 @@ public class Currency implements Parcelable {
         historyDays = newDataChart;
     }
 
+    public void setDayFluctuationPercentage(float dayFluctuationPercentage) {
+        this.dayFluctuationPercentage = dayFluctuationPercentage;
+    }
+
+    public void setDayFluctuation(double dayFluctuation) {
+        this.dayFluctuation = dayFluctuation;
+    }
+
     public void setIcon(Bitmap newIcon)
     {
         icon = newIcon;
@@ -280,6 +298,12 @@ public class Currency implements Parcelable {
 
             dayFluctuationPercentage = (float) (dayFluctuation / historyMinutes.get(0).getOpen() * 100);
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        return symbol + " " + value + " " + dayFluctuation;
     }
 
     public interface CurrencyCallBack {

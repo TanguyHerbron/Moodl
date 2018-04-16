@@ -251,7 +251,7 @@ public class Summary extends Fragment {
         {
             final Currency currency = balanceManager.getTotalBalance().get(i);
 
-            if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
+            if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001))
             {
                 currencyLayout.addView(layoutGenerator.getInfoLayout(currency, preferencesManager.getDetailOption(), totalValue, preferencesManager.isBalanceHidden()));
             }
@@ -629,7 +629,7 @@ public class Summary extends Fragment {
                     {
                         for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                         {
-                            balance.get(i).updateHistoryMinutes(getActivity(), new Currency.CurrencyCallBack() {
+                            balance.get(i).updatePrice(getActivity(), new Currency.CurrencyCallBack() {
                                 @Override
                                 public void onSuccess(Currency currency) {
                                     countCoins(true, false);

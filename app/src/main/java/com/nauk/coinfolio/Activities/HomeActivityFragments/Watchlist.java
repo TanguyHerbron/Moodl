@@ -236,14 +236,26 @@ public class Watchlist extends Fragment {
                 card.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 card.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View view) {
+                    public void onClick(final View view) {
                         if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
                         {
                             collapseView(view);
                         }
                         else
                         {
-                            extendView(view);
+                            if (currency.getHistoryMinutes() == null) {
+                                currency.updateHistoryMinutes(getActivity(), new Currency.CurrencyCallBack() {
+                                    @Override
+                                    public void onSuccess(Currency currency) {
+                                        extendView(view);
+                                        setupLineChart(view, currency);
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                extendView(view);
+                            }
                         }
                     }
                 });
@@ -410,7 +422,7 @@ public class Watchlist extends Fragment {
         protected Void doInBackground(Void... voids) {
             for(final Currency currency : watchlistManager.getWatchlist())
             {
-                currency.updateHistoryMinutes(getActivity(), new Currency.CurrencyCallBack() {
+                currency.updatePrice(getActivity(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(final Currency sucessCurrency) {
                         if(getIconUrl(sucessCurrency.getSymbol()) != null)
