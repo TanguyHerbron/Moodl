@@ -123,7 +123,7 @@
     <string name="title_watchlist">Watchlist</string>
     <string name="title_infos">Infos</string>
     <string name="title_transactions">Transactions</string>
-    <string name="title_home">Home</string>
+    <string name="title_home">Holdings</string>
     <string name="title_market_cap">Market Capitalization</string>
 
     <!--Chart buttons texts-->

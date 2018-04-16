@@ -65,20 +65,14 @@ import java.util.Locale;
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
 
 //Auto refresh with predefined intervals
-//Adding manually currencies (date, purchased price)
 //Multiple portfolio (exchanges & custom)
-//Add currency details (market cap, 1h, 3h, 1d, 3d, 1w, 1m, 3m, 1y)
 //Add roadmap to buy a coin
 //Add reddit link ?
 //
 
 public class HomeActivity extends AppCompatActivity {
 
-    private PreferencesManager preferencesManager;
-
     private CollapsingToolbarLayout toolbarLayout;
-    private ViewFlipper viewFlipper;
-    private HomeLayoutGenerator layoutGenerator;
     private BottomNavigationView bottomNavigationView;
 
     private ViewPager viewPager;
@@ -151,11 +145,9 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         //Objects initialization
-        preferencesManager = new PreferencesManager(this);
 
         //Layouts setup
         toolbarLayout = findViewById(R.id.toolbar_layout);
-        viewFlipper = findViewById(R.id.viewFlipperSummary);
 
         bottomNavigationView = findViewById(R.id.navigationSummary);
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
@@ -175,73 +167,10 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void switchMainView()
-    {
-        Log.d("coinfolio", "Should");
-        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
-        findViewById(R.id.swiperefresh).setNestedScrollingEnabled(true);
-
-        findViewById(R.id.toolbar_layout).setFocusable(true);
-        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
-        ((AppBarLayout) findViewById(R.id.app_bar)).setActivated(true);
-        findViewById(R.id.app_bar).setClickable(true);
-        findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
-
-        findViewById(R.id.app_bar).setEnabled(true);
-        findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(true);
-        findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(true);
-
-        findViewById(R.id.switch_button).setVisibility(View.VISIBLE);
-
-        viewFlipper.setDisplayedChild(1);
-    }
-
-    private void switchSecondaryViews(int itemIndex)
-    {
-        Log.d("coinfolio", "Should not");
-        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
-        findViewById(R.id.swiperefresh).setNestedScrollingEnabled(false);
-
-        findViewById(R.id.toolbar_layout).setFocusable(false);
-        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
-        ((AppBarLayout) findViewById(R.id.app_bar)).setActivated(false);
-        findViewById(R.id.app_bar).setClickable(false);
-        findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
-
-        findViewById(R.id.app_bar).setEnabled(false);
-        findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(false);
-        findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(false);
-
-        findViewById(R.id.switch_button).setVisibility(View.GONE);
-
-        viewFlipper.setDisplayedChild(itemIndex);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
 
-    }
-
-    private void addTestWatchlistCardview()
-    {
-        View view = LayoutInflater.from(this).inflate(R.layout.cardview_watchlist, null);
-
-        ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView)).setText("3%");
-        ((TextView) view.findViewById(R.id.currencyFluctuationTextView)).setText("$3");
-        ((TextView) view.findViewById(R.id.currencyNameTextView)).setText("TanguyCoin");
-        ((TextView) view.findViewById(R.id.currencySymbolTextView)).setText("TGC");
-        ((TextView) view.findViewById(R.id.currencyValueTextView)).setText("$100");
-
-        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("coinfolio", "Clicked !");
-            }
-        });
-
-        ((LinearLayout) findViewById(R.id.linearLayoutWatchlist)).addView(view);
     }
 
     @Override

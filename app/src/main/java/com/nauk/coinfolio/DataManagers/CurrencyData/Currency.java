@@ -106,6 +106,7 @@ public class Currency implements Parcelable {
 
                 if(dataChart != null)
                 {
+                    Log.d("coinfolio", "Success for : " + symbol);
                     setValue(dataChart.get(dataChart.size() - 1).getClose());
                     updateDayFluctuation();
                 }

@@ -44,7 +44,8 @@
             <LinearLayout
                 android:id="@+id/progressLayoutChart"
                 android:layout_width="match_parent"
-                android:layout_height="305dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.4"
                 android:visibility="gone"
                 android:gravity="center">
 
@@ -57,21 +58,23 @@
 
             </LinearLayout>
 
-
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/chartPriceView"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"/>
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"/>
 
             <com.github.mikephil.charting.charts.CandleStickChart
                 android:id="@+id/chartCandleStickView"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
                 android:visibility="gone"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0.85"
                 android:orientation="horizontal">
 
                 <TextView
@@ -106,13 +109,15 @@
             <com.github.mikephil.charting.charts.BarChart
                 android:id="@+id/chartVolumeView"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.8"
                 android:layout_marginTop="5dp" />
 
             <LinearLayout
                 android:id="@+id/layoutChartButtons"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0.82"
                 android:orientation="horizontal">
 
                 <Button
@@ -120,6 +125,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="11.1"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/button1h"/>
 
                 <Button
@@ -127,6 +133,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="11.1"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/button3h"/>
 
                 <Button
@@ -135,6 +142,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="11.1"
                     android:enabled="false"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/button1d"/>
 
                 <Button
@@ -142,6 +150,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="11.1"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/button3d"/>
 
                 <Button
@@ -149,6 +158,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="11.1"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/button1w"/>
 
                 <Button
@@ -156,6 +166,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="11.1"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/button1m"/>
 
                 <Button
@@ -170,6 +181,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="11.1"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/button6m"/>
 
                 <Button
@@ -177,6 +189,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="11.1"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/button1y"/>
 
             </LinearLayout>
@@ -184,8 +197,10 @@
             <LinearLayout
                 android:id="@+id/llCharts"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="match_parent"
+                android:layout_weight="0.7"
+                android:orientation="horizontal"
+                android:paddingStart="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -202,6 +217,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:text="Beginning price"
                             android:layout_weight="0.5"
                             android:textStyle="bold"/>
@@ -210,6 +226,7 @@
                             android:id="@+id/txtViewPriceStart"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:layout_weight="0.5"/>
 
                     </LinearLayout>
@@ -223,6 +240,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:text="Current price"
                             android:layout_weight="0.5"
                             android:textStyle="bold"/>
@@ -231,6 +249,7 @@
                             android:id="@+id/txtViewPriceNow"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:layout_weight="0.5"/>
 
                     </LinearLayout>
@@ -244,6 +263,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:text="Delta"
                             android:layout_weight="0.5"
                             android:textStyle="bold"/>
@@ -252,6 +272,7 @@
                             android:id="@+id/txtViewPercentage"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:layout_weight="0.5"/>
 
                     </LinearLayout>
@@ -273,6 +294,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:text="Total volume"
                             android:layout_weight="0.5"
                             android:textStyle="bold"/>
@@ -281,6 +303,7 @@
                             android:id="@+id/totalVolume"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:layout_weight="0.5" />
 
                     </LinearLayout>
@@ -294,6 +317,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:text="Highest price"
                             android:layout_weight="0.5"
                             android:textStyle="bold" />
@@ -302,6 +326,7 @@
                             android:id="@+id/highestPrice"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:layout_weight="0.5" />
 
                     </LinearLayout>
@@ -315,6 +340,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:text="Lowest price"
                             android:layout_weight="0.5"
                             android:textStyle="bold"/>
@@ -323,6 +349,7 @@
                             android:id="@+id/lowestPrice"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:autoSizeTextType="uniform"
                             android:layout_weight="0.5" />
 
                     </LinearLayout>
