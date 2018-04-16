@@ -111,6 +111,7 @@ public class Currency implements Parcelable {
                 }
                 else
                 {
+                    Log.d("coinfolio", "Error for : " + symbol);
                     value = NULL;
                 }
 

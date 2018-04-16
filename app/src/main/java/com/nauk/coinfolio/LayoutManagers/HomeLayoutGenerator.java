@@ -253,7 +253,6 @@ public class HomeLayoutGenerator {
         List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
         ArrayList<Entry> values = new ArrayList<>();
 
-        Log.d("coinfolio", "Generating data for " + currency.getSymbol());
         for(int i = 0; i < dataChartList.size(); i+=10)
         {
             values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));

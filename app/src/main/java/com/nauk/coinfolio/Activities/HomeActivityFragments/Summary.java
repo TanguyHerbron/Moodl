@@ -135,7 +135,7 @@ public class Summary extends Fragment {
             }
         });
 
-        updateTitle();
+        //updateTitle();
 
         updateAll(true);
 
@@ -495,7 +495,8 @@ public class Summary extends Fragment {
         protected void onPostExecute(Void result)
         {
             refreshLayout.setRefreshing(false);
-            refreshCurrencyList();
+            //refreshCurrencyList();
+            adaptView();
             handler.removeCallbacks(updateRunnable);
         }
     }
@@ -632,6 +633,7 @@ public class Summary extends Fragment {
                                 @Override
                                 public void onSuccess(Currency currency) {
                                     countCoins(true, false);
+                                    Log.d("coinfolio", "History " + currency.getSymbol());
                                 }
                             });
                         }
