@@ -23,6 +23,7 @@ import android.view.ViewParent;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.nauk.coinfolio.Activities.CurrencyDetailsActivity;
 import com.nauk.coinfolio.Activities.CurrencySelectionActivity;
 import com.nauk.coinfolio.Activities.HomeActivity;
+import com.nauk.coinfolio.Activities.SettingsActivity;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
@@ -97,6 +99,16 @@ public class Watchlist extends Fragment {
                 Intent selectionIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
                 selectionIntent.putExtra("isWatchList", true);
                 startActivity(selectionIntent);
+            }
+        });
+
+        ImageButton settingsButton = view.findViewById(R.id.settings_button);
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
+                startActivity(settingIntent);
             }
         });
 

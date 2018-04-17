@@ -72,7 +72,6 @@ import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private CollapsingToolbarLayout toolbarLayout;
     private BottomNavigationView bottomNavigationView;
 
     private ViewPager viewPager;
@@ -115,7 +114,6 @@ public class HomeActivity extends AppCompatActivity {
         //getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         setContentView(R.layout.activity_currency_summary);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         viewPager = findViewById(R.id.viewPager);
         final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), 3);
@@ -125,7 +123,7 @@ public class HomeActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                bottomNavigationView.getMenu().getItem(position).setChecked(true);
+                //bottomNavigationView.getMenu().getItem(position).setChecked(true);
 
                 if(position % 2 == 0)
                 {
@@ -147,24 +145,10 @@ public class HomeActivity extends AppCompatActivity {
         //Objects initialization
 
         //Layouts setup
-        toolbarLayout = findViewById(R.id.toolbar_layout);
 
         bottomNavigationView = findViewById(R.id.navigationSummary);
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
         bottomNavigationView.setSelectedItemId(R.id.navigation_currencies_list);
-        toolbarLayout.setForegroundGravity(Gravity.CENTER);
-
-        ImageButton settingsButton = findViewById(R.id.settings_button);
-
-        settingsButton.setBackground(this.getResources().getDrawable(R.drawable.ic_settings_black_24dp));
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent settingIntent = new Intent(HomeActivity.this, SettingsActivity.class);
-                startActivity(settingIntent);
-                //overridePendingTransition(R.anim.activity_enter, R.anim.activity_exit);
-            }
-        });
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.nauk.coinfolio.Activities.HomeActivityFragments;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
@@ -21,6 +23,7 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.nauk.coinfolio.Activities.SettingsActivity;
 import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.R;
 
@@ -69,6 +72,16 @@ public class MarketCapitalization extends Fragment {
         );
 
         lastTimestamp = 0;
+
+        ImageButton settingsButton = view.findViewById(R.id.settings_button);
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
+                startActivity(settingIntent);
+            }
+        });
 
         updateMarketCap();
 
@@ -205,13 +218,11 @@ public class MarketCapitalization extends Fragment {
                 {
                     case MotionEvent.ACTION_DOWN:
                         refreshLayout.setEnabled(false);
-                        getActivity().findViewById(R.id.viewPager).setEnabled(false);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     default:
                         refreshLayout.setEnabled(true);
-                        getActivity().findViewById(R.id.viewPager).setEnabled(true);
                         break;
                 }
                 return false;

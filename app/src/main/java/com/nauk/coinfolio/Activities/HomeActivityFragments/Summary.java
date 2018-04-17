@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import com.nauk.coinfolio.Activities.CurrencySelectionActivity;
 import com.nauk.coinfolio.Activities.HomeActivity;
+import com.nauk.coinfolio.Activities.SettingsActivity;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
@@ -75,8 +76,7 @@ public class Summary extends Fragment {
         balanceManager = new BalanceManager(getActivity());
         layoutGenerator = new HomeLayoutGenerator(getActivity());
         refreshLayout = view.findViewById(R.id.swiperefreshsummary);
-        toolbarSubtitle = getActivity().findViewById(R.id.toolbarSubtitle);
-        toolbarLayout = getActivity().findViewById(R.id.toolbar_layout);
+        toolbarSubtitle = view.findViewById(R.id.toolbarSubtitle);
 
         totalValue = 0;
         totalFluctuation = 0;
@@ -113,8 +113,20 @@ public class Summary extends Fragment {
         );
 
         handler.postDelayed(updateRunnable, 10000);
+        toolbarLayout = view.findViewById(R.id.toolbar_layout);
+        toolbarLayout.setForegroundGravity(Gravity.CENTER);
 
         Button addCurrencyButton = view.findViewById(R.id.buttonAddTransaction);
+
+        ImageButton settingsButton = view.findViewById(R.id.settings_button);
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
+                startActivity(settingIntent);
+            }
+        });
 
         addCurrencyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,7 +137,7 @@ public class Summary extends Fragment {
             }
         });
 
-        ImageButton detailsButton = getActivity().findViewById(R.id.switch_button);
+        ImageButton detailsButton = view.findViewById(R.id.switch_button);
         detailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

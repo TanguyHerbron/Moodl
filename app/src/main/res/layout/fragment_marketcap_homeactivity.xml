@@ -1,61 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/swiperefreshmarketcap"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    android:layout_marginBottom="56dp"
-    android:background="@color/summary_background">
-    <LinearLayout android:id="@+id/layoutMarketCap"
+    android:layout_marginBottom="56dp">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/gradient_background_reverse">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_collapseMode="pin">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_collapseMode="pin"
+                android:layout_margin="10dp">
+
+                <ImageButton
+                    android:id="@+id/settings_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_settings"
+                    android:background="@drawable/ic_settings_black_24dp"
+                    android:visibility="visible"
+                    android:layout_gravity="end"
+                    android:contentDescription="Settings"/>
+
+            </FrameLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swiperefreshmarketcap"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        android:layout_marginTop="?attr/actionBarSize"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:background="@color/summary_background">
 
-        <ProgressBar
-            android:id="@+id/progressBarMarketCap"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_gravity="center"
-            android:background="@drawable/circular_progress_bar" />
-
-        <LinearLayout
-            android:id="@+id/layoutProgressMarketCap"
+        <LinearLayout android:id="@+id/layoutMarketCap"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            xmlns:android="http://schemas.android.com/apk/res/android">
 
-            <TextView
-                android:id="@+id/marketCapTextView"
+            <ProgressBar
+                android:id="@+id/progressBarMarketCap"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="5dp"
-                android:textSize="20dp"
-                android:gravity="center_horizontal"/>
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_gravity="center"
+                android:background="@drawable/circular_progress_bar" />
 
-            <TextView
-                android:id="@+id/dayVolumeTotalMarketCap"
+            <LinearLayout
+                android:id="@+id/layoutProgressMarketCap"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
-                android:textSize="18dp"
-                android:gravity="center_horizontal"/>
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:orientation="vertical">
 
-            <com.github.mikephil.charting.charts.PieChart
-                android:id="@+id/marketCapPieChart"
-                android:layout_width="match_parent"
-                android:layout_height="350dp"/>
+                <TextView
+                    android:id="@+id/marketCapTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="5dp"
+                    android:textSize="20dp"
+                    android:gravity="center_horizontal"/>
+
+                <TextView
+                    android:id="@+id/dayVolumeTotalMarketCap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:textSize="18dp"
+                    android:gravity="center_horizontal"/>
+
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/marketCapPieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="350dp"/>
+
+            </LinearLayout>
 
         </LinearLayout>
-
-    </LinearLayout>
-</android.support.v4.widget.SwipeRefreshLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
+</android.support.constraint.ConstraintLayout>

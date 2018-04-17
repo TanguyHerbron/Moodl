@@ -1,49 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/swiperefreshsummary"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    android:layout_marginBottom="56dp"
-    android:background="@color/summary_background">
+    android:fitsSystemWindows="true"
+    tools:context="com.nauk.coinfolio.Activities.HomeActivity">
 
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/nestedScrollViewLayout"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/app_bar_height"
+        android:fitsSystemWindows="true"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:background="@drawable/gradient_background">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:contentScrim="@drawable/gradient_background"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:toolbarId="@+id/toolbar"
+            app:collapsedTitleGravity="center"
+            app:expandedTitleGravity="center"
+            app:titleEnabled="true">
+
+            <TextView
+                android:id="@+id/toolbarSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|bottom"
+                android:layout_marginBottom="35dp"
+                android:gravity="center"
+                android:textSize="20sp"
+                app:layout_collapseMode="parallax"/>
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                android:layout_marginStart="-30dp">
+
+            </android.support.v7.widget.Toolbar>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_collapseMode="pin"
+                android:layout_margin="10dp">
+
+                <ImageButton
+                    android:id="@+id/switch_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/quick_button"
+                    android:visibility="visible"
+                    android:layout_gravity="start"
+                    android:contentDescription="Switch view"/>
+
+                <ImageButton
+                    android:id="@+id/settings_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_settings"
+                    android:visibility="visible"
+                    android:layout_gravity="end"
+                    android:background="@drawable/ic_settings_black_24dp"
+                    android:contentDescription="Settings"/>
+
+            </FrameLayout>
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swiperefreshsummary"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.nauk.coinfolio.Activities.HomeActivity">
-        <LinearLayout
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:background="@color/summary_background">
+
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/nestedScrollViewLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp">
-
+            android:layout_height="match_parent"
+            tools:context="com.nauk.coinfolio.Activities.HomeActivity">
             <LinearLayout
-                android:id="@+id/currencyListLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:orientation="vertical"
+                android:layout_marginTop="10dp">
 
-            <Button
-                android:id="@+id/buttonAddTransaction"
-                android:text="Add transaction"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_dashed_background"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/separationColor"
-                style="@style/Widget.AppCompat.Button.Borderless"/>
+                <LinearLayout
+                    android:id="@+id/currencyListLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
+                <Button
+                    android:id="@+id/buttonAddTransaction"
+                    android:text="Add transaction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_dashed_background"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:textColor="@color/separationColor"
+                    style="@style/Widget.AppCompat.Button.Borderless"/>
 
-        </LinearLayout>
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
 
-    </android.support.v4.widget.NestedScrollView>
+            </LinearLayout>
 
-</android.support.v4.widget.SwipeRefreshLayout>
+        </android.support.v4.widget.NestedScrollView>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+</android.support.design.widget.CoordinatorLayout>
