@@ -46,7 +46,7 @@ public class HomeLayoutGenerator {
         this.context = context;
     }
 
-    public View getInfoLayout(final Currency currency, boolean isExtended, float totalValue, boolean isBalanceHidden)
+    public View getInfoLayout(final Currency currency, float totalValue, boolean isBalanceHidden)
     {
         View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, null, true);
 
@@ -84,15 +84,6 @@ public class HomeLayoutGenerator {
                 context.getApplicationContext().startActivity(intent);
             }
         });
-
-        if(isExtended)
-        {
-            extendView(view);
-        }
-        else
-        {
-            collapseView(view);
-        }
 
         updateColor(view, currency);
 

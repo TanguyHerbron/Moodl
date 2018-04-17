@@ -37,6 +37,7 @@ import com.nauk.coinfolio.R;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -137,18 +138,6 @@ public class Summary extends Fragment {
             }
         });
 
-        ImageButton detailsButton = view.findViewById(R.id.switch_button);
-        detailsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                preferencesManager.setDetailOption(!preferencesManager.getDetailOption());
-                updateViewButtonIcon();
-                switchView();
-            }
-        });
-
-        //updateTitle();
-
         updateAll(true);
 
         generateSplashScreen();
@@ -188,8 +177,6 @@ public class Summary extends Fragment {
         super.onResume();
 
         updateAll(preferencesManager.mustUpdateSummary());
-
-        updateViewButtonIcon();
 
         displayBalance(preferencesManager.isBalanceHidden());
     }
@@ -243,31 +230,38 @@ public class Summary extends Fragment {
         totalFluctuation = 0;
     }
 
-    private void switchView()
-    {
-        if(preferencesManager.getDetailOption())
-        {
-            adaptView();
-        }
-        else
-        {
-            adaptView();
-        }
-    }
-
     private void adaptView()
     {
         currencyLayout.removeAllViews();
 
-        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-        {
-            final Currency currency = balanceManager.getTotalBalance().get(i);
+        final List<View> currencyView = new ArrayList<>();
 
-            if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001))
-            {
-                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, preferencesManager.getDetailOption(), totalValue, preferencesManager.isBalanceHidden()));
+        Runnable newRunnabmle = new Runnable() {
+            @Override
+            public void run() {
+                for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+                {
+                    final Currency currency = balanceManager.getTotalBalance().get(i);
+
+                    if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001))
+                    {
+                        currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
+                    }
+                }
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for(int i = 0; i < currencyView.size(); i++)
+                        {
+                            currencyLayout.addView(currencyView.get(i));
+                        }
+                    }
+                });
             }
-        }
+        };
+
+        newRunnabmle.run();
     }
 
     private void countCoins(boolean isCoin, boolean isDetails)
@@ -356,6 +350,8 @@ public class Summary extends Fragment {
     protected void updateTitle()
     {
         float totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) * 100;
+
+
 
         if(preferencesManager.isBalanceHidden())
         {
@@ -446,27 +442,6 @@ public class Summary extends Fragment {
             }
         }
 
-        private void refreshCurrencyList()
-        {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    currencyLayout.removeAllViews();
-
-                    for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-                    {
-                        Currency currency = balanceManager.getTotalBalance().get(i);
-
-                        if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001) {
-                            currencyLayout.addView(layoutGenerator.getInfoLayout(currency, preferencesManager.getDetailOption(), totalValue, preferencesManager.isBalanceHidden()));
-                        }
-                    }
-
-                    adaptView();
-                }
-            });
-        }
-
         @Override
         protected Void doInBackground(Void... params)
         {
@@ -532,22 +507,6 @@ public class Summary extends Fragment {
         }
 
         callBack.onSuccess(result);
-    }
-
-    private void updateViewButtonIcon()
-    {
-        ImageButton imgButton = getActivity().findViewById(R.id.switch_button);
-
-        imgButton.setBackgroundColor(this.getResources().getColor(R.color.buttonColor));
-
-        if(preferencesManager.getDetailOption())
-        {
-            imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_unfold_less_black_24dp));
-        }
-        else
-        {
-            imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_details_black_24dp));
-        }
     }
 
     private void displayBalance(boolean hideBalance)

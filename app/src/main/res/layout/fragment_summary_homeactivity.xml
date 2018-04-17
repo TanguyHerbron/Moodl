@@ -55,15 +55,6 @@
                 android:layout_margin="10dp">
 
                 <ImageButton
-                    android:id="@+id/switch_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/quick_button"
-                    android:visibility="visible"
-                    android:layout_gravity="start"
-                    android:contentDescription="Switch view"/>
-
-                <ImageButton
                     android:id="@+id/settings_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

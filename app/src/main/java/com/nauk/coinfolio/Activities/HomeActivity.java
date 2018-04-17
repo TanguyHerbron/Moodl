@@ -86,14 +86,12 @@ public class HomeActivity extends AppCompatActivity {
             switch (item.getItemId())
             {
                 case R.id.navigation_watchlist:
-                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
                     viewPager.setCurrentItem(0);
                     break;
                 case R.id.navigation_currencies_list:
                     viewPager.setCurrentItem(1);
                     break;
                 case R.id.navigation_market_cap:
-                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
                     viewPager.setCurrentItem(2);
                     break;
             }

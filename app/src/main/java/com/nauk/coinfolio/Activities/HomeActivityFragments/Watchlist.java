@@ -27,6 +27,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.support.v7.widget.Toolbar;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -69,6 +70,7 @@ public class Watchlist extends Fragment {
     private SwipeRefreshLayout refreshLayout;
     private long lastTimestamp;
     private PreferencesManager preferencesManager;
+    private Toolbar toolbar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -91,6 +93,7 @@ public class Watchlist extends Fragment {
                 updateWatchlist(false);
             }
         });
+        toolbar = view.findViewById(R.id.toolbar);
 
         Button addWatchlistButton = view.findViewById(R.id.buttonAddWatchlist);
         addWatchlistButton.setOnClickListener(new View.OnClickListener() {
@@ -225,69 +228,88 @@ public class Watchlist extends Fragment {
 
         if(watchlistCounter >= watchlistManager.getWatchlist().size())
         {
+            final List<View> watchlistViews = new ArrayList<View>();
+
             ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).removeAllViews();
 
-            for(final Currency currency : watchlistManager.getWatchlist())
-            {
-                View card = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, null);
+            Runnable newRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    for(final Currency currency : watchlistManager.getWatchlist())
+                    {
+                        View card = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, null);
 
-                ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setText(getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(currency.getDayFluctuationPercentage())));
-                ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setText(getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
-                ((TextView) card.findViewById(R.id.currencyNameTextView)).setText(currency.getName());
-                ((TextView) card.findViewById(R.id.currencySymbolTextView)).setText(getResources().getString(R.string.currencySymbolPlaceholder, currency.getSymbol()));
-                ((ImageView) card.findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
-                ((TextView) card.findViewById(R.id.currencyValueTextView)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(currency.getValue())));
+                        ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setText(getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(currency.getDayFluctuationPercentage())));
+                        ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setText(getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
+                        ((TextView) card.findViewById(R.id.currencyNameTextView)).setText(currency.getName());
+                        ((TextView) card.findViewById(R.id.currencySymbolTextView)).setText(getResources().getString(R.string.currencySymbolPlaceholder, currency.getSymbol()));
+                        ((ImageView) card.findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
+                        ((TextView) card.findViewById(R.id.currencyValueTextView)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(currency.getValue())));
 
-                Drawable arrowDrawable = ((ImageView) card.findViewById(R.id.detailsArrow)).getDrawable();
-                arrowDrawable.mutate();
-                arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-                arrowDrawable.invalidateSelf();
+                        Drawable arrowDrawable = ((ImageView) card.findViewById(R.id.detailsArrow)).getDrawable();
+                        arrowDrawable.mutate();
+                        arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+                        arrowDrawable.invalidateSelf();
 
-                updateColor(card, currency);
+                        updateColor(card, currency);
 
-                card.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                card.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View view) {
-                        if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
-                        {
-                            collapseView(view);
-                        }
-                        else
-                        {
-                            if (currency.getHistoryMinutes() == null) {
-                                currency.updateHistoryMinutes(getActivity(), new Currency.CurrencyCallBack() {
-                                    @Override
-                                    public void onSuccess(Currency currency) {
-                                        extendView(view);
-                                        setupLineChart(view, currency);
+                        card.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                        card.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(final View view) {
+                                if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
+                                {
+                                    collapseView(view);
+                                }
+                                else
+                                {
+                                    if (currency.getHistoryMinutes() == null) {
+                                        currency.updateHistoryMinutes(getActivity(), new Currency.CurrencyCallBack() {
+                                            @Override
+                                            public void onSuccess(Currency currency) {
+                                                extendView(view);
+                                                setupLineChart(view, currency);
+                                            }
+                                        });
                                     }
-                                });
+                                    else
+                                    {
+                                        extendView(view);
+                                    }
+                                }
                             }
-                            else
+                        });
+
+                        card.findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent(getActivity(), CurrencyDetailsActivity.class);
+                                intent.putExtra("currency", currency);
+                                getActivity().getApplicationContext().startActivity(intent);
+                            }
+                        });
+
+                        if(currency.getHistoryMinutes() != null)
+                        {
+                            setupLineChart(card, currency);
+                        }
+
+                        watchlistViews.add(card);
+                    }
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            for(int i = 0; i < watchlistViews.size(); i++)
                             {
-                                extendView(view);
+                                ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(watchlistViews.get(i), 0);
                             }
                         }
-                    }
-                });
-
-                card.findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(getActivity(), CurrencyDetailsActivity.class);
-                        intent.putExtra("currency", currency);
-                        getActivity().getApplicationContext().startActivity(intent);
-                    }
-                });
-
-                if(currency.getHistoryMinutes() != null)
-                {
-                    setupLineChart(card, currency);
+                    });
                 }
+            };
 
-                ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(card, 0);
-            }
+            newRunnable.run();
 
             if(refreshLayout.isRefreshing())
             {
