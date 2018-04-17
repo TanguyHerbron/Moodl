@@ -82,7 +82,7 @@ public class BinanceManager {
         if(!symbol.equals(pairSymbol))
         {
             try {
-                presentTrades = client.getMyTrades(symbol + pairSymbol);
+                presentTrades = client.getMyTrades(symbol + pairSymbol, 20);
 
             } catch (BinanceApiException e) {
                 try {
