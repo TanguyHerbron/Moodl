@@ -128,7 +128,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
         values.put(KEY_CURRENCY_BALANCE, balance);
         values.put(KEY_CURRENCY_DATE, date.getTime());
         values.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
-        //values.put(KEY_CURRENCY_PURCHASED_PRICE, something);
 
         db.insert(TABLE_MANUAL_CURRENCIES, null, values);
         db.close();

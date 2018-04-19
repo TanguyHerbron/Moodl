@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 
 public class PreferencesManager {
 
+    private static int fragmentUpdated = 0;
     private static final String currencyListFile = "CustomCurrencies";
     private static final String preferencesFile = "Preferences";
     private SharedPreferences settingPreferences;
@@ -34,7 +35,20 @@ public class PreferencesManager {
         return preferencesList.getBoolean("DetailOption", true);
     }
 
-    public void disableRefreshDefaultCurrency()
+    public boolean mustRefreshDefaultCurrency()
+    {
+        fragmentUpdated++;
+
+        if(fragmentUpdated == 3)
+        {
+            disableRefreshDefaultCurrency();
+            fragmentUpdated = 0;
+        }
+
+        return settingPreferences.getBoolean("refresh_default_currency", false);
+    }
+
+    private void disableRefreshDefaultCurrency()
     {
         SharedPreferences.Editor editor = settingPreferences.edit();
         editor.putBoolean("refresh_default_currency", false);

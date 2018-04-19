@@ -43,11 +43,11 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
-import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.DataManagers.ExchangeManager.BinanceManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
+import com.nauk.coinfolio.PlaceholderManager;
 import com.nauk.coinfolio.R;
 
 import java.text.DecimalFormat;
@@ -84,7 +84,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private BarChart barChart;
     private PreferencesManager preferencesManager;
     private BinanceManager binanceManager;
-    private CurrencyDetailsList currencyDetailsList;
 
     private boolean displayLineChart;
 
@@ -142,7 +141,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         databaseManager = new DatabaseManager(this);
         preferencesManager = new PreferencesManager(this);
-        currencyDetailsList = new CurrencyDetailsList(this);
 
         displayLineChart = true;
 
@@ -549,9 +547,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             date = getDate(dataChartList.get(index).getTimestamp() * 1000);
         }
 
-        volumePlaceholder = getResources().getString(R.string.volumeDollarPlaceholder, numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()));
-        pricePlaceholder = getResources().getString(R.string.priceDollarPlaceholder, numberConformer(e.getY()));
-        timestampPlaceholder = getResources().getString(R.string.timestampPlaceholder, date);
+        volumePlaceholder = PlaceholderManager.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), this);
+        pricePlaceholder = PlaceholderManager.getPriceString(numberConformer(e.getY()), this);
+        timestampPlaceholder = PlaceholderManager.getTimestampString(date, this);
 
         ((TextView) findViewById(R.id.volumeHightlight)).setText(volumePlaceholder);
         findViewById(R.id.volumeHightlight).setVisibility(View.VISIBLE);
@@ -726,8 +724,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         updateFluctuation(start, end);
 
-        ((TextView) findViewById(R.id.txtViewPriceStart)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(start)));
-        ((TextView) findViewById(R.id.txtViewPriceNow)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(end)));
+        ((TextView) findViewById(R.id.txtViewPriceStart)).setText(PlaceholderManager.getValueString(numberConformer(start), this));
+        ((TextView) findViewById(R.id.txtViewPriceNow)).setText(PlaceholderManager.getValueString(numberConformer(end), this));
 
         for(int i = 1; i < dataChartList.size(); i++)
         {
@@ -744,9 +742,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             }
         }
 
-        ((TextView) findViewById(R.id.totalVolume)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(totalVolume)));
-        ((TextView) findViewById(R.id.highestPrice)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(highestPrice)));
-        ((TextView) findViewById(R.id.lowestPrice)).setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(lowestPrice)));
+        ((TextView) findViewById(R.id.totalVolume)).setText(PlaceholderManager.getValueString(numberConformer(totalVolume), this));
+        ((TextView) findViewById(R.id.highestPrice)).setText(PlaceholderManager.getValueString(numberConformer(highestPrice), this));
+        ((TextView) findViewById(R.id.lowestPrice)).setText(PlaceholderManager.getValueString(numberConformer(lowestPrice), this));
     }
 
     private void updateFluctuation(float start, float end)

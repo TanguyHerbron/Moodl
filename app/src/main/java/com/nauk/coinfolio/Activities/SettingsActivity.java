@@ -233,18 +233,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             });
 
             bindPreferenceSummaryToValue(findPreference("default_currency"));
-            findPreference("default_currency").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object o) {
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-                    SharedPreferences.Editor editor = preferences.edit();
-
-                    editor.putBoolean("refresh_default_currency", true);
-                    editor.apply();
-
-                    return false;
-                }
-            });
         }
 
         @Override

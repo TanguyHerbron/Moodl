@@ -73,7 +73,6 @@ import java.util.Locale;
 public class HomeActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
-
     private ViewPager viewPager;
 
 

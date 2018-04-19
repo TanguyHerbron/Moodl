@@ -34,17 +34,19 @@
 
     <string name="pref_title_default_currency">Default currency</string>
     <string-array name="pref_default_currencies_titles">
-        <item>USD</item>
-        <item>EUR</item>
-        <item>BTC</item>
-        <item>ETH</item>
+        <item>Dollar (USD)</item>
+        <item>Euro (EUR)</item>
+        <item>Pound (GBP)</item>
+        <!--<item>Bitcoin (BTC)</item>
+        <item>Ethereum (ETH)</item>-->
     </string-array>
 
     <string-array name="pref_default_currencies_values">
         <item>USD</item>
         <item>EUR</item>
-        <item>BTC</item>
-        <item>ETH</item>
+        <item>GBP</item>
+        <!--<item>BTC</item>
+        <item>ETH</item>-->
     </string-array>
 
     <string-array name="list_preference_entries">
@@ -137,20 +139,31 @@
     <!--Cardview placeholders-->
     <string name="currencySymbolPlaceholder">(%1$s)</string>
     <string name="currencyBalancePlaceholder">%1$s%2$s</string>
+    <string name="currencyPercentagePlaceholder">%1$s%%</string>
+    <!--Dollar-->
     <string name="currencyDollarParenthesisPlaceholder">(US$%1$s)</string>
     <string name="currencyDollarPlaceholder">US$%1$s</string>
+    <string name="fluctuationDollarPercentagePlaceholder">US$%1$s (%2$s%%)</string>
+    <!--Euro-->
     <string name="currencyEurosParenthesisPlaceholder">(%1$s€)</string>
     <string name="currencyEurosPlaceholder">%1$s€</string>
-    <string name="currencyPercentagePlaceholder">%1$s%%</string>
-    <string name="fluctuationDollarPercentagePlaceholder">US$%1$s (%2$s%)</string>
-    <string name="fluctuationEurosPercentagePlaceholder">%1$s€ (%2$s%)</string>
+    <string name="fluctuationEurosPercentagePlaceholder">%1$s€ (%2$s%%)</string>
+    <!--Pound-->
+    <string name="currencyPoundParenthesisPlaceholder">(%1$s£)</string>
+    <string name="currencyPoundPlaceholder">%1$s£</string>
+    <string name="fluctuationPoundPercentagePlaceholder">%1$s£ (%2$s%%)</string>
 
     <!--DetailsActivity placeholders-->
+    <string name="timestampPlaceholder">Date\n%1$s</string>
+    <!--Dollar-->
     <string name="volumeDollarPlaceholder">Volume\nUS$%1$s</string>
     <string name="priceDollarPlaceholder">Price\nUS$%1$s</string>
+    <!--Euro-->
     <string name="volumeEurosPlaceholder">Volume\n%1$s€</string>
     <string name="priceEurosPlaceholder">Price\n%1$s€</string>
-    <string name="timestampPlaceholder">Date\n%1$s</string>
+    <!--Pound-->
+    <string name="volumePoundPlaceholder">Volume\n%1$s£</string>
+    <string name="pricePoundPlaceholder">Price\n%1$s£</string>
 
     <string name="title_activity_main">MainActivity</string>
 
@@ -158,10 +171,17 @@
     <string name="fingerprint_dialog_title">Verify your fingerprint to continue</string>
 
 
+    <!--Marketcap placeholders-->
+    <!--Dollar-->
     <string name="market_cap_dollar_textview">Total Market Capitalization :\nUS$%1$s</string>
     <string name="volume_dollar_market_cap_textview">24h volume :\nUS$%1$s</string>
+    <!--Euro-->
     <string name="market_cap_euros_textview">Total Market Capitalization :\n%1$s€</string>
     <string name="volume_euros_market_cap_textview">24h volume :\n%1$s€</string>
+    <!--Pound-->
+    <string name="market_cap_pound_textview">Total Market Capitalization :\n%1$s£</string>
+    <string name="volume_pound_market_cap_textview">24h volume :\n%1$s£</string>
+
     <string name="title_activity_scrolling">ScrollingActivity</string>
 
 </resources>

@@ -50,6 +50,7 @@ public class MarketCapitalization extends Fragment {
     private HashMap<String, Integer> dominantCurrenciesColors;
     private SwipeRefreshLayout refreshLayout;
     private long lastTimestamp;
+    private String defaultCurrency;
 
     private View view;
 
@@ -68,12 +69,13 @@ public class MarketCapitalization extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        updateMarketCap();
+                        updateMarketCap(false);
                     }
 
                 }
         );
 
+        defaultCurrency = preferencesManager.getDefaultCurrency();
         lastTimestamp = 0;
 
         ImageButton settingsButton = view.findViewById(R.id.settings_button);
@@ -86,7 +88,7 @@ public class MarketCapitalization extends Fragment {
             }
         });
 
-        updateMarketCap();
+        updateMarketCap(true);
 
         return view;
     }
@@ -96,7 +98,16 @@ public class MarketCapitalization extends Fragment {
     {
         super.onResume();
 
-        updateMarketCap();
+        if(!defaultCurrency.equals(preferencesManager.getDefaultCurrency()))
+        {
+            defaultCurrency = preferencesManager.getDefaultCurrency();
+            updateMarketCap(true);
+        }
+        else
+        {
+            updateMarketCap(false);
+        }
+
     }
 
     private void setupDominantCurrenciesColors()
@@ -120,9 +131,9 @@ public class MarketCapitalization extends Fragment {
         dominantCurrenciesColors.put("ETC", -10448784);
     }
 
-    private void updateMarketCap()
+    private void updateMarketCap(boolean mustUpdate)
     {
-        if(System.currentTimeMillis() / 1000 - lastTimestamp > 60)
+        if(System.currentTimeMillis() / 1000 - lastTimestamp > 60 || mustUpdate)
         {
             if(!refreshLayout.isRefreshing())
             {
@@ -157,6 +168,48 @@ public class MarketCapitalization extends Fragment {
         }
     }
 
+    private void refreshDisplayedData()
+    {
+        setupTextViewMarketCap();
+
+        view.findViewById(R.id.progressBarMarketCap).setVisibility(View.GONE);
+        view.findViewById(R.id.layoutProgressMarketCap).setVisibility(View.VISIBLE);
+
+        List<PieEntry> entries = new ArrayList<>();
+
+        ArrayList<Integer> colors = new ArrayList<>();
+
+        float otherCurrenciesDominance = 0;
+
+        for(Iterator i = marketCapManager.getDominance().keySet().iterator(); i.hasNext(); )
+        {
+            String key = (String) i.next();
+            entries.add(new PieEntry(marketCapManager.getDominance().get(key), key));
+            otherCurrenciesDominance += marketCapManager.getDominance().get(key);
+            colors.add(dominantCurrenciesColors.get(key));
+        }
+
+        entries.add(new PieEntry(100-otherCurrenciesDominance, "Others"));
+        colors.add(-12369084);
+
+        PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
+        set.setColors(colors);
+        set.setSliceSpace(1);
+        set.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        set.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+
+        PieData data = new PieData(set);
+        data.setValueTextSize(10);
+        data.setValueFormatter(new PercentFormatter());
+
+        setupPieChart(data);
+
+        if(refreshLayout.isRefreshing())
+        {
+            refreshLayout.setRefreshing(false);
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private void countCompletedMarketCapRequest()
     {
@@ -164,44 +217,7 @@ public class MarketCapitalization extends Fragment {
 
         if(marketCapCounter == 2)
         {
-            setupTextViewMarketCap();
-
-            view.findViewById(R.id.progressBarMarketCap).setVisibility(View.GONE);
-            view.findViewById(R.id.layoutProgressMarketCap).setVisibility(View.VISIBLE);
-
-            List<PieEntry> entries = new ArrayList<>();
-
-            ArrayList<Integer> colors = new ArrayList<>();
-
-            float otherCurrenciesDominance = 0;
-
-            for(Iterator i = marketCapManager.getDominance().keySet().iterator(); i.hasNext(); )
-            {
-                String key = (String) i.next();
-                entries.add(new PieEntry(marketCapManager.getDominance().get(key), key));
-                otherCurrenciesDominance += marketCapManager.getDominance().get(key);
-                colors.add(dominantCurrenciesColors.get(key));
-            }
-
-            entries.add(new PieEntry(100-otherCurrenciesDominance, "Others"));
-            colors.add(-12369084);
-
-            PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
-            set.setColors(colors);
-            set.setSliceSpace(1);
-            set.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-            set.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-
-            PieData data = new PieData(set);
-            data.setValueTextSize(10);
-            data.setValueFormatter(new PercentFormatter());
-
-            setupPieChart(data);
-
-            if(refreshLayout.isRefreshing())
-            {
-                refreshLayout.setRefreshing(false);
-            }
+            refreshDisplayedData();
         }
     }
 

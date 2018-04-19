@@ -34,13 +34,20 @@ import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
+import com.nauk.coinfolio.PlaceholderManager;
 import com.nauk.coinfolio.R;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import static java.lang.Math.abs;
 
 /**
  * Created by Tiji on 13/04/2018.
@@ -54,6 +61,7 @@ public class Summary extends Fragment {
     private HomeLayoutGenerator layoutGenerator;
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
+    private String defaultCurrency;
 
     private TextView toolbarSubtitle;
     private CollapsingToolbarLayout toolbarLayout;
@@ -84,6 +92,8 @@ public class Summary extends Fragment {
         totalValue = 0;
         totalFluctuation = 0;
         lastTimestamp = 0;
+
+        defaultCurrency = preferencesManager.getDefaultCurrency();
 
         handler = new Handler();
         updateRunnable = new  Runnable() {
@@ -180,7 +190,16 @@ public class Summary extends Fragment {
 
         displayBalance(preferencesManager.isBalanceHidden());
 
-        updateAll(preferencesManager.mustUpdateSummary());
+        if(!defaultCurrency.equals(preferencesManager.getDefaultCurrency()))
+        {
+            defaultCurrency = preferencesManager.getDefaultCurrency();
+
+            updateAll(true);
+        }
+        else
+        {
+            updateAll(preferencesManager.mustUpdateSummary());
+        }
     }
 
     private void updateAll(boolean mustUpdate)
@@ -240,13 +259,14 @@ public class Summary extends Fragment {
         Runnable newRunnable = new Runnable() {
             @Override
             public void run() {
-                for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+                if (balanceManager.getTotalBalance() != null)
                 {
-                    final Currency currency = balanceManager.getTotalBalance().get(i);
+                    for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
+                        final Currency currency = balanceManager.getTotalBalance().get(i);
 
-                    if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001))
-                    {
-                        currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
+                        if (!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001)) {
+                            currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
+                        }
                     }
                 }
 
@@ -353,7 +373,7 @@ public class Summary extends Fragment {
 
         if(preferencesManager.isBalanceHidden())
         {
-            toolbarLayout.setTitle(getResources().getString(R.string.currencyPercentagePlaceholder, String.format("%.2f", totalFluctuationPercentage)));
+            toolbarLayout.setTitle(PlaceholderManager.getPercentageString(numberConformer(totalFluctuationPercentage), getActivity()));
             toolbarSubtitle.setVisibility(View.GONE);
 
             if(totalFluctuation > 0)
@@ -369,15 +389,7 @@ public class Summary extends Fragment {
         }
         else
         {
-            switch (preferencesManager.getDefaultCurrency())
-            {
-                case "EUR":
-                    toolbarLayout.setTitle(getResources().getString(R.string.currencyEurosPlaceholder, String.format("%.2f", totalValue)));
-                    break;
-                default:
-                    toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, String.format("%.2f", totalValue)));
-                    break;
-            }
+            toolbarLayout.setTitle(PlaceholderManager.getValueString(numberConformer(totalValue), getActivity()));
             toolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
             toolbarLayout.setExpandedTitleColor(Color.WHITE);
 
@@ -394,31 +406,30 @@ public class Summary extends Fragment {
 
             if(totalFluctuation == 0)
             {
-                switch (preferencesManager.getDefaultCurrency())
-                {
-                    case "EUR":
-                        toolbarSubtitle.setText(getResources().getString(R.string.currencyEurosPlaceholder, "0.00"));
-                        break;
-                    default:
-                        toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
-                        break;
-                }
+                toolbarSubtitle.setText(PlaceholderManager.getValueString(numberConformer(totalValue), getActivity()));
                 toolbarSubtitle.setTextColor(-1275068417);
-
             }
             else
             {
-                switch (preferencesManager.getDefaultCurrency())
-                {
-                    case "EUR":
-                        toolbarSubtitle.setText(String.format("%.2f", totalFluctuation) + "€ (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
-                        break;
-                    default:
-                        toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
-                        break;
-                }
+                toolbarSubtitle.setText(PlaceholderManager.getValuePercentageString(numberConformer(totalFluctuation), numberConformer(totalFluctuationPercentage), getActivity()));
             }
         }
+    }
+
+    private String numberConformer(double number)
+    {
+        String str;
+
+        if(abs(number) > 1)
+        {
+            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
+        }
+        else
+        {
+            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
+        }
+
+        return str;
     }
 
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
@@ -622,7 +633,7 @@ public class Summary extends Fragment {
                     {
                         for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                         {
-                            balance.get(i).updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                            balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
                                 @Override
                                 public void onSuccess(Currency currency) {
                                     countCoins(true, false);

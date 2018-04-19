@@ -70,7 +70,7 @@ public class Watchlist extends Fragment {
     private SwipeRefreshLayout refreshLayout;
     private long lastTimestamp;
     private PreferencesManager preferencesManager;
-    private Toolbar toolbar;
+    private String defaultCurrency;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -82,6 +82,7 @@ public class Watchlist extends Fragment {
         preferencesManager = new PreferencesManager(getContext());
 
         lastTimestamp = 0;
+        defaultCurrency = preferencesManager.getDefaultCurrency();
 
         watchlistManager = new WatchlistManager(getContext());
 
@@ -93,7 +94,6 @@ public class Watchlist extends Fragment {
                 updateWatchlist(false);
             }
         });
-        toolbar = view.findViewById(R.id.toolbar);
 
         Button addWatchlistButton = view.findViewById(R.id.buttonAddWatchlist);
         addWatchlistButton.setOnClickListener(new View.OnClickListener() {
@@ -189,7 +189,15 @@ public class Watchlist extends Fragment {
     {
         super.onResume();
 
-        updateWatchlist(preferencesManager.mustUpdateWatchlist());
+        if(!defaultCurrency.equals(preferencesManager.getDefaultCurrency()))
+        {
+            defaultCurrency = preferencesManager.getDefaultCurrency();
+            updateWatchlist(true);
+        }
+        else
+        {
+            updateWatchlist(preferencesManager.mustUpdateWatchlist());
+        }
     }
 
     private void updateWatchlist(boolean mustUpdate)
@@ -222,42 +230,47 @@ public class Watchlist extends Fragment {
         }
     }
 
+    private void generateCards()
+    {
+        final List<View> watchlistViews = new ArrayList<View>();
+
+        ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).removeAllViews();
+
+        Runnable newRunnable = new Runnable() {
+            @Override
+            public void run() {
+                for(final Currency currency : watchlistManager.getWatchlist())
+                {
+                    watchlistViews.add(getCurrencyCardFor(currency));
+                }
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for(int i = 0; i < watchlistViews.size(); i++)
+                        {
+                            ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(watchlistViews.get(i), 0);
+                        }
+                    }
+                });
+            }
+        };
+
+        newRunnable.run();
+
+        if(refreshLayout.isRefreshing())
+        {
+            refreshLayout.setRefreshing(false);
+        }
+    }
+
     private void countWatchlist()
     {
         watchlistCounter++;
 
         if(watchlistCounter >= watchlistManager.getWatchlist().size())
         {
-            final List<View> watchlistViews = new ArrayList<View>();
-
-            ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).removeAllViews();
-
-            Runnable newRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    for(final Currency currency : watchlistManager.getWatchlist())
-                    {
-                        watchlistViews.add(getCurrencyCardFor(currency));
-                    }
-
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            for(int i = 0; i < watchlistViews.size(); i++)
-                            {
-                                ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(watchlistViews.get(i), 0);
-                            }
-                        }
-                    });
-                }
-            };
-
-            newRunnable.run();
-
-            if(refreshLayout.isRefreshing())
-            {
-                refreshLayout.setRefreshing(false);
-            }
+            generateCards();
         }
     }
 
