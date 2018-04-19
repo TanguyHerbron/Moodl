@@ -635,6 +635,17 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
         }
 
+        int counter = 0;
+        for(int i = str.indexOf(".") - 1; i > 0; i--)
+        {
+            counter++;
+            if(counter == 3)
+            {
+                str = str.substring(0, i) + " " + str.substring(i, str.length());
+                counter = 0;
+            }
+        }
+
         return str;
     }
 
@@ -837,7 +848,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             });
 
             amountTxtView.setText(String.valueOf(transactionList.get(i).getAmount()));
-            valueTxtView.setText(String.valueOf(transactionList.get(i).getPurchasedPrice()));
+            valueTxtView.setText(numberConformer(transactionList.get(i).getPurchasedPrice() * transactionList.get(i).getAmount()));
 
             setupSwipeView(view);
 

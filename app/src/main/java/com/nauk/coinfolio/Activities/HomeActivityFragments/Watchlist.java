@@ -43,6 +43,7 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.DataManagers.WatchlistManager;
+import com.nauk.coinfolio.PlaceholderManager;
 import com.nauk.coinfolio.R;
 
 import org.json.JSONException;
@@ -278,28 +279,17 @@ public class Watchlist extends Fragment {
     {
         View card = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, null);
 
-        switch (preferencesManager.getDefaultCurrency())
-        {
-            case "EUR":
-                ((TextView) card.findViewById(R.id.currencyFluctuationTextView))
-                        .setText(getResources().getString(R.string.currencyEurosParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
-                ((TextView) card.findViewById(R.id.currencyValueTextView))
-                        .setText(getResources().getString(R.string.currencyEurosPlaceholder, numberConformer(currency.getValue())));
-                break;
-            default :
-                ((TextView) card.findViewById(R.id.currencyFluctuationTextView))
-                        .setText(getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
-                ((TextView) card.findViewById(R.id.currencyValueTextView))
-                        .setText(getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(currency.getValue())));
-                break;
-        }
+        ((TextView) card.findViewById(R.id.currencyFluctuationTextView))
+                .setText(PlaceholderManager.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getActivity()));
+        ((TextView) card.findViewById(R.id.currencyValueTextView))
+                .setText(PlaceholderManager.getValueString(numberConformer(currency.getValue()), getActivity()));
 
         ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView))
-                .setText(getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(currency.getDayFluctuationPercentage())));
+                .setText(PlaceholderManager.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getActivity()));
         ((TextView) card.findViewById(R.id.currencyNameTextView))
                 .setText(currency.getName());
         ((TextView) card.findViewById(R.id.currencySymbolTextView))
-                .setText(getResources().getString(R.string.currencySymbolPlaceholder, currency.getSymbol()));
+                .setText(PlaceholderManager.getSymbolString(currency.getSymbol(), getActivity()));
         ((ImageView) card.findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
 
         Drawable arrowDrawable = ((ImageView) card.findViewById(R.id.detailsArrow)).getDrawable();
@@ -359,7 +349,6 @@ public class Watchlist extends Fragment {
         List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
         ArrayList<Entry> values = new ArrayList<>();
 
-        Log.d("coinfolio", "Generating data for " + currency.getSymbol());
         for(int i = 0; i < dataChartList.size(); i+=10)
         {
             values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
@@ -519,11 +508,22 @@ public class Watchlist extends Fragment {
 
         if(abs(number) > 1)
         {
-            str = String.format( Locale.UK, "%.2f", number);
+            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
         }
         else
         {
-            str = String.format( Locale.UK, "%.4f", number);
+            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
+        }
+
+        int counter = 0;
+        for(int i = str.indexOf(".") - 1; i > 0; i--)
+        {
+            counter++;
+            if(counter == 3)
+            {
+                str = str.substring(0, i) + " " + str.substring(i, str.length());
+                counter = 0;
+            }
         }
 
         return str;

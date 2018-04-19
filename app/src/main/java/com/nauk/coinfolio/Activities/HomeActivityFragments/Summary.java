@@ -429,6 +429,17 @@ public class Summary extends Fragment {
             str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
         }
 
+        int counter = 0;
+        for(int i = str.indexOf(".") - 1; i > 0; i--)
+        {
+            counter++;
+            if(counter == 3)
+            {
+                str = str.substring(0, i) + " " + str.substring(i, str.length());
+                counter = 0;
+            }
+        }
+
         return str;
     }
 

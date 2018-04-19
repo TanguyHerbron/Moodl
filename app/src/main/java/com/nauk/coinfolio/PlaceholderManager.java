@@ -21,6 +21,9 @@ public class PlaceholderManager {
             case "GBP":
                 formattedString = context.getResources().getString(R.string.currencyPoundPlaceholder, value);
                 break;
+            case "JPY":
+                formattedString = context.getResources().getString(R.string.currencyYenPlaceholder, value);
+                break;
             default:
                 formattedString = context.getResources().getString(R.string.currencyDollarPlaceholder, value);
                 break;
@@ -41,6 +44,9 @@ public class PlaceholderManager {
                 break;
             case "GBP":
                 formattedString = context.getResources().getString(R.string.fluctuationPoundPercentagePlaceholder, value, percentage);
+                break;
+            case "JPY":
+                formattedString = context.getResources().getString(R.string.fluctuationYenPercentagePlaceholder, value, percentage);
                 break;
             default:
                 formattedString = context.getResources().getString(R.string.fluctuationDollarPercentagePlaceholder, value, percentage);
@@ -63,6 +69,9 @@ public class PlaceholderManager {
             case "GBP":
                 formattedString = context.getResources().getString(R.string.currencyPoundParenthesisPlaceholder, value);
                 break;
+            case "JPY":
+                formattedString = context.getResources().getString(R.string.currencyYenParenthesisPlaceholder, value);
+                break;
             default:
                 formattedString = context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, value);
                 break;
@@ -84,6 +93,9 @@ public class PlaceholderManager {
             case "GBP":
                 formattedString = context.getResources().getString(R.string.pricePoundPlaceholder, value);
                 break;
+            case "JPY":
+                formattedString = context.getResources().getString(R.string.priceYenPlaceholder, value);
+                break;
             default:
                 formattedString = context.getResources().getString(R.string.priceDollarPlaceholder, value);
                 break;
@@ -104,6 +116,9 @@ public class PlaceholderManager {
                 break;
             case "GBP":
                 formattedString = context.getResources().getString(R.string.volumePoundPlaceholder, value);
+                break;
+            case "JPY":
+                formattedString = context.getResources().getString(R.string.volumeYenPlaceholder, value);
                 break;
             default:
                 formattedString = context.getResources().getString(R.string.volumeDollarPlaceholder, value);

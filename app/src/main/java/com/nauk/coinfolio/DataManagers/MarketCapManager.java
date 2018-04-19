@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 public class MarketCapManager {
 
-    private static final String topCurrenciesUrl = "https://api.coinmarketcap.com/v1/ticker/?limit=9";
+    private static final String topCurrenciesUrl = "https://api.coinmarketcap.com/v1/ticker/?limit=9&convert=";
     private static final String marketCapUrl = "https://api.coinmarketcap.com/v1/global/?convert=";
     private RequestQueue requestQueue;
     private String topRequestResult[];
@@ -34,14 +34,16 @@ public class MarketCapManager {
         requestQueue = Volley.newRequestQueue(context);
     }
 
-    public void updateTopCurrencies(final VolleyCallBack callBack)
+    public void updateTopCurrencies(final VolleyCallBack callBack, final String toSymbol)
     {
-        StringRequest strRequest = new StringRequest(Request.Method.GET, topCurrenciesUrl,
+        String requestString = topCurrenciesUrl + toSymbol;
+
+        StringRequest strRequest = new StringRequest(Request.Method.GET, requestString,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         if (response.length() > 0) {
-                            processTopCurrencies(response);
+                            processTopCurrencies(response, toSymbol);
                         }
 
                         callBack.onSuccess();
@@ -57,7 +59,7 @@ public class MarketCapManager {
         requestQueue.add(strRequest);
     }
 
-    public void updateMarketCap(final VolleyCallBack callBack, String toSymbol)
+    public void updateMarketCap(final VolleyCallBack callBack, final String toSymbol)
     {
         String requestString = marketCapUrl + toSymbol;
 
@@ -66,7 +68,7 @@ public class MarketCapManager {
                     @Override
                     public void onResponse(String response) {
                         if (response.length() > 0) {
-                            processMarketCapData(response);
+                            processMarketCapData(response, toSymbol);
                         }
 
                         callBack.onSuccess();
@@ -82,20 +84,20 @@ public class MarketCapManager {
         requestQueue.add(strRequest);
     }
 
-    private void processMarketCapData(String response)
+    private void processMarketCapData(String response, String toSymbol)
     {
         try {
             JSONObject jsonObject = new JSONObject(response);
 
-            marketCap = new BigDecimal(jsonObject.getString("total_market_cap_usd")).longValue();
+            marketCap = new BigDecimal(jsonObject.getString("total_market_cap_" + toSymbol.toLowerCase())).longValue();
 
-            dayVolume = new BigDecimal(jsonObject.getString("total_24h_volume_usd")).longValue();
+            dayVolume = new BigDecimal(jsonObject.getString("total_24h_volume_" + toSymbol.toLowerCase())).longValue();
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    public HashMap<String, Float> getDominance()
+    public HashMap<String, Float> getDominance(String toSymbol)
     {
         HashMap<String, Float> dominance = new HashMap<>();
 
@@ -104,7 +106,7 @@ public class MarketCapManager {
             try {
                 JSONObject jsonObject = new JSONObject(topRequestResult[i]);
 
-                dominance.put(jsonObject.getString("symbol"), (Float.parseFloat(jsonObject.getString("market_cap_usd")) / marketCap)*100);
+                dominance.put(jsonObject.getString("symbol"), (Float.parseFloat(jsonObject.getString("market_cap_" + toSymbol.toLowerCase())) / marketCap)*100);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -118,7 +120,7 @@ public class MarketCapManager {
         return dayVolume;
     }
 
-    private void processTopCurrencies(String response)
+    private void processTopCurrencies(String response, String toSymbol)
     {
         response = response.substring(response.indexOf('[')+1, response.lastIndexOf(']'));
 

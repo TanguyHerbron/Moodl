@@ -26,6 +26,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.nauk.coinfolio.Activities.SettingsActivity;
 import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
+import com.nauk.coinfolio.PlaceholderManager;
 import com.nauk.coinfolio.R;
 
 import java.text.DecimalFormat;
@@ -36,6 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+
+import static java.lang.Math.abs;
 
 /**
  * Created by Tiji on 13/04/2018.
@@ -150,7 +153,7 @@ public class MarketCapitalization extends Fragment {
                 {
                     countCompletedMarketCapRequest();
                 }
-            });
+            }, preferencesManager.getDefaultCurrency());
 
             marketCapManager.updateMarketCap(new MarketCapManager.VolleyCallBack() {
                 @Override
@@ -181,11 +184,10 @@ public class MarketCapitalization extends Fragment {
 
         float otherCurrenciesDominance = 0;
 
-        for(Iterator i = marketCapManager.getDominance().keySet().iterator(); i.hasNext(); )
+        for (String key : marketCapManager.getDominance(preferencesManager.getDefaultCurrency()).keySet())
         {
-            String key = (String) i.next();
-            entries.add(new PieEntry(marketCapManager.getDominance().get(key), key));
-            otherCurrenciesDominance += marketCapManager.getDominance().get(key);
+            entries.add(new PieEntry(marketCapManager.getDominance(preferencesManager.getDefaultCurrency()).get(key), key));
+            otherCurrenciesDominance += marketCapManager.getDominance(preferencesManager.getDefaultCurrency()).get(key);
             colors.add(dominantCurrenciesColors.get(key));
         }
 
@@ -256,6 +258,33 @@ public class MarketCapitalization extends Fragment {
         pieChart.invalidate();
     }
 
+    private String numberConformer(double number)
+    {
+        String str;
+
+        if(abs(number) > 1)
+        {
+            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
+        }
+        else
+        {
+            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
+        }
+
+        int counter = 0;
+        for(int i = str.length() - 1; i > 0; i--)
+        {
+            counter++;
+            if(counter == 3)
+            {
+                str = str.substring(0, i) + " " + str.substring(i, str.length());
+                counter = 0;
+            }
+        }
+
+        return str;
+    }
+
     private SpannableString generateCenterSpannableText() {
 
         SpannableString spannableString = new SpannableString("Market Capitalization Dominance");
@@ -264,26 +293,9 @@ public class MarketCapitalization extends Fragment {
 
     private void setupTextViewMarketCap()
     {
-        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
-        DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
-
-        symbols.setGroupingSeparator(' ');
-        formatter.setDecimalFormatSymbols(symbols);
-
-        switch (preferencesManager.getDefaultCurrency())
-        {
-            case "EUR":
-                ((TextView) view.findViewById(R.id.marketCapTextView))
-                        .setText(getActivity().getResources().getString(R.string.market_cap_euros_textview, formatter.format(marketCapManager.getMarketCap())));
-                ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap))
-                        .setText(getActivity().getResources().getString(R.string.volume_euros_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
-                break;
-            default:
-                ((TextView) view.findViewById(R.id.marketCapTextView))
-                        .setText(getActivity().getResources().getString(R.string.market_cap_dollar_textview, formatter.format(marketCapManager.getMarketCap())));
-                ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap))
-                        .setText(getActivity().getResources().getString(R.string.volume_dollar_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
-                break;
-        }
+        ((TextView) view.findViewById(R.id.marketCapTextView))
+                .setText(PlaceholderManager.getValueString(numberConformer(marketCapManager.getMarketCap()), getActivity()));
+        ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap))
+                .setText(PlaceholderManager.getValueString(numberConformer(marketCapManager.getDayVolume()), getActivity()));
     }
 }
