@@ -625,19 +625,14 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private String numberConformer(double number)
     {
         String str;
-        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
-        DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
-
-        symbols.setGroupingSeparator(' ');
-        formatter.setDecimalFormatSymbols(symbols);
 
         if(abs(number) > 1)
         {
-            str = formatter.format(number);
+            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
         }
         else
         {
-            str = String.format( Locale.UK, "%.4f", number);
+            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
         }
 
         return str;
@@ -842,6 +837,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             });
 
             amountTxtView.setText(String.valueOf(transactionList.get(i).getAmount()));
+            valueTxtView.setText(String.valueOf(transactionList.get(i).getPurchasedPrice()));
 
             setupSwipeView(view);
 
