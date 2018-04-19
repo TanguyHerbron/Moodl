@@ -96,7 +96,7 @@ public class BalanceManager {
 
         hitBtcManagers.clear();
 
-        if(publicKey != null && privateKey != null && preferenceManager.isHitBTCActivated())
+        if(preferenceManager.isHitBTCActivated() && publicKey != null && privateKey != null)
         {
             hitBtcManagers.add(new HitBtcManager(context, publicKey, privateKey));
         }
@@ -106,7 +106,7 @@ public class BalanceManager {
 
         binanceManagers.clear();
 
-        if(publicKey != null && privateKey != null && preferenceManager.isBinanceActivated())
+        if(preferenceManager.isBinanceActivated() && publicKey != null && privateKey != null)
         {
             binanceManagers.add(new BinanceManager(publicKey, privateKey));
         }
@@ -120,6 +120,8 @@ public class BalanceManager {
     public void updateTotalBalance(final VolleyCallBack callBack)
     {
         boolean isUpdated = false;
+        
+        balanceCounter = 0;
 
         manualBalances = databaseManager.getAllCurrenciesFromManualCurrency();
 

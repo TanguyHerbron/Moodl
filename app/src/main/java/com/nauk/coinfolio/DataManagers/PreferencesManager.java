@@ -34,6 +34,18 @@ public class PreferencesManager {
         return preferencesList.getBoolean("DetailOption", true);
     }
 
+    public void disableRefreshDefaultCurrency()
+    {
+        SharedPreferences.Editor editor = settingPreferences.edit();
+        editor.putBoolean("refresh_default_currency", false);
+        editor.apply();
+    }
+
+    public String getDefaultCurrency()
+    {
+        return settingPreferences.getString("default_currency", "USD");
+    }
+
     public String getHitBTCPublicKey()
     {
         return settingPreferences.getString("hitbtc_publickey", null);

@@ -32,22 +32,19 @@
     <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">Data &amp; sync</string>
 
-    <string name="pref_title_sync_frequency">Sync frequency</string>
-    <string-array name="pref_sync_frequency_titles">
-        <item>15 minutes</item>
-        <item>30 minutes</item>
-        <item>1 hour</item>
-        <item>3 hours</item>
-        <item>6 hours</item>
-        <item>Never</item>
+    <string name="pref_title_default_currency">Default currency</string>
+    <string-array name="pref_default_currencies_titles">
+        <item>USD</item>
+        <item>EUR</item>
+        <item>BTC</item>
+        <item>ETH</item>
     </string-array>
-    <string-array name="pref_sync_frequency_values">
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>180</item>
-        <item>360</item>
-        <item>-1</item>
+
+    <string-array name="pref_default_currencies_values">
+        <item>USD</item>
+        <item>EUR</item>
+        <item>BTC</item>
+        <item>ETH</item>
     </string-array>
 
     <string-array name="list_preference_entries">
@@ -142,12 +139,17 @@
     <string name="currencyBalancePlaceholder">%1$s%2$s</string>
     <string name="currencyDollarParenthesisPlaceholder">(US$%1$s)</string>
     <string name="currencyDollarPlaceholder">US$%1$s</string>
+    <string name="currencyEurosParenthesisPlaceholder">(%1$s€)</string>
+    <string name="currencyEurosPlaceholder">%1$s€</string>
     <string name="currencyPercentagePlaceholder">%1$s%%</string>
     <string name="fluctuationDollarPercentagePlaceholder">US$%1$s (%2$s%)</string>
+    <string name="fluctuationEurosPercentagePlaceholder">%1$s€ (%2$s%)</string>
 
     <!--DetailsActivity placeholders-->
-    <string name="volumePlaceholder">Volume\nUS$%1$s</string>
-    <string name="pricePlaceholder">Price\nUS$%1$s</string>
+    <string name="volumeDollarPlaceholder">Volume\nUS$%1$s</string>
+    <string name="priceDollarPlaceholder">Price\nUS$%1$s</string>
+    <string name="volumeEurosPlaceholder">Volume\n%1$s€</string>
+    <string name="priceEurosPlaceholder">Price\n%1$s€</string>
     <string name="timestampPlaceholder">Date\n%1$s</string>
 
     <string name="title_activity_main">MainActivity</string>
@@ -156,8 +158,10 @@
     <string name="fingerprint_dialog_title">Verify your fingerprint to continue</string>
 
 
-    <string name="market_cap_textview">Total Market Capitalization :\nUS$%1$s</string>
-    <string name="volume_market_cap_textview">24h volume :\nUS$%1$s</string>
+    <string name="market_cap_dollar_textview">Total Market Capitalization :\nUS$%1$s</string>
+    <string name="volume_dollar_market_cap_textview">24h volume :\nUS$%1$s</string>
+    <string name="market_cap_euros_textview">Total Market Capitalization :\n%1$s€</string>
+    <string name="volume_euros_market_cap_textview">24h volume :\n%1$s€</string>
     <string name="title_activity_scrolling">ScrollingActivity</string>
 
 </resources>

@@ -44,7 +44,7 @@ public class CurrencyDataRetriever {
         requestQueue = Volley.newRequestQueue(context);
     }
 
-    private void getPriceTimestamp(final String symbolCurrencyFrom, String symbolCurrencyTo, final DataChartCallBack callBack, long timestamp)
+    public void getPriceTimestamp(final String symbolCurrencyFrom, String symbolCurrencyTo, final DataChartCallBack callBack, long timestamp)
     {
         final String requestUrl = "https://min-api.cryptocompare.com/data/pricehistorical?fsym=" + symbolCurrencyFrom + "&tsyms=" + symbolCurrencyTo + "&ts=" + timestamp;
 
@@ -74,7 +74,7 @@ public class CurrencyDataRetriever {
         return result;
     }
 
-    private void updateHistory(final String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
+    public void updateHistory(final String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
     {
         String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
 
@@ -95,7 +95,7 @@ public class CurrencyDataRetriever {
         requestQueue.add(stringRequest);
     }
 
-    private void updatePrice(final String symbolCurrencyFrom, String symbolCurrencyTo, final PriceCallBack callBack)
+    public void updatePrice(final String symbolCurrencyFrom, String symbolCurrencyTo, final PriceCallBack callBack)
     {
         String requestUrl = priceUrl + symbolCurrencyFrom + "&tsyms=" + symbolCurrencyTo;
 

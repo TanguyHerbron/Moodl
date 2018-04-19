@@ -16,7 +16,6 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -300,7 +299,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 updateChartTab(DAY, 1);
                 break;
             case "3d":
-                currency.updateHistoryHours(this, new Currency.CurrencyCallBack() {
+                currency.updateHistoryHours(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(Currency currency) {
                         runOnUiThread(new Runnable() {
@@ -313,7 +312,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 });
                 break;
             case "1w":
-                currency.updateHistoryHours(this, new Currency.CurrencyCallBack() {
+                currency.updateHistoryHours(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(Currency currency) {
                         runOnUiThread(new Runnable() {
@@ -326,7 +325,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 });
                 break;
             case "1M":
-                currency.updateHistoryHours(this, new Currency.CurrencyCallBack() {
+                currency.updateHistoryHours(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(Currency currency) {
                         runOnUiThread(new Runnable() {
@@ -339,7 +338,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 });
                 break;
             case "3M":
-                currency.updateHistoryDays(this, new Currency.CurrencyCallBack() {
+                currency.updateHistoryDays(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(Currency currency) {
                         runOnUiThread(new Runnable() {
@@ -352,7 +351,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 });
                 break;
             case "6M":
-                currency.updateHistoryDays(this, new Currency.CurrencyCallBack() {
+                currency.updateHistoryDays(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(Currency currency) {
                         runOnUiThread(new Runnable() {
@@ -365,7 +364,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 });
                 break;
             case "1y":
-                currency.updateHistoryDays(this, new Currency.CurrencyCallBack() {
+                currency.updateHistoryDays(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(Currency currency) {
                         runOnUiThread(new Runnable() {
@@ -550,8 +549,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             date = getDate(dataChartList.get(index).getTimestamp() * 1000);
         }
 
-        volumePlaceholder = getResources().getString(R.string.volumePlaceholder, numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()));
-        pricePlaceholder = getResources().getString(R.string.pricePlaceholder, numberConformer(e.getY()));
+        volumePlaceholder = getResources().getString(R.string.volumeDollarPlaceholder, numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()));
+        pricePlaceholder = getResources().getString(R.string.priceDollarPlaceholder, numberConformer(e.getY()));
         timestampPlaceholder = getResources().getString(R.string.timestampPlaceholder, date);
 
         ((TextView) findViewById(R.id.volumeHightlight)).setText(volumePlaceholder);

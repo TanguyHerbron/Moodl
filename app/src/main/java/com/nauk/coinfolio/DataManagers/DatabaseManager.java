@@ -145,7 +145,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
         while(resultatList.moveToNext())
         {
             currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(3)));
-            Log.d("coinfolio", "Database output : " + resultatList.getString(1));
         }
 
         resultatList.close();

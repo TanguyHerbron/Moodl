@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.FingerprintToolkit.FingerprintDialogFragment;
 import com.nauk.coinfolio.FingerprintToolkit.FingerprintHandler;
 import com.nauk.coinfolio.R;
@@ -228,6 +229,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     editor.apply();
 
                     return isChecked;
+                }
+            });
+
+            bindPreferenceSummaryToValue(findPreference("default_currency"));
+            findPreference("default_currency").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object o) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                    SharedPreferences.Editor editor = preferences.edit();
+
+                    editor.putBoolean("refresh_default_currency", true);
+                    editor.apply();
+
+                    return false;
                 }
             });
         }

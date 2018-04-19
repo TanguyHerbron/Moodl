@@ -7,6 +7,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.preference.PreferenceScreen;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.nauk.coinfolio.Activities.CurrencyDetailsActivity;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
+import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.R;
 
 import java.text.DecimalFormat;
@@ -53,11 +55,13 @@ public class HomeLayoutGenerator {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
+                PreferencesManager preferencesManager = new PreferencesManager(context);
+
                 if (view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE) {
                     collapseView(view);
                 } else {
                     if (currency.getHistoryMinutes() == null) {
-                        currency.updateHistoryMinutes(context, new Currency.CurrencyCallBack() {
+                        currency.updateHistoryMinutes(context, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                             @Override
                             public void onSuccess(Currency currency) {
                                 //setupLineChart(view, currency);
@@ -202,6 +206,28 @@ public class HomeLayoutGenerator {
         double value = currency.getValue() * currency.getBalance();
         double percentage = value / totalValue * 100;
         DecimalFormat df = new DecimalFormat(".##");
+        PreferencesManager preferencesManager = new PreferencesManager(context);
+
+        switch (preferencesManager.getDefaultCurrency())
+        {
+            case "EUR":
+                ((TextView) view.findViewById(R.id.currencyValueOwnedTextView))
+                        .setText(context.getResources().getString(R.string.currencyEurosParenthesisPlaceholder, numberConformer(currency.getValue() * currency.getBalance())));
+                ((TextView) view.findViewById(R.id.currencyValueTextView))
+                        .setText(context.getResources().getString(R.string.currencyEurosPlaceholder, numberConformer(currency.getValue())));
+                ((TextView) view.findViewById(R.id.currencyFluctuationTextView))
+                        .setText(context.getResources().getString(R.string.currencyEurosParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
+                break;
+            default:
+                ((TextView) view.findViewById(R.id.currencyValueOwnedTextView))
+                        .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getValue() * currency.getBalance())));
+                ((TextView) view.findViewById(R.id.currencyValueTextView))
+                        .setText(context.getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(currency.getValue())));
+                ((TextView) view.findViewById(R.id.currencyFluctuationTextView))
+                        .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
+
+                break;
+        }
 
         ((ImageView) view.findViewById(R.id.currencyIcon))
                 .setImageBitmap(currency.getIcon());
@@ -211,15 +237,8 @@ public class HomeLayoutGenerator {
                 .setText(context.getResources().getString(R.string.currencySymbolPlaceholder, currency.getSymbol()));
         ((TextView) view.findViewById(R.id.currencyOwnedTextView))
                 .setText(context.getResources().getString(R.string.currencyBalancePlaceholder, numberConformer(currency.getBalance()), currency.getSymbol()));
-        ((TextView) view.findViewById(R.id.currencyValueOwnedTextView))
-                .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getValue() * currency.getBalance())));
-
-        ((TextView) view.findViewById(R.id.currencyValueTextView))
-                .setText(context.getResources().getString(R.string.currencyDollarPlaceholder, numberConformer(currency.getValue())));
         ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView))
                 .setText(context.getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(currency.getDayFluctuationPercentage())));
-        ((TextView) view.findViewById(R.id.currencyFluctuationTextView))
-                .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
 
         Drawable arrowDrawable = ((ImageView) view.findViewById(R.id.detailsArrow)).getDrawable();
         arrowDrawable.mutate();

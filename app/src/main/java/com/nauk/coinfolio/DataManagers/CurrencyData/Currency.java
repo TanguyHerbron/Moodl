@@ -64,11 +64,11 @@ public class Currency implements Parcelable {
 
     //public Currency(int id, String symbol, String name, String algorithm, String proofType, )
 
-    public void getTimestampPrice(android.content.Context context, final PriceCallBack callBack, long timestamp)
+    public void getTimestampPrice(android.content.Context context, String toSymbol, final PriceCallBack callBack, long timestamp)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
-        dataRetriver.getPriceTimestamp(symbol, new CurrencyDataRetriever.DataChartCallBack() {
+        dataRetriver.getPriceTimestamp(symbol, toSymbol, new CurrencyDataRetriever.DataChartCallBack() {
             @Override
             public void onSuccess(List<CurrencyDataChart> dataChart) {}
 
@@ -97,11 +97,11 @@ public class Currency implements Parcelable {
         return url;
     }
 
-    public void updatePrice(android.content.Context context, final CurrencyCallBack callBack)
+    public void updatePrice(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
-        dataRetriver.updatePrice(symbol, new CurrencyDataRetriever.PriceCallBack() {
+        dataRetriver.updatePrice(symbol, toSymbol, new CurrencyDataRetriever.PriceCallBack() {
             @Override
             public void onSuccess(Currency currencyInfo) {
                 if(currencyInfo != null)
@@ -117,11 +117,11 @@ public class Currency implements Parcelable {
         });
     }
 
-    public void updateHistoryMinutes(android.content.Context context, final CurrencyCallBack callBack)
+    public void updateHistoryMinutes(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
-        dataRetriver.updateHistory(symbol, new CurrencyDataRetriever.DataChartCallBack() {
+        dataRetriver.updateHistory(symbol, toSymbol, new CurrencyDataRetriever.DataChartCallBack() {
             @Override
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryMinutes(dataChart);
@@ -134,10 +134,10 @@ public class Currency implements Parcelable {
         }, CurrencyDataRetriever.MINUTES);
     }
 
-    public void updateHistoryHours(android.content.Context context, final CurrencyCallBack callBack)
+    public void updateHistoryHours(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
-        dataRetriver.updateHistory(symbol, new CurrencyDataRetriever.DataChartCallBack() {
+        dataRetriver.updateHistory(symbol, toSymbol, new CurrencyDataRetriever.DataChartCallBack() {
             @Override
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryHours(dataChart);
@@ -150,10 +150,10 @@ public class Currency implements Parcelable {
         }, CurrencyDataRetriever.HOURS);
     }
 
-    public void updateHistoryDays(android.content.Context context, final CurrencyCallBack callBack)
+    public void updateHistoryDays(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
-        dataRetriver.updateHistory(symbol, new CurrencyDataRetriever.DataChartCallBack() {
+        dataRetriver.updateHistory(symbol, toSymbol, new CurrencyDataRetriever.DataChartCallBack() {
             @Override
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryDays(dataChart);

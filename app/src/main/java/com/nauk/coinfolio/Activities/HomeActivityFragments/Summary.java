@@ -8,7 +8,9 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -50,7 +52,6 @@ public class Summary extends Fragment {
     private PreferencesManager preferencesManager;
     private BalanceManager balanceManager;
     private HomeLayoutGenerator layoutGenerator;
-    private View view;
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
 
@@ -67,17 +68,18 @@ public class Summary extends Fragment {
     protected float totalFluctuation;
     private long lastTimestamp;
 
+    @NonNull
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        view = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
 
-        currencyLayout = view.findViewById(R.id.currencyListLayout);
+        currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
         preferencesManager = new PreferencesManager(getActivity());
         balanceManager = new BalanceManager(getActivity());
         layoutGenerator = new HomeLayoutGenerator(getActivity());
-        refreshLayout = view.findViewById(R.id.swiperefreshsummary);
-        toolbarSubtitle = view.findViewById(R.id.toolbarSubtitle);
+        refreshLayout = fragmentView.findViewById(R.id.swiperefreshsummary);
+        toolbarSubtitle = fragmentView.findViewById(R.id.toolbarSubtitle);
 
         totalValue = 0;
         totalFluctuation = 0;
@@ -114,12 +116,12 @@ public class Summary extends Fragment {
         );
 
         handler.postDelayed(updateRunnable, 10000);
-        toolbarLayout = view.findViewById(R.id.toolbar_layout);
+        toolbarLayout = fragmentView.findViewById(R.id.toolbar_layout);
         toolbarLayout.setForegroundGravity(Gravity.CENTER);
 
-        Button addCurrencyButton = view.findViewById(R.id.buttonAddTransaction);
+        Button addCurrencyButton = fragmentView.findViewById(R.id.buttonAddTransaction);
 
-        ImageButton settingsButton = view.findViewById(R.id.settings_button);
+        ImageButton settingsButton = fragmentView.findViewById(R.id.settings_button);
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,7 +144,7 @@ public class Summary extends Fragment {
 
         generateSplashScreen();
 
-        return view;
+        return fragmentView;
     }
 
     private void generateSplashScreen()
@@ -176,9 +178,9 @@ public class Summary extends Fragment {
     public void onResume() {
         super.onResume();
 
-        updateAll(preferencesManager.mustUpdateSummary());
-
         displayBalance(preferencesManager.isBalanceHidden());
+
+        updateAll(preferencesManager.mustUpdateSummary());
     }
 
     private void updateAll(boolean mustUpdate)
@@ -197,7 +199,6 @@ public class Summary extends Fragment {
             resetCounters();
             DataUpdater updater = new DataUpdater();
             updater.execute();
-
         }
         else
         {
@@ -236,7 +237,7 @@ public class Summary extends Fragment {
 
         final List<View> currencyView = new ArrayList<>();
 
-        Runnable newRunnabmle = new Runnable() {
+        Runnable newRunnable = new Runnable() {
             @Override
             public void run() {
                 for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
@@ -261,7 +262,7 @@ public class Summary extends Fragment {
             }
         };
 
-        newRunnabmle.run();
+        newRunnable.run();
     }
 
     private void countCoins(boolean isCoin, boolean isDetails)
@@ -292,7 +293,6 @@ public class Summary extends Fragment {
             }
         }
     }
-
 
     private void countIcons()
     {
@@ -351,8 +351,6 @@ public class Summary extends Fragment {
     {
         float totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) * 100;
 
-
-
         if(preferencesManager.isBalanceHidden())
         {
             toolbarLayout.setTitle(getResources().getString(R.string.currencyPercentagePlaceholder, String.format("%.2f", totalFluctuationPercentage)));
@@ -371,7 +369,15 @@ public class Summary extends Fragment {
         }
         else
         {
-            toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, String.format("%.2f", totalValue)));
+            switch (preferencesManager.getDefaultCurrency())
+            {
+                case "EUR":
+                    toolbarLayout.setTitle(getResources().getString(R.string.currencyEurosPlaceholder, String.format("%.2f", totalValue)));
+                    break;
+                default:
+                    toolbarLayout.setTitle(getResources().getString(R.string.currencyDollarPlaceholder, String.format("%.2f", totalValue)));
+                    break;
+            }
             toolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
             toolbarLayout.setExpandedTitleColor(Color.WHITE);
 
@@ -388,13 +394,29 @@ public class Summary extends Fragment {
 
             if(totalFluctuation == 0)
             {
-                toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
+                switch (preferencesManager.getDefaultCurrency())
+                {
+                    case "EUR":
+                        toolbarSubtitle.setText(getResources().getString(R.string.currencyEurosPlaceholder, "0.00"));
+                        break;
+                    default:
+                        toolbarSubtitle.setText(getResources().getString(R.string.currencyDollarPlaceholder, "0.00"));
+                        break;
+                }
                 toolbarSubtitle.setTextColor(-1275068417);
 
             }
             else
             {
-                toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
+                switch (preferencesManager.getDefaultCurrency())
+                {
+                    case "EUR":
+                        toolbarSubtitle.setText(String.format("%.2f", totalFluctuation) + "€ (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
+                        break;
+                    default:
+                        toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
+                        break;
+                }
             }
         }
     }
@@ -600,7 +622,7 @@ public class Summary extends Fragment {
                     {
                         for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
                         {
-                            balance.get(i).updatePrice(getActivity(), new Currency.CurrencyCallBack() {
+                            balance.get(i).updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                                 @Override
                                 public void onSuccess(Currency currency) {
                                     countCoins(true, false);
@@ -622,27 +644,34 @@ public class Summary extends Fragment {
 
                 public void onError(String error)
                 {
-                    /*switch (error)
+                    View view = getActivity().findViewById(R.id.snackbar_placer);
+
+                    switch (error)
                     {
                         case "com.android.volley.AuthFailureError":
                             preferencesManager.disableHitBTC();
-                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                            Snackbar.make(view, "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
                                     .show();
+
                             refreshLayout.setRefreshing(false);
+
                             updateAll(true);
                             break;
                         case "API-key format invalid.":
                             preferencesManager.disableBinance();
-                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                            Snackbar.make(view, "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
                                     .show();
+
                             updateAll(true);
                             break;
                         default:
-                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "Unexpected error", Snackbar.LENGTH_LONG)
+                            Snackbar.make(view, "Unexpected error", Snackbar.LENGTH_LONG)
                                     .show();
+
                             Log.d("coinfolio", error);
+
                             updateAll(true);
-                    }*/
+                    }
                 }
             });
 

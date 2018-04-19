@@ -121,7 +121,10 @@ public class HomeActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                //bottomNavigationView.getMenu().getItem(position).setChecked(true);
+                if(!bottomNavigationView.getMenu().getItem(position).isChecked())
+                {
+                    bottomNavigationView.getMenu().getItem(position).setChecked(true);
+                }
 
                 if(position % 2 == 0)
                 {

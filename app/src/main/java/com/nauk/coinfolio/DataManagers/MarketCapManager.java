@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 public class MarketCapManager {
 
     private static final String topCurrenciesUrl = "https://api.coinmarketcap.com/v1/ticker/?limit=9";
-    private static final String marketCapUrl = "https://api.coinmarketcap.com/v1/global/";
+    private static final String marketCapUrl = "https://api.coinmarketcap.com/v1/global/?convert=";
     private RequestQueue requestQueue;
     private String topRequestResult[];
     private long marketCap;
@@ -57,9 +57,11 @@ public class MarketCapManager {
         requestQueue.add(strRequest);
     }
 
-    public void updateMarketCap(final VolleyCallBack callBack)
+    public void updateMarketCap(final VolleyCallBack callBack, String toSymbol)
     {
-        StringRequest strRequest = new StringRequest(Request.Method.GET, marketCapUrl,
+        String requestString = marketCapUrl + toSymbol;
+
+        StringRequest strRequest = new StringRequest(Request.Method.GET, requestString,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

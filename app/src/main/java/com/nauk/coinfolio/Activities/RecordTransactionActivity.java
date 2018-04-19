@@ -80,7 +80,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
             }
         });
 
-        currency.getTimestampPrice(this, new Currency.PriceCallBack() {
+        currency.getTimestampPrice(this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
             @Override
             public void onSuccess(String price) {
                 purchasedPrice.setText(price);
@@ -119,7 +119,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
                         calendar.set(Calendar.MINUTE, minute);
                         purchasedDate.setText(sdf.format(calendar.getTime()));
 
-                        currency.getTimestampPrice(RecordTransactionActivity.this, new Currency.PriceCallBack() {
+                        currency.getTimestampPrice(RecordTransactionActivity.this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
                             @Override
                             public void onSuccess(String price) {
                                 purchasedPrice.setText(price);

@@ -25,6 +25,7 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.nauk.coinfolio.Activities.SettingsActivity;
 import com.nauk.coinfolio.DataManagers.MarketCapManager;
+import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.R;
 
 import java.text.DecimalFormat;
@@ -44,6 +45,7 @@ public class MarketCapitalization extends Fragment {
 
     private int marketCapCounter;
 
+    private PreferencesManager preferencesManager;
     private MarketCapManager marketCapManager;
     private HashMap<String, Integer> dominantCurrenciesColors;
     private SwipeRefreshLayout refreshLayout;
@@ -54,6 +56,7 @@ public class MarketCapitalization extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
+        preferencesManager = new PreferencesManager(getContext());
         view = inflater.inflate(R.layout.fragment_marketcap_homeactivity, container, false);
 
         setupDominantCurrenciesColors();
@@ -92,6 +95,8 @@ public class MarketCapitalization extends Fragment {
     public void onResume()
     {
         super.onResume();
+
+        updateMarketCap();
     }
 
     private void setupDominantCurrenciesColors()
@@ -141,7 +146,7 @@ public class MarketCapitalization extends Fragment {
                 public void onSuccess() {
                     countCompletedMarketCapRequest();
                 }
-            });
+            }, preferencesManager.getDefaultCurrency());
         }
         else
         {
@@ -249,8 +254,20 @@ public class MarketCapitalization extends Fragment {
         symbols.setGroupingSeparator(' ');
         formatter.setDecimalFormatSymbols(symbols);
 
-        ((TextView) view.findViewById(R.id.marketCapTextView)).setText(getActivity().getResources().getString(R.string.market_cap_textview, formatter.format(marketCapManager.getMarketCap())));
-
-        ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap)).setText(getActivity().getResources().getString(R.string.volume_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
+        switch (preferencesManager.getDefaultCurrency())
+        {
+            case "EUR":
+                ((TextView) view.findViewById(R.id.marketCapTextView))
+                        .setText(getActivity().getResources().getString(R.string.market_cap_euros_textview, formatter.format(marketCapManager.getMarketCap())));
+                ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap))
+                        .setText(getActivity().getResources().getString(R.string.volume_euros_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
+                break;
+            default:
+                ((TextView) view.findViewById(R.id.marketCapTextView))
+                        .setText(getActivity().getResources().getString(R.string.market_cap_dollar_textview, formatter.format(marketCapManager.getMarketCap())));
+                ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap))
+                        .setText(getActivity().getResources().getString(R.string.volume_dollar_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
+                break;
+        }
     }
 }

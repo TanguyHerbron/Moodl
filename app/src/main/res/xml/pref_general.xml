@@ -5,6 +5,16 @@
         android:key="hide_balance"
         android:title="@string/pref_title_hide_balance" />
 
+    <ListPreference
+        android:defaultValue="USD"
+        android:entries="@array/pref_default_currencies_titles"
+        android:entryValues="@array/pref_default_currencies_values"
+        android:key="default_currency"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_default_currency" />
+
+
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <!--<EditTextPreference
