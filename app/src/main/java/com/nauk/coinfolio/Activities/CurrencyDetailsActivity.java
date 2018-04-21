@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -16,12 +17,16 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
@@ -184,11 +189,11 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         drawTransactionList();
 
-        updateInfoTab();
-
         initializeButtons();
         initializeLineChart(lineChart);
         initializeCandleStickChart(candleStickChart);
+
+        updateInfoTab();
 
         updateChartTab(DAY, 1);
 
@@ -201,9 +206,54 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         updater.execute();
     }
 
+    private void refreshInfoTab()
+    {
+        Drawable progressBarDrawable = ((ProgressBar) findViewById(R.id.percentageCoinEmited)).getProgressDrawable();
+        progressBarDrawable.mutate();
+        progressBarDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        progressBarDrawable.invalidateSelf();
+
+        ((ProgressBar) findViewById(R.id.percentageCoinEmited))
+                .setProgress((int) Math.round(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100));
+
+        ((TextView) findViewById(R.id.txtViewAlgorithm))
+                .setText(currency.getAlgorithm());
+        ((TextView) findViewById(R.id.txtViewProofType))
+                .setText(currency.getProofType());
+        ((TextView) findViewById(R.id.txtViewDescription))
+                .setText(Html.fromHtml(currency.getDescription()));
+        ((TextView) findViewById(R.id.txtViewDescription))
+                .setMovementMethod(LinkMovementMethod.getInstance());
+        ((TextView) findViewById(R.id.txtViewPercentageCoinEmited))
+                .setText("Percentage of coin emited : " + numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100) + "%");
+
+        if(currency.getMaxCoinSupply() == 0)
+        {
+            ((TextView) findViewById(R.id.txtViewTotalSupply))
+                    .setText(PlaceholderManager.getSymbolString("Infinity", getApplication()));
+        }
+        else
+        {
+            ((TextView) findViewById(R.id.txtViewTotalSupply))
+                    .setText(PlaceholderManager.getSymbolString(numberConformer(currency.getMaxCoinSupply()), getApplication()));
+        }
+        ((TextView) findViewById(R.id.txtViewCirculatingSupply))
+                .setText(PlaceholderManager.getSymbolString(numberConformer(currency.getMinedCoinSupply()), getApplication()));
+    }
+
     private void updateInfoTab()
     {
-        ((TextView) findViewById(R.id.txtViewTotalSupply)).setText("");
+        currency.updateSnapshot(this, new Currency.CurrencyCallBack() {
+            @Override
+            public void onSuccess(final Currency currency) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshInfoTab();
+                    }
+                });
+            }
+        });
     }
 
     private void setupActionBar()
@@ -635,14 +685,22 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
         }
 
-        int counter = 0;
-        for(int i = str.indexOf(".") - 1; i > 0; i--)
+        if(!str.equals("Infinity"))
         {
-            counter++;
-            if(counter == 3)
+            int counter = 0;
+            int i = str.indexOf(".") - 1;
+            if(i <= 0)
             {
-                str = str.substring(0, i) + " " + str.substring(i, str.length());
-                counter = 0;
+                i = str.length() - 1;
+            }
+            for(; i > 0; i--)
+            {
+                counter++;
+                if(counter == 3)
+                {
+                    str = str.substring(0, i) + " " + str.substring(i, str.length());
+                    counter = 0;
+                }
             }
         }
 
@@ -715,9 +773,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         dataSet.setHighlightEnabled(true);
         dataSet.setDrawHorizontalHighlightIndicator(false);
         dataSet.setHighLightColor(currency.getChartColor());
-
-        Drawable fillDrawable = ContextCompat.getDrawable(this, R.drawable.linear_chart_gradient);
-        fillDrawable.setColorFilter(getColorWithAlpha(currency.getChartColor(), 0.5f), PorterDuff.Mode.SRC_ATOP);
 
         return new LineData(dataSet);
     }

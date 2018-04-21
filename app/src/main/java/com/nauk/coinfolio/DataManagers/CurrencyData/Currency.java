@@ -5,15 +5,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import com.nauk.coinfolio.R;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.sql.Types.NULL;
 
 /**
  * Created by Tiji on 25/12/2017.
@@ -34,11 +31,14 @@ public class Currency implements Parcelable {
     private CurrencyDataRetriever dataRetriver;
     private Bitmap icon;
     private int chartColor;
-    private int circulatingSupply;
+    private double maxCoinSupply;
+    private double minedCoinSupply;
+    private String description;
+    private String algorithm;
+    private String proofType;
     private int totalSupply;
     private double marketCapitalization;
     private List<String> socialMediaLinks;
-    private String algorithm;
     //private String proofType
 
     public Currency() {}
@@ -101,7 +101,7 @@ public class Currency implements Parcelable {
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
-        dataRetriver.updatePrice(symbol, toSymbol, new CurrencyDataRetriever.PriceCallBack() {
+        dataRetriver.updatePrice(symbol, toSymbol, new CurrencyDataRetriever.CurrencyCallBack() {
             @Override
             public void onSuccess(Currency currencyInfo) {
                 if(currencyInfo != null)
@@ -110,7 +110,6 @@ public class Currency implements Parcelable {
                     setDayFluctuation(currencyInfo.getDayFluctuation());
                     setDayFluctuationPercentage(currencyInfo.getDayFluctuationPercentage());
                 }
-                Log.d("coinfolio", this.toString());
 
                 callBack.onSuccess(Currency.this);
             }
@@ -132,6 +131,32 @@ public class Currency implements Parcelable {
             @Override
             public void onSuccess(String result){}
         }, CurrencyDataRetriever.MINUTES);
+    }
+
+    private void mergeWith(Currency currency)
+    {
+        dataRetriver = currency.dataRetriver;
+        maxCoinSupply = currency.maxCoinSupply;
+        minedCoinSupply = currency.minedCoinSupply;
+        description = currency.description;
+        algorithm = currency.algorithm;
+        proofType = currency.proofType;
+        totalSupply = currency.totalSupply;
+        marketCapitalization = currency.marketCapitalization;
+        socialMediaLinks = currency.socialMediaLinks;
+    }
+
+    public void updateSnapshot(android.content.Context context, final CurrencyCallBack callBack)
+    {
+        dataRetriver = new CurrencyDataRetriever(context);
+        dataRetriver.updateSnapshot(id, new CurrencyDataRetriever.CurrencyCallBack() {
+            @Override
+            public void onSuccess(Currency currencyInfo) {
+                Currency.this.mergeWith(currencyInfo);
+
+                callBack.onSuccess(Currency.this);
+            }
+        });
     }
 
     public void updateHistoryHours(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
@@ -290,6 +315,46 @@ public class Currency implements Parcelable {
         return icon;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getMaxCoinSupply() {
+        return maxCoinSupply;
+    }
+
+    public void setMaxCoinSupply(double maxCoinSupply) {
+        this.maxCoinSupply = maxCoinSupply;
+    }
+
+    public double getMinedCoinSupply() {
+        return minedCoinSupply;
+    }
+
+    public void setMinedCoinSupply(double minedCoinSupply) {
+        this.minedCoinSupply = minedCoinSupply;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public String getProofType() {
+        return proofType;
+    }
+
+    public void setProofType(String proofType) {
+        this.proofType = proofType;
+    }
+
     private void updateDayFluctuation()
     {
         if(historyMinutes != null)
@@ -303,7 +368,23 @@ public class Currency implements Parcelable {
     @Override
     public String toString()
     {
-        return symbol + " " + value + " " + dayFluctuation;
+        Field[] fields = this.getClass().getDeclaredFields();
+        String currencyString = "Currency >";
+
+        for(Field field : fields)
+        {
+            currencyString += "\n\t";
+
+            try {
+                currencyString += field.getName();
+                currencyString += ": ";
+                currencyString += field.get(this);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return currencyString;
     }
 
     public interface CurrencyCallBack {

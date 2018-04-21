@@ -1,6 +1,5 @@
 package com.nauk.coinfolio.DataManagers.CurrencyData;
 
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -9,6 +8,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.nauk.coinfolio.R;
 
 import org.json.JSONException;
@@ -32,6 +32,7 @@ public class CurrencyDataRetriever {
     private String hourHistoryUrl = "https://min-api.cryptocompare.com/data/histohour";
     private String dayHistoryUrl = "https://min-api.cryptocompare.com/data/histoday";
     private String priceUrl = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=";
+    private String snapshotUrl = "https://www.cryptocompare.com/api/data/coinsnapshotfullbyid/?id=";
 
     private RequestQueue requestQueue;
 
@@ -44,6 +45,29 @@ public class CurrencyDataRetriever {
         requestQueue = Volley.newRequestQueue(context);
     }
 
+    public void updateSnapshot(int id, final CurrencyCallBack callBack)
+    {
+        final String requestUrl = snapshotUrl + id;
+
+        Log.d("coinfolio", "Update snapshot for " + id);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callBack.onSuccess(processSnapshotResult(response));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }
+
     public void getPriceTimestamp(final String symbolCurrencyFrom, String symbolCurrencyTo, final DataChartCallBack callBack, long timestamp)
     {
         final String requestUrl = "https://min-api.cryptocompare.com/data/pricehistorical?fsym=" + symbolCurrencyFrom + "&tsyms=" + symbolCurrencyTo + "&ts=" + timestamp;
@@ -52,7 +76,6 @@ public class CurrencyDataRetriever {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.d("coinfolio", response + " " + requestUrl);
                         callBack.onSuccess(processPriceTimestampResult(response));
                     }
                 },
@@ -95,7 +118,7 @@ public class CurrencyDataRetriever {
         requestQueue.add(stringRequest);
     }
 
-    public void updatePrice(final String symbolCurrencyFrom, String symbolCurrencyTo, final PriceCallBack callBack)
+    public void updatePrice(final String symbolCurrencyFrom, String symbolCurrencyTo, final CurrencyCallBack callBack)
     {
         String requestUrl = priceUrl + symbolCurrencyFrom + "&tsyms=" + symbolCurrencyTo;
 
@@ -139,17 +162,42 @@ public class CurrencyDataRetriever {
     private Currency processPriceResult(String response)
     {
         Currency currency = new Currency();
-        response = response.substring(response.indexOf("TYPE") - 2, response.length() - 3);
+
+        if(response.length() > 500)
+        {
+            response = response.substring(response.indexOf("TYPE") - 2, response.length() - 3);
+
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                double open24 = jsonObject.getDouble("OPEN24HOUR");
+                double value = jsonObject.getDouble("PRICE");
+
+                currency.setDayFluctuation(value - open24);
+                currency.setDayFluctuationPercentage((float) (currency.getDayFluctuation() / open24 * 100));
+
+                currency.setValue(value);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return currency;
+    }
+
+    private Currency processSnapshotResult(String response)
+    {
+        Currency currency = new Currency();
 
         try {
             JSONObject jsonObject = new JSONObject(response);
-            double open24 = jsonObject.getDouble("OPEN24HOUR");
-            double value = jsonObject.getDouble("PRICE");
+            jsonObject = new JSONObject(jsonObject.getString("Data"));
+            jsonObject = new JSONObject(jsonObject.getString("General"));
 
-            currency.setDayFluctuation(value - open24);
-            currency.setDayFluctuationPercentage((float) (currency.getDayFluctuation() / open24 * 100));
-
-            currency.setValue(value);
+            currency.setProofType(jsonObject.getString("ProofType"));
+            currency.setAlgorithm(jsonObject.getString("Algorithm"));
+            currency.setDescription(jsonObject.getString("Description"));
+            currency.setMaxCoinSupply(Double.parseDouble(jsonObject.getString("TotalCoinSupply")));
+            currency.setMinedCoinSupply(Double.parseDouble(jsonObject.getString("TotalCoinsMined")));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -225,7 +273,7 @@ public class CurrencyDataRetriever {
         }
     }
 
-    public void updatePrice(String symbolCurrencyFrom, final PriceCallBack callBack)
+    public void updatePrice(String symbolCurrencyFrom, final CurrencyCallBack callBack)
     {
         if(symbolCurrencyFrom.equals("USD"))
         {
@@ -268,7 +316,7 @@ public class CurrencyDataRetriever {
         void onSuccess(String price);
     }
 
-    public interface PriceCallBack {
+    public interface CurrencyCallBack {
         void onSuccess(Currency currencyInfo);
     }
 }

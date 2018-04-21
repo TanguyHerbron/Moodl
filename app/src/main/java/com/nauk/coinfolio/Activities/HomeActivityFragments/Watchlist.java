@@ -469,6 +469,20 @@ public class Watchlist extends Fragment {
         }
     }
 
+    public int getCurrencyId(String symbol)
+    {
+        int id = 0;
+
+        try {
+            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
+            id = jsonObject.getInt("Id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return id;
+    }
+
     private class WatchlistUpdater extends AsyncTask<Void, Integer, Void>
     {
         @Override
@@ -481,6 +495,7 @@ public class Watchlist extends Fragment {
         protected Void doInBackground(Void... voids) {
             for(final Currency currency : watchlistManager.getWatchlist())
             {
+                currency.setId(getCurrencyId(currency.getSymbol()));
                 currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(final Currency sucessCurrency) {

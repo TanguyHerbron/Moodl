@@ -48,9 +48,9 @@ public class BinanceManager {
 
             for(int i = 0; i < assets.size(); i++)
             {
-                if(Double.parseDouble(assets.get(i).getFree()) > 0)
+                if(Double.parseDouble(assets.get(i).getFree()) > 0 || Double.parseDouble(assets.get(i).getLocked()) > 0)
                 {
-                    balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree())));
+                    balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree()) + Double.parseDouble(assets.get(i).getLocked())));
                 }
             }
 
