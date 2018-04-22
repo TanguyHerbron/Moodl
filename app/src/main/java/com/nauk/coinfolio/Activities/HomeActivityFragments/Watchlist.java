@@ -8,18 +8,17 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
@@ -28,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.support.v7.widget.Toolbar;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -43,6 +41,7 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyTickerList;
+import com.nauk.coinfolio.DataManagers.DatabaseManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.DataManagers.WatchlistManager;
 import com.nauk.coinfolio.PlaceholderManager;
@@ -77,6 +76,7 @@ public class Watchlist extends Fragment {
     private CurrencyTickerList currencyTickerList;
     private boolean tickerUpdated;
     private boolean detailsUpdated;
+    private boolean editModeEnabled;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -98,6 +98,8 @@ public class Watchlist extends Fragment {
                 checkUpdatedData();
             }
         });
+
+        editModeEnabled = false;
 
         watchlistManager = new WatchlistManager(getContext());
 
@@ -121,12 +123,38 @@ public class Watchlist extends Fragment {
         });
 
         ImageButton settingsButton = view.findViewById(R.id.settings_button);
-
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
                 startActivity(settingIntent);
+            }
+        });
+
+        ImageButton editButton = view.findViewById(R.id.edit_button);
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(editModeEnabled)
+                {
+                    editModeEnabled = false;
+
+                    for(int i = 0; i < ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildCount(); i++)
+                    {
+                        ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildAt(i).setClickable(true);
+                        collapseW(((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildAt(i).findViewById(R.id.deleteCardWatchlist));
+                    }
+                }
+                else
+                {
+                    editModeEnabled = true;
+
+                    for(int i = 0; i < ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildCount(); i++)
+                    {
+                        ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildAt(i).setClickable(false);
+                        expandW(((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildAt(i).findViewById(R.id.deleteCardWatchlist));
+                    }
+                }
             }
         });
 
@@ -172,6 +200,31 @@ public class Watchlist extends Fragment {
         v.startAnimation(a);
     }
 
+    private static void expandW(final View v) {
+        v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
+        final int targetWidth = v.getMeasuredWidth();
+
+        v.getLayoutParams().width = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().width = interpolatedTime == 1
+                        ? CardView.LayoutParams.WRAP_CONTENT
+                        : (int)(targetWidth * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        a.setDuration((int)(targetWidth / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
     private static void collapse(final View v) {
         final int initialHeight = v.getMeasuredHeight();
 
@@ -195,6 +248,30 @@ public class Watchlist extends Fragment {
 
         // 1dp/ms
         a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+    private static void collapseW(final View v) {
+        final int initialWidth = v.getMeasuredWidth();
+
+        Animation a = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.getLayoutParams().width = initialWidth - (int)(initialWidth * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        a.setDuration((int)(initialWidth / v.getContext().getResources().getDisplayMetrics().density));
         v.startAnimation(a);
     }
 
@@ -301,7 +378,9 @@ public class Watchlist extends Fragment {
 
     private View getCurrencyCardFor(final Currency currency)
     {
-        View card = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, null);
+        final View card = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, null);
+
+        card.setTag(currency.getSymbol());
 
         ((TextView) card.findViewById(R.id.currencyFluctuationTextView))
                 .setText(PlaceholderManager.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getActivity()));
@@ -327,6 +406,15 @@ public class Watchlist extends Fragment {
         progressDrawable.mutate();
         progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
         progressDrawable.invalidateSelf();
+
+        card.findViewById(R.id.deleteCardWatchlist).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                collapse(card);
+                DatabaseManager databaseManager = new DatabaseManager(getActivity());
+                databaseManager.deleteCurrencyFromWatchlist(currency.getSymbol());
+            }
+        });
 
         updateColor(card, currency);
 

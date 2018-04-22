@@ -22,6 +22,16 @@
                 app:layout_collapseMode="pin"
                 android:layout_margin="10dp">
 
+                <ImageButton
+                    android:id="@+id/edit_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_edit_mode"
+                    android:background="@drawable/ic_mode_edit_white_24dp"
+                    android:visibility="visible"
+                    android:layout_gravity="start"
+                    android:contentDescription="Edit mode"/>
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

@@ -103,6 +103,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.close();
     }
 
+    public int deleteCurrencyFromWatchlist(String symbol)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        return db.delete(TABLE_WATCHLIST, KEY_WATCHLIST_SYMBOL + " = '" + symbol + "'", null);
+    }
+
     public List<Currency> getAllCurrenciesFromWatchlist()
     {
         String searchQuerry = "SELECT * FROM " + TABLE_WATCHLIST;
