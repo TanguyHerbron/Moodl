@@ -90,6 +90,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private PreferencesManager preferencesManager;
     private BinanceManager binanceManager;
 
+    private boolean isSnapshotUpdated;
+    private boolean isTickerUpdated;
+
     private boolean displayLineChart;
 
     private Button lineChartButton;
@@ -146,6 +149,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         databaseManager = new DatabaseManager(this);
         preferencesManager = new PreferencesManager(this);
+
+        isSnapshotUpdated = false;
+        isTickerUpdated = false;
 
         displayLineChart = true;
 
@@ -231,6 +237,17 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 .setMovementMethod(LinkMovementMethod.getInstance());
         ((TextView) findViewById(R.id.txtViewPercentageCoinEmited))
                 .setText("Percentage of coin emited : " + numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100) + "%");
+        if(currency.getMarketCapitalization() != 0)
+        {
+            ((TextView) findViewById(R.id.txtViewMarketCapitalization))
+                    .setText(PlaceholderManager.getValueString(numberConformer(currency.getMarketCapitalization()), this));
+        }
+
+        if(currency.getRank() != 0)
+        {
+            ((TextView) findViewById(R.id.txtViewRank))
+                    .setText(String.valueOf(currency.getRank()));
+        }
 
         if(currency.getMaxCoinSupply() == 0)
         {
@@ -251,14 +268,31 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         currency.updateSnapshot(this, new Currency.CurrencyCallBack() {
             @Override
             public void onSuccess(final Currency currency) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshInfoTab();
-                    }
-                });
+                isSnapshotUpdated = true;
+                dataCounter();
             }
         });
+
+        currency.updateTicker(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+            @Override
+            public void onSuccess(Currency currency) {
+                isTickerUpdated = true;
+                dataCounter();
+            }
+        });
+    }
+
+    private void dataCounter()
+    {
+        if(isTickerUpdated && isSnapshotUpdated)
+        {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshInfoTab();
+                }
+            });
+        }
     }
 
     private void setupActionBar()

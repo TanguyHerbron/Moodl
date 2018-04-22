@@ -19,6 +19,7 @@ import java.util.List;
 public class Currency implements Parcelable {
 
     private int id;
+    private String tickerId;
     private String name;
     private String symbol;
     private double value;
@@ -38,6 +39,7 @@ public class Currency implements Parcelable {
     private String proofType;
     private int totalSupply;
     private double marketCapitalization;
+    private int rank;
     private List<String> socialMediaLinks;
     //private String proofType
 
@@ -152,7 +154,29 @@ public class Currency implements Parcelable {
         dataRetriver.updateSnapshot(id, new CurrencyDataRetriever.CurrencyCallBack() {
             @Override
             public void onSuccess(Currency currencyInfo) {
-                Currency.this.mergeWith(currencyInfo);
+                //Currency.this.mergeWith(currencyInfo);
+
+                Currency.this.proofType = currencyInfo.proofType;
+                Currency.this.algorithm = currencyInfo.algorithm;
+                Currency.this.description = currencyInfo.description;
+                Currency.this.maxCoinSupply = currencyInfo.maxCoinSupply;
+                Currency.this.minedCoinSupply = currencyInfo.minedCoinSupply;
+
+                callBack.onSuccess(Currency.this);
+            }
+        });
+    }
+
+    public void updateTicker(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    {
+        dataRetriver = new CurrencyDataRetriever(context);
+        dataRetriver.updateTickerInfos(tickerId, toSymbol, new CurrencyDataRetriever.CurrencyCallBack() {
+            @Override
+            public void onSuccess(Currency currencyInfo) {
+                //Currency.this.mergeWith(currencyInfo);
+
+                Currency.this.marketCapitalization = currencyInfo.marketCapitalization;
+                Currency.this.rank = currencyInfo.rank;
 
                 callBack.onSuccess(Currency.this);
             }
@@ -355,6 +379,30 @@ public class Currency implements Parcelable {
         this.proofType = proofType;
     }
 
+    public double getMarketCapitalization() {
+        return marketCapitalization;
+    }
+
+    public void setMarketCapitalization(double marketCapitalization) {
+        this.marketCapitalization = marketCapitalization;
+    }
+
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
+    public String getTickerId() {
+        return tickerId;
+    }
+
+    public void setTickerId(String tickerId) {
+        this.tickerId = tickerId;
+    }
+
     private void updateDayFluctuation()
     {
         if(historyMinutes != null)
@@ -412,6 +460,7 @@ public class Currency implements Parcelable {
         dest.writeList(this.historyMinutes);
         dest.writeParcelable(this.icon, flags);
         dest.writeInt(this.chartColor);
+        dest.writeString(this.tickerId);
     }
 
     protected Currency(Parcel in) {
@@ -426,6 +475,7 @@ public class Currency implements Parcelable {
         in.readList(this.historyMinutes, CurrencyDataChart.class.getClassLoader());
         this.icon = in.readParcelable(Bitmap.class.getClassLoader());
         this.chartColor = in.readInt();
+        this.tickerId = in.readString();
     }
 
     public static final Parcelable.Creator<Currency> CREATOR = new Parcelable.Creator<Currency>() {

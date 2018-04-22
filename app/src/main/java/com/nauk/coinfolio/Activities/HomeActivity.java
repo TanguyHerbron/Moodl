@@ -44,6 +44,7 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
+import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyTickerList;
 import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;

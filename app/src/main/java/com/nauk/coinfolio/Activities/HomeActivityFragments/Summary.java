@@ -32,6 +32,7 @@ import com.nauk.coinfolio.Activities.HomeActivity;
 import com.nauk.coinfolio.Activities.SettingsActivity;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
+import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyTickerList;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
 import com.nauk.coinfolio.PlaceholderManager;
@@ -62,6 +63,7 @@ public class Summary extends Fragment {
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
     private String defaultCurrency;
+    private CurrencyTickerList currencyTickerList;
 
     private TextView toolbarSubtitle;
     private CollapsingToolbarLayout toolbarLayout;
@@ -73,6 +75,7 @@ public class Summary extends Fragment {
     private int iconCounter;
     private float totalValue;
     private boolean detailsChecker;
+    private boolean tickersChecker;
     protected float totalFluctuation;
     private long lastTimestamp;
 
@@ -88,10 +91,12 @@ public class Summary extends Fragment {
         layoutGenerator = new HomeLayoutGenerator(getActivity());
         refreshLayout = fragmentView.findViewById(R.id.swiperefreshsummary);
         toolbarSubtitle = fragmentView.findViewById(R.id.toolbarSubtitle);
+        currencyTickerList = new CurrencyTickerList(getActivity());
 
         totalValue = 0;
         totalFluctuation = 0;
         lastTimestamp = 0;
+        tickersChecker = false;
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
 
@@ -277,6 +282,11 @@ public class Summary extends Fragment {
                         {
                             currencyLayout.addView(currencyView.get(i));
                         }
+
+                        if(loadingDialog.isShowing())
+                        {
+                            loadingDialog.dismiss();
+                        }
                     }
                 });
             }
@@ -285,11 +295,16 @@ public class Summary extends Fragment {
         newRunnable.run();
     }
 
-    private void countCoins(boolean isCoin, boolean isDetails)
+    private void countCoins(boolean isCoin, boolean isDetails, boolean isTickers)
     {
         if(isCoin)
         {
             coinCounter++;
+        }
+
+        if(isTickers)
+        {
+            tickersChecker = true;
         }
 
         if(isDetails)
@@ -299,7 +314,7 @@ public class Summary extends Fragment {
 
         if(balanceManager.getTotalBalance() != null)
         {
-            if(coinCounter == balanceManager.getTotalBalance().size() && detailsChecker)
+            if(coinCounter == balanceManager.getTotalBalance().size() && detailsChecker && tickersChecker)
             {
                 IconDownloader iconDownloader = new IconDownloader();
                 iconDownloader.execute();
@@ -500,6 +515,8 @@ public class Summary extends Fragment {
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
+                localCurrency.setTickerId(currencyTickerList.getTickerIdForSymbol(localCurrency.getSymbol()));
+
                 updateChartColor(localCurrency);
 
                 loadCurrency(localCurrency);
@@ -513,11 +530,6 @@ public class Summary extends Fragment {
                     updateTitle();
                 }
             });
-
-            if(loadingDialog.isShowing())
-            {
-                loadingDialog.dismiss();
-            }
 
             return null;
         }
@@ -626,11 +638,17 @@ public class Summary extends Fragment {
         @Override
         protected Void doInBackground(Void... params)
         {
+            currencyTickerList.update(new BalanceManager.IconCallBack() {
+                @Override
+                public void onSuccess() {
+                    countCoins(false, false, true);
+                }
+            });
             balanceManager.updateDetails(new BalanceManager.IconCallBack() {
                 @Override
                 public void onSuccess()
                 {
-                    countCoins(false, true);
+                    countCoins(false, true, false);
                 }
             });
 
@@ -647,8 +665,7 @@ public class Summary extends Fragment {
                             balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
                                 @Override
                                 public void onSuccess(Currency currency) {
-                                    countCoins(true, false);
-                                    Log.d("coinfolio", "History " + currency.getSymbol());
+                                    countCoins(true, false, false);
                                 }
                             });
                         }
@@ -658,7 +675,7 @@ public class Summary extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                countCoins(false, false);
+                                countCoins(false, false, false);
                             }
                         });
                     }

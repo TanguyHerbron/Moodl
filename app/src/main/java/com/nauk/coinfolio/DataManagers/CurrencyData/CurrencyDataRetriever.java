@@ -33,6 +33,7 @@ public class CurrencyDataRetriever {
     private String dayHistoryUrl = "https://min-api.cryptocompare.com/data/histoday";
     private String priceUrl = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=";
     private String snapshotUrl = "https://www.cryptocompare.com/api/data/coinsnapshotfullbyid/?id=";
+    private String tickerUrl = "https://api.coinmarketcap.com/v1/ticker/";
 
     private RequestQueue requestQueue;
 
@@ -45,11 +46,48 @@ public class CurrencyDataRetriever {
         requestQueue = Volley.newRequestQueue(context);
     }
 
+    public void updateTickerInfos(String currencyName, final String toSymbol, final CurrencyCallBack callBack)
+    {
+        final String requestUrl = tickerUrl + currencyName + "/?convert=" + toSymbol;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callBack.onSuccess(processTicker(response, toSymbol));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        callBack.onSuccess(new Currency());
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }
+
+    private Currency processTicker(String response, String toSymbol)
+    {
+        Currency currency = new Currency();
+
+        response = response.substring(1, response.length()-1);
+
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+
+            currency.setMarketCapitalization(jsonObject.getDouble("market_cap_" + toSymbol.toLowerCase()));
+            currency.setRank(jsonObject.getInt("rank"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return currency;
+    }
+
     public void updateSnapshot(int id, final CurrencyCallBack callBack)
     {
         final String requestUrl = snapshotUrl + id;
-
-        Log.d("coinfolio", "Update snapshot for " + id);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
                 new Response.Listener<String>() {
@@ -61,7 +99,7 @@ public class CurrencyDataRetriever {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        callBack.onSuccess(new Currency());
                     }
                 });
 

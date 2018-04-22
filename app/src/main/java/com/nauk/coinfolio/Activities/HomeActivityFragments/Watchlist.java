@@ -42,6 +42,7 @@ import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
+import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyTickerList;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.DataManagers.WatchlistManager;
 import com.nauk.coinfolio.PlaceholderManager;
@@ -73,6 +74,9 @@ public class Watchlist extends Fragment {
     private long lastTimestamp;
     private PreferencesManager preferencesManager;
     private String defaultCurrency;
+    private CurrencyTickerList currencyTickerList;
+    private boolean tickerUpdated;
+    private boolean detailsUpdated;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -85,6 +89,15 @@ public class Watchlist extends Fragment {
 
         lastTimestamp = 0;
         defaultCurrency = preferencesManager.getDefaultCurrency();
+        currencyTickerList = new CurrencyTickerList(getActivity());
+        tickerUpdated = false;
+        currencyTickerList.update(new BalanceManager.IconCallBack() {
+            @Override
+            public void onSuccess() {
+                tickerUpdated = true;
+                checkUpdatedData();
+            }
+        });
 
         watchlistManager = new WatchlistManager(getContext());
 
@@ -212,14 +225,15 @@ public class Watchlist extends Fragment {
             }
 
             lastTimestamp = System.currentTimeMillis()/1000;
+            detailsUpdated = false;
 
             watchlistManager.updateWatchlist();
 
             currencyDetailsList.update(new BalanceManager.IconCallBack() {
                 @Override
                 public void onSuccess() {
-                    WatchlistUpdater watchlistUpdater = new WatchlistUpdater();
-                    watchlistUpdater.execute();
+                    detailsUpdated = true;
+                    checkUpdatedData();
                 }
             });
         }
@@ -229,6 +243,15 @@ public class Watchlist extends Fragment {
             {
                 refreshLayout.setRefreshing(false);
             }
+        }
+    }
+
+    private void checkUpdatedData()
+    {
+        if(tickerUpdated && detailsUpdated)
+        {
+            WatchlistUpdater watchlistUpdater = new WatchlistUpdater();
+            watchlistUpdater.execute();
         }
     }
 
@@ -516,6 +539,7 @@ public class Watchlist extends Fragment {
         protected Void doInBackground(Void... voids) {
             for(final Currency currency : watchlistManager.getWatchlist())
             {
+                currency.setTickerId(currencyTickerList.getTickerIdForSymbol(currency.getSymbol()));
                 currency.setId(getCurrencyId(currency.getSymbol()));
                 currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
