@@ -50,6 +50,7 @@
                 android:gravity="center">
 
                 <ProgressBar
+                    android:id="@+id/progressBarChart"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="?android:attr/progressBarStyleLarge"

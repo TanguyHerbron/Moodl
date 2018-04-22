@@ -53,6 +53,8 @@ public class HomeLayoutGenerator {
     {
         View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, null, true);
 
+        ((LineChart) view.findViewById(R.id.LineChartView)).setNoDataTextColor(currency.getChartColor());
+
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -61,18 +63,34 @@ public class HomeLayoutGenerator {
                 if (view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE) {
                     collapseView(view);
                 } else {
+                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.GONE);
+                    view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.VISIBLE);
+                    extendView(view);
+
                     if (currency.getHistoryMinutes() == null) {
                         currency.updateHistoryMinutes(context, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                             @Override
                             public void onSuccess(Currency currency) {
-                                ChartLoader chartLoader = new ChartLoader(view, currency);
-                                chartLoader.execute();
+                                if(currency.getHistoryMinutes() != null)
+                                {
+                                    setupLineChart(view, currency);
+                                    view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
+                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
+                                }
+                                else
+                                {
+                                    view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
+                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
+                                    view.findViewById(R.id.linearLayoutSubLayout).findViewById(R.id.detailsArrow).setVisibility(View.GONE);
+                                }
                             }
                         });
                     }
                     else
                     {
                         extendView(view);
+                        view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
+                        view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -94,7 +112,7 @@ public class HomeLayoutGenerator {
         return view;
     }
 
-    private class ChartLoader extends AsyncTask<Void, Integer, Void>
+    /*private class ChartLoader extends AsyncTask<Void, Integer, Void>
     {
         private View view;
         private Currency currency;
@@ -126,7 +144,7 @@ public class HomeLayoutGenerator {
             view.findViewById(R.id.LineChartView).invalidate();
         }
     }
-
+*/
     private static void expand(final View v) {
         v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
         final int targetHeight = v.getMeasuredHeight();
@@ -230,6 +248,11 @@ public class HomeLayoutGenerator {
         arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
         arrowDrawable.invalidateSelf();
 
+        Drawable progressDrawable = ((ProgressBar) view.findViewById(R.id.progressBarLinechartSummary)).getIndeterminateDrawable();
+        progressDrawable.mutate();
+        progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        progressDrawable.invalidateSelf();
+
         Drawable progressBarDrawable = ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).getProgressDrawable();
         progressBarDrawable.mutate();
         progressBarDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
@@ -265,7 +288,7 @@ public class HomeLayoutGenerator {
 
     private void updateColor(View view, Currency currency)
     {
-        if(currency.getDayFluctuationPercentage() > 0)
+        if(currency.getDayFluctuationPercentage() >= 0)
         {
             ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView))
                     .setTextColor(context.getResources().getColor(R.color.increase));

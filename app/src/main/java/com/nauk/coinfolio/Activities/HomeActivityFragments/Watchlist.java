@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 
@@ -292,12 +293,28 @@ public class Watchlist extends Fragment {
                 .setText(PlaceholderManager.getSymbolString(currency.getSymbol(), getActivity()));
         ((ImageView) card.findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
 
+        ((LineChart) card.findViewById(R.id.LineChartView)).setNoDataTextColor(currency.getChartColor());
+
         Drawable arrowDrawable = ((ImageView) card.findViewById(R.id.detailsArrow)).getDrawable();
         arrowDrawable.mutate();
         arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
         arrowDrawable.invalidateSelf();
 
+        Drawable progressDrawable = ((ProgressBar) card.findViewById(R.id.progressBarLinechartWatchlist)).getIndeterminateDrawable();
+        progressDrawable.mutate();
+        progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        progressDrawable.invalidateSelf();
+
         updateColor(card, currency);
+
+        card.findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), CurrencyDetailsActivity.class);
+                intent.putExtra("currency", currency);
+                getActivity().getApplicationContext().startActivity(intent);
+            }
+        });
 
         card.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         card.setOnClickListener(new View.OnClickListener() {
@@ -309,36 +326,38 @@ public class Watchlist extends Fragment {
                 }
                 else
                 {
+                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.GONE);
+                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.VISIBLE);
+                    extendView(view);
+
                     if (currency.getHistoryMinutes() == null) {
                         currency.updateHistoryMinutes(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                             @Override
                             public void onSuccess(Currency currency) {
-                                extendView(view);
-                                setupLineChart(view, currency);
+                                if(currency.getHistoryMinutes() != null)
+                                {
+                                    setupLineChart(view, currency);
+                                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
+                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
+                                }
+                                else
+                                {
+                                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
+                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
+                                    view.findViewById(R.id.linearLayoutSubLayout).findViewById(R.id.detailsArrow).setVisibility(View.GONE);
+                                }
                             }
                         });
                     }
                     else
                     {
                         extendView(view);
+                        view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
+                        view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
                     }
                 }
             }
         });
-
-        card.findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                getActivity().getApplicationContext().startActivity(intent);
-            }
-        });
-
-        if(currency.getHistoryMinutes() != null)
-        {
-            setupLineChart(card, currency);
-        }
 
         return card;
     }
@@ -400,11 +419,13 @@ public class Watchlist extends Fragment {
         lineChart.getXAxis().setEnabled(false);
         lineChart.setViewPortOffsets(0, 0, 0, 0);
         lineChart.setData(generateData(currency));
+
+        lineChart.invalidate();
     }
 
     private void updateColor(View card, Currency currency)
     {
-        if(currency.getDayFluctuation() > 0)
+        if(currency.getDayFluctuation() >= 0)
         {
             ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setTextColor(getResources().getColor(R.color.increase));
             ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setTextColor(getResources().getColor(R.color.increase));

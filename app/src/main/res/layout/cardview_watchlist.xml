@@ -139,19 +139,39 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/cardViewChartSize"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"
+                    android:visibility="visible">
 
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/LineChartView"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"/>
-
-                    <ImageView
-                        android:id="@+id/detailsArrow"
+                    <ProgressBar
+                        android:id="@+id/progressBarLinechartWatchlist"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_keyboard_arrow_right_grey_48dp"
-                        android:layout_gravity="center_vertical|end"/>
+                        android:layout_gravity="center"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:visibility="visible"/>
+
+                    <FrameLayout
+                        android:id="@+id/linearLayoutSubLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:visibility="gone">
+
+                        <com.github.mikephil.charting.charts.LineChart
+                            android:id="@+id/LineChartView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+
+                        <ImageView
+                            android:id="@+id/detailsArrow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_keyboard_arrow_right_grey_48dp"
+                            android:layout_gravity="center_vertical|end"/>
+
+                    </FrameLayout>
 
                 </FrameLayout>
 

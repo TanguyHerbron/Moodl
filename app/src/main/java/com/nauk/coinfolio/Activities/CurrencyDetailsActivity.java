@@ -185,6 +185,11 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             }
         });
 
+        Drawable progressBarDrawable = ((ProgressBar) findViewById(R.id.progressBarChart)).getIndeterminateDrawable();
+        progressBarDrawable.mutate();
+        progressBarDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        progressBarDrawable.invalidateSelf();
+
         setupActionBar();
 
         drawTransactionList();
