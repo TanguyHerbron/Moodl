@@ -227,10 +227,24 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         ((ProgressBar) findViewById(R.id.percentageCoinEmited))
                 .setProgress((int) Math.round(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100));
 
-        ((TextView) findViewById(R.id.txtViewAlgorithm))
-                .setText(currency.getAlgorithm());
-        ((TextView) findViewById(R.id.txtViewProofType))
-                .setText(currency.getProofType());
+        if(currency.getAlgorithm() != null && !currency.getAlgorithm().equals(""))
+        {
+            ((TextView) findViewById(R.id.txtViewAlgorithm))
+                    .setText(currency.getAlgorithm());
+        }
+
+        if(currency.getProofType() != null && !currency.getProofType().equals(""))
+        {
+            ((TextView) findViewById(R.id.txtViewProofType))
+                    .setText(currency.getProofType());
+        }
+
+        if(currency.getStartDate() != null && !currency.getStartDate().equals(""))
+        {
+            ((TextView) findViewById(R.id.txtViewStartDate))
+                    .setText(currency.getStartDate());
+        }
+
         ((TextView) findViewById(R.id.txtViewDescription))
                 .setText(Html.fromHtml(currency.getDescription()));
         ((TextView) findViewById(R.id.txtViewDescription))
@@ -303,7 +317,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         }
         else
         {
-            setTitle(" " + currency.getName() + " | " + currency.getBalance());
+            setTitle(" " + currency.getName() + " | " + numberConformer(currency.getBalance()));
         }
 
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME |
@@ -727,12 +741,12 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         if(!str.equals("Infinity"))
         {
             int counter = 0;
-            int i = str.indexOf(".") - 1;
+            int i = str.indexOf(".");
             if(i <= 0)
             {
-                i = str.length() - 1;
+                i = str.length();
             }
-            for(; i > 0; i--)
+            for(i -= 1; i > 0; i--)
             {
                 counter++;
                 if(counter == 3)

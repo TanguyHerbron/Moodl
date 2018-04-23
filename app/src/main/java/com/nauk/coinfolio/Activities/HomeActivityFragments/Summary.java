@@ -445,7 +445,12 @@ public class Summary extends Fragment {
         }
 
         int counter = 0;
-        for(int i = str.indexOf(".") - 1; i > 0; i--)
+        int i = str.indexOf(".");
+        if(i <= 0)
+        {
+            i = str.length();
+        }
+        for(i -= 1; i > 0; i--)
         {
             counter++;
             if(counter == 3)

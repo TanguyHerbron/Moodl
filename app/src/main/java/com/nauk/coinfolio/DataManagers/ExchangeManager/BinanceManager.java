@@ -11,6 +11,7 @@ import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.domain.account.request.OrderRequest;
 import com.binance.api.client.exception.BinanceApiException;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
+import com.nauk.coinfolio.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;

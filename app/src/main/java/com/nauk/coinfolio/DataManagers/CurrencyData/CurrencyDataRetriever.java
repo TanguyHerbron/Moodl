@@ -234,8 +234,18 @@ public class CurrencyDataRetriever {
             currency.setProofType(jsonObject.getString("ProofType"));
             currency.setAlgorithm(jsonObject.getString("Algorithm"));
             currency.setDescription(jsonObject.getString("Description"));
-            currency.setMaxCoinSupply(Double.parseDouble(jsonObject.getString("TotalCoinSupply")));
-            currency.setMinedCoinSupply(Double.parseDouble(jsonObject.getString("TotalCoinsMined")));
+
+            if(!jsonObject.getString("TotalCoinSupply").equals(""))
+            {
+                currency.setMaxCoinSupply(Double.parseDouble(jsonObject.getString("TotalCoinSupply")));
+            }
+
+            if(!jsonObject.getString("TotalCoinsMined").equals(""))
+            {
+                currency.setMinedCoinSupply(Double.parseDouble(jsonObject.getString("TotalCoinsMined")));
+            }
+
+            currency.setStartDate(jsonObject.getString("StartDate"));
         } catch (JSONException e) {
             e.printStackTrace();
         }

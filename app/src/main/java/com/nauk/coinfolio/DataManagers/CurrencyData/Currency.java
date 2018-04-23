@@ -40,6 +40,7 @@ public class Currency implements Parcelable {
     private int totalSupply;
     private double marketCapitalization;
     private int rank;
+    private String startDate;
     private List<String> socialMediaLinks;
     //private String proofType
 
@@ -161,6 +162,7 @@ public class Currency implements Parcelable {
                 Currency.this.description = currencyInfo.description;
                 Currency.this.maxCoinSupply = currencyInfo.maxCoinSupply;
                 Currency.this.minedCoinSupply = currencyInfo.minedCoinSupply;
+                Currency.this.startDate = currencyInfo.startDate;
 
                 callBack.onSuccess(Currency.this);
             }
@@ -401,6 +403,14 @@ public class Currency implements Parcelable {
 
     public void setTickerId(String tickerId) {
         this.tickerId = tickerId;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
     }
 
     private void updateDayFluctuation()
