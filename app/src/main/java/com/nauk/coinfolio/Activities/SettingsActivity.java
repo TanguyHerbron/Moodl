@@ -6,6 +6,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.fingerprint.FingerprintManager;
@@ -19,8 +20,10 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.preference.SwitchPreference;
+import android.provider.Settings;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
@@ -31,6 +34,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.nauk.coinfolio.BuildConfig;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.FingerprintToolkit.FingerprintDialogFragment;
 import com.nauk.coinfolio.FingerprintToolkit.FingerprintHandler;
@@ -231,6 +235,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return isChecked;
                 }
             });
+
+            ((PreferenceScreen) findPreference("version")).setSummary(BuildConfig.VERSION_NAME);
 
             bindPreferenceSummaryToValue(findPreference("default_currency"));
         }

@@ -14,6 +14,8 @@
         android:positiveButtonText="@null"
         android:title="@string/pref_title_default_currency" />
 
+    <PreferenceScreen android:title="Version"
+        android:key="version"/>
 
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
