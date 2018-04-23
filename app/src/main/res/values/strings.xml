@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">Coinfolio</string>
+    <string name="app_name">Moodl</string>
     <string name="action_settings">Settings</string>
     <string name="action_edit_mode">Edit mode</string>
     <string name="donation">Fais un don wallah</string>
-    <string name="debug">Coinfolio_debug</string>
-    <string name="debug_volley">Coinfolio_debugVolley</string>
+    <string name="debug">Moodl_debug</string>
+    <string name="debug_volley">Moodl_debugVolley</string>
     <string name="quick_button">Switch view</string>
     <string name="title_activity_settings">Settings</string>
 

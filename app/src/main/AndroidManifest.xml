@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.nauk.coinfolio">
+    package="com.nauk.moodl">
 
     <uses-feature android:name="android.hardware.fingerprint"
         android:required="false"/>
@@ -10,13 +10,13 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/icon_coinfolio"
+        android:icon="@mipmap/ic_launcher_moodl"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher_moodl_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Activities.HomeActivity"
+            android:name="com.nauk.moodl.Activities.HomeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
@@ -28,30 +28,30 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.SettingsActivity"
+            android:name="com.nauk.moodl.Activities.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.CurrencySelectionActivity"
+            android:name="com.nauk.moodl.Activities.CurrencySelectionActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nauk.coinfolio.Activities.HomeActivity"/>
+                android:value="com.nauk.moodl.Activities.HomeActivity"/>
         </activity>
         <activity
-            android:name=".Activities.RecordTransactionActivity"
+            android:name="com.nauk.moodl.Activities.RecordTransactionActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nauk.coinfolio.Activities.HomeActivity"/>
+                android:value="com.nauk.moodl.Activities.HomeActivity"/>
         </activity>
         <activity
-            android:name=".Activities.CurrencyDetailsActivity"
+            android:name="com.nauk.moodl.Activities.CurrencyDetailsActivity"
             android:label="@string/title_activity_currency_details"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nauk.coinfolio.Activities.HomeActivity"/>
+                android:value="com.nauk.moodl.Activities.HomeActivity"/>
         </activity>
     </application>
 

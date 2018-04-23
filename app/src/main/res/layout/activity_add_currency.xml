@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.nauk.coinfolio.Activities.CurrencySelectionActivity">
+    tools:context="com.nauk.moodl.Activities.CurrencySelectionActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
