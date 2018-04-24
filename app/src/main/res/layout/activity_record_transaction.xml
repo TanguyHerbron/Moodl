@@ -8,7 +8,37 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_margin="5dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp">
+
+            <Button
+                android:id="@+id/receivedButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:text="@string/receivedText"
+                android:background="@drawable/button_received"
+                android:layout_marginEnd="2.5dp"
+                android:enabled="false"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/sentButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:text="@string/sentText"
+                android:background="@drawable/button_sent"
+                android:layout_marginStart="2.5dp"
+                android:textColor="@color/white"
+                android:enabled="true" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/currencySymbol"
@@ -35,6 +65,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/activity_purchased_price"/>
+
+        <EditText
+            android:id="@+id/feesTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/activity_fees"
+            android:visibility="gone"
+            android:text="0"/>
 
         <Button
             android:id="@+id/validateButton"

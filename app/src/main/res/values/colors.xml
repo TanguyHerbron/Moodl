@@ -38,4 +38,7 @@
     <color name="summary_background">#F5F7FA</color>
     <color name="decreaseCandle">#FFFF5754</color>
     <color name="increaseCandle">#FF45B64A</color>
+    <color name="transparent_red">#22F55447</color>
+    <color name="transparent_green">#225DBF61</color>
+    <color name="transparent_white">#EEFFFFFF</color>
 </resources>

@@ -23,14 +23,18 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
     private String coin;
     private String symbol;
-    private EditText amountTxtView;
+    private TextView symbolTxtView;
     private TextView purchasedDate;
+    private TextView feesTxtView;
+    private EditText amountTxtView;
     private Button validateButton;
+    private Button receivedButton;
+    private Button sentButton;
     private DatabaseManager databaseManager;
     private Calendar calendar;
     private SimpleDateFormat sdf;
     private PreferencesManager preferenceManager;
-    private EditText purchasedPrice;
+    private EditText purchasedPriceEditText;
     private Currency currency;
 
     @Override
@@ -53,13 +57,18 @@ public class RecordTransactionActivity extends AppCompatActivity {
         databaseManager = new DatabaseManager(this);
         preferenceManager = new PreferencesManager(this);
 
-        validateButton = findViewById(R.id.validateButton);
+        symbolTxtView = findViewById(R.id.currencySymbol);
         amountTxtView = findViewById(R.id.currencyAmount);
+        feesTxtView = findViewById(R.id.feesTextView);
         purchasedDate = findViewById(R.id.purchaseDate);
-        purchasedPrice = findViewById(R.id.purchasePrice);
+        purchasedPriceEditText = findViewById(R.id.purchasePrice);
+        validateButton = findViewById(R.id.validateButton);
+        receivedButton = findViewById(R.id.receivedButton);
+        sentButton = findViewById(R.id.sentButton);
 
         //purchasedPrice.setText();
         purchasedDate.setText(sdf.format(calendar.getTime()));
+        symbolTxtView.setText(symbol);
 
         purchasedDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,7 +80,16 @@ public class RecordTransactionActivity extends AppCompatActivity {
         validateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                databaseManager.addCurrencyToManualCurrency(symbol, Double.parseDouble(amountTxtView.getText().toString()), calendar.getTime(), purchasedPrice.getText().toString());
+                double amount = Double.parseDouble(amountTxtView.getText().toString());
+                double purchasedPrice = Double.parseDouble(purchasedPriceEditText.getText().toString());
+                double fees = Double.parseDouble(feesTxtView.getText().toString());
+
+                if(!sentButton.isEnabled())
+                {
+                    amount *= -1;
+                }
+
+                databaseManager.addCurrencyToManualCurrency(symbol, amount, calendar.getTime(), purchasedPrice, fees);
                 preferenceManager.setMustUpdateSummary(true);
                 Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -80,10 +98,30 @@ public class RecordTransactionActivity extends AppCompatActivity {
             }
         });
 
+        receivedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                receivedButton.setEnabled(false);
+                sentButton.setEnabled(true);
+                purchasedPriceEditText.setVisibility(View.VISIBLE);
+                feesTxtView.setVisibility(View.GONE);
+            }
+        });
+
+        sentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                receivedButton.setEnabled(true);
+                sentButton.setEnabled(false);
+                purchasedPriceEditText.setVisibility(View.GONE);
+                feesTxtView.setVisibility(View.VISIBLE);
+            }
+        });
+
         currency.getTimestampPrice(this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
             @Override
             public void onSuccess(String price) {
-                purchasedPrice.setText(price);
+                purchasedPriceEditText.setText(price);
             }
         }, calendar.getTimeInMillis() / 1000);
     }
@@ -122,7 +160,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
                         currency.getTimestampPrice(RecordTransactionActivity.this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
                             @Override
                             public void onSuccess(String price) {
-                                purchasedPrice.setText(price);
+                                purchasedPriceEditText.setText(price);
                             }
                         }, calendar.getTimeInMillis() / 1000);
                         Log.d("moodl", "Time : " + calendar.getTimeInMillis());

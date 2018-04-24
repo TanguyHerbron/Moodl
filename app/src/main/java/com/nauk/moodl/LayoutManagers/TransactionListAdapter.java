@@ -68,7 +68,7 @@ public class TransactionListAdapter extends ArrayAdapter<Transaction> {
                 DatabaseManager databaseManager = new DatabaseManager(context);
                 preferencesManager.setMustUpdateSummary(true);
                 databaseManager.deleteTransactionFromId(Integer.parseInt(view.getTag().toString()));
-                collapse((View) view.getParent().getParent().getParent().getParent());
+                collapse((View) view.getParent().getParent().getParent());
             }
         });
 

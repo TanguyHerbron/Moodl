@@ -34,6 +34,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
     private static final String KEY_CURRENCY_DATE = "addDate";
     private static final String KEY_CURRENCY_PURCHASED_PRICE = "purchasedPrice";
     private static final String KEY_CURRENCY_IS_MINED = "isMined";
+    private static final String KEY_CURRENCY_FEES = "fees";
 
     private static final String KEY_EXCHANGE_ID = "idExchange";
     private static final String KEY_EXCHANGE_NAME = "name";
@@ -60,7 +61,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 + KEY_CURRENCY_BALANCE + " TEXT,"
                 + KEY_CURRENCY_DATE + " TEXT,"
                 + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
-                + KEY_CURRENCY_IS_MINED + " INTEGER"
+                + KEY_CURRENCY_IS_MINED + " INTEGER,"
+                + KEY_CURRENCY_FEES + " REAL"
                 + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
@@ -125,7 +127,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return currencyList;
     }
 
-    public void addCurrencyToManualCurrency(String symbol, double balance, Date date, String purchasedPrice)
+    public void addCurrencyToManualCurrency(String symbol, double balance, Date date, double purchasedPrice, double fees)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -134,6 +136,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         values.put(KEY_CURRENCY_BALANCE, balance);
         values.put(KEY_CURRENCY_DATE, date.getTime());
         values.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
+        values.put(KEY_CURRENCY_FEES, fees);
 
         db.insert(TABLE_MANUAL_CURRENCIES, null, values);
         db.close();
@@ -149,7 +152,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(3)));
+            currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(3) - resultatList.getDouble(7)));
         }
 
         resultatList.close();

@@ -64,6 +64,9 @@
         <item>3</item>
     </string-array>
 
+    <string name="receivedText">Received</string>
+    <string name="sentText">Sent</string>
+
     <string-array name="multi_select_list_preference_default_value" />
 
     <string name="pref_title_system_sync_settings">System sync settings</string>
@@ -120,6 +123,7 @@
     <string name="activity_add_amount">Amount</string>
     <string name="activity_purchased_price">Purchased price</string>
     <string name="activity_purchased_date">Purchased date</string>
+    <string name="activity_fees">Fees</string>
     <string name="title_activity_currency_details">CurrencyDetailsActivity</string>
     <string name="title_history">History charts</string>
     <string name="title_watchlist">Watchlist</string>
