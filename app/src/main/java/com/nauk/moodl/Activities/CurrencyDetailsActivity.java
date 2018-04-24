@@ -17,14 +17,20 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
@@ -51,9 +57,11 @@ import com.nauk.moodl.DataManagers.CurrencyData.Transaction;
 import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.ExchangeManager.BinanceManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
+import com.nauk.moodl.LayoutManagers.TradeListAdapter;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -69,7 +77,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
     private LinearLayout transactionLayout;
-    private LinearLayout tradeLayout;
+    private ListView tradeLayout;
     private DatabaseManager databaseManager;
     //private String symbol;
     private Currency currency;
@@ -85,6 +93,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private BarChart barChart;
     private PreferencesManager preferencesManager;
     private BinanceManager binanceManager;
+    private TradeListAdapter tradeListAdapter;
+    private boolean flag_loading;
 
     private boolean isSnapshotUpdated;
     private boolean isTickerUpdated;
@@ -150,6 +160,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         isTickerUpdated = false;
 
         displayLineChart = true;
+        flag_loading = false;
 
         viewFlipper = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
@@ -887,40 +898,36 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return transColor;
     }
 
-    private void drawTradeList(HashMap<String, List<Trade>> trades)
+    private void drawTradeList(ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades)
     {
         findViewById(R.id.tradeProgressBar).setVisibility(View.GONE);
 
-        tradeLayout.removeAllViews();
+        tradeLayout.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
 
-        for(String key : trades.keySet())
-        {
-            for(int i = trades.get(key).size()-1; i >= 0; i--)
-            {
-                View view = LayoutInflater.from(this).inflate(R.layout.custom_trade_row, null);
-                TextView amountTxtView = view.findViewById(R.id.amountPurchased);
-                TextView purchasedPrice = view.findViewById(R.id.purchasedPrice);
-                TextView tradePair = view.findViewById(R.id.pair);
-                TextView dateTxtView = view.findViewById(R.id.tradeDate);
-                View tradeIndicator = view.findViewById(R.id.tradeIndicator);
-
-                if(trades.get(key).get(i).isBuyer())
-                {
-                    tradeIndicator.setBackgroundColor(getColor(R.color.green));
-                }
-                else
-                {
-                    tradeIndicator.setBackgroundColor(getColor(R.color.red));
-                }
-
-                amountTxtView.setText(String.valueOf(trades.get(key).get(i).getQty()));
-                purchasedPrice.setText(trades.get(key).get(i).getPrice());
-                dateTxtView.setText(getDate(trades.get(key).get(i).getTime()));
-                tradePair.setText(currency.getSymbol() + "/" + key);
-
-                tradeLayout.addView(view);
             }
-        }
+
+            @Override
+            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if(firstVisibleItem+visibleItemCount == totalItemCount && totalItemCount!=0)
+                {
+                    if(!flag_loading)
+                    {
+                        flag_loading = true;
+
+                        expand(findViewById(R.id.tradeProgressBar));
+                        TradeAdder tradeAdder = new TradeAdder();
+                        tradeAdder.execute();
+                    }
+                }
+            }
+        });
+
+        tradeListAdapter = new TradeListAdapter(this, trades);
+
+        tradeLayout.setAdapter(tradeListAdapter);
+        tradeLayout.setTextFilterEnabled(false);
     }
 
     private void drawTransactionList()
@@ -958,6 +965,34 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
             transactionLayout.addView(view);
         }
+    }
+
+    private static void expand(final View v) {
+        v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? CardView.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
     }
 
     private void setupSwipeView(View view)
@@ -1003,6 +1038,44 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         });
     }
 
+    private class TradeAdder extends AsyncTask<Void, Integer, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
+                @Override
+                public void onSuccess() {
+                    ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades = binanceManager.getTrades();
+                    final ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> returnedTrades = new ArrayList<>();
+
+                    for(int i = trades.size() - 1; i > 0 ; i--)
+                    {
+                        returnedTrades.add(trades.get(i));
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tradeListAdapter.addAll(returnedTrades);
+                            tradeListAdapter.notifyDataSetChanged();
+                            flag_loading = false;
+
+                            findViewById(R.id.tradeProgressBar).setVisibility(View.GONE);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+
+                }
+            }, currency.getSymbol(), tradeListAdapter.getItem(tradeListAdapter.getCount() - 1).getId());
+
+            return null;
+        }
+    }
+
     private class TradeUpdater extends AsyncTask<Void, Integer, Void>
     {
         @Override
@@ -1025,12 +1098,18 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
                 @Override
                 public void onSuccess() {
-                    final HashMap<String, List<Trade>> trades = binanceManager.getTrades();
+                    ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades = binanceManager.getTrades();
+                    final ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> returnedTrades = new ArrayList<>();
+
+                    for(int i = trades.size() - 1; i > 0 ; i--)
+                    {
+                        returnedTrades.add(trades.get(i));
+                    }
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            drawTradeList(trades);
+                            drawTradeList(returnedTrades);
                         }
                     });
                 }

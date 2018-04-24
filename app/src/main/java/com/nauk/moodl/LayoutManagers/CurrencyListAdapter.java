@@ -22,10 +22,10 @@ public class CurrencyListAdapter extends ArrayAdapter<Currency> {
         private ArrayList<Currency> tempCurrency, suggestions;
         private Context context;
 
-        public CurrencyListAdapter(Context context, ArrayList<Currency> objects) {
-            super(context, android.R.layout.simple_list_item_1, objects);
-            this.tempCurrency = new ArrayList<Currency>(objects);
-            this.suggestions = new ArrayList<Currency>(objects);
+        public CurrencyListAdapter(Context context, ArrayList<Currency> currencies) {
+            super(context, android.R.layout.simple_list_item_1, currencies);
+            this.tempCurrency = new ArrayList<>(currencies);
+            this.suggestions = new ArrayList<>(currencies);
 
             this.context = context;
         }
