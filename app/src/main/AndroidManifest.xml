@@ -12,7 +12,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher_moodl"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_moodl_round"
+        android:roundIcon="@mipmap/ic_launcher_moodl"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
