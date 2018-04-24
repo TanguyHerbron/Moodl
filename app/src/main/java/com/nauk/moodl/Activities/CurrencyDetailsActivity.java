@@ -11,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.NavUtils;
@@ -25,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.AbsListView;
@@ -58,6 +60,7 @@ import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.ExchangeManager.BinanceManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.LayoutManagers.TradeListAdapter;
+import com.nauk.moodl.LayoutManagers.TransactionListAdapter;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -76,7 +79,7 @@ import static java.lang.Math.abs;
 public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
-    private LinearLayout transactionLayout;
+    private ListView transactionLayout;
     private ListView tradeLayout;
     private DatabaseManager databaseManager;
     //private String symbol;
@@ -94,6 +97,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private PreferencesManager preferencesManager;
     private BinanceManager binanceManager;
     private TradeListAdapter tradeListAdapter;
+    private TransactionListAdapter transactionListAdapter;
     private boolean flag_loading;
 
     private boolean isSnapshotUpdated;
@@ -205,11 +209,12 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         setupActionBar();
 
-        drawTransactionList();
-
         initializeButtons();
         initializeLineChart(lineChart);
         initializeCandleStickChart(candleStickChart);
+
+        TransactionUpdater transactionUpdater = new TransactionUpdater();
+        transactionUpdater.execute();
 
         updateInfoTab();
 
@@ -898,6 +903,14 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         return transColor;
     }
 
+    private void drawTransactionList(ArrayList<Transaction> transactions)
+    {
+        transactionListAdapter = new TransactionListAdapter(this, transactions);
+
+        transactionLayout.setAdapter(transactionListAdapter);
+        transactionLayout.setTextFilterEnabled(false);
+    }
+
     private void drawTradeList(ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades)
     {
         findViewById(R.id.tradeProgressBar).setVisibility(View.GONE);
@@ -930,43 +943,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         tradeLayout.setTextFilterEnabled(false);
     }
 
-    private void drawTransactionList()
-    {
-        transactionLayout.removeAllViews();
-
-        List<Transaction> transactionList = databaseManager.getCurrencyTransactions(currency.getSymbol());
-
-        for(int i = 0; i < transactionList.size(); i++)
-        {
-            View view = LayoutInflater.from(this).inflate(R.layout.custom_transaction_row, null);
-            TextView amountTxtView = view.findViewById(R.id.amountPurchased);
-            TextView valueTxtView = view.findViewById(R.id.puchasedValue);
-            TextView dateTxtView = view.findViewById(R.id.purchaseDate);
-
-            dateTxtView.setText(getDate(transactionList.get(i).getTimestamp()));
-
-            LinearLayout deleteLayout = view.findViewById(R.id.deleteTransactionLayout);
-            deleteLayout.setTag(transactionList.get(i).getTransactionId());
-
-            deleteLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    preferencesManager.setMustUpdateSummary(true);
-                    databaseManager.deleteTransactionFromId(Integer.parseInt(view.getTag().toString()));
-                    drawTransactionList();
-                    hasBeenModified = true;
-                }
-            });
-
-            amountTxtView.setText(String.valueOf(transactionList.get(i).getAmount()));
-            valueTxtView.setText(numberConformer(transactionList.get(i).getPurchasedPrice() * transactionList.get(i).getAmount()));
-
-            setupSwipeView(view);
-
-            transactionLayout.addView(view);
-        }
-    }
-
     private static void expand(final View v) {
         v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
         final int targetHeight = v.getMeasuredHeight();
@@ -995,47 +971,23 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         v.startAnimation(a);
     }
 
-    private void setupSwipeView(View view)
+
+
+    public class TransactionUpdater extends AsyncTask<Void, Integer, Void>
     {
-        SwipeLayout swipeLayout =  view.findViewById(R.id.swipeLayout);
+        @Override
+        protected Void doInBackground(Void... voids) {
 
-        //set show mode.
-        swipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
-
-        //add drag edge.(If the BottomView has 'layout_gravity' attribute, this line is unnecessary)
-        swipeLayout.addDrag(SwipeLayout.DragEdge.Left, view.findViewById(R.id.bottom_wrapper));
-
-        swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
-            @Override
-            public void onClose(SwipeLayout layout) {
-                //when the SurfaceView totally cover the BottomView.
+            if(Looper.myLooper() == null)
+            {
+                Looper.prepare();
             }
 
-            @Override
-            public void onUpdate(SwipeLayout layout, int leftOffset, int topOffset) {
-                //you are swiping.
-            }
+            ArrayList<Transaction> transactionList = databaseManager.getCurrencyTransactions(currency.getSymbol());
+            drawTransactionList(transactionList);
 
-            @Override
-            public void onStartOpen(SwipeLayout layout) {
-
-            }
-
-            @Override
-            public void onOpen(SwipeLayout layout) {
-                //when the BottomView totally show.
-            }
-
-            @Override
-            public void onStartClose(SwipeLayout layout) {
-
-            }
-
-            @Override
-            public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
-                //when user's hand released.
-            }
-        });
+            return null;
+        }
     }
 
     private class TradeAdder extends AsyncTask<Void, Integer, Void>

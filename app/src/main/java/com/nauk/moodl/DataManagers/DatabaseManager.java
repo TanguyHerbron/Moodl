@@ -159,13 +159,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return currencyList;
     }
 
-    public List<Transaction> getCurrencyTransactions(String symbol)
+    public ArrayList<Transaction> getCurrencyTransactions(String symbol)
     {
         String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE symbol='" + symbol.toUpperCase() + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
-        List<Transaction> transactionList = new ArrayList<>();
+        ArrayList<Transaction> transactionList = new ArrayList<>();
 
         while(resultatList.moveToNext())
         {
