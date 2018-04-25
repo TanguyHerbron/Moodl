@@ -2,8 +2,13 @@ package com.nauk.moodl.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -24,18 +29,52 @@ public class RecordTransactionActivity extends AppCompatActivity {
     private String coin;
     private String symbol;
     private TextView symbolTxtView;
-    private TextView purchasedDate;
+    private TextInputLayout purchasedDateLayout;
+    private EditText purchaseDate;
     private TextView feesTxtView;
     private EditText amountTxtView;
-    private Button validateButton;
-    private Button receivedButton;
-    private Button sentButton;
+    private Button buyButton;
+    private Button sellButton;
+    private Button transferButton;
     private DatabaseManager databaseManager;
     private Calendar calendar;
     private SimpleDateFormat sdf;
     private PreferencesManager preferenceManager;
     private EditText purchasedPriceEditText;
     private Currency currency;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_record_action, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_record:
+                double amount = Double.parseDouble(amountTxtView.getText().toString());
+                double purchasedPrice = Double.parseDouble(purchasedPriceEditText.getText().toString());
+                double fees = Double.parseDouble(feesTxtView.getText().toString());
+
+                if(!sellButton.isEnabled())
+                {
+                    amount *= -1;
+                }
+
+                databaseManager.addCurrencyToManualCurrency(symbol, amount, calendar.getTime(), purchasedPrice, fees);
+                preferenceManager.setMustUpdateSummary(true);
+                Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                finish();
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,61 +99,63 @@ public class RecordTransactionActivity extends AppCompatActivity {
         symbolTxtView = findViewById(R.id.currencySymbol);
         amountTxtView = findViewById(R.id.currencyAmount);
         feesTxtView = findViewById(R.id.feesTextView);
-        purchasedDate = findViewById(R.id.purchaseDate);
+        purchasedDateLayout = findViewById(R.id.input_purchase_date);
+        purchaseDate = findViewById(R.id.purchaseDate);
         purchasedPriceEditText = findViewById(R.id.purchasePrice);
-        validateButton = findViewById(R.id.validateButton);
-        receivedButton = findViewById(R.id.receivedButton);
-        sentButton = findViewById(R.id.sentButton);
+        buyButton = findViewById(R.id.buyButton);
+        sellButton = findViewById(R.id.sellButton);
+        transferButton = findViewById(R.id.transfertButton);
 
         //purchasedPrice.setText();
-        purchasedDate.setText(sdf.format(calendar.getTime()));
+        purchaseDate.setText(sdf.format(calendar.getTime()));
         symbolTxtView.setText(symbol);
+        feesTxtView.setText(String.valueOf(0));
 
-        purchasedDate.setOnClickListener(new View.OnClickListener() {
+        purchasedDateLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 createDatePicker();
             }
         });
 
-        validateButton.setOnClickListener(new View.OnClickListener() {
+        purchaseDate.setKeyListener(null);
+
+        purchaseDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                double amount = Double.parseDouble(amountTxtView.getText().toString());
-                double purchasedPrice = Double.parseDouble(purchasedPriceEditText.getText().toString());
-                double fees = Double.parseDouble(feesTxtView.getText().toString());
-
-                if(!sentButton.isEnabled())
-                {
-                    amount *= -1;
-                }
-
-                databaseManager.addCurrencyToManualCurrency(symbol, amount, calendar.getTime(), purchasedPrice, fees);
-                preferenceManager.setMustUpdateSummary(true);
-                Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                startActivity(intent);
-                finish();
+                createDatePicker();
             }
         });
 
-        receivedButton.setOnClickListener(new View.OnClickListener() {
+        buyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                receivedButton.setEnabled(false);
-                sentButton.setEnabled(true);
-                purchasedPriceEditText.setVisibility(View.VISIBLE);
-                feesTxtView.setVisibility(View.GONE);
+                buyButton.setEnabled(false);
+                sellButton.setEnabled(true);
+                transferButton.setEnabled(true);
+                findViewById(R.id.input_purchase_price).setVisibility(View.VISIBLE);
+                findViewById(R.id.input_fees).setVisibility(View.GONE);
             }
         });
 
-        sentButton.setOnClickListener(new View.OnClickListener() {
+        sellButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                receivedButton.setEnabled(true);
-                sentButton.setEnabled(false);
-                purchasedPriceEditText.setVisibility(View.GONE);
-                feesTxtView.setVisibility(View.VISIBLE);
+                buyButton.setEnabled(true);
+                sellButton.setEnabled(false);
+                transferButton.setEnabled(true);
+                findViewById(R.id.input_purchase_price).setVisibility(View.GONE);
+                findViewById(R.id.input_fees).setVisibility(View.VISIBLE);
+            }
+        });
+
+        transferButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                buyButton.setEnabled(true);
+                sellButton.setEnabled(true);
+                transferButton.setEnabled(false);
+                // Prepare transfer interface
             }
         });
 
@@ -136,7 +177,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
                         calendar.set(Calendar.YEAR, year);
                         calendar.set(Calendar.MONTH, month);
                         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        purchasedDate.setText(sdf.format(calendar.getTime()));
+                        purchaseDate.setText(sdf.format(calendar.getTime()));
                         createTimePicker();
                     }
                 },
@@ -155,7 +196,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
                     public void onTimeSet(TimePicker view, int hour, int minute) {
                         calendar.set(Calendar.HOUR_OF_DAY, hour);
                         calendar.set(Calendar.MINUTE, minute);
-                        purchasedDate.setText(sdf.format(calendar.getTime()));
+                        purchaseDate.setText(sdf.format(calendar.getTime()));
 
                         currency.getTimestampPrice(RecordTransactionActivity.this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
                             @Override

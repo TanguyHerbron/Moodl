@@ -41,4 +41,6 @@
     <color name="transparent_red">#22F55447</color>
     <color name="transparent_green">#225DBF61</color>
     <color name="transparent_white">#EEFFFFFF</color>
+    <color name="blue">#FF689afe</color>
+    <color name="transparent_blue">#22689afe</color>
 </resources>

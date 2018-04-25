@@ -64,8 +64,11 @@
         <item>3</item>
     </string-array>
 
-    <string name="receivedText">Received</string>
-    <string name="sentText">Sent</string>
+    <string name="buyText">Buy</string>
+    <string name="sellText">Sell</string>
+    <string name="transferText">Transfer</string>
+
+    <string name="transaction_record">Save</string>
 
     <string-array name="multi_select_list_preference_default_value" />
 
