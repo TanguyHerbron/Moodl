@@ -1,6 +1,7 @@
 package com.nauk.moodl.Activities;
 
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -9,6 +10,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.nauk.moodl.PagerAdapter;
 import com.nauk.moodl.R;
@@ -54,6 +57,9 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         /**Interface setup**/
+        Window w = getWindow();
+        w.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        w.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
         //Setup main interface
         //requestWindowFeature(Window.FEATURE_NO_TITLE);

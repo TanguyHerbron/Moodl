@@ -1,5 +1,7 @@
 package com.nauk.moodl.DataManagers.CurrencyData;
 
+import android.util.Log;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -60,7 +62,15 @@ public class CurrencyTickerList {
             JSONObject jsonObject = new JSONObject(coinTickersHashmap.get(symbol));
             tickerId = jsonObject.getString("id");
         } catch (JSONException | NullPointerException e) {
-            e.printStackTrace();
+            switch (e.getMessage())
+            {
+                case "Attempt to invoke virtual method 'int java.lang.String.length()' on a null object reference":
+                    Log.d("moodl", "Symbol " + symbol + " not supported");
+                    break;
+                default:
+                    e.printStackTrace();
+                    break;
+            }
         }
 
         return tickerId;
