@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/app_bar_height"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:paddingTop="10dp"
+        android:paddingTop="@dimen/fragment_padding"
         android:background="@drawable/gradient_background">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -26,16 +26,6 @@
             app:expandedTitleGravity="center"
             app:titleEnabled="true">
 
-            <TextView
-                android:id="@+id/toolbarSubtitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|bottom"
-                android:layout_marginBottom="20dp"
-                android:gravity="center"
-                android:textSize="20sp"
-                app:layout_collapseMode="parallax"/>
-
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -45,6 +35,16 @@
                 android:layout_marginStart="-30dp">
 
             </android.support.v7.widget.Toolbar>
+
+            <TextView
+                android:id="@+id/toolbarSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|bottom"
+                android:layout_marginBottom="20dp"
+                android:gravity="center"
+                android:textSize="20sp"
+                app:layout_collapseMode="parallax"/>
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -76,9 +76,9 @@
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/nestedScrollViewLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="com.nauk.moodl.Activities.HomeActivity">
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

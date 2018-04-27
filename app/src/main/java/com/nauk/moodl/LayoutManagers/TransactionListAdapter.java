@@ -1,8 +1,11 @@
 package com.nauk.moodl.LayoutManagers;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +17,8 @@ import android.widget.TextView;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.nauk.moodl.Activities.CurrencyDetailsActivity;
+import com.nauk.moodl.Activities.CurrencySelectionActivity;
+import com.nauk.moodl.Activities.RecordTransactionActivity;
 import com.nauk.moodl.DataManagers.CurrencyData.Transaction;
 import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
@@ -43,7 +48,7 @@ public class TransactionListAdapter extends ArrayAdapter<Transaction> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        Transaction transaction = getItem(position);
+        final Transaction transaction = getItem(position);
 
         if(convertView == null)
         {
@@ -69,6 +74,22 @@ public class TransactionListAdapter extends ArrayAdapter<Transaction> {
                 preferencesManager.setMustUpdateSummary(true);
                 databaseManager.deleteTransactionFromId(Integer.parseInt(view.getTag().toString()));
                 collapse((View) view.getParent().getParent().getParent());
+            }
+        });
+
+        LinearLayout editLayout = convertView.findViewById(R.id.editTransactionLayout);
+        editLayout.setTag(transaction.getTransactionId());
+
+        editLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String name = ((Activity) context).getTitle().toString();
+                name = name.substring(1, name.indexOf("|") - 1);
+                Intent intent = new Intent(context, RecordTransactionActivity.class);
+                intent.putExtra("coin", name);
+                intent.putExtra("symbol", transaction.getSymbol());
+                intent.putExtra("transactionId", transaction.getTransactionId());
+                context.startActivity(intent);
             }
         });
 

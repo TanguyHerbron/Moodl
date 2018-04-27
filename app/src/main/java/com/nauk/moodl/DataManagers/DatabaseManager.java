@@ -162,9 +162,43 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return currencyList;
     }
 
-    public ArrayList<Transaction> getCurrencyTransactions(String symbol)
+    public void updateTransactionWithId(int transactionId, double amount, Date time, double purchasedPrice, double fees)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE symbol='" + symbol.toUpperCase() + "'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(KEY_CURRENCY_BALANCE, amount);
+        cv.put(KEY_CURRENCY_DATE, time.getTime());
+        cv.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
+        cv.put(KEY_CURRENCY_FEES, fees);
+
+        db.update(TABLE_MANUAL_CURRENCIES, cv, KEY_CURRENCY_ID + "=" + transactionId, null);
+
+    }
+
+    public Transaction getCurrencyTransactionById(int id)
+    {
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE " + KEY_CURRENCY_ID + "='" + id + "'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor resultatList = db.rawQuery(searchQuerry, null);
+
+        Transaction transaction = null;
+
+        if(resultatList.moveToFirst())
+        {
+            transaction = new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5), resultatList.getDouble(7));
+        }
+
+        resultatList.close();
+
+        db.close();
+
+        return transaction;
+    }
+
+    public ArrayList<Transaction> getCurrencyTransactionsForSymbol(String symbol)
+    {
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE " + KEY_CURRENCY_SYMBOL + "='" + symbol.toUpperCase() + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -172,7 +206,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5)));
+            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5), resultatList.getDouble(7)));
         }
 
         resultatList.close();

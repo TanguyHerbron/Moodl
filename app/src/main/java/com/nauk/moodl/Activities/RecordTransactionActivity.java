@@ -3,12 +3,12 @@ package com.nauk.moodl.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
+import com.nauk.moodl.DataManagers.CurrencyData.Transaction;
 import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.R;
@@ -42,6 +43,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
     private PreferencesManager preferenceManager;
     private EditText purchasedPriceEditText;
     private Currency currency;
+    private int transactionId;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,11 +65,23 @@ public class RecordTransactionActivity extends AppCompatActivity {
                     amount *= -1;
                 }
 
-                databaseManager.addCurrencyToManualCurrency(symbol, amount, calendar.getTime(), purchasedPrice, fees);
+                if(transactionId != -1)
+                {
+                    databaseManager.updateTransactionWithId(transactionId, amount, calendar.getTime(), purchasedPrice, fees);
+                }
+                else
+                {
+                    databaseManager.addCurrencyToManualCurrency(symbol, amount, calendar.getTime(), purchasedPrice, fees);
+                }
+
                 preferenceManager.setMustUpdateSummary(true);
                 Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
+                finish();
+                break;
+            case android.R.id.home:
+                //NavUtils.navigateUpFromSameTask(this);
                 finish();
                 break;
             default:
@@ -82,16 +96,10 @@ public class RecordTransactionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_record_transaction);
 
         Intent intent = getIntent();
-        coin = intent.getStringExtra("coin");
-        symbol = intent.getStringExtra("symbol");
-
-        setTitle("Add " + coin + " transaction");
 
         sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy");
 
         calendar = Calendar.getInstance();
-
-        currency = new Currency(coin, symbol);
 
         databaseManager = new DatabaseManager(this);
         preferenceManager = new PreferencesManager(this);
@@ -106,10 +114,33 @@ public class RecordTransactionActivity extends AppCompatActivity {
         sellButton = findViewById(R.id.sellButton);
         transferButton = findViewById(R.id.transfertButton);
 
-        //purchasedPrice.setText();
-        purchaseDate.setText(sdf.format(calendar.getTime()));
-        symbolTxtView.setText(symbol);
-        feesTxtView.setText(String.valueOf(0));
+        coin = intent.getStringExtra("coin");
+        Log.d("moodl", "1" + coin);
+        symbol = intent.getStringExtra("symbol");
+        transactionId = intent.getIntExtra("transactionId", -1);
+
+        if(transactionId != -1)
+        {
+            setTitle("Edit " + coin + " transaction");
+
+            DatabaseManager databaseManager = new DatabaseManager(this);
+            Transaction transaction = databaseManager.getCurrencyTransactionById(transactionId);
+
+            symbolTxtView.setText(transaction.getSymbol());
+            amountTxtView.setText(String.valueOf(transaction.getAmount()));
+            purchaseDate.setText(sdf.format(transaction.getTimestamp()));
+            feesTxtView.setText(String.valueOf(transaction.getFees()));
+        }
+        else
+        {
+            setTitle("Add " + coin + " transaction");
+
+            purchaseDate.setText(sdf.format(calendar.getTime()));
+            symbolTxtView.setText(symbol);
+            feesTxtView.setText(String.valueOf(0));
+        }
+
+        currency = new Currency(coin, symbol);
 
         purchasedDateLayout.setOnClickListener(new View.OnClickListener() {
             @Override

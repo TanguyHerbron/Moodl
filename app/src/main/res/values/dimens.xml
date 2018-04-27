@@ -3,7 +3,7 @@
     <dimen name="cardViewSecondaryText">12sp</dimen>
     <dimen name="cardViewChartSize">150dp</dimen>
 
-    <dimen name="app_bar_height">150dp</dimen>
+    <dimen name="app_bar_height">172dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="mainText">6dp</dimen>
@@ -21,4 +21,6 @@
     <dimen name="cardview_elevation">8dp</dimen>
     <dimen name="toolbar_height">56dp</dimen>
     <dimen name="toolbar_height_expand">70dp</dimen>
+
+    <dimen name="fragment_padding">15dp</dimen>
 </resources>

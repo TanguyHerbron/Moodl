@@ -18,6 +18,7 @@
             <!--What you want to show-->
 
             <LinearLayout
+                android:id="@+id/editTransactionLayout"
                 android:layout_width="wrap_content"
                 android:layout_weight="0.5"
                 android:layout_height="match_parent"

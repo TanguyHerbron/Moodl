@@ -21,12 +21,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewParent;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.AbsListView;
@@ -37,8 +34,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.binance.api.client.domain.account.Trade;
-import com.daimajia.swipe.SwipeLayout;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.CandleStickChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -64,11 +59,9 @@ import com.nauk.moodl.LayoutManagers.TransactionListAdapter;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -142,7 +135,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -983,7 +976,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 Looper.prepare();
             }
 
-            ArrayList<Transaction> transactionList = databaseManager.getCurrencyTransactions(currency.getSymbol());
+            ArrayList<Transaction> transactionList = databaseManager.getCurrencyTransactionsForSymbol(currency.getSymbol());
             drawTransactionList(transactionList);
 
             return null;

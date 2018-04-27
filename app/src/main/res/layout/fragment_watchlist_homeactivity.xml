@@ -9,7 +9,7 @@
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
+        android:paddingTop="@dimen/fragment_padding"
         android:background="@drawable/gradient_background_reverse">
 
         <android.support.v7.widget.Toolbar
