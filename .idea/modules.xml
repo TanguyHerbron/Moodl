@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Moodl.iml" filepath="$PROJECT_DIR$/Moodl.iml" />
-      <module fileurl="file://E:\Github\Moodl\Moodl.iml" filepath="E:\Github\Moodl\Moodl.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

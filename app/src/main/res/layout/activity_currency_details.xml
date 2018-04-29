@@ -625,17 +625,30 @@
                 android:layout_weight="0.5"
                 android:orientation="vertical">
 
+                <LinearLayout
+                    android:id="@+id/tradeLoaderIndicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:layout_margin="10dp">
+
+                    <ProgressBar
+                        android:id="@+id/loadingIndicator"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Looking for trades..."/>
+
+                </LinearLayout>
+
                 <ListView
                     android:id="@+id/listTrades"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"/>
-
-                <ProgressBar
-                    android:id="@+id/tradeProgressBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"/>
 
             </LinearLayout>
 

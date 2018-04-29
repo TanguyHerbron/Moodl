@@ -1,9 +1,12 @@
 package com.nauk.moodl.Activities;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -21,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -100,6 +104,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private Button lineChartButton;
     private Button candleStickChartButton;
+
+
+    private View loadingFooter;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -217,6 +224,11 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         hasBeenModified = false;
+
+        Drawable tradeDrawable = ((ProgressBar) findViewById(R.id.loadingIndicator)).getIndeterminateDrawable();
+        tradeDrawable.mutate();
+        tradeDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        tradeDrawable.invalidateSelf();
 
         TradeUpdater updater = new TradeUpdater();
         updater.execute();
@@ -906,8 +918,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private void drawTradeList(ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades)
     {
-        findViewById(R.id.tradeProgressBar).setVisibility(View.GONE);
-
         tradeLayout.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
@@ -922,7 +932,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                     {
                         flag_loading = true;
 
-                        expand(findViewById(R.id.tradeProgressBar));
                         TradeAdder tradeAdder = new TradeAdder();
                         tradeAdder.execute();
                     }
@@ -934,6 +943,8 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         tradeLayout.setAdapter(tradeListAdapter);
         tradeLayout.setTextFilterEnabled(false);
+
+        findViewById(R.id.tradeLoaderIndicator).setVisibility(View.GONE);
     }
 
     private static void expand(final View v) {
@@ -983,8 +994,28 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         }
     }
 
+    private void loadingIndicatorGenerator()
+    {
+        loadingFooter = LayoutInflater.from(CurrencyDetailsActivity.this).inflate(R.layout.listview_loading_indicator, null, false);
+
+        Drawable drawable = ((ProgressBar) loadingFooter.findViewById(R.id.progressIndicator)).getIndeterminateDrawable();
+        drawable.mutate();
+        drawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        drawable.invalidateSelf();
+
+        tradeLayout.addFooterView(loadingFooter);
+    }
+
     private class TradeAdder extends AsyncTask<Void, Integer, Void>
     {
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+
+            loadingIndicatorGenerator();
+        }
+
         @Override
         protected Void doInBackground(Void... voids) {
 
@@ -1006,7 +1037,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                             tradeListAdapter.notifyDataSetChanged();
                             flag_loading = false;
 
-                            findViewById(R.id.tradeProgressBar).setVisibility(View.GONE);
+                            tradeLayout.removeFooterView(loadingFooter);
                         }
                     });
                 }
@@ -1027,8 +1058,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         protected void onPreExecute()
         {
             super.onPreExecute();
-
-            findViewById(R.id.tradeProgressBar).setVisibility(View.VISIBLE);
         }
 
         @Override
