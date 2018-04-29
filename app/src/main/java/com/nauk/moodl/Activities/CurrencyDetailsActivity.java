@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -54,6 +55,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDataChart;
+import com.nauk.moodl.DataManagers.CurrencyData.Trade;
 import com.nauk.moodl.DataManagers.CurrencyData.Transaction;
 import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.ExchangeManager.BinanceManager;
@@ -63,6 +65,7 @@ import com.nauk.moodl.LayoutManagers.TransactionListAdapter;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -105,6 +108,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     private Button lineChartButton;
     private Button candleStickChartButton;
 
+    private ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> returnedTrades;
 
     private View loadingFooter;
 
@@ -918,26 +922,29 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
     private void drawTradeList(ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades)
     {
-        tradeLayout.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
+        if(returnedTrades.size() > 20)
+        {
+            tradeLayout.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView absListView, int i) {
 
-            }
+                }
 
-            @Override
-            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if(firstVisibleItem+visibleItemCount == totalItemCount && totalItemCount!=0)
-                {
-                    if(!flag_loading)
+                @Override
+                public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    if(firstVisibleItem+visibleItemCount == totalItemCount && totalItemCount!=0)
                     {
-                        flag_loading = true;
+                        if(!flag_loading && tradeLayout.getCount() != returnedTrades.size() - 1)
+                        {
+                            flag_loading = true;
 
-                        TradeAdder tradeAdder = new TradeAdder();
-                        tradeAdder.execute();
+                            TradeAdder tradeAdder = new TradeAdder();
+                            tradeAdder.execute();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         tradeListAdapter = new TradeListAdapter(this, trades);
 
@@ -987,8 +994,13 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 Looper.prepare();
             }
 
-            ArrayList<Transaction> transactionList = databaseManager.getCurrencyTransactionsForSymbol(currency.getSymbol());
-            drawTransactionList(transactionList);
+            final ArrayList<Transaction> transactionList = databaseManager.getCurrencyTransactionsForSymbol(currency.getSymbol());
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    drawTransactionList(transactionList);
+                }
+            });
 
             return null;
         }
@@ -1019,7 +1031,23 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
+            final ArrayList<Trade> trades = new ArrayList<>();
+            for(int i = tradeLayout.getCount(); i < tradeLayout.getCount() + 20 && i < returnedTrades.size(); i++)
+            {
+                trades.add(returnedTrades.get(i));
+            }
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    tradeListAdapter.addAll(trades);
+                    tradeListAdapter.notifyDataSetChanged();
+                    flag_loading = false;
+
+                    tradeLayout.removeFooterView(loadingFooter);
+                }
+            });
+            /*binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
                 @Override
                 public void onSuccess() {
                     ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades = binanceManager.getTrades();
@@ -1046,7 +1074,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 public void onError(String error) {
 
                 }
-            }, currency.getSymbol(), tradeListAdapter.getItem(tradeListAdapter.getCount() - 1).getId());
+            }, currency.getSymbol(), tradeListAdapter.getItem(tradeListAdapter.getCount() - 1).getId());*/
 
             return null;
         }
@@ -1073,9 +1101,9 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess() {
                     ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades = binanceManager.getTrades();
-                    final ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> returnedTrades = new ArrayList<>();
+                    returnedTrades = new ArrayList<>();
 
-                    for(int i = trades.size() - 1; i > 0 ; i--)
+                    for(int i = trades.size() - 1; i >= 0 ; i--)
                     {
                         returnedTrades.add(trades.get(i));
                     }
@@ -1083,7 +1111,14 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            drawTradeList(returnedTrades);
+                            ArrayList<Trade> trades = new ArrayList<>();
+
+                            for(int i = 0; i < 20 && i < returnedTrades.size(); i++)
+                            {
+                                trades.add(returnedTrades.get(i));
+                            }
+
+                            drawTradeList(trades);
                         }
                     });
                 }

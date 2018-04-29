@@ -77,7 +77,10 @@ public class BinanceManager {
 
         for(int i = 0; i < pairSymbolList.size(); i++)
         {
-            trades.addAll(updateTrades(symbol, pairSymbolList.get(i)));
+            if(!pairSymbolList.get(i).equals(symbol))
+            {
+                trades.addAll(updateTrades(symbol, pairSymbolList.get(i)));
+            }
         }
 
         callBack.onSuccess();
@@ -89,7 +92,10 @@ public class BinanceManager {
 
         for(int i = 0; i < pairSymbolList.size(); i++)
         {
-            trades.addAll(updateTrades(symbol, pairSymbolList.get(i), fromId));
+            if(!pairSymbolList.get(i).equals(symbol))
+            {
+                trades.addAll(updateTrades(symbol, pairSymbolList.get(i), fromId));
+            }
         }
 
         callBack.onSuccess();
@@ -106,16 +112,16 @@ public class BinanceManager {
         if(!symbol.equals(pairSymbol))
         {
             try {
-                presentTrades = client.getMyTrades(symbol + pairSymbol, 20);
+                presentTrades = client.getMyTrades(symbol + pairSymbol);
 
 
             } catch (BinanceApiException e) {
-                try {
-                    presentTrades = client.getMyTrades(pairSymbol + symbol, 20);
+                /*try {
+                    presentTrades = client.getMyTrades(pairSymbol + symbol);
 
                 } catch (BinanceApiException f) {
                     f.printStackTrace();
-                }
+                }*/
             }
         }
 

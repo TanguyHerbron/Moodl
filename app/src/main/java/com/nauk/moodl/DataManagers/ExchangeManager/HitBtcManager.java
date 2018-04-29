@@ -31,7 +31,9 @@ public class HitBtcManager {
     private String publicKey;
     private String privateKey;
     final private String hitBalanceUrl = "https://api.hitbtc.com/api/2/trading/balance";
+    final private String tradeHistoryUrl = "https://api.hitbtc.com/api/2/history/trades?";
     private RequestQueue requestQueue;
+    private List<String> pairSymbolList;
 
     private List<Currency> balance;
     private android.content.Context context;
@@ -43,6 +45,21 @@ public class HitBtcManager {
 
         this.publicKey = publicKey;
         this.privateKey = privateKey;
+    }
+
+    private void createPairSymbolList()
+    {
+        pairSymbolList = new ArrayList<>();
+
+        pairSymbolList.add("BTC");
+        pairSymbolList.add("ETH");
+        pairSymbolList.add("BNB");
+        pairSymbolList.add("USDT");
+    }
+
+    public void updateTrades(final HitBtcCallBack callBack, String symbol, String pairSymbol)
+    {
+
     }
 
     public void updateBalance(final HitBtcCallBack callBack)
