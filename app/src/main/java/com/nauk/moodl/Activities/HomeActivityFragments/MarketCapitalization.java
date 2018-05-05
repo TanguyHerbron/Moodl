@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import static com.nauk.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
 /**
@@ -52,12 +53,27 @@ public class MarketCapitalization extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        preferencesManager = new PreferencesManager(getContext());
         view = inflater.inflate(R.layout.fragment_marketcap_homeactivity, container, false);
 
         setupDominantCurrenciesColors();
 
+        preferencesManager = new PreferencesManager(getContext());
         marketCapManager = new MarketCapManager(getContext());
+
+        defaultCurrency = preferencesManager.getDefaultCurrency();
+        lastTimestamp = 0;
+
+        setupRefreshLayout();
+
+        setupSettingsButton();
+
+        updateMarketCap(true);
+
+        return view;
+    }
+
+    private void setupRefreshLayout()
+    {
         refreshLayout = view.findViewById(R.id.swiperefreshmarketcap);
 
         refreshLayout.setOnRefreshListener(
@@ -69,10 +85,10 @@ public class MarketCapitalization extends Fragment {
 
                 }
         );
+    }
 
-        defaultCurrency = preferencesManager.getDefaultCurrency();
-        lastTimestamp = 0;
-
+    private void setupSettingsButton()
+    {
         ImageButton settingsButton = view.findViewById(R.id.settings_button);
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -82,10 +98,6 @@ public class MarketCapitalization extends Fragment {
                 startActivity(settingIntent);
             }
         });
-
-        updateMarketCap(true);
-
-        return view;
     }
 
     @Override
@@ -170,6 +182,20 @@ public class MarketCapitalization extends Fragment {
         view.findViewById(R.id.progressBarMarketCap).setVisibility(View.GONE);
         view.findViewById(R.id.layoutProgressMarketCap).setVisibility(View.VISIBLE);
 
+        PieData data = new PieData(getMarketDominanceDataSet());
+        data.setValueTextSize(10);
+        data.setValueFormatter(new PercentFormatter());
+
+        setupPieChart(data);
+
+        if(refreshLayout.isRefreshing())
+        {
+            refreshLayout.setRefreshing(false);
+        }
+    }
+
+    private PieDataSet getMarketDominanceDataSet()
+    {
         List<PieEntry> entries = new ArrayList<>();
 
         ArrayList<Integer> colors = new ArrayList<>();
@@ -192,16 +218,7 @@ public class MarketCapitalization extends Fragment {
         set.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
         set.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
 
-        PieData data = new PieData(set);
-        data.setValueTextSize(10);
-        data.setValueFormatter(new PercentFormatter());
-
-        setupPieChart(data);
-
-        if(refreshLayout.isRefreshing())
-        {
-            refreshLayout.setRefreshing(false);
-        }
+        return set;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -248,33 +265,6 @@ public class MarketCapitalization extends Fragment {
         pieChart.getLegend().setEnabled(false);
         pieChart.setCenterText(generateCenterSpannableText());
         pieChart.invalidate();
-    }
-
-    private String numberConformer(double number)
-    {
-        String str;
-
-        if(abs(number) > 1)
-        {
-            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
-        }
-        else
-        {
-            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
-        }
-
-        int counter = 0;
-        for(int i = str.length() - 1; i > 0; i--)
-        {
-            counter++;
-            if(counter == 3)
-            {
-                str = str.substring(0, i) + " " + str.substring(i, str.length());
-                counter = 0;
-            }
-        }
-
-        return str;
     }
 
     private SpannableString generateCenterSpannableText() {

@@ -55,10 +55,14 @@ public class FingerprintDialogFragment extends DialogFragment{
 
     public void wrongFingerprint(String errorString)
     {
-        ((SwirlView) this.getView().findViewById(R.id.swirl)).clearColorFilter();
-        ((SwirlView) this.getView().findViewById(R.id.swirlBackground)).clearColorFilter();
-        ((SwirlView) this.getView().findViewById(R.id.swirl)).setState(SwirlView.State.ERROR);
-        ((SwirlView) this.getView().findViewById(R.id.swirlBackground)).setState(SwirlView.State.ERROR);
+        SwirlView swirlView = this.getView().findViewById(R.id.swirl);
+        SwirlView swirlBackground = this.getView().findViewById(R.id.swirlBackground);
+
+        swirlView.clearColorFilter();
+        swirlView.setState(SwirlView.State.ERROR);
+
+        swirlBackground.clearColorFilter();
+        swirlBackground.setState(SwirlView.State.ERROR);
 
         ((TextView) this.getView().findViewById(R.id.fingerprint_error)).setText(errorString);
     }

@@ -12,13 +12,11 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -55,6 +53,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.nauk.moodl.MoodlBox.collapseH;
+import static com.nauk.moodl.MoodlBox.collapseW;
+import static com.nauk.moodl.MoodlBox.expandH;
+import static com.nauk.moodl.MoodlBox.expandW;
+import static com.nauk.moodl.MoodlBox.getVerticalExpandAnimation;
+import static com.nauk.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
 /**
@@ -110,25 +114,17 @@ public class Watchlist extends Fragment {
             }
         });
 
-        Button addWatchlistButton = view.findViewById(R.id.buttonAddWatchlist);
-        addWatchlistButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent selectionIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
-                selectionIntent.putExtra("isWatchList", true);
-                startActivity(selectionIntent);
-            }
-        });
+        setupAddWatchlistButton();
 
-        ImageButton settingsButton = view.findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
-                startActivity(settingIntent);
-            }
-        });
+        setupSettingsButton();
 
+        setupEditButton();
+
+        return view;
+    }
+
+    private void setupEditButton()
+    {
         ImageButton editButton = view.findViewById(R.id.edit_button);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,132 +143,52 @@ public class Watchlist extends Fragment {
                 {
                     editModeEnabled = true;
 
+                    LinearLayout watchlistLayout = Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist);
+
+                    Animation anim = getVerticalExpandAnimation(watchlistLayout.getChildAt(0));
+
                     for(int i = 0; i < ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildCount(); i++)
                     {
-                        ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildAt(i).setClickable(false);
-                        expandW(((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildAt(i).findViewById(R.id.deleteCardWatchlist));
+                        View watchlistElement = watchlistLayout.getChildAt(i);
+
+                        watchlistElement.setClickable(false);
+                        expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist), anim);
                     }
                 }
             }
         });
-
-        return view;
     }
 
-    private void collapseView(View view)
+    private void setupAddWatchlistButton()
     {
-        collapse(view.findViewById(R.id.collapsableLayout));
+        Button addWatchlistButton = view.findViewById(R.id.buttonAddWatchlist);
+        addWatchlistButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent selectionIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
+                selectionIntent.putExtra("isWatchList", true);
+                startActivity(selectionIntent);
+            }
+        });
     }
 
-    private void extendView(View view)
+    private void setupSettingsButton()
     {
-        expand(view.findViewById(R.id.collapsableLayout));
+        ImageButton settingsButton = view.findViewById(R.id.settings_button);
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
+                startActivity(settingIntent);
+            }
+        });
+    }
+
+    private void displayChartView()
+    {
+        expandH(view.findViewById(R.id.collapsableLayout));
         view.findViewById(R.id.LineChartView).invalidate();
     }
-
-    private static void expand(final View v) {
-        v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
-        final int targetHeight = v.getMeasuredHeight();
-
-        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
-        v.getLayoutParams().height = 1;
-        v.setVisibility(View.VISIBLE);
-        Animation a = new Animation()
-        {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                v.getLayoutParams().height = interpolatedTime == 1
-                        ? CardView.LayoutParams.WRAP_CONTENT
-                        : (int)(targetHeight * interpolatedTime);
-                v.requestLayout();
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        // 1dp/ms
-        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
-        v.startAnimation(a);
-    }
-
-    private static void expandW(final View v) {
-        v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
-        final int targetWidth = v.getMeasuredWidth();
-
-        v.getLayoutParams().width = 1;
-        v.setVisibility(View.VISIBLE);
-        Animation a = new Animation() {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                v.getLayoutParams().width = interpolatedTime == 1
-                        ? CardView.LayoutParams.WRAP_CONTENT
-                        : (int)(targetWidth * interpolatedTime);
-                v.requestLayout();
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        a.setDuration((int)(targetWidth / v.getContext().getResources().getDisplayMetrics().density));
-        v.startAnimation(a);
-    }
-
-    private static void collapse(final View v) {
-        final int initialHeight = v.getMeasuredHeight();
-
-        Animation a = new Animation()
-        {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if(interpolatedTime == 1){
-                    v.setVisibility(View.GONE);
-                }else{
-                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
-                    v.requestLayout();
-                }
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        // 1dp/ms
-        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
-        v.startAnimation(a);
-    }
-
-    private static void collapseW(final View v) {
-        final int initialWidth = v.getMeasuredWidth();
-
-        Animation a = new Animation() {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if(interpolatedTime == 1) {
-                    v.setVisibility(View.GONE);
-                } else {
-                    v.getLayoutParams().width = initialWidth - (int)(initialWidth * interpolatedTime);
-                    v.requestLayout();
-                }
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        a.setDuration((int)(initialWidth / v.getContext().getResources().getDisplayMetrics().density));
-        v.startAnimation(a);
-    }
-
 
     @Override
     public void onResume()
@@ -408,7 +324,7 @@ public class Watchlist extends Fragment {
         card.findViewById(R.id.deleteCardWatchlist).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                collapse(card);
+                collapseH(card);
                 DatabaseManager databaseManager = new DatabaseManager(getActivity());
                 databaseManager.deleteCurrencyFromWatchlist(currency.getSymbol());
             }
@@ -431,13 +347,14 @@ public class Watchlist extends Fragment {
             public void onClick(final View view) {
                 if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
                 {
-                    collapseView(view);
+                    collapseH(view.findViewById(R.id.collapsableLayout));
                 }
                 else
                 {
                     view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.GONE);
                     view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.VISIBLE);
-                    extendView(view);
+
+                    displayChartView();
 
                     if (currency.getHistoryMinutes() == null) {
                         currency.updateHistoryMinutes(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
@@ -460,7 +377,7 @@ public class Watchlist extends Fragment {
                     }
                     else
                     {
-                        extendView(view);
+                        displayChartView();
                         view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
                         view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
                     }
@@ -646,37 +563,5 @@ public class Watchlist extends Fragment {
             }
             return null;
         }
-    }
-
-    private String numberConformer(double number)
-    {
-        String str;
-
-        if(abs(number) > 1)
-        {
-            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
-        }
-        else
-        {
-            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
-        }
-
-        int counter = 0;
-        int i = str.indexOf(".");
-        if(i <= 0)
-        {
-            i = str.length();
-        }
-        for(i -= 1; i > 0; i--)
-        {
-            counter++;
-            if(counter == 3)
-            {
-                str = str.substring(0, i) + " " + str.substring(i, str.length());
-                counter = 0;
-            }
-        }
-
-        return str;
     }
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="donation">Donation</string>
+    <string name="quick_button">Changement de vue</string>
+    <string name="title_activity_settings">Réglages</string>
+    <string name="pref_header_general">Général</string>
+    <string name="pref_title_hide_balance">Cacher le solde</string>
+    <string name="pref_title_default_currency">Monnaie par défaut</string>
+    <string name="buyText">Achat</string>
+    <string name="sellText">Vente</string>
+    <string name="transferText">Transfère</string>
+    <string name="transaction_record">Enregistrer</string>
+    <string name="fingerprint_verification">Vérifiez votre emprunte</string>
+    <string name="pref_header_exchange">Réglages des échanges</string>
+    <string name="pref_title_enable_synchronization_hitbtc">Activer la synchronisation</string>
+    <string name="pref_title_hitbtc_publickey">Clé public</string>
+    <string name="pref_title_hitbtc_privatekey">Clé privée</string>
+    <string name="pref_title_enable_synchronization_gdax">Activer la synchronisation</string>
+    <string name="pref_title_gdax_publickey">Clé public</string>
+    <string name="pref_title_gdax_privatekey">Clé privée</string>
+    <string name="activity_add_amount">Montant</string>
+    <string name="activity_purchased_price">Prix d\'achat</string>
+    <string name="activity_purchased_date">Date d\'achat</string>
+    <string name="activity_fees">Frais</string>
+    <string name="title_history">Historique</string>
+    <string name="title_infos">Informations</string>
+    <string name="title_transactions">Transactions</string>
+    <string name="title_home">Possessions</string>
+    <string name="title_market_cap">Capitalisation du marché</string>
+</resources>

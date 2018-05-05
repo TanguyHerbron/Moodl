@@ -24,6 +24,7 @@ import com.nauk.moodl.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class RecordTransactionActivity extends AppCompatActivity {
 
@@ -97,26 +98,18 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy");
+        sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.UK);
 
         calendar = Calendar.getInstance();
 
         databaseManager = new DatabaseManager(this);
         preferenceManager = new PreferencesManager(this);
 
-        symbolTxtView = findViewById(R.id.currencySymbol);
-        amountTxtView = findViewById(R.id.currencyAmount);
-        feesTxtView = findViewById(R.id.feesTextView);
-        purchasedDateLayout = findViewById(R.id.input_purchase_date);
-        purchaseDate = findViewById(R.id.purchaseDate);
-        purchasedPriceEditText = findViewById(R.id.purchasePrice);
-        buyButton = findViewById(R.id.buyButton);
-        sellButton = findViewById(R.id.sellButton);
-        transferButton = findViewById(R.id.transfertButton);
+        initializeViewElements();
 
         coin = intent.getStringExtra("coin");
-        Log.d("moodl", "1" + coin);
         symbol = intent.getStringExtra("symbol");
+
         transactionId = intent.getIntExtra("transactionId", -1);
 
         if(transactionId != -1)
@@ -158,6 +151,18 @@ public class RecordTransactionActivity extends AppCompatActivity {
             }
         });
 
+        initializeButtons();
+
+        currency.getTimestampPrice(this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
+            @Override
+            public void onSuccess(String price) {
+                purchasedPriceEditText.setText(price);
+            }
+        }, calendar.getTimeInMillis() / 1000);
+    }
+
+    private void initializeButtons()
+    {
         buyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -189,13 +194,19 @@ public class RecordTransactionActivity extends AppCompatActivity {
                 // Prepare transfer interface
             }
         });
+    }
 
-        currency.getTimestampPrice(this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
-            @Override
-            public void onSuccess(String price) {
-                purchasedPriceEditText.setText(price);
-            }
-        }, calendar.getTimeInMillis() / 1000);
+    private void initializeViewElements()
+    {
+        symbolTxtView = findViewById(R.id.currencySymbol);
+        amountTxtView = findViewById(R.id.currencyAmount);
+        feesTxtView = findViewById(R.id.feesTextView);
+        purchasedDateLayout = findViewById(R.id.input_purchase_date);
+        purchaseDate = findViewById(R.id.purchaseDate);
+        purchasedPriceEditText = findViewById(R.id.purchasePrice);
+        buyButton = findViewById(R.id.buyButton);
+        sellButton = findViewById(R.id.sellButton);
+        transferButton = findViewById(R.id.transfertButton);
     }
 
     private void createDatePicker()

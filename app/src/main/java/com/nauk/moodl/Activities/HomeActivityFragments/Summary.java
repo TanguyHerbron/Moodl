@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.nauk.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
 /**
@@ -66,6 +67,7 @@ public class Summary extends Fragment {
     private Handler handler;
 
     private Runnable updateRunnable;
+    private Runnable layoutRefresherRunnable;
 
     private int coinCounter;
     private int iconCounter;
@@ -81,22 +83,51 @@ public class Summary extends Fragment {
     {
         View fragmentView = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
 
-        currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
         preferencesManager = new PreferencesManager(getActivity());
         balanceManager = new BalanceManager(getActivity());
         layoutGenerator = new HomeLayoutGenerator(getActivity());
-        refreshLayout = fragmentView.findViewById(R.id.swiperefreshsummary);
-        toolbarSubtitle = fragmentView.findViewById(R.id.toolbarSubtitle);
         currencyTickerList = new CurrencyTickerList(getActivity());
 
-        totalValue = 0;
-        totalFluctuation = 0;
-        lastTimestamp = 0;
-        tickersChecker = false;
+        currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
+        refreshLayout = fragmentView.findViewById(R.id.swiperefreshsummary);
+        toolbarSubtitle = fragmentView.findViewById(R.id.toolbarSubtitle);
+
+        resetCounters();
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
 
         handler = new Handler();
+
+        initiateUpdateRunnable();
+
+        initiateLayoutRefresherRunnable();
+
+        refreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        updateAll(false);
+                    }
+                }
+        );
+
+        handler.postDelayed(updateRunnable, 10000);
+        toolbarLayout = fragmentView.findViewById(R.id.toolbar_layout);
+        toolbarLayout.setForegroundGravity(Gravity.CENTER);
+
+        setupAddCurrencyButton(fragmentView);
+
+        setupSettingsButton(fragmentView);
+
+        updateAll(true);
+
+        generateSplashScreen();
+
+        return fragmentView;
+    }
+
+    private void initiateUpdateRunnable()
+    {
         updateRunnable = new  Runnable() {
             @Override
             public void run() {
@@ -115,23 +146,62 @@ public class Summary extends Fragment {
                 }
             }
         };
+    }
 
-        refreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        updateAll(false);
+    private void initiateLayoutRefresherRunnable()
+    {
+        layoutRefresherRunnable = new Runnable() {
+            @Override
+            public void run() {
+                final List<View> currencyView = new ArrayList<>();
+
+                if (balanceManager.getTotalBalance() != null)
+                {
+                    for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
+                        final Currency currency = balanceManager.getTotalBalance().get(i);
+
+                        if (!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > preferencesManager.getMinimumAmount())) {
+                            currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
+                        }
                     }
-
                 }
-        );
 
-        handler.postDelayed(updateRunnable, 10000);
-        toolbarLayout = fragmentView.findViewById(R.id.toolbar_layout);
-        toolbarLayout.setForegroundGravity(Gravity.CENTER);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        currencyLayout.removeAllViews();
 
+                        for(int i = 0; i < currencyView.size(); i++)
+                        {
+                            currencyLayout.addView(currencyView.get(i));
+                        }
+
+                        if(loadingDialog.isShowing())
+                        {
+                            loadingDialog.dismiss();
+                        }
+                    }
+                });
+            }
+        };
+    }
+
+    private void setupAddCurrencyButton(View fragmentView)
+    {
         Button addCurrencyButton = fragmentView.findViewById(R.id.buttonAddTransaction);
 
+        addCurrencyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent addIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
+
+                startActivity(addIntent);
+            }
+        });
+    }
+
+    private void setupSettingsButton(View fragmentView)
+    {
         ImageButton settingsButton = fragmentView.findViewById(R.id.settings_button);
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -142,20 +212,6 @@ public class Summary extends Fragment {
             }
         });
 
-        addCurrencyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent addIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
-
-                startActivity(addIntent);
-            }
-        });
-
-        updateAll(true);
-
-        generateSplashScreen();
-
-        return fragmentView;
     }
 
     private void generateSplashScreen()
@@ -231,14 +287,14 @@ public class Summary extends Fragment {
 
     private void showErrorSnackbar()
     {
-        /*Snackbar.make(getActivity().findViewById(R.id.viewFlipperSummary), "Error while updating data", Snackbar.LENGTH_LONG)
+        Snackbar.make(getActivity().findViewById(R.id.snackbar_placer), "Error while updating data", Snackbar.LENGTH_LONG)
                 .setAction("Update", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
                     }
                 })
-                .show();*/
+                .show();
     }
 
     private void resetCounters()
@@ -253,42 +309,8 @@ public class Summary extends Fragment {
 
     private void adaptView()
     {
-        currencyLayout.removeAllViews();
 
-        final List<View> currencyView = new ArrayList<>();
-
-        Runnable newRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (balanceManager.getTotalBalance() != null)
-                {
-                    for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
-                        final Currency currency = balanceManager.getTotalBalance().get(i);
-
-                        if (!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001)) {
-                            currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
-                        }
-                    }
-                }
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(int i = 0; i < currencyView.size(); i++)
-                        {
-                            currencyLayout.addView(currencyView.get(i));
-                        }
-
-                        if(loadingDialog.isShowing())
-                        {
-                            loadingDialog.dismiss();
-                        }
-                    }
-                });
-            }
-        };
-
-        newRunnable.run();
+        layoutRefresherRunnable.run();
     }
 
     private void countCoins(boolean isCoin, boolean isDetails, boolean isTickers)
@@ -349,8 +371,6 @@ public class Summary extends Fragment {
             {
                 if(iconCounter == balanceManager.getTotalBalance().size() - offset)
                 {
-                    Log.d(getResources().getString(R.string.debug), "Loading heavy");
-
                     UiHeavyLoadCalculator uiHeavyLoadCalculator = new UiHeavyLoadCalculator();
                     uiHeavyLoadCalculator.execute();
                 }
@@ -372,7 +392,6 @@ public class Summary extends Fragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 updateTitle();
             }
         });
@@ -384,79 +403,57 @@ public class Summary extends Fragment {
 
         if(preferencesManager.isBalanceHidden())
         {
-            toolbarLayout.setTitle(PlaceholderManager.getPercentageString(numberConformer(totalFluctuationPercentage), getActivity()));
-            toolbarSubtitle.setVisibility(View.GONE);
-
-            if(totalFluctuation > 0)
-            {
-                toolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.increase));
-                toolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.increase));
-            }
-            else
-            {
-                toolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.decrease));
-                toolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.decrease));
-            }
+            updateHideBalanceTitle(totalFluctuationPercentage);
         }
         else
         {
-            toolbarLayout.setTitle(PlaceholderManager.getValueString(numberConformer(totalValue), getActivity()));
-            toolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
-            toolbarLayout.setExpandedTitleColor(Color.WHITE);
-
-            toolbarSubtitle.setVisibility(View.VISIBLE);
-
-            if(totalFluctuation > 0)
-            {
-                toolbarSubtitle.setTextColor(getResources().getColor(R.color.increase));
-            }
-            else
-            {
-                toolbarSubtitle.setTextColor(getResources().getColor(R.color.decrease));
-            }
-
-            if(totalFluctuation == 0)
-            {
-                toolbarSubtitle.setText(PlaceholderManager.getValueString(numberConformer(totalValue), getActivity()));
-                toolbarSubtitle.setTextColor(-1275068417);
-            }
-            else
-            {
-                toolbarSubtitle.setText(PlaceholderManager.getValuePercentageString(numberConformer(totalFluctuation), numberConformer(totalFluctuationPercentage), getActivity()));
-            }
+            updateBalanceDisplayedTitle(totalFluctuationPercentage);
         }
     }
 
-    private String numberConformer(double number)
+    public void updateBalanceDisplayedTitle(float totalFluctuationPercentage)
     {
-        String str;
+        toolbarLayout.setTitle(PlaceholderManager.getValueString(numberConformer(totalValue), getActivity()));
+        toolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
+        toolbarLayout.setExpandedTitleColor(Color.WHITE);
 
-        if(abs(number) > 1)
+        toolbarSubtitle.setVisibility(View.VISIBLE);
+
+        if(totalFluctuation > 0)
         {
-            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
+            toolbarSubtitle.setTextColor(getResources().getColor(R.color.increase));
         }
         else
         {
-            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
+            toolbarSubtitle.setTextColor(getResources().getColor(R.color.decrease));
         }
 
-        int counter = 0;
-        int i = str.indexOf(".");
-        if(i <= 0)
+        if(totalFluctuation == 0)
         {
-            i = str.length();
+            toolbarSubtitle.setText(PlaceholderManager.getValueString(numberConformer(totalValue), getActivity()));
+            toolbarSubtitle.setTextColor(-1275068417);
         }
-        for(i -= 1; i > 0; i--)
+        else
         {
-            counter++;
-            if(counter == 3)
-            {
-                str = str.substring(0, i) + " " + str.substring(i, str.length());
-                counter = 0;
-            }
+            toolbarSubtitle.setText(PlaceholderManager.getValuePercentageString(numberConformer(totalFluctuation), numberConformer(totalFluctuationPercentage), getActivity()));
         }
+    }
 
-        return str;
+    private void updateHideBalanceTitle(float totalFluctuationPercentage)
+    {
+        toolbarLayout.setTitle(PlaceholderManager.getPercentageString(numberConformer(totalFluctuationPercentage), getActivity()));
+        toolbarSubtitle.setVisibility(View.GONE);
+
+        if(totalFluctuation > 0)
+        {
+            toolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.increase));
+            toolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.increase));
+        }
+        else
+        {
+            toolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.decrease));
+            toolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.decrease));
+        }
     }
 
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
@@ -493,7 +490,8 @@ public class Summary extends Fragment {
 
         private void loadCurrency(Currency currency)
         {
-            if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > 0.001)
+            Log.d("moodl", "For " + currency.getSymbol() + " " + (currency.getBalance() * currency.getValue()) + " " + preferencesManager.getMinimumAmount());
+            if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > preferencesManager.getMinimumAmount())
             {
                 currency.setName(balanceManager.getCurrencyName(currency.getSymbol()));
                 currency.setId(balanceManager.getCurrencyId(currency.getSymbol()));
@@ -539,8 +537,19 @@ public class Summary extends Fragment {
         protected void onPostExecute(Void result)
         {
             refreshLayout.setRefreshing(false);
-            //refreshCurrencyList();
-            adaptView();
+            new AsyncTask<Void, Integer, Void>() {
+
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    if(Looper.myLooper() == null)
+                    {
+                        Looper.prepare();
+                    }
+
+                    adaptView();
+                    return null;
+                }
+            }.execute();
             handler.removeCallbacks(updateRunnable);
         }
     }
@@ -625,17 +634,49 @@ public class Summary extends Fragment {
 
             return null;
         }
-
-        @Override
-        protected void onPostExecute(Void result)
-        {
-
-        }
     }
 
 
     private class DataUpdater extends AsyncTask<Void, Integer, Void>
     {
+        private void generateSnackBarError(String error)
+        {
+            View view = getActivity().findViewById(R.id.snackbar_placer);
+
+            switch (error)
+            {
+                case "com.android.volley.AuthFailureError":
+                    preferencesManager.disableHitBTC();
+                    Snackbar.make(view, "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                            .show();
+
+                    refreshLayout.setRefreshing(false);
+
+                    updateAll(true);
+                    break;
+                case "API-key format invalid.":
+                    preferencesManager.disableBinance();
+                    Snackbar.make(view, "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                            .show();
+
+                    updateAll(true);
+                    break;
+                case "com.android.volley.NoConnectionError: java.net.UnknownHostException: Unable to resolve host \"api.hitbtc.com\": No address associated with hostname":
+                    Snackbar.make(view, "Can't resolve host", Snackbar.LENGTH_LONG)
+                            .show();
+                    break;
+                case "com.android.volley.TimeoutError":
+                    break;
+                default:
+                    Snackbar.make(view, "Unexpected error", Snackbar.LENGTH_LONG)
+                            .show();
+
+                    Log.d("moodl", error);
+
+                    updateAll(false);
+            }
+        }
+
         @Override
         protected Void doInBackground(Void... params)
         {
@@ -684,43 +725,11 @@ public class Summary extends Fragment {
 
                 public void onError(String error)
                 {
-                    View view = getActivity().findViewById(R.id.snackbar_placer);
-
-                    switch (error)
-                    {
-                        case "com.android.volley.AuthFailureError":
-                            preferencesManager.disableHitBTC();
-                            Snackbar.make(view, "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
-                                    .show();
-
-                            refreshLayout.setRefreshing(false);
-
-                            updateAll(true);
-                            break;
-                        case "API-key format invalid.":
-                            preferencesManager.disableBinance();
-                            Snackbar.make(view, "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
-                                    .show();
-
-                            updateAll(true);
-                            break;
-                        default:
-                            Snackbar.make(view, "Unexpected error", Snackbar.LENGTH_LONG)
-                                    .show();
-
-                            Log.d("moodl", error);
-
-                            updateAll(true);
-                    }
+                    generateSnackBarError(error);
                 }
             });
 
             return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
         }
     }
 

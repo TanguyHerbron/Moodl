@@ -2,6 +2,7 @@ package com.nauk.moodl.DataManagers;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 /**
  * Created by Guitoune on 09/01/2018.
@@ -46,6 +47,23 @@ public class PreferencesManager {
         }
 
         return settingPreferences.getBoolean("refresh_default_currency", false);
+    }
+
+    public float getMinimumAmount()
+    {
+        String str = settingPreferences.getString("minimum_value_displayed", "0");
+        float ret;
+
+        if(str.equals(""))
+        {
+            ret = 0;
+        }
+        else
+        {
+            ret = Float.valueOf(str);
+        }
+
+        return ret;
     }
 
     private void disableRefreshDefaultCurrency()

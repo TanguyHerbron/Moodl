@@ -29,9 +29,10 @@ import com.nauk.moodl.R;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-import static java.lang.Math.abs;
+import static com.nauk.moodl.MoodlBox.collapseH;
+import static com.nauk.moodl.MoodlBox.expandH;
+import static com.nauk.moodl.MoodlBox.numberConformer;
 
 /**
  * Created by Tiji on 05/01/2018.
@@ -58,11 +59,11 @@ public class HomeLayoutGenerator {
                 PreferencesManager preferencesManager = new PreferencesManager(context);
 
                 if (view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE) {
-                    collapseView(view);
+                    collapseH(view.findViewById(R.id.collapsableLayout));
                 } else {
                     view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.GONE);
                     view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.VISIBLE);
-                    extendView(view);
+                    expandH(view.findViewById(R.id.collapsableLayout));
 
                     if (currency.getHistoryMinutes() == null) {
                         currency.updateHistoryMinutes(context, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
@@ -85,7 +86,7 @@ public class HomeLayoutGenerator {
                     }
                     else
                     {
-                        extendView(view);
+                        expandH(view.findViewById(R.id.collapsableLayout));
                         view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
                         view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
                     }
@@ -272,17 +273,6 @@ public class HomeLayoutGenerator {
         }
     }
 
-    private void collapseView(View view)
-    {
-        collapse(view.findViewById(R.id.collapsableLayout));
-    }
-
-    private void extendView(View view)
-    {
-        expand(view.findViewById(R.id.collapsableLayout));
-        //view.findViewById(R.id.LineChartView).invalidate();
-    }
-
     private void updateColor(View view, Currency currency)
     {
         if(currency.getDayFluctuationPercentage() >= 0)
@@ -338,32 +328,5 @@ public class HomeLayoutGenerator {
         transColor = Color.argb(alpha, r, g, b);
 
         return transColor ;
-    }
-
-    private String numberConformer(double number)
-    {
-        String str;
-
-        if(abs(number) > 1)
-        {
-            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
-        }
-        else
-        {
-            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
-        }
-
-        int counter = 0;
-        for(int i = str.indexOf(".") - 1; i > 0; i--)
-        {
-            counter++;
-            if(counter == 3)
-            {
-                str = str.substring(0, i) + " " + str.substring(i, str.length());
-                counter = 0;
-            }
-        }
-
-        return str;
     }
 }

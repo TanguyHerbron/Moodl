@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.nauk.moodl.MoodlBox.getDateFromTimestamp;
+
 /**
  * Created by Guitoune on 24/04/2018.
  */
@@ -49,7 +51,7 @@ public class TradeListAdapter extends ArrayAdapter<Trade> {
 
         amountTxtView.setText(String.valueOf(trade.getQty()));
         purchasedPrice.setText(trade.getPrice());
-        dateTxtView.setText(getDate(trade.getTime()));
+        dateTxtView.setText(getDateFromTimestamp(trade.getTime()));
         tradePair.setText(trade.getSymbol() + "/" + trade.getPairSymbol());
 
         if(trade.isBuyer())
@@ -62,17 +64,5 @@ public class TradeListAdapter extends ArrayAdapter<Trade> {
         }
 
         return convertView;
-    }
-
-    private String getDate(long timeStamp){
-
-        try{
-            SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.getDefault());
-            Date netDate = (new Date(timeStamp));
-            return sdf.format(netDate);
-        }
-        catch(Exception ex){
-            return "xx";
-        }
     }
 }

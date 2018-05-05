@@ -1,10 +1,8 @@
 <resources>
-    <string name="app_name">Moodl</string>
-    <string name="action_settings">Settings</string>
-    <string name="action_edit_mode">Edit mode</string>
-    <string name="donation">Fais un don wallah</string>
-    <string name="debug">Moodl_debug</string>
-    <string name="debug_volley">Moodl_debugVolley</string>
+    <string name="app_name" translatable="false">Moodl</string>
+    <string name="donation">Donation</string>
+    <string name="debug" translatable="false">Moodl_debug</string>
+    <string name="debug_volley" translatable="false">Moodl_debugVolley</string>
     <string name="quick_button">Switch view</string>
     <string name="title_activity_settings">Settings</string>
 
@@ -15,23 +13,8 @@
 
     <string name="pref_title_hide_balance">Hide balance</string>
 
-    <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
-
-    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
-    <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_example_list_values">
-        <item>1</item>
-        <item>0</item>
-        <item>-1</item>
-    </string-array>
-
     <!-- Example settings for Data & Sync -->
-    <string name="pref_header_data_sync">Data &amp; sync</string>
+    <string name="pref_title_minimum_amount_displayed">Minimum amount displayed</string>
 
     <string name="pref_title_default_currency">Default currency</string>
     <string-array name="pref_default_currencies_titles">
@@ -90,19 +73,19 @@
 
     <!--Exchange strings-->
     <string name="pref_header_exchange">Exchanges settings</string>
-    <string name="pref_fingerprint">Touch ID</string>
+    <string name="pref_fingerprint" translatable="false">Touch ID</string>
 
     <!--HitBTC-->
     <string name="pref_title_enable_synchronization_hitbtc">Enable synchronization</string>
     <string name="pref_title_hitbtc_publickey">Public key</string>
     <string name="pref_title_hitbtc_privatekey">Private key</string>
-    <string name="pref_title_exchange_hitbtc">HitBTC</string>
+    <string name="pref_title_exchange_hitbtc" translatable="false">HitBTC</string>
 
     <!--GDAX-->
     <string name="pref_title_enable_synchronization_gdax">Enable synchronization</string>
     <string name="pref_title_gdax_publickey">Public key</string>
     <string name="pref_title_gdax_privatekey">Private key</string>
-    <string name="pref_title_exchange_gdax">GDAX</string>
+    <string name="pref_title_exchange_gdax" translatable="false">GDAX</string>
 
     <!--Binance-->
     <string name="pref_title_enable_synchronization_binance">Enable synchronization</string>
@@ -129,7 +112,7 @@
     <string name="activity_fees">Fees</string>
     <string name="title_activity_currency_details">CurrencyDetailsActivity</string>
     <string name="title_history">History charts</string>
-    <string name="title_watchlist">Watchlist</string>
+    <string name="title_watchlist" translatable="false">Watchlist</string>
     <string name="title_infos">Infos</string>
     <string name="title_transactions">Transactions</string>
     <string name="title_home">Holdings</string>
@@ -203,5 +186,7 @@
     <string name="volume_yen_market_cap_textview">24h volume :\n%1$s¥</string>
 
     <string name="title_activity_scrolling">ScrollingActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_edit_mode">Edition</string>
 
 </resources>

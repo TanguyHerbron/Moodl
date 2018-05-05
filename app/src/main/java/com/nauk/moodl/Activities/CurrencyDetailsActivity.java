@@ -1,12 +1,9 @@
 package com.nauk.moodl.Activities;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -17,14 +14,12 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -65,13 +60,11 @@ import com.nauk.moodl.LayoutManagers.TransactionListAdapter;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
-import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
+import static com.nauk.moodl.MoodlBox.numberConformer;
+import static com.nauk.moodl.MoodlBox.getDateFromTimestamp;
 import static java.lang.Math.abs;
 
 /**Create a Parcelable**/
@@ -266,8 +259,12 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                     .setText(currency.getStartDate());
         }
 
-        ((TextView) findViewById(R.id.txtViewDescription))
-                .setText(Html.fromHtml(currency.getDescription()));
+        if(currency.getDescription() != null)
+        {
+            ((TextView) findViewById(R.id.txtViewDescription))
+                    .setText(Html.fromHtml(currency.getDescription()));
+        }
+
         ((TextView) findViewById(R.id.txtViewDescription))
                 .setMovementMethod(LinkMovementMethod.getInstance());
         ((TextView) findViewById(R.id.txtViewPercentageCoinEmited))
@@ -412,13 +409,43 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         switch (interval)
         {
             case "1h":
-                updateChartTab(HOUR, 1);
+                currency.updateHistoryMinutes(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(CurrencyDetailsActivity.HOUR, 1);
+                            }
+                        });
+                    }
+                });
                 break;
             case "3h":
-                updateChartTab(HOUR, 3);
+                currency.updateHistoryMinutes(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(CurrencyDetailsActivity.HOUR, 3);
+                            }
+                        });
+                    }
+                });
                 break;
             case "1d":
-                updateChartTab(DAY, 1);
+                currency.updateHistoryMinutes(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(CurrencyDetailsActivity.DAY, 1);
+                            }
+                        });
+                    }
+                });
                 break;
             case "3d":
                 currency.updateHistoryHours(this, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
@@ -664,11 +691,11 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         if(dataChartList.size() > 200)
         {
-            date = getDate(dataChartList.get((int) Math.floor(dataChartList.size() / 200) * index).getTimestamp() * 1000);
+            date = getDateFromTimestamp(dataChartList.get((int) Math.floor(dataChartList.size() / 200) * index).getTimestamp() * 1000);
         }
         else
         {
-            date = getDate(dataChartList.get(index).getTimestamp() * 1000);
+            date = getDateFromTimestamp(dataChartList.get(index).getTimestamp() * 1000);
         }
 
         volumePlaceholder = PlaceholderManager.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), this);
@@ -707,18 +734,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         findViewById(R.id.timestampHightlight).setVisibility(View.INVISIBLE);
     }
 
-    private String getDate(long timeStamp){
-
-        try{
-            SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.getDefault());
-            Date netDate = (new Date(timeStamp));
-            return sdf.format(netDate);
-        }
-        catch(Exception ex){
-            return "xx";
-        }
-    }
-
     private BarData generateVolumeChartSet()
     {
         BarDataSet dataSet;
@@ -744,41 +759,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         dataSet.setHighLightColor(currency.getChartColor());
 
         return new BarData(dataSet);
-    }
-
-    private String numberConformer(double number)
-    {
-        String str;
-
-        if(abs(number) > 1)
-        {
-            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
-        }
-        else
-        {
-            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
-        }
-
-        if(!str.equals("Infinity"))
-        {
-            int counter = 0;
-            int i = str.indexOf(".");
-            if(i <= 0)
-            {
-                i = str.length();
-            }
-            for(i -= 1; i > 0; i--)
-            {
-                counter++;
-                if(counter == 3)
-                {
-                    str = str.substring(0, i) + " " + str.substring(i, str.length());
-                    counter = 0;
-                }
-            }
-        }
-
-        return str;
     }
 
     private CandleData generatePriceCandleStickChartSet()
