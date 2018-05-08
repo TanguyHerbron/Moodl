@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.SpannableString;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.nauk.moodl.Activities.SettingsActivity;
+import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.MarketCapManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.PlaceholderManager;
@@ -197,19 +199,20 @@ public class MarketCapitalization extends Fragment {
     private PieDataSet getMarketDominanceDataSet()
     {
         List<PieEntry> entries = new ArrayList<>();
-
+        List<Currency> topCurrencies = marketCapManager.getTopCurrencies();
         ArrayList<Integer> colors = new ArrayList<>();
 
-        float otherCurrenciesDominance = 0;
+        float topCurrenciesDominance = 0;
 
-        for (String key : marketCapManager.getDominance(preferencesManager.getDefaultCurrency()).keySet())
+        for(int i = 0; i < topCurrencies.size(); i++)
         {
-            entries.add(new PieEntry(marketCapManager.getDominance(preferencesManager.getDefaultCurrency()).get(key), key));
-            otherCurrenciesDominance += marketCapManager.getDominance(preferencesManager.getDefaultCurrency()).get(key);
-            colors.add(dominantCurrenciesColors.get(key));
+            Log.d("moodl", "Dominance : " + topCurrencies.get(i).getSymbol() + " " + topCurrencies.get(i).getDominance(marketCapManager.getMarketCap()));
+            entries.add(new PieEntry(topCurrencies.get(i).getDominance(marketCapManager.getMarketCap()), topCurrencies.get(i).getSymbol()));
+            topCurrenciesDominance += topCurrencies.get(i).getDominance(marketCapManager.getMarketCap());
+            colors.add(dominantCurrenciesColors.get(topCurrencies.get(i).getSymbol()));
         }
 
-        entries.add(new PieEntry(100-otherCurrenciesDominance, "Others"));
+        entries.add(new PieEntry(100-topCurrenciesDominance, "Others"));
         colors.add(-12369084);
 
         PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");

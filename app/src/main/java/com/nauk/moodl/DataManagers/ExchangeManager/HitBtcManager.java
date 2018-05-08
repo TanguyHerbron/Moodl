@@ -30,7 +30,7 @@ public class HitBtcManager {
 
     private String publicKey;
     private String privateKey;
-    final private String hitBalanceUrl = "https://api.hitbtc.com/api/2/trading/balance";
+    final private String hitBalanceUrl = "https://api.hitbtc.com/api/2/account/balance";
     final private String tradeHistoryUrl = "https://api.hitbtc.com/api/2/history/trades?";
     private RequestQueue requestQueue;
     private List<String> pairSymbolList;
@@ -115,10 +115,12 @@ public class HitBtcManager {
         {
             try {
                 JSONObject jsonObject = response.getJSONObject(i);
+                double available = Double.parseDouble(jsonObject.getString("available"));
+                double reserved = Double.parseDouble(jsonObject.getString("reserved"));
 
-                if(Float.parseFloat(jsonObject.getString("available")) > 0)
+                if(available > 0 || reserved > 0)
                 {
-                    balance.add(new Currency(jsonObject.getString("currency"), Double.parseDouble(jsonObject.getString("available"))));
+                    balance.add(new Currency(jsonObject.getString("currency"), available + reserved));
                 }
 
             } catch (JSONException e) {

@@ -18,7 +18,7 @@ import java.util.List;
 public class Currency implements Parcelable {
 
     private int id;
-    private String tickerId;
+    private int tickerId;
     private String name;
     private String symbol;
     private double value;
@@ -38,6 +38,7 @@ public class Currency implements Parcelable {
     private String proofType;
     private int totalSupply;
     private double marketCapitalization;
+    private double dominance;
     private int rank;
     private String startDate;
     private List<String> socialMediaLinks;
@@ -62,6 +63,13 @@ public class Currency implements Parcelable {
     {
         this.name = name;
         this.symbol = symbol;
+    }
+
+    public Currency(String name, String symbol, int tickerId)
+    {
+        this.name = name;
+        this.symbol = symbol;
+        this.tickerId = tickerId;
     }
 
     //public Currency(int id, String symbol, String name, String algorithm, String proofType, )
@@ -396,11 +404,11 @@ public class Currency implements Parcelable {
         this.rank = rank;
     }
 
-    public String getTickerId() {
+    public int getTickerId() {
         return tickerId;
     }
 
-    public void setTickerId(String tickerId) {
+    public void setTickerId(int tickerId) {
         this.tickerId = tickerId;
     }
 
@@ -410,6 +418,11 @@ public class Currency implements Parcelable {
 
     public void setStartDate(String startDate) {
         this.startDate = startDate;
+    }
+
+    public float getDominance(float totalMarketCapitalization)
+    {
+        return (float) (marketCapitalization / totalMarketCapitalization) * 100;
     }
 
     private void updateDayFluctuation()
@@ -469,7 +482,7 @@ public class Currency implements Parcelable {
         dest.writeList(this.historyMinutes);
         dest.writeParcelable(this.icon, flags);
         dest.writeInt(this.chartColor);
-        dest.writeString(this.tickerId);
+        dest.writeInt(this.tickerId);
     }
 
     protected Currency(Parcel in) {
@@ -484,7 +497,7 @@ public class Currency implements Parcelable {
         in.readList(this.historyMinutes, CurrencyDataChart.class.getClassLoader());
         this.icon = in.readParcelable(Bitmap.class.getClassLoader());
         this.chartColor = in.readInt();
-        this.tickerId = in.readString();
+        this.tickerId = in.readInt();
     }
 
     public static final Parcelable.Creator<Currency> CREATOR = new Parcelable.Creator<Currency>() {

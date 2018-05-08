@@ -32,7 +32,7 @@ public class CurrencyDataRetriever {
     private String dayHistoryUrl = "https://min-api.cryptocompare.com/data/histoday";
     private String priceUrl = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=";
     private String snapshotUrl = "https://www.cryptocompare.com/api/data/coinsnapshotfullbyid/?id=";
-    private String tickerUrl = "https://api.coinmarketcap.com/v1/ticker/";
+    private String tickerUrl = "https://api.coinmarketcap.com/v2/ticker/";
 
     private RequestQueue requestQueue;
 
@@ -45,9 +45,9 @@ public class CurrencyDataRetriever {
         requestQueue = Volley.newRequestQueue(context);
     }
 
-    public void updateTickerInfos(String currencyName, final String toSymbol, final CurrencyCallBack callBack)
+    public void updateTickerInfos(int tickerId, final String toSymbol, final CurrencyCallBack callBack)
     {
-        final String requestUrl = tickerUrl + currencyName + "/?convert=" + toSymbol;
+        final String requestUrl = tickerUrl + tickerId + "/?convert=" + toSymbol;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
                 new Response.Listener<String>() {

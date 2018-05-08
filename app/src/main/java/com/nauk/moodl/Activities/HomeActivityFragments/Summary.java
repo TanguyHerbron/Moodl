@@ -490,7 +490,6 @@ public class Summary extends Fragment {
 
         private void loadCurrency(Currency currency)
         {
-            Log.d("moodl", "For " + currency.getSymbol() + " " + (currency.getBalance() * currency.getValue()) + " " + preferencesManager.getMinimumAmount());
             if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > preferencesManager.getMinimumAmount())
             {
                 currency.setName(balanceManager.getCurrencyName(currency.getSymbol()));

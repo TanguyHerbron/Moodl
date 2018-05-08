@@ -10,10 +10,13 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.nauk.moodl.DataManagers.BalanceManager;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -22,9 +25,9 @@ import java.util.regex.Pattern;
 
 public class CurrencyTickerList {
 
-    final private static String TICKERLISTURL = "https://api.coinmarketcap.com/v1/ticker/?limit=0";
+    final private static String TICKERLISTURL = "https://api.coinmarketcap.com/v2/listings/";
     private RequestQueue requestQueue;
-    private LinkedHashMap<String, String> coinTickersHashmap;
+    private List<Currency> currencyTickerList;
     private android.content.Context context;
 
     public CurrencyTickerList(android.content.Context context)
@@ -35,7 +38,7 @@ public class CurrencyTickerList {
 
     public void update(final BalanceManager.IconCallBack callBack)
     {
-        coinTickersHashmap = new LinkedHashMap<>();
+        currencyTickerList = new ArrayList<>();
         StringRequest strRequest = new StringRequest(Request.Method.GET, TICKERLISTURL,
                 new Response.Listener<String>() {
                     @Override
@@ -55,22 +58,19 @@ public class CurrencyTickerList {
         requestQueue.add(strRequest);
     }
 
-    public String getTickerIdForSymbol(String symbol)
+    public int getTickerIdForSymbol(String symbol)
     {
-        String tickerId = null;
-        try {
-            JSONObject jsonObject = new JSONObject(coinTickersHashmap.get(symbol));
-            tickerId = jsonObject.getString("id");
-        } catch (JSONException | NullPointerException e) {
-            switch (e.getMessage())
-            {
-                case "Attempt to invoke virtual method 'int java.lang.String.length()' on a null object reference":
-                    Log.d("moodl", "Symbol " + symbol + " not supported");
-                    break;
-                default:
-                    e.printStackTrace();
-                    break;
-            }
+        int tickerId = 0;
+        int i = 0;
+
+        while(!currencyTickerList.get(i).equals(symbol) && currencyTickerList.size() < i)
+        {
+            i++;
+        }
+
+        if(currencyTickerList.get(i).equals(symbol))
+        {
+            tickerId = currencyTickerList.get(i).getTickerId();
         }
 
         return tickerId;
@@ -78,14 +78,28 @@ public class CurrencyTickerList {
 
     public void processTickerListResult(String response, BalanceManager.IconCallBack callBack)
     {
-        response = response.substring(1, response.length() - 1);
+        try {
+            JSONObject dataJsonObject = new JSONObject(response);
+            JSONArray dataJsonArray = dataJsonObject.getJSONArray("data");
+
+            for(int i = 0; i < dataJsonArray.length(); i++)
+            {
+                JSONObject currencyJsonObject = dataJsonArray.getJSONObject(i);
+                currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), currencyJsonObject.getString("symbol"), currencyJsonObject.getInt("id")));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        /*response = response.substring(16, response.length() - 2);
         String[] strTable = response.split(Pattern.quote("},"));
 
         for(int i = 0; i < strTable.length; i++)
         {
             strTable[i] += "}";
+            Log.d("moodl", "TICKER " + i + " " + strTable[i]);
             try {
                 JSONObject jsonObject = new JSONObject(strTable[i]);
+                Log.d("moodl", "TICKER JSON " + i + " " + jsonObject);
                 switch (jsonObject.getString("symbol"))
                 {
                     case "MIOTA":
@@ -101,7 +115,7 @@ public class CurrencyTickerList {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
 
         callBack.onSuccess();
     }

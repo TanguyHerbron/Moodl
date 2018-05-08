@@ -1,17 +1,24 @@
 package com.nauk.moodl.DataManagers;
 
+import android.util.Log;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -20,10 +27,10 @@ import java.util.regex.Pattern;
 
 public class MarketCapManager {
 
-    private static final String topCurrenciesUrl = "https://api.coinmarketcap.com/v1/ticker/?limit=9&convert=";
-    private static final String marketCapUrl = "https://api.coinmarketcap.com/v1/global/?convert=";
+    private static final String topCurrenciesUrl = "https://api.coinmarketcap.com/v2/ticker/?limit=9&convert=";
+    private static final String marketCapUrl = "https://api.coinmarketcap.com/v2/global/?convert=";
     private RequestQueue requestQueue;
-    private String topRequestResult[];
+    private List<Currency> topCurrencies;
     private long marketCap;
     private long dayVolume;
 
@@ -35,6 +42,8 @@ public class MarketCapManager {
     public void updateTopCurrencies(final VolleyCallBack callBack, final String toSymbol)
     {
         String requestString = topCurrenciesUrl + toSymbol;
+
+        topCurrencies = new ArrayList<>();
 
         StringRequest strRequest = new StringRequest(Request.Method.GET, requestString,
                 new Response.Listener<String>() {
@@ -86,31 +95,21 @@ public class MarketCapManager {
     {
         try {
             JSONObject jsonObject = new JSONObject(response);
+            JSONObject dataJsonObject = jsonObject.getJSONObject("data");
+            JSONObject quotesJsonObject = dataJsonObject.getJSONObject("quotes");
+            JSONObject valuesJsonObject = quotesJsonObject.getJSONObject(toSymbol);
 
-            marketCap = new BigDecimal(jsonObject.getString("total_market_cap_" + toSymbol.toLowerCase())).longValue();
+            marketCap = valuesJsonObject.getLong("total_market_cap");
 
-            dayVolume = new BigDecimal(jsonObject.getString("total_24h_volume_" + toSymbol.toLowerCase())).longValue();
+            dayVolume = valuesJsonObject.getLong("total_volume_24h");
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    public HashMap<String, Float> getDominance(String toSymbol)
+    public List<Currency> getTopCurrencies()
     {
-        HashMap<String, Float> dominance = new HashMap<>();
-
-        for(int i = 0; i < topRequestResult.length; i++)
-        {
-            try {
-                JSONObject jsonObject = new JSONObject(topRequestResult[i]);
-
-                dominance.put(jsonObject.getString("symbol"), (Float.parseFloat(jsonObject.getString("market_cap_" + toSymbol.toLowerCase())) / marketCap)*100);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return dominance;
+        return topCurrencies;
     }
 
     public long getDayVolume()
@@ -120,22 +119,28 @@ public class MarketCapManager {
 
     private void processTopCurrencies(String response, String toSymbol)
     {
-        response = response.substring(response.indexOf('[')+1, response.lastIndexOf(']'));
+        try {
+            JSONObject masterJsonObject = new JSONObject(response);
 
-        topRequestResult = response.split(Pattern.quote("},"));
+            if(masterJsonObject.keys().hasNext())
+            {
+                JSONObject currencyJsonObject = masterJsonObject.getJSONObject(masterJsonObject.keys().next());
+                Iterator<?> keys = currencyJsonObject.keys();
 
-        for(int i = 0; i < topRequestResult.length; i++)
-        {
-            topRequestResult[i] += "}";
-            /*try {
+                while(keys.hasNext())
+                {
+                    String key = keys.next().toString();
+                    JSONObject subCurrencyJsonObject = currencyJsonObject.getJSONObject(key);
+                    Currency newCurrency = new Currency(subCurrencyJsonObject.getString("name"), subCurrencyJsonObject.getString("symbol"), subCurrencyJsonObject.getInt("id"));
+                    JSONObject quoteJsonObject = subCurrencyJsonObject.getJSONObject("quotes");
+                    JSONObject symJsonObject = quoteJsonObject.getJSONObject(toSymbol);
+                    newCurrency.setMarketCapitalization(symJsonObject.getDouble("market_cap"));
 
-                JSONObject jsonObject = new JSONObject(topRequestResult[i]);
-
-                //Log.d("moodl", "Symbol : " + jsonObject.getString("symbol") + " " + jsonObject.getString("rank"));
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }*/
+                    topCurrencies.add(newCurrency);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
