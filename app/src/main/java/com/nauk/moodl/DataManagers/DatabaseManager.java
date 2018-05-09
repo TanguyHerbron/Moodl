@@ -204,10 +204,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         ArrayList<Transaction> transactionList = new ArrayList<>();
 
-        while(resultatList.moveToNext())
-        {
+        resultatList.moveToLast();
+
+        do {
             transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5), resultatList.getDouble(7)));
-        }
+        } while(resultatList.moveToPrevious());
 
         resultatList.close();
 

@@ -621,6 +621,26 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         barChart.getXAxis().setEnabled(false);
         barChart.setViewPortOffsets(0, 0, 0, 0);
         barChart.setFitBars(true);
+        barChart.setHighlightFullBarEnabled(true);
+
+        barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                barChartValueSelected(e);
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+
+        barChart.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return toucheEvent(motionEvent);
+            }
+        });
     }
 
     private void drawPriceCandleStickChart()
@@ -636,7 +656,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         lineChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
-                valueSelectedEvent(e);
+                lineChartValueSelected(e);
             }
 
             @Override
@@ -683,15 +703,28 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         lineChart.setViewPortOffsets(0, 0, 0, 0);
     }
 
-    private void valueSelectedEvent(Entry e)
+    private void barChartValueSelected(Entry e)
+    {
+        int index = barChart.getData().getDataSets().get(0).getEntryIndex((BarEntry) e);
+
+        lineChart.highlightValue(lineChart.getData().getDataSets().get(0).getEntryForIndex(index).getX(), lineChart.getData().getDataSets().get(0).getEntryForIndex(index).getY(), 0);
+        generatePlaceHoldersFromIndex(index);
+    }
+
+    private void lineChartValueSelected(Entry e)
     {
         int index = lineChart.getData().getDataSets().get(0).getEntryIndex(e);
+
+        barChart.highlightValue(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getX(), 0, index);
+        generatePlaceHoldersFromIndex(index);
+    }
+
+    private void generatePlaceHoldersFromIndex(int index)
+    {
         String date;
         String volumePlaceholder;
         String pricePlaceholder;
         String timestampPlaceholder;
-
-        barChart.highlightValue(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getX(), 0, index);
 
         if(dataChartList.size() > 200)
         {
@@ -703,7 +736,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         }
 
         volumePlaceholder = PlaceholderManager.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), this);
-        pricePlaceholder = PlaceholderManager.getPriceString(numberConformer(e.getY()), this);
+        pricePlaceholder = PlaceholderManager.getPriceString(numberConformer((lineChart.getHighlighted())[0].getY()), this);
         timestampPlaceholder = PlaceholderManager.getTimestampString(date, this);
 
         ((TextView) findViewById(R.id.volumeHightlight)).setText(volumePlaceholder);
@@ -712,7 +745,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         findViewById(R.id.priceHightlight).setVisibility(View.VISIBLE);
         ((TextView) findViewById(R.id.timestampHightlight)).setText(timestampPlaceholder);
         findViewById(R.id.timestampHightlight).setVisibility(View.VISIBLE);
-
     }
 
     private boolean toucheEvent(MotionEvent motionEvent)
