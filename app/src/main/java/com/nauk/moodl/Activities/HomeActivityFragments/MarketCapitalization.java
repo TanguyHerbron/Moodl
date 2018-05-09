@@ -206,8 +206,14 @@ public class MarketCapitalization extends Fragment {
 
         for(int i = 0; i < topCurrencies.size(); i++)
         {
-            Log.d("moodl", "Dominance : " + topCurrencies.get(i).getSymbol() + " " + topCurrencies.get(i).getDominance(marketCapManager.getMarketCap()));
-            entries.add(new PieEntry(topCurrencies.get(i).getDominance(marketCapManager.getMarketCap()), topCurrencies.get(i).getSymbol()));
+            PieEntry pieEntry = new PieEntry(topCurrencies.get(i).getDominance(marketCapManager.getMarketCap()), topCurrencies.get(i).getSymbol());
+
+            if(pieEntry.getValue() < 3)
+            {
+                pieEntry.setLabel("");
+            }
+
+            entries.add(pieEntry);
             topCurrenciesDominance += topCurrencies.get(i).getDominance(marketCapManager.getMarketCap());
             colors.add(dominantCurrenciesColors.get(topCurrencies.get(i).getSymbol()));
         }
@@ -218,8 +224,7 @@ public class MarketCapitalization extends Fragment {
         PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
         set.setColors(colors);
         set.setSliceSpace(1);
-        set.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        set.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        set.setDrawValues(false);
 
         return set;
     }
@@ -241,10 +246,9 @@ public class MarketCapitalization extends Fragment {
 
         pieChart.setData(data);
         pieChart.setDrawSlicesUnderHole(false);
-        pieChart.setUsePercentValues(true);
+        pieChart.setUsePercentValues(false);
         pieChart.setTouchEnabled(true);
-
-        pieChart.setEntryLabelColor(Color.parseColor("#FF000000"));
+        pieChart.setEntryLabelColor(Color.WHITE);
 
         pieChart.setOnTouchListener(new View.OnTouchListener() {
             @Override

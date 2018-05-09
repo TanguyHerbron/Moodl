@@ -70,13 +70,15 @@ public class CurrencyDataRetriever {
     {
         Currency currency = new Currency();
 
-        response = response.substring(1, response.length()-1);
-
         try {
             JSONObject jsonObject = new JSONObject(response);
+            JSONObject currencyJsonObject = jsonObject.getJSONObject("data");
+            JSONObject quotesJsonObject = currencyJsonObject.getJSONObject("quotes");
+            JSONObject valuesJsonObject = quotesJsonObject.getJSONObject(toSymbol);
 
-            currency.setMarketCapitalization(jsonObject.getDouble("market_cap_" + toSymbol.toLowerCase()));
-            currency.setRank(jsonObject.getInt("rank"));
+            currency.setMarketCapitalization(valuesJsonObject.getDouble("market_cap"));
+            currency.setRank(currencyJsonObject.getInt("rank"));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

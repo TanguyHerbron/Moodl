@@ -63,12 +63,12 @@ public class CurrencyTickerList {
         int tickerId = 0;
         int i = 0;
 
-        while(!currencyTickerList.get(i).equals(symbol) && currencyTickerList.size() < i)
+        while(!currencyTickerList.get(i).getSymbol().equals(symbol) && currencyTickerList.size() > i+1)
         {
             i++;
         }
 
-        if(currencyTickerList.get(i).equals(symbol))
+        if(currencyTickerList.get(i).getSymbol().equals(symbol))
         {
             tickerId = currencyTickerList.get(i).getTickerId();
         }
@@ -85,7 +85,18 @@ public class CurrencyTickerList {
             for(int i = 0; i < dataJsonArray.length(); i++)
             {
                 JSONObject currencyJsonObject = dataJsonArray.getJSONObject(i);
-                currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), currencyJsonObject.getString("symbol"), currencyJsonObject.getInt("id")));
+                switch (currencyJsonObject.getString("symbol"))
+                {
+                    case "MIOTA":
+                        currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), "IOT", currencyJsonObject.getInt("id")));
+                        break;
+                    case "NANO":
+                        currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), "XRB", currencyJsonObject.getInt("id")));
+                        break;
+                    default:
+                        currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), currencyJsonObject.getString("symbol"), currencyJsonObject.getInt("id")));
+                        break;
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
