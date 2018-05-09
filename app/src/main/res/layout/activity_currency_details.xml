@@ -447,10 +447,12 @@
                     android:baselineAligned="false">
 
                     <LinearLayout
+                        android:id="@+id/linearMarketCap"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_weight="0.5">
+                        android:layout_weight="0.5"
+                        android:visibility="gone">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -467,10 +469,12 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/linearRank"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_weight="0.5">
+                        android:layout_weight="0.5"
+                        android:visibility="gone">
 
                         <TextView
                             android:layout_width="match_parent"

@@ -270,16 +270,19 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
                 .setMovementMethod(LinkMovementMethod.getInstance());
         ((TextView) findViewById(R.id.txtViewPercentageCoinEmited))
                 .setText("Percentage of coin emited : " + numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100) + "%");
+
         if(currency.getMarketCapitalization() != 0)
         {
             ((TextView) findViewById(R.id.txtViewMarketCapitalization))
                     .setText(PlaceholderManager.getValueString(numberConformer(currency.getMarketCapitalization()), this));
+            findViewById(R.id.linearMarketCap).setVisibility(View.VISIBLE);
         }
 
         if(currency.getRank() != 0)
         {
             ((TextView) findViewById(R.id.txtViewRank))
                     .setText(String.valueOf(currency.getRank()));
+            findViewById(R.id.linearRank).setVisibility(View.VISIBLE);
         }
 
         if(currency.getMaxCoinSupply() == 0)
