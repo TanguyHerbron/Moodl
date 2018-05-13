@@ -12,11 +12,11 @@ import com.nauk.moodl.Activities.HomeActivityFragments.Watchlist;
  * Created by Tiji on 13/04/2018.
  */
 
-public class PagerAdapter extends FragmentStatePagerAdapter {
+public class HomeActivityPagerAdapter extends FragmentStatePagerAdapter {
 
     private int numOfTabs;
 
-    public PagerAdapter(FragmentManager fm, int numOfTabs)
+    public HomeActivityPagerAdapter(FragmentManager fm, int numOfTabs)
     {
         super(fm);
         this.numOfTabs = numOfTabs;
@@ -27,14 +27,11 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
         switch (position)
         {
             case 0:
-                Watchlist watchlist = new Watchlist();
-                return watchlist;
+                return new Watchlist();
             case 1:
-                Summary summary = new Summary();
-                return summary;
+                return new Summary();
             case 2:
-                MarketCapitalization marketCapitalization = new MarketCapitalization();
-                return marketCapitalization;
+                return new MarketCapitalization();
             default:
                 return null;
         }

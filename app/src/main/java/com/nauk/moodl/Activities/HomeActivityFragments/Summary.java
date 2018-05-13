@@ -128,6 +128,8 @@ public class Summary extends Fragment {
         updateRunnable = new  Runnable() {
             @Override
             public void run() {
+                lastTimestamp = 0;
+
                 if (refreshLayout.isRefreshing())
                 {
                     refreshLayout.setRefreshing(false);

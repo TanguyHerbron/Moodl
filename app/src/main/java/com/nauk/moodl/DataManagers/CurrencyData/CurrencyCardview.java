@@ -13,6 +13,7 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -54,7 +55,9 @@ public class CurrencyCardview extends CardView {
 
         ((LineChart) findViewById(R.id.LineChartView)).setNoDataTextColor(currency.getChartColor());
 
-        findViewById(R.id.masterLayout).setOnClickListener(new View.OnClickListener() {
+        setupCardView(context);
+
+        setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
                 PreferencesManager preferencesManager = new PreferencesManager(context);
@@ -119,7 +122,9 @@ public class CurrencyCardview extends CardView {
 
         ((LineChart) findViewById(R.id.LineChartView)).setNoDataTextColor(currency.getChartColor());
 
-        findViewById(R.id.masterLayout).setOnClickListener(new View.OnClickListener() {
+        setupCardView(context);
+
+        setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
                 PreferencesManager preferencesManager = new PreferencesManager(context);
@@ -172,6 +177,13 @@ public class CurrencyCardview extends CardView {
         });
 
         updateColor(currency);
+    }
+
+    private void setupCardView(Context context)
+    {
+        setClickable(false);
+        setFocusable(false);
+        setBackgroundColor(context.getColor(R.color.summary_background));
     }
 
     private void setupLineChart(View view, final Currency currency)

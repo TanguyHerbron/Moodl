@@ -15,12 +15,12 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -56,6 +56,7 @@ import com.nauk.moodl.DataManagers.CurrencyData.Transaction;
 import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.ExchangeManager.BinanceManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
+import com.nauk.moodl.DetailsActivityPagerAdapter;
 import com.nauk.moodl.LayoutManagers.TradeListAdapter;
 import com.nauk.moodl.LayoutManagers.TransactionListAdapter;
 import com.nauk.moodl.PlaceholderManager;
@@ -72,7 +73,7 @@ import static java.lang.Math.abs;
 
 public class CurrencyDetailsActivity extends AppCompatActivity {
 
-    private ViewFlipper viewFlipper;
+    private ViewPager viewPager;
     private ListView transactionLayout;
     private ListView tradeLayout;
     private DatabaseManager databaseManager;
@@ -113,13 +114,13 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    viewFlipper.setDisplayedChild(0);
+                    viewPager.setCurrentItem(0);
                     return true;
                 case R.id.navigation_dashboard:
-                    viewFlipper.setDisplayedChild(1);
+                    viewPager.setCurrentItem(1);
                     return true;
                 case R.id.navigation_notifications:
-                    viewFlipper.setDisplayedChild(2);
+                    viewPager.setCurrentItem(2);
                     return true;
             }
             return false;
@@ -141,7 +142,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
 
-                if(viewFlipper.getDisplayedChild() == 0)
+                if(viewPager.getCurrentItem() == 0)
                 {
                     finishAfterTransition();
                 }
@@ -160,9 +161,20 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currency_details);
 
-        Intent intent = getIntent();
+        viewPager = findViewById(R.id.vfCurrencyDetails);
+        final DetailsActivityPagerAdapter adapter = new DetailsActivityPagerAdapter(getSupportFragmentManager(), 3);
+
+        viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(2);
+
+        BottomNavigationView navigation = findViewById(R.id.navigation_details);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        /*Intent intent = getIntent();
 
         currency = intent.getParcelableExtra("currency");
+
+
 
         databaseManager = new DatabaseManager(this);
         preferencesManager = new PreferencesManager(this);
@@ -173,7 +185,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         displayLineChart = true;
         flag_loading = false;
 
-        viewFlipper = findViewById(R.id.vfCurrencyDetails);
+        viewPager = findViewById(R.id.vfCurrencyDetails);
         transactionLayout = findViewById(R.id.listTransactions);
         tradeLayout = findViewById(R.id.listTrades);
         lineChart = findViewById(R.id.chartPriceView);
@@ -227,8 +239,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         updateChartTab(DAY, 1);
 
-        BottomNavigationView navigation = findViewById(R.id.navigation_details);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
 
         hasBeenModified = false;
 
@@ -238,7 +249,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         tradeDrawable.invalidateSelf();
 
         TradeUpdater updater = new TradeUpdater();
-        updater.execute();
+        updater.execute();*/
     }
 
     private void refreshInfoTab()
@@ -609,6 +620,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         initializeBarChart(barChart);
 
         barChart.setData(generateVolumeChartSet());
+        barChart.animateY(1000);
         barChart.invalidate();
 
         findViewById(R.id.chartVolumeView).setVisibility(View.VISIBLE);

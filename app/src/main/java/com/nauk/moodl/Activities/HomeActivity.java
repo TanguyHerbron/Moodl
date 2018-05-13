@@ -1,7 +1,6 @@
 package com.nauk.moodl.Activities;
 
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -13,7 +12,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.nauk.moodl.PagerAdapter;
+import com.nauk.moodl.HomeActivityPagerAdapter;
 import com.nauk.moodl.R;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
@@ -64,7 +63,7 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_currency_summary);
 
         viewPager = findViewById(R.id.viewPager);
-        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), 3);
+        final HomeActivityPagerAdapter adapter = new HomeActivityPagerAdapter(getSupportFragmentManager(), 3);
 
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(2);
