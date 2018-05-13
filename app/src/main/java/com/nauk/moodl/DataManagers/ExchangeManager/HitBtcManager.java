@@ -31,9 +31,12 @@ public class HitBtcManager {
     private String publicKey;
     private String privateKey;
     final private String hitBalanceUrl = "https://api.hitbtc.com/api/2/account/balance";
+    final private String hitTradingBalanceUrl = "https://api.hitbtc.com/api/2/trading/balance";
     final private String tradeHistoryUrl = "https://api.hitbtc.com/api/2/history/trades?";
     private RequestQueue requestQueue;
     private List<String> pairSymbolList;
+    private boolean isTradingBalanceUpdated;
+    private boolean isBalanceUpdated;
 
     private List<Currency> balance;
     private android.content.Context context;
@@ -62,7 +65,97 @@ public class HitBtcManager {
 
     }
 
-    public void updateBalance(final HitBtcCallBack callBack)
+    private void mergeBalanceSymbols()
+    {
+        List<Currency> mergedBalance = new ArrayList<>();
+
+        for(int i = 0; i < balance.size(); i++)
+        {
+            boolean updated = false;
+
+            for(int j = 0; j < mergedBalance.size(); j++)
+            {
+                if(mergedBalance.get(j).getSymbol().equals(balance.get(i).getSymbol()))
+                {
+                    mergedBalance.get(j).setBalance(mergedBalance.get(j).getBalance() + balance.get(i).getBalance());
+                    updated = true;
+                }
+            }
+
+            if(!updated)
+            {
+                mergedBalance.add(balance.get(i));
+            }
+        }
+
+        balance = mergedBalance;
+    }
+
+    public void updateGlobalBalance(final HitBtcCallBack masterCallBack)
+    {
+        isTradingBalanceUpdated = false;
+        isBalanceUpdated = false;
+
+        balance = new ArrayList<>();
+
+        updateBalance(new HitBtcCallBack() {
+            @Override
+            public void onSuccess() {
+                isBalanceUpdated = true;
+
+                if(isTradingBalanceUpdated)
+                {
+                    mergeBalanceSymbols();
+                    masterCallBack.onSuccess();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                masterCallBack.onError(error);
+            }
+        });
+
+        updateTradingBalance(new HitBtcCallBack() {
+            @Override
+            public void onSuccess() {
+                isTradingBalanceUpdated = true;
+
+                if(isBalanceUpdated)
+                {
+                    mergeBalanceSymbols();
+                    masterCallBack.onSuccess();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                masterCallBack.onError(error);
+            }
+        });
+    }
+
+    private void updateTradingBalance(final HitBtcCallBack callBack)
+    {
+        JsonArrayRequest arrayRequest = new JsonArrayRequest(Request.Method.GET, hitTradingBalanceUrl
+                , getResponseListener(callBack), getErrorResponseListener(callBack))
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                String credentials = publicKey + ":" + privateKey;
+                String auth = "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+                headers.put("Content-Type", "application/json");
+                headers.put("Authorization", auth);
+
+                return headers;
+            }
+        };
+
+        requestQueue.add(arrayRequest);
+    }
+
+    private void updateBalance(final HitBtcCallBack callBack)
     {
         JsonArrayRequest arrayRequest = new JsonArrayRequest(Request.Method.GET, hitBalanceUrl
                 , getResponseListener(callBack), getErrorResponseListener(callBack))
@@ -109,8 +202,6 @@ public class HitBtcManager {
 
     private void parseBalance(JSONArray response)
     {
-        balance = new ArrayList<>();
-
         for(int i = 0; i < response.length(); i++)
         {
             try {
@@ -120,7 +211,15 @@ public class HitBtcManager {
 
                 if(available > 0 || reserved > 0)
                 {
-                    balance.add(new Currency(jsonObject.getString("currency"), available + reserved));
+                    switch (jsonObject.getString("currency"))
+                    {
+                        case "IOTA":
+                            balance.add(new Currency("MIOTA", available + reserved));
+                            break;
+                        default:
+                            balance.add(new Currency(jsonObject.getString("currency"), available + reserved));
+                            break;
+                    }
                 }
 
             } catch (JSONException e) {

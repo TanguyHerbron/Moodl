@@ -145,7 +145,7 @@ public class BalanceManager {
 
             for(int i = 0; i < hitBtcManagers.size(); i++)
             {
-                hitBtcManagers.get(i).updateBalance(new HitBtcManager.HitBtcCallBack() {
+                hitBtcManagers.get(i).updateGlobalBalance(new HitBtcManager.HitBtcCallBack() {
                     @Override
                     public void onSuccess() {
                         countBalances(callBack);
@@ -274,8 +274,16 @@ public class BalanceManager {
         String url;
 
         try {
-            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
-            url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
+            switch (symbol)
+            {
+                case "IOTA":
+                    url = "https://www.cryptocompare.com/media/1383540/iota_logo.png?width=50";
+                    break;
+                default:
+                    JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
+                    url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
+                    break;
+            }
         } catch (NullPointerException e) {
             Log.d(context.getResources().getString(R.string.debug), symbol + " has no icon URL");
             url = null;

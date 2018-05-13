@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 public class CurrencyDetailsList {
 
-    final private static String DETAILURL = "https://www.cryptocompare.com/api/data/coinlist/";
+    final private static String DETAILURL = "https://min-api.cryptocompare.com/data/all/coinlist";
     private RequestQueue requestQueue;
     private LinkedHashMap<String, String> coinInfosHashmap;
     private android.content.Context context;
@@ -74,7 +74,18 @@ public class CurrencyDetailsList {
                 StrictMode.setThreadPolicy(policy);
                 JSONObject jsonObject = new JSONObject(tab[i]);
 
-                coinInfosHashmap.put(jsonObject.getString("Symbol"), tab[i]);
+                switch (jsonObject.getString("Symbol"))
+                {
+                    case "IOT":
+                        coinInfosHashmap.put("MIOTA", tab[i]);
+                        break;
+                    case "XRB":
+                        coinInfosHashmap.put("NANO", tab[i]);
+                        break;
+                    default:
+                        coinInfosHashmap.put(jsonObject.getString("Symbol"), tab[i]);
+                        break;
+                }
             } catch (JSONException e) {
                 Log.d(context.getResources().getString(R.string.debug), "ImageUrl not found.");
             }

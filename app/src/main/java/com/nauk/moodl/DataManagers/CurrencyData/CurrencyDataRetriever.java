@@ -27,12 +27,12 @@ public class CurrencyDataRetriever {
     final static int HOURS = 1;
     final static int DAYS = 2;
 
-    private String minuteHistoryUrl = "https://min-api.cryptocompare.com/data/histominute";
-    private String hourHistoryUrl = "https://min-api.cryptocompare.com/data/histohour";
-    private String dayHistoryUrl = "https://min-api.cryptocompare.com/data/histoday";
-    private String priceUrl = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=";
-    private String snapshotUrl = "https://www.cryptocompare.com/api/data/coinsnapshotfullbyid/?id=";
-    private String tickerUrl = "https://api.coinmarketcap.com/v2/ticker/";
+    private final static String minuteHistoryUrl = "https://min-api.cryptocompare.com/data/histominute";
+    private final static String hourHistoryUrl = "https://min-api.cryptocompare.com/data/histohour";
+    private final static String dayHistoryUrl = "https://min-api.cryptocompare.com/data/histoday";
+    private final static String priceUrl = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=";
+    private final static String snapshotUrl = "https://www.cryptocompare.com/api/data/coinsnapshotfullbyid/?id=";
+    private final static String tickerUrl = "https://api.coinmarketcap.com/v2/ticker/";
 
     private RequestQueue requestQueue;
 
@@ -157,8 +157,12 @@ public class CurrencyDataRetriever {
         requestQueue.add(stringRequest);
     }
 
-    public void updatePrice(final String symbolCurrencyFrom, String symbolCurrencyTo, final CurrencyCallBack callBack)
+    public void updatePrice(String symbolCurrencyFrom, String symbolCurrencyTo, final CurrencyCallBack callBack)
     {
+        if(symbolCurrencyFrom.equals("MIOTA"))
+        {
+            symbolCurrencyFrom = "IOT";
+        }
         String requestUrl = priceUrl + symbolCurrencyFrom + "&tsyms=" + symbolCurrencyTo;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,

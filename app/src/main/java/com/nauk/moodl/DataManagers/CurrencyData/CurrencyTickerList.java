@@ -85,18 +85,7 @@ public class CurrencyTickerList {
             for(int i = 0; i < dataJsonArray.length(); i++)
             {
                 JSONObject currencyJsonObject = dataJsonArray.getJSONObject(i);
-                switch (currencyJsonObject.getString("symbol"))
-                {
-                    case "MIOTA":
-                        currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), "IOT", currencyJsonObject.getInt("id")));
-                        break;
-                    case "NANO":
-                        currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), "XRB", currencyJsonObject.getInt("id")));
-                        break;
-                    default:
-                        currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), currencyJsonObject.getString("symbol"), currencyJsonObject.getInt("id")));
-                        break;
-                }
+                currencyTickerList.add(new Currency(currencyJsonObject.getString("name"), currencyJsonObject.getString("symbol"), currencyJsonObject.getInt("id")));
             }
         } catch (JSONException e) {
             e.printStackTrace();

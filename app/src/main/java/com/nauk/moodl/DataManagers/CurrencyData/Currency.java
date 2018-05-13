@@ -96,6 +96,7 @@ public class Currency implements Parcelable {
         try {
             JSONObject jsonObject = new JSONObject(currencyDetails);
             url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
+
         } catch (NullPointerException e) {
             //Log.d(context.getResources().getString(R.string.debug), symbol + " has no icon URL");
             url = null;

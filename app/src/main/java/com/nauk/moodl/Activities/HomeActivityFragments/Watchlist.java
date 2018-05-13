@@ -34,6 +34,7 @@ import com.nauk.moodl.Activities.HomeActivity;
 import com.nauk.moodl.Activities.SettingsActivity;
 import com.nauk.moodl.DataManagers.BalanceManager;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
+import com.nauk.moodl.DataManagers.CurrencyData.CurrencyCardview;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyTickerList;
@@ -184,12 +185,6 @@ public class Watchlist extends Fragment {
         });
     }
 
-    private void displayChartView()
-    {
-        expandH(view.findViewById(R.id.collapsableLayout));
-        view.findViewById(R.id.LineChartView).invalidate();
-    }
-
     @Override
     public void onResume()
     {
@@ -248,31 +243,17 @@ public class Watchlist extends Fragment {
 
     private void generateCards()
     {
-        final List<View> watchlistViews = new ArrayList<View>();
-
         ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).removeAllViews();
 
-        Runnable newRunnable = new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(final Currency currency : watchlistManager.getWatchlist())
+                for(Currency currency : watchlistManager.getWatchlist())
                 {
-                    watchlistViews.add(getCurrencyCardFor(currency));
+                    ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(new CurrencyCardview(getContext(), currency));
                 }
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(int i = 0; i < watchlistViews.size(); i++)
-                        {
-                            ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(watchlistViews.get(i), 0);
-                        }
-                    }
-                });
             }
-        };
-
-        newRunnable.run();
+        });
 
         if(refreshLayout.isRefreshing())
         {
@@ -288,104 +269,6 @@ public class Watchlist extends Fragment {
         {
             generateCards();
         }
-    }
-
-    private View getCurrencyCardFor(final Currency currency)
-    {
-        final View card = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, null);
-
-        card.setTag(currency.getSymbol());
-
-        ((TextView) card.findViewById(R.id.currencyFluctuationTextView))
-                .setText(PlaceholderManager.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getActivity()));
-        ((TextView) card.findViewById(R.id.currencyValueTextView))
-                .setText(PlaceholderManager.getValueString(numberConformer(currency.getValue()), getActivity()));
-
-        ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView))
-                .setText(PlaceholderManager.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getActivity()));
-        ((TextView) card.findViewById(R.id.currencyNameTextView))
-                .setText(currency.getName());
-        ((TextView) card.findViewById(R.id.currencySymbolTextView))
-                .setText(PlaceholderManager.getSymbolString(currency.getSymbol(), getActivity()));
-        ((ImageView) card.findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
-
-        ((LineChart) card.findViewById(R.id.LineChartView)).setNoDataTextColor(currency.getChartColor());
-
-        Drawable arrowDrawable = ((ImageView) card.findViewById(R.id.detailsArrow)).getDrawable();
-        arrowDrawable.mutate();
-        arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-        arrowDrawable.invalidateSelf();
-
-        Drawable progressDrawable = ((ProgressBar) card.findViewById(R.id.progressBarLinechartWatchlist)).getIndeterminateDrawable();
-        progressDrawable.mutate();
-        progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-        progressDrawable.invalidateSelf();
-
-        card.findViewById(R.id.deleteCardWatchlist).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                collapseH(card);
-                DatabaseManager databaseManager = new DatabaseManager(getActivity());
-                databaseManager.deleteCurrencyFromWatchlist(currency.getSymbol());
-            }
-        });
-
-        updateColor(card, currency);
-
-        card.findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                getActivity().getApplicationContext().startActivity(intent);
-            }
-        });
-
-        card.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        card.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
-                {
-                    collapseH(view.findViewById(R.id.collapsableLayout));
-                }
-                else
-                {
-                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.GONE);
-                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.VISIBLE);
-
-                    displayChartView();
-
-                    if (currency.getHistoryMinutes() == null) {
-                        currency.updateHistoryMinutes(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                            @Override
-                            public void onSuccess(Currency currency) {
-                                if(currency.getHistoryMinutes() != null)
-                                {
-                                    setupLineChart(view, currency);
-                                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
-                                }
-                                else
-                                {
-                                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).findViewById(R.id.detailsArrow).setVisibility(View.GONE);
-                                }
-                            }
-                        });
-                    }
-                    else
-                    {
-                        displayChartView();
-                        view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
-                        view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-        });
-
-        return card;
     }
 
     private LineData generateData(Currency currency)
@@ -425,42 +308,6 @@ public class Watchlist extends Fragment {
         transColor = Color.argb(alpha, r, g, b);
 
         return transColor ;
-    }
-
-    private void setupLineChart(View view, final Currency currency)
-    {
-        LineChart lineChart = view.findViewById(R.id.LineChartView);
-
-        lineChart.setDrawGridBackground(false);
-        lineChart.setDrawBorders(false);
-        lineChart.setDrawMarkers(false);
-        lineChart.setDoubleTapToZoomEnabled(false);
-        lineChart.setPinchZoom(false);
-        lineChart.setScaleEnabled(false);
-        lineChart.setDragEnabled(false);
-        lineChart.getDescription().setEnabled(false);
-        lineChart.getAxisLeft().setEnabled(false);
-        lineChart.getAxisRight().setEnabled(false);
-        lineChart.getLegend().setEnabled(false);
-        lineChart.getXAxis().setEnabled(false);
-        lineChart.setViewPortOffsets(0, 0, 0, 0);
-        lineChart.setData(generateData(currency));
-
-        lineChart.invalidate();
-    }
-
-    private void updateColor(View card, Currency currency)
-    {
-        if(currency.getDayFluctuation() >= 0)
-        {
-            ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setTextColor(getResources().getColor(R.color.increase));
-            ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setTextColor(getResources().getColor(R.color.increase));
-        }
-        else
-        {
-            ((TextView) card.findViewById(R.id.currencyFluctuationPercentageTextView)).setTextColor(getResources().getColor(R.color.decrease));
-            ((TextView) card.findViewById(R.id.currencyFluctuationTextView)).setTextColor(getResources().getColor(R.color.decrease));
-        }
     }
 
     private String getIconUrl(String symbol)
@@ -547,17 +394,14 @@ public class Watchlist extends Fragment {
                 currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(final Currency sucessCurrency) {
-                        if(getIconUrl(sucessCurrency.getSymbol()) != null)
-                        {
-                            getBitmapFromURL(getIconUrl(sucessCurrency.getSymbol()), new HomeActivity.IconCallBack() {
-                                @Override
-                                public void onSuccess(Bitmap bitmapIcon) {
-                                    sucessCurrency.setIcon(bitmapIcon);
-                                    updateChartColor(currency);
-                                    countWatchlist();
-                                }
-                            });
-                        }
+                        getBitmapFromURL(getIconUrl(sucessCurrency.getSymbol()), new HomeActivity.IconCallBack() {
+                            @Override
+                            public void onSuccess(Bitmap bitmapIcon) {
+                                sucessCurrency.setIcon(bitmapIcon);
+                                updateChartColor(currency);
+                                countWatchlist();
+                            }
+                        });
                     }
                 });
             }

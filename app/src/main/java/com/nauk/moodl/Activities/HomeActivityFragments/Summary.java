@@ -31,9 +31,9 @@ import com.nauk.moodl.Activities.HomeActivity;
 import com.nauk.moodl.Activities.SettingsActivity;
 import com.nauk.moodl.DataManagers.BalanceManager;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
+import com.nauk.moodl.DataManagers.CurrencyData.CurrencyCardview;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyTickerList;
 import com.nauk.moodl.DataManagers.PreferencesManager;
-import com.nauk.moodl.LayoutManagers.HomeLayoutGenerator;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -42,7 +42,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static com.nauk.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
@@ -56,7 +55,6 @@ public class Summary extends Fragment {
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
     private BalanceManager balanceManager;
-    private HomeLayoutGenerator layoutGenerator;
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
     private String defaultCurrency;
@@ -85,7 +83,6 @@ public class Summary extends Fragment {
 
         preferencesManager = new PreferencesManager(getActivity());
         balanceManager = new BalanceManager(getActivity());
-        layoutGenerator = new HomeLayoutGenerator(getActivity());
         currencyTickerList = new CurrencyTickerList(getActivity());
 
         currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
@@ -154,14 +151,16 @@ public class Summary extends Fragment {
             @Override
             public void run() {
                 final List<View> currencyView = new ArrayList<>();
+                final List<Currency> renderedCurrencies = new ArrayList<>();
 
                 if (balanceManager.getTotalBalance() != null)
                 {
                     for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
                         final Currency currency = balanceManager.getTotalBalance().get(i);
 
-                        if (!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > preferencesManager.getMinimumAmount())) {
-                            currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
+                        if (!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
+                            //currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
+                            renderedCurrencies.add(currency);
                         }
                     }
                 }
@@ -171,15 +170,18 @@ public class Summary extends Fragment {
                     public void run() {
                         currencyLayout.removeAllViews();
 
-                        for(int i = 0; i < currencyView.size(); i++)
+                        for(int i = 0; i < renderedCurrencies.size(); i++)
                         {
-                            currencyLayout.addView(currencyView.get(i));
+                            //currencyLayout.addView(currencyView.get(i));
+                            currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), totalValue, preferencesManager.isBalanceHidden()));
                         }
 
                         if(loadingDialog.isShowing())
                         {
                             loadingDialog.dismiss();
                         }
+
+                        handler.removeCallbacks(updateRunnable);
                     }
                 });
             }
@@ -302,6 +304,7 @@ public class Summary extends Fragment {
         coinCounter = 0;
         iconCounter = 0;
         detailsChecker = false;
+        tickersChecker = false;
 
         totalValue = 0;
         totalFluctuation = 0;
@@ -309,7 +312,6 @@ public class Summary extends Fragment {
 
     private void adaptView()
     {
-
         layoutRefresherRunnable.run();
     }
 
@@ -549,7 +551,6 @@ public class Summary extends Fragment {
                     return null;
                 }
             }.execute();
-            handler.removeCallbacks(updateRunnable);
         }
     }
 
@@ -619,16 +620,13 @@ public class Summary extends Fragment {
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                if(balanceManager.getIconUrl(localCurrency.getSymbol()) != null)
-                {
-                    getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new HomeActivity.IconCallBack() {
-                        @Override
-                        public void onSuccess(Bitmap bitmapIcon) {
-                            localCurrency.setIcon(bitmapIcon);
-                            countIcons();
-                        }
-                    });
-                }
+                getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new HomeActivity.IconCallBack() {
+                    @Override
+                    public void onSuccess(Bitmap bitmapIcon) {
+                        localCurrency.setIcon(bitmapIcon);
+                        countIcons();
+                    }
+                });
             }
 
             return null;
@@ -696,7 +694,6 @@ public class Summary extends Fragment {
             balanceManager.updateTotalBalance(new BalanceManager.VolleyCallBack() {
                 @Override
                 public void onSuccess() {
-
                     final List<Currency> balance = balanceManager.getTotalBalance();
 
                     if(balanceManager.getTotalBalance().size() > 0)
