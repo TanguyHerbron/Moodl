@@ -1,8 +1,10 @@
 package com.nauk.moodl.DataManagers.CurrencyData;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -231,6 +233,19 @@ public class Currency implements Parcelable {
 
     }
 
+    private int getDarkenColor(int color)
+    {
+        int transColor;
+        int alpha = Color.alpha(color);
+        int r = Math.round(Color.red(color) * 0.8f);
+        int g = Math.round(Color.green(color) * 0.8f);
+        int b = Math.round(Color.blue(color) * 0.8f);
+
+        transColor = Color.argb(alpha, r, g, b);
+
+        return transColor ;
+    }
+
     public void setId(int id)
     {
         this.id = id;
@@ -243,6 +258,13 @@ public class Currency implements Parcelable {
 
     public void setChartColor(int chartColor)
     {
+        double lightness = 1 - (0.299 * Color.red(chartColor) + 0.587 * Color.green(chartColor) + 0.114 * Color.blue(chartColor)) / 255;
+
+        if(lightness < 0.1)
+        {
+            chartColor = getDarkenColor(chartColor);
+        }
+
         this.chartColor = chartColor;
     }
 

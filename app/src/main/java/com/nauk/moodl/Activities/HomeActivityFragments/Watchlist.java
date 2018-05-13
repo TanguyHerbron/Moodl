@@ -271,45 +271,6 @@ public class Watchlist extends Fragment {
         }
     }
 
-    private LineData generateData(Currency currency)
-    {
-        LineDataSet dataSet;
-        List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
-        ArrayList<Entry> values = new ArrayList<>();
-
-        for(int i = 0; i < dataChartList.size(); i+=10)
-        {
-            values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
-        }
-
-        dataSet = new LineDataSet(values, "History");
-        dataSet.setDrawIcons(false);
-        dataSet.setColor(currency.getChartColor());
-        dataSet.setLineWidth(1);
-        dataSet.setDrawFilled(true);
-        dataSet.setFillColor(getColorWithAplha(currency.getChartColor(), 0.5f));
-        dataSet.setFormLineWidth(1);
-        dataSet.setFormSize(15);
-        dataSet.setDrawCircles(false);
-        dataSet.setDrawValues(false);
-        dataSet.setHighlightEnabled(false);
-
-        return new LineData(dataSet);
-    }
-
-    private int getColorWithAplha(int color, float ratio)
-    {
-        int transColor;
-        int alpha = Math.round(Color.alpha(color) * ratio);
-        int r = Color.red(color);
-        int g = Color.green(color);
-        int b = Color.blue(color);
-
-        transColor = Color.argb(alpha, r, g, b);
-
-        return transColor ;
-    }
-
     private String getIconUrl(String symbol)
     {
         String url;

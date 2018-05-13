@@ -186,6 +186,11 @@ public class CurrencyDataRetriever {
     {
         String requestUrl = null;
 
+        if(symbolCurrencyFrom.equals("MIOTA"))
+        {
+            symbolCurrencyFrom = "IOT";
+        }
+
         switch (timeUnit)
         {
             case MINUTES:
