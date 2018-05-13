@@ -1,5 +1,7 @@
 package com.nauk.moodl.DataManagers.CurrencyData;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -21,6 +23,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.nauk.moodl.Activities.CurrencyDetailsActivity;
+import com.nauk.moodl.Activities.HomeActivityFragments.Summary;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
@@ -43,7 +46,7 @@ public class CurrencyCardview extends CardView {
         super(context);
     }
 
-    public CurrencyCardview(@NonNull final Context context, final Currency currency)
+    public CurrencyCardview(@NonNull final Context context, final Currency currency, final Activity activity)
     {
         super (context);
 
@@ -97,9 +100,11 @@ public class CurrencyCardview extends CardView {
         findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                Intent intent = new Intent(activity, CurrencyDetailsActivity.class);
                 intent.putExtra("currency", currency);
-                context.getApplicationContext().startActivity(intent);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ActivityOptions activityOptions = ActivityOptions.makeSceneTransitionAnimation(activity, findViewById(R.id.LineChartView), "chart");
+                activity.startActivity(intent, activityOptions.toBundle());
             }
         });
 

@@ -63,6 +63,7 @@
                 android:id="@+id/chartPriceView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:transitionName="chart"
                 android:layout_weight="0.5"/>
 
             <com.github.mikephil.charting.charts.CandleStickChart

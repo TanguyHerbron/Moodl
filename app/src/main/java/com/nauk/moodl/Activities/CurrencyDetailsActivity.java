@@ -140,7 +140,16 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+
+                if(viewFlipper.getDisplayedChild() == 0)
+                {
+                    finishAfterTransition();
+                }
+                else
+                {
+                    finish();
+                }
+
                 return true;
         }
         return super.onOptionsItemSelected(item);

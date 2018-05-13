@@ -250,7 +250,7 @@ public class Watchlist extends Fragment {
             public void run() {
                 for(Currency currency : watchlistManager.getWatchlist())
                 {
-                    ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(new CurrencyCardview(getContext(), currency));
+                    ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(new CurrencyCardview(getContext(), currency, getActivity()));
                 }
             }
         });
