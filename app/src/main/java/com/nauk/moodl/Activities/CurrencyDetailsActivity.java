@@ -239,8 +239,6 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
         updateChartTab(DAY, 1);
 
-
-
         hasBeenModified = false;
 
         Drawable tradeDrawable = ((ProgressBar) findViewById(R.id.loadingIndicator)).getIndeterminateDrawable();
