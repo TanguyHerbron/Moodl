@@ -13,6 +13,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.nauk.moodl.HomeActivityPagerAdapter;
+import com.nauk.moodl.LayoutManagers.CustomViewPager;
 import com.nauk.moodl.R;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
@@ -26,7 +27,7 @@ import com.nauk.moodl.R;
 public class HomeActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
-    private ViewPager viewPager;
+    private CustomViewPager viewPager;
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener

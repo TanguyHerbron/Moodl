@@ -1,204 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mainLinear"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="false"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
-    android:layout_marginBottom="10dp"
-    app:cardCornerRadius="2dp"
     android:orientation="vertical"
     android:tag="mainLinear">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/currencyInfoLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
+            android:layout_margin="5dp"
+            android:orientation="vertical"
+            android:layout_weight="0.92">
 
             <LinearLayout
-                android:id="@+id/currencyInfoLayout"
-                android:layout_width="0dp"
+                android:id="@+id/topLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:orientation="vertical"
-                android:layout_weight="0.92">
+                android:orientation="horizontal"
+                android:gravity="center">
 
-                <LinearLayout
-                    android:id="@+id/topLayout"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/currencyIcon"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center">
+                    android:layout_margin="1dp" />
 
-                    <ImageView
-                        android:id="@+id/currencyIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="1dp" />
-
-                    <TextView
-                        android:id="@+id/currencyNameTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:gravity="start"
-                        android:textColor="@color/mainTextViewColor"
-                        android:textSize="@dimen/cardViewMainText" />
-
-                    <TextView
-                        android:id="@+id/currencySymbolTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="2dp"
-                        android:gravity="left"
-                        android:textColor="@color/secondaryTextViewColor"
-                        android:textSize="@dimen/cardViewSecondaryText" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/bottomLayout"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/currencyNameTextView"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_gravity="center_vertical"
+                    android:gravity="start"
+                    android:textColor="@color/mainTextViewColor"
+                    android:textSize="@dimen/cardViewMainText" />
 
-                    <TextView
-                        android:id="@+id/currencyValueTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:textColor="@color/secondaryTextViewColor"
-                        android:textSize="@dimen/cardViewMainText"
-                        android:layout_weight="0.5"/>
-
-                    <LinearLayout
-                        android:id="@+id/secondaryLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:orientation="horizontal"
-                        android:layout_weight="0.5">
-
-                        <TextView
-                            android:id="@+id/currencyFluctuationPercentageTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/cardViewMainText" />
-
-                        <TextView
-                            android:id="@+id/currencyFluctuationTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/cardViewSecondaryText" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/currencySymbolTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:gravity="left"
+                    android:textColor="@color/secondaryTextViewColor"
+                    android:textSize="@dimen/cardViewSecondaryText" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/deleteCardWatchlist"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:background="@color/decreaseCandle"
-                android:gravity="center"
-                android:layout_gravity="end"
-                android:visibility="gone"
-                android:layout_weight="0.08"
-                android:orientation="vertical">
+                android:id="@+id/bottomLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-                <ImageView
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/currencyValueTextView"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ic_delete_white_24dp"
-                    android:clickable="false"
-                    android:focusable="false"/>
+                    android:gravity="start"
+                    android:textColor="@color/secondaryTextViewColor"
+                    android:textSize="@dimen/cardViewMainText"
+                    android:layout_weight="0.5"/>
+
+                <LinearLayout
+                    android:id="@+id/secondaryLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:orientation="horizontal"
+                    android:layout_weight="0.5">
+
+                    <TextView
+                        android:id="@+id/currencyFluctuationPercentageTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/cardViewMainText" />
+
+                    <TextView
+                        android:id="@+id/currencyFluctuationTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/cardViewSecondaryText" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/collapsableLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:id="@+id/deleteCardWatchlist"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@color/decreaseCandle"
+            android:gravity="center"
+            android:layout_gravity="end"
             android:visibility="gone"
+            android:layout_weight="0.08"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/separationLayout"
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Day history"
-                    android:textSize="@dimen/cardViewSecondaryText" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/separationLineSize"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:background="@color/separationColor" />
-
-            </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/frameLayoutChart"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/cardViewChartSize"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="visible">
-
-                <ProgressBar
-                    android:id="@+id/progressBarLinechartWatchlist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:visibility="visible"/>
-
-                <FrameLayout
-                    android:id="@+id/linearLayoutSubLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:visibility="gone">
-
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/LineChartView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
-
-                    <ImageView
-                        android:id="@+id/detailsArrow"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_keyboard_arrow_right_grey_48dp"
-                        android:layout_gravity="center_vertical|end"/>
-
-                </FrameLayout>
-
-            </FrameLayout>
+                android:background="@drawable/ic_delete_white_24dp"
+                android:clickable="false"
+                android:focusable="false"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-</android.support.v7.widget.CardView>
+    <LinearLayout
+        android:id="@+id/collapsableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/separationLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Day history"
+                android:textSize="@dimen/cardViewSecondaryText" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/separationLineSize"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:background="@color/separationColor" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/frameLayoutChart"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cardViewChartSize"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/progressBarLinechartWatchlist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="false"
+                android:focusable="false"
+                android:visibility="visible"/>
+
+            <FrameLayout
+                android:id="@+id/linearLayoutSubLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/LineChartView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
+                <ImageView
+                    android:id="@+id/detailsArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_keyboard_arrow_right_grey_48dp"
+                    android:layout_gravity="center_vertical|end"/>
+
+            </FrameLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

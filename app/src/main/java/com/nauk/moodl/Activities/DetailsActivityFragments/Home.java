@@ -33,6 +33,7 @@ import com.nauk.moodl.Activities.CurrencyDetailsActivity;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.moodl.DataManagers.PreferencesManager;
+import com.nauk.moodl.LayoutManagers.CustomViewPager;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -462,7 +463,8 @@ public class Home extends Fragment {
 
         barChart.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+            public boolean onTouch(View view, MotionEvent motionEvent)
+            {
                 return toucheEvent(motionEvent);
             }
         });
@@ -478,12 +480,19 @@ public class Home extends Fragment {
 
     private boolean toucheEvent(MotionEvent motionEvent)
     {
-        if(motionEvent.getAction() == MotionEvent.ACTION_UP)
+        switch (motionEvent.getAction())
         {
-            lineChart.highlightValue(null);
-            updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
-            barChart.highlightValues(null);
-            hideDataIndicators();
+            case MotionEvent.ACTION_DOWN:
+                ((CustomViewPager) view.getParent()).setPagingEnabled(false);
+                break;
+
+            case MotionEvent.ACTION_UP:
+                ((CustomViewPager) view.getParent()).setPagingEnabled(true);
+                lineChart.highlightValue(null);
+                updateFluctuation(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
+                barChart.highlightValues(null);
+                hideDataIndicators();
+                break;
         }
 
         return false;
@@ -518,7 +527,8 @@ public class Home extends Fragment {
 
         lineChart.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+            public boolean onTouch(View view, MotionEvent motionEvent)
+            {
                 return toucheEvent(motionEvent);
             }
         });

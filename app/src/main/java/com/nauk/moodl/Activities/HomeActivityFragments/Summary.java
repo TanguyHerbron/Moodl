@@ -568,7 +568,7 @@ public class Summary extends Fragment {
             InputStream input = connection.getInputStream();
             result = BitmapFactory.decodeStream(input);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.d("moodl", "Error while downloading icon");
             result = BitmapFactory.decodeResource(this.getResources(),
                     R.mipmap.ic_launcher_moodl);
             result = Bitmap.createScaledBitmap(result, 50, 50, false);

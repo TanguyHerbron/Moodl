@@ -24,6 +24,7 @@ import com.nauk.moodl.Activities.SettingsActivity;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.MarketCapManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
+import com.nauk.moodl.LayoutManagers.CustomViewPager;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -257,11 +258,13 @@ public class MarketCapitalization extends Fragment {
                 {
                     case MotionEvent.ACTION_DOWN:
                         refreshLayout.setEnabled(false);
+                        ((CustomViewPager) view.getParent().getParent().getParent().getParent().getParent()).setPagingEnabled(false);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     default:
                         refreshLayout.setEnabled(true);
+                        ((CustomViewPager) view.getParent().getParent().getParent().getParent().getParent()).setPagingEnabled(true);
                         break;
                 }
                 return false;

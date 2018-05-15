@@ -25,6 +25,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.nauk.moodl.Activities.CurrencyDetailsActivity;
 import com.nauk.moodl.Activities.HomeActivityFragments.Summary;
+import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
@@ -100,6 +101,15 @@ public class CurrencyCardview extends CardView {
 
         updateCardViewInfos(currency);
 
+        findViewById(R.id.deleteCardWatchlist).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseManager databaseManager = new DatabaseManager(getContext());
+                databaseManager.deleteCurrencyFromWatchlist(currency.getSymbol());
+                collapseH(CurrencyCardview.this);
+            }
+        });
+
         findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -112,6 +122,11 @@ public class CurrencyCardview extends CardView {
         });
 
         updateColor(currency);
+    }
+
+    private float convertDpToPx(float dp)
+    {
+        return dp * this.getResources().getDisplayMetrics().density;
     }
 
     public CurrencyCardview(@NonNull final Context context, final Currency currency, float totalValue, boolean isBalanceHidden)
@@ -181,9 +196,16 @@ public class CurrencyCardview extends CardView {
 
     private void setupCardView(Context context)
     {
+        ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.MATCH_PARENT, ViewGroup.MarginLayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins((int) convertDpToPx(10), 0, (int) convertDpToPx(10), (int) convertDpToPx(10));
+
+        setLayoutParams(layoutParams);
+
+        setRadius(convertDpToPx(2));
+
         setClickable(false);
         setFocusable(false);
-        setBackgroundColor(context.getColor(R.color.summary_background));
+        setCardBackgroundColor(context.getColor(R.color.white));
     }
 
     private void setupLineChart(View view, final Currency currency)

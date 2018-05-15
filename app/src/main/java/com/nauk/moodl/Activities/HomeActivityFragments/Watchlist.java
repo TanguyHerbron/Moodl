@@ -134,10 +134,14 @@ public class Watchlist extends Fragment {
                 {
                     editModeEnabled = false;
 
+                    LinearLayout watchlistLayout = Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist);
+
                     for(int i = 0; i < ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildCount(); i++)
                     {
-                        ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildAt(i).setClickable(true);
-                        collapseW(((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildAt(i).findViewById(R.id.deleteCardWatchlist));
+                        View watchlistElement = watchlistLayout.getChildAt(i);
+
+                        watchlistElement.setClickable(true);
+                        collapseW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
                     }
                 }
                 else
@@ -146,14 +150,12 @@ public class Watchlist extends Fragment {
 
                     LinearLayout watchlistLayout = Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist);
 
-                    Animation anim = getVerticalExpandAnimation(watchlistLayout.getChildAt(0));
-
                     for(int i = 0; i < ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildCount(); i++)
                     {
                         View watchlistElement = watchlistLayout.getChildAt(i);
 
                         watchlistElement.setClickable(false);
-                        expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist), anim);
+                        expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
                     }
                 }
             }
