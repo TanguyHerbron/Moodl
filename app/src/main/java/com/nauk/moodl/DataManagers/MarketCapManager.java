@@ -135,6 +135,7 @@ public class MarketCapManager {
                     JSONObject quoteJsonObject = subCurrencyJsonObject.getJSONObject("quotes");
                     JSONObject symJsonObject = quoteJsonObject.getJSONObject(toSymbol);
                     newCurrency.setMarketCapitalization(symJsonObject.getDouble("market_cap"));
+                    newCurrency.setVolume24h(symJsonObject.getDouble("volume_24h"));
 
                     topCurrencies.add(newCurrency);
                 }
@@ -142,6 +143,22 @@ public class MarketCapManager {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public Currency getCurrencyFromSymbol(String symbol)
+    {
+        Currency returnedCurrency = null;
+        int index = 0;
+
+        do {
+            if(symbol.equals(topCurrencies.get(index).getSymbol()))
+            {
+                returnedCurrency = topCurrencies.get(index);
+            }
+        } while(index < topCurrencies.size() && returnedCurrency == null);
+
+
+        return returnedCurrency;
     }
 
     public long getMarketCap()

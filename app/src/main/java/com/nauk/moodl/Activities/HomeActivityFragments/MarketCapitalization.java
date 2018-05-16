@@ -16,10 +16,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.nauk.moodl.Activities.SettingsActivity;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.MarketCapManager;
@@ -207,7 +210,7 @@ public class MarketCapitalization extends Fragment {
 
         for(int i = 0; i < topCurrencies.size(); i++)
         {
-            PieEntry pieEntry = new PieEntry(topCurrencies.get(i).getDominance(marketCapManager.getMarketCap()), topCurrencies.get(i).getSymbol());
+            PieEntry pieEntry = new PieEntry(topCurrencies.get(i).getDominance(marketCapManager.getMarketCap()), topCurrencies.get(i).getSymbol(), topCurrencies.get(i).getSymbol());
 
             if(pieEntry.getValue() < 3)
             {
@@ -268,6 +271,19 @@ public class MarketCapitalization extends Fragment {
                         break;
                 }
                 return false;
+            }
+        });
+
+        pieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                Currency currency = marketCapManager.getCurrencyFromSymbol((String) e.getData());
+                Log.d("moodl", "> " + currency.getSymbol() + " " + currency.getMarketCapitalization() + " " + currency.getVolume24h());
+            }
+
+            @Override
+            public void onNothingSelected() {
+
             }
         });
 

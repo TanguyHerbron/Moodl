@@ -40,6 +40,8 @@ public class Currency implements Parcelable {
     private String proofType;
     private int totalSupply;
     private double marketCapitalization;
+
+    private double volume24h;
     private double dominance;
     private int rank;
     private String startDate;
@@ -266,6 +268,14 @@ public class Currency implements Parcelable {
         }
 
         this.chartColor = chartColor;
+    }
+
+    public double getVolume24h() {
+        return volume24h;
+    }
+
+    public void setVolume24h(double volume24h) {
+        this.volume24h = volume24h;
     }
 
     public int getChartColor()
