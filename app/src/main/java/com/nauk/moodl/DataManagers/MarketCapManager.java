@@ -155,6 +155,8 @@ public class MarketCapManager {
             {
                 returnedCurrency = topCurrencies.get(index);
             }
+
+            index++;
         } while(index < topCurrencies.size() && returnedCurrency == null);
 
 

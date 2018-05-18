@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
@@ -27,6 +28,7 @@ import com.nauk.moodl.Activities.SettingsActivity;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.MarketCapManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
+import com.nauk.moodl.LayoutManagers.CustomPieChart;
 import com.nauk.moodl.LayoutManagers.CustomViewPager;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
@@ -246,7 +248,7 @@ public class MarketCapitalization extends Fragment {
 
     private void setupPieChart(PieData data)
     {
-        PieChart pieChart = view.findViewById(R.id.marketCapPieChart);
+        CustomPieChart pieChart = view.findViewById(R.id.marketCapPieChart);
 
         pieChart.setData(data);
         pieChart.setDrawSlicesUnderHole(false);
@@ -270,6 +272,9 @@ public class MarketCapitalization extends Fragment {
                         ((CustomViewPager) view.getParent().getParent().getParent().getParent().getParent()).setPagingEnabled(true);
                         break;
                 }
+
+                view.performClick();
+
                 return false;
             }
         });
@@ -277,8 +282,23 @@ public class MarketCapitalization extends Fragment {
         pieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
-                Currency currency = marketCapManager.getCurrencyFromSymbol((String) e.getData());
-                Log.d("moodl", "> " + currency.getSymbol() + " " + currency.getMarketCapitalization() + " " + currency.getVolume24h());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(e.getData() != null)
+                        {
+                            Currency currency = marketCapManager.getCurrencyFromSymbol((String) e.getData());
+                            //view.findViewById(R.id.layoutMarketDetails).setVisibility();
+                            ((TextView) view.findViewById(R.id.textViewMarketCap))
+                                    .setText(PlaceholderManager.getValueString(String.valueOf(currency.getMarketCapitalization()), getContext()));
+                            ((TextView) view.findViewById(R.id.textViewVolume))
+                                    .setText(PlaceholderManager.getValueString(String.valueOf(currency.getVolume24h()), getContext()));
+                            ((TextView) view.findViewById(R.id.textViewSymbol))
+                                    .setText(currency.getName());
+
+                        }
+                    }
+                });
             }
 
             @Override
