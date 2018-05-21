@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.SpannableString;
 import android.util.Log;
@@ -73,11 +75,31 @@ public class MarketCapitalization extends Fragment {
 
         setupRefreshLayout();
 
-        setupSettingsButton();
+        setupDrawerButton();
 
         updateMarketCap(true);
 
         return view;
+    }
+
+    private void setupDrawerButton()
+    {
+        ImageButton drawerButton = view.findViewById(R.id.drawer_button);
+        drawerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
+
+                if(drawerLayout.isDrawerOpen(GravityCompat.START))
+                {
+                    drawerLayout.closeDrawers();
+                }
+                else
+                {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
     }
 
     private void setupRefreshLayout()
@@ -93,19 +115,6 @@ public class MarketCapitalization extends Fragment {
 
                 }
         );
-    }
-
-    private void setupSettingsButton()
-    {
-        ImageButton settingsButton = view.findViewById(R.id.settings_button);
-
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
-                startActivity(settingIntent);
-            }
-        });
     }
 
     @Override
@@ -263,13 +272,11 @@ public class MarketCapitalization extends Fragment {
                 {
                     case MotionEvent.ACTION_DOWN:
                         refreshLayout.setEnabled(false);
-                        ((CustomViewPager) view.getParent().getParent().getParent().getParent().getParent()).setPagingEnabled(false);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     default:
                         refreshLayout.setEnabled(true);
-                        ((CustomViewPager) view.getParent().getParent().getParent().getParent().getParent()).setPagingEnabled(true);
                         break;
                 }
 

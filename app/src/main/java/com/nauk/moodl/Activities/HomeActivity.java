@@ -1,17 +1,27 @@
 package com.nauk.moodl.Activities;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.nauk.moodl.Activities.DetailsActivityFragments.Home;
+import com.nauk.moodl.Activities.HomeActivityFragments.MarketCapitalization;
+import com.nauk.moodl.Activities.HomeActivityFragments.Summary;
+import com.nauk.moodl.Activities.HomeActivityFragments.Watchlist;
 import com.nauk.moodl.HomeActivityPagerAdapter;
 import com.nauk.moodl.LayoutManagers.CustomViewPager;
 import com.nauk.moodl.R;
@@ -26,31 +36,11 @@ import com.nauk.moodl.R;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private BottomNavigationView bottomNavigationView;
-    private CustomViewPager viewPager;
-
-
-    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            item.setChecked(true);
-            switch (item.getItemId())
-            {
-                case R.id.navigation_watchlist:
-                    viewPager.setCurrentItem(0);
-                    break;
-                case R.id.navigation_currencies_list:
-                    viewPager.setCurrentItem(1);
-                    break;
-                case R.id.navigation_market_cap:
-                    viewPager.setCurrentItem(2);
-                    break;
-            }
-            return false;
-        }
-    };
+    private DrawerLayout drawerLayout;
+    private Fragment watchlistFragment;
+    private Fragment holdingsFragment;
+    private Fragment marketFragment;
+    private Fragment currentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,43 +53,81 @@ public class HomeActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_currency_summary);
 
-        viewPager = findViewById(R.id.viewPager);
-        final HomeActivityPagerAdapter adapter = new HomeActivityPagerAdapter(getSupportFragmentManager(), 3);
+        watchlistFragment = new Watchlist();
+        holdingsFragment = new Summary();
+        marketFragment = new MarketCapitalization();
 
-        viewPager.setAdapter(adapter);
-        viewPager.setOffscreenPageLimit(2);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.content_frame, watchlistFragment)
+                .addToBackStack(null)
+                .add(R.id.content_frame, marketFragment)
+                .addToBackStack(null)
+                .add(R.id.content_frame, holdingsFragment)
+                .addToBackStack(null)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+
+        showFragment(holdingsFragment);
+
+        navigationView.setCheckedItem(R.id.navigation_currencies_list);
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if(!bottomNavigationView.getMenu().getItem(position).isChecked())
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                switch (item.getItemId())
                 {
-                    bottomNavigationView.getMenu().getItem(position).setChecked(true);
+                    case R.id.navigation_watchlist:
+                        showFragment(watchlistFragment);
+                        break;
+                    case R.id.navigation_currencies_list:
+                        showFragment(holdingsFragment);
+                        break;
+                    case R.id.navigation_market_cap:
+                        showFragment(marketFragment);
+                        break;
+                    case R.id.navigation_settings:
+                        Intent settingIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+                        startActivity(settingIntent);
+                        break;
                 }
+                item.setChecked(true);
+                drawerLayout.closeDrawers();
 
-                if(position % 2 == 0)
-                {
-                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
-                }
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
+                return false;
             }
         });
 
         //Objects initialization
 
         //Layouts setup
+    }
 
-        bottomNavigationView = findViewById(R.id.navigationSummary);
-        bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
-        bottomNavigationView.setSelectedItemId(R.id.navigation_currencies_list);
+    private void showFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        if(currentFragment != null)
+        {
+            fragmentManager.beginTransaction()
+                    .hide(currentFragment)
+                    .show(fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .commit();
+        }
+        else
+        {
+            fragmentManager.beginTransaction()
+                    .show(fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .commit();
+        }
+
+
+
+        currentFragment = fragment;
     }
 
     @Override

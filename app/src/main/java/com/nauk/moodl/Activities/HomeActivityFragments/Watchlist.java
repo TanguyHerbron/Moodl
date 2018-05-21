@@ -3,45 +3,31 @@ package com.nauk.moodl.Activities.HomeActivityFragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.nauk.moodl.Activities.CurrencyDetailsActivity;
 import com.nauk.moodl.Activities.CurrencySelectionActivity;
 import com.nauk.moodl.Activities.HomeActivity;
 import com.nauk.moodl.Activities.SettingsActivity;
 import com.nauk.moodl.DataManagers.BalanceManager;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyCardview;
-import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyTickerList;
-import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.DataManagers.WatchlistManager;
-import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
 import org.json.JSONException;
@@ -50,16 +36,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
-import static com.nauk.moodl.MoodlBox.collapseH;
 import static com.nauk.moodl.MoodlBox.collapseW;
-import static com.nauk.moodl.MoodlBox.expandH;
 import static com.nauk.moodl.MoodlBox.expandW;
-import static com.nauk.moodl.MoodlBox.getVerticalExpandAnimation;
-import static com.nauk.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
 /**
@@ -117,7 +96,7 @@ public class Watchlist extends Fragment {
 
         setupAddWatchlistButton();
 
-        setupSettingsButton();
+        setupDrawerButton();
 
         setupEditButton();
 
@@ -130,13 +109,13 @@ public class Watchlist extends Fragment {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                LinearLayout watchlistLayout = Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist);
+
                 if(editModeEnabled)
                 {
                     editModeEnabled = false;
 
-                    LinearLayout watchlistLayout = Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist);
-
-                    for(int i = 0; i < ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildCount(); i++)
+                    for(int i = 0; i < watchlistLayout.getChildCount(); i++)
                     {
                         View watchlistElement = watchlistLayout.getChildAt(i);
 
@@ -148,9 +127,7 @@ public class Watchlist extends Fragment {
                 {
                     editModeEnabled = true;
 
-                    LinearLayout watchlistLayout = Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist);
-
-                    for(int i = 0; i < ((LinearLayout) Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist)).getChildCount(); i++)
+                    for(int i = 0; i < watchlistLayout.getChildCount(); i++)
                     {
                         View watchlistElement = watchlistLayout.getChildAt(i);
 
@@ -175,14 +152,22 @@ public class Watchlist extends Fragment {
         });
     }
 
-    private void setupSettingsButton()
+    private void setupDrawerButton()
     {
-        ImageButton settingsButton = view.findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
+        ImageButton drawerButton = view.findViewById(R.id.drawer_button);
+        drawerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
-                startActivity(settingIntent);
+                DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
+
+                if(drawerLayout.isDrawerOpen(GravityCompat.START))
+                {
+                    drawerLayout.closeDrawers();
+                }
+                else
+                {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
             }
         });
     }

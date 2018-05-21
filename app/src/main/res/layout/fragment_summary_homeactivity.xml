@@ -53,14 +53,14 @@
                 android:layout_margin="10dp">
 
                 <ImageButton
-                    android:id="@+id/settings_button"
+                    android:id="@+id/drawer_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/action_settings"
+                    android:background="@drawable/ic_drawer_white_24dp"
                     android:visibility="visible"
-                    android:layout_gravity="end"
-                    android:background="@drawable/ic_settings_black_24dp"
-                    android:contentDescription="Settings"/>
+                    android:layout_gravity="start|center_vertical"
+                    android:contentDescription="Drawer"/>
 
             </FrameLayout>
 

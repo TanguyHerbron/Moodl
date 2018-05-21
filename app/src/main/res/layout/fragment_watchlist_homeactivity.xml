@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:layout_marginBottom="56dp">
+    android:fitsSystemWindows="true">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -25,14 +24,14 @@
                 android:layout_margin="10dp">
 
                 <ImageButton
-                    android:id="@+id/edit_button"
+                    android:id="@+id/drawer_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/action_edit_mode"
-                    android:background="@drawable/ic_mode_edit_white_24dp"
+                    android:text="@string/action_settings"
+                    android:background="@drawable/ic_drawer_white_24dp"
                     android:visibility="visible"
-                    android:layout_gravity="start"
-                    android:contentDescription="Edit mode"/>
+                    android:layout_gravity="start|center_vertical"
+                    android:contentDescription="Drawer"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -45,14 +44,14 @@
                     android:textStyle="bold"/>
 
                 <ImageButton
-                    android:id="@+id/settings_button"
+                    android:id="@+id/edit_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/action_settings"
-                    android:background="@drawable/ic_settings_black_24dp"
+                    android:text="@string/action_edit_mode"
+                    android:background="@drawable/ic_mode_edit_white_24dp"
                     android:visibility="visible"
-                    android:layout_gravity="end"
-                    android:contentDescription="Settings"/>
+                    android:layout_gravity="end|center_vertical"
+                    android:contentDescription="Edit mode"/>
 
             </FrameLayout>
 

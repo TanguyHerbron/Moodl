@@ -13,6 +13,8 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
@@ -114,13 +116,33 @@ public class Summary extends Fragment {
 
         setupAddCurrencyButton(fragmentView);
 
-        setupSettingsButton(fragmentView);
-
         updateAll(true);
+
+        setupDrawerButton(fragmentView);
 
         generateSplashScreen();
 
         return fragmentView;
+    }
+
+    private void setupDrawerButton(View view)
+    {
+        ImageButton drawerButton = view.findViewById(R.id.drawer_button);
+        drawerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
+
+                if(drawerLayout.isDrawerOpen(GravityCompat.START))
+                {
+                    drawerLayout.closeDrawers();
+                }
+                else
+                {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
     }
 
     private void initiateUpdateRunnable()
@@ -204,20 +226,6 @@ public class Summary extends Fragment {
         });
     }
 
-    private void setupSettingsButton(View fragmentView)
-    {
-        ImageButton settingsButton = fragmentView.findViewById(R.id.settings_button);
-
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent settingIntent = new Intent(getActivity(), SettingsActivity.class);
-                startActivity(settingIntent);
-            }
-        });
-
-    }
-
     private void generateSplashScreen()
     {
         LinearLayout loadingLayout = new LinearLayout(getActivity());
@@ -291,14 +299,14 @@ public class Summary extends Fragment {
 
     private void showErrorSnackbar()
     {
-        Snackbar.make(getActivity().findViewById(R.id.snackbar_placer), "Error while updating data", Snackbar.LENGTH_LONG)
+        /*Snackbar.make(getActivity().findViewById(R.id.snackbar_placer), "Error while updating data", Snackbar.LENGTH_LONG)
                 .setAction("Update", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
                     }
                 })
-                .show();
+                .show();*/
     }
 
     private void resetCounters()
@@ -640,7 +648,7 @@ public class Summary extends Fragment {
     {
         private void generateSnackBarError(String error)
         {
-            View view = getActivity().findViewById(R.id.snackbar_placer);
+            /*View view = getActivity().findViewById(R.id.snackbar_placer);
 
             switch (error)
             {
@@ -673,7 +681,7 @@ public class Summary extends Fragment {
                     Log.d("moodl", error);
 
                     updateAll(false);
-            }
+            }*/
         }
 
         @Override
