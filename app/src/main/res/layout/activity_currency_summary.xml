@@ -18,6 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/summary_navigation_drawer"/>
+        app:menu="@menu/summary_navigation_drawer"
+        app:headerLayout="@layout/summary_drawer_header"/>
 
 </android.support.v4.widget.DrawerLayout>
