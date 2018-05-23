@@ -5,12 +5,36 @@
     android:background="@drawable/gradient_background"
     android:padding="16dp"
     android:orientation="vertical"
-    android:gravity="bottom">
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_launcher_moodl"
+            android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="24sp"/>
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Moodl"
-        android:textStyle="bold"/>
+        android:id="@+id/totalValueDrawer"
+        android:textColor="@color/white"
+        android:textSize="20sp"/>
+
 
 </LinearLayout>

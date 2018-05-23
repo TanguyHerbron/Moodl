@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -61,7 +62,7 @@ public class Watchlist extends Fragment {
     private boolean editModeEnabled;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         view = inflater.inflate(R.layout.fragment_watchlist_homeactivity, container, false);
 
@@ -73,13 +74,7 @@ public class Watchlist extends Fragment {
         defaultCurrency = preferencesManager.getDefaultCurrency();
         currencyTickerList = new CurrencyTickerList(getActivity());
         tickerUpdated = false;
-        currencyTickerList.update(new BalanceManager.IconCallBack() {
-            @Override
-            public void onSuccess() {
-                tickerUpdated = true;
-                checkUpdatedData();
-            }
-        });
+        updateTickerList();
 
         editModeEnabled = false;
 
@@ -103,6 +98,25 @@ public class Watchlist extends Fragment {
         return view;
     }
 
+    private void updateTickerList()
+    {
+        AsyncTask<Void, Integer, Void> updater = new AsyncTask<Void, Integer, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                currencyTickerList.update(new BalanceManager.IconCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        tickerUpdated = true;
+                        checkUpdatedData();
+                    }
+                });
+                return null;
+            }
+        };
+
+        updater.execute();
+    }
+
     private void setupEditButton()
     {
         ImageButton editButton = view.findViewById(R.id.edit_button);
@@ -119,8 +133,11 @@ public class Watchlist extends Fragment {
                     {
                         View watchlistElement = watchlistLayout.getChildAt(i);
 
-                        watchlistElement.setClickable(true);
-                        collapseW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
+                        if(watchlistElement instanceof LinearLayout)
+                        {
+                            watchlistElement.setClickable(true);
+                            collapseW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
+                        }
                     }
                 }
                 else
@@ -131,8 +148,11 @@ public class Watchlist extends Fragment {
                     {
                         View watchlistElement = watchlistLayout.getChildAt(i);
 
-                        watchlistElement.setClickable(false);
-                        expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
+                        if(watchlistElement instanceof LinearLayout)
+                        {
+                            watchlistElement.setClickable(false);
+                            expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
+                        }
                     }
                 }
             }
@@ -200,15 +220,23 @@ public class Watchlist extends Fragment {
             lastTimestamp = System.currentTimeMillis()/1000;
             detailsUpdated = false;
 
-            watchlistManager.updateWatchlist();
-
-            currencyDetailsList.update(new BalanceManager.IconCallBack() {
+            AsyncTask<Void, Integer, Void> watchlistUpdater = new AsyncTask<Void, Integer, Void>() {
                 @Override
-                public void onSuccess() {
-                    detailsUpdated = true;
-                    checkUpdatedData();
+                protected Void doInBackground(Void... voids) {
+                    watchlistManager.updateWatchlist();
+
+                    currencyDetailsList.update(new BalanceManager.IconCallBack() {
+                        @Override
+                        public void onSuccess() {
+                            detailsUpdated = true;
+                            checkUpdatedData();
+                        }
+                    });
+                    return null;
                 }
-            });
+            };
+
+            watchlistUpdater.execute();
         }
         else
         {

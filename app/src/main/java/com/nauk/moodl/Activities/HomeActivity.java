@@ -4,26 +4,21 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.nauk.moodl.Activities.DetailsActivityFragments.Home;
 import com.nauk.moodl.Activities.HomeActivityFragments.MarketCapitalization;
 import com.nauk.moodl.Activities.HomeActivityFragments.Summary;
 import com.nauk.moodl.Activities.HomeActivityFragments.Watchlist;
-import com.nauk.moodl.HomeActivityPagerAdapter;
-import com.nauk.moodl.LayoutManagers.CustomViewPager;
 import com.nauk.moodl.R;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
@@ -57,16 +52,6 @@ public class HomeActivity extends AppCompatActivity {
         holdingsFragment = new Summary();
         marketFragment = new MarketCapitalization();
 
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.content_frame, watchlistFragment)
-                .addToBackStack(null)
-                .add(R.id.content_frame, marketFragment)
-                .addToBackStack(null)
-                .add(R.id.content_frame, holdingsFragment)
-                .addToBackStack(null)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .commit();
-
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
 
@@ -77,6 +62,8 @@ public class HomeActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                item.setChecked(true);
 
                 switch (item.getItemId())
                 {
@@ -92,9 +79,10 @@ public class HomeActivity extends AppCompatActivity {
                     case R.id.navigation_settings:
                         Intent settingIntent = new Intent(getApplicationContext(), SettingsActivity.class);
                         startActivity(settingIntent);
+                        item.setChecked(false);
                         break;
                 }
-                item.setChecked(true);
+
                 drawerLayout.closeDrawers();
 
                 return false;
@@ -108,24 +96,24 @@ public class HomeActivity extends AppCompatActivity {
 
     private void showFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         if(currentFragment != null)
         {
-            fragmentManager.beginTransaction()
-                    .hide(currentFragment)
-                    .show(fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .commit();
+            fragmentTransaction.hide(currentFragment);
+        }
+
+        if(fragment.isAdded())
+        {
+            fragmentTransaction.show(fragment);
         }
         else
         {
-            fragmentManager.beginTransaction()
-                    .show(fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .commit();
+            fragmentTransaction.add(R.id.content_frame, fragment).addToBackStack(null);
         }
 
-
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
 
         currentFragment = fragment;
     }
@@ -152,9 +140,8 @@ public class HomeActivity extends AppCompatActivity {
 
         switch (id)
         {
-            /*case R.id.action_settings:
-                Log.d(this.getResources().getString(R.string.debug), "Setting button toggled");
-                break;*/
+            case R.id.navigation_settings:
+                break;
         }
 
         return super.onOptionsItemSelected(item);

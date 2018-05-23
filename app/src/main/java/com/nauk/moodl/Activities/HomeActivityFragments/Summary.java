@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -30,7 +29,6 @@ import android.widget.TextView;
 
 import com.nauk.moodl.Activities.CurrencySelectionActivity;
 import com.nauk.moodl.Activities.HomeActivity;
-import com.nauk.moodl.Activities.SettingsActivity;
 import com.nauk.moodl.DataManagers.BalanceManager;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyCardview;
