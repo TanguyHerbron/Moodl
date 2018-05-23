@@ -34,6 +34,7 @@ import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyCardview;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyTickerList;
 import com.nauk.moodl.DataManagers.PreferencesManager;
+import com.nauk.moodl.HideBalanceSwitch;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -50,7 +51,7 @@ import static java.lang.Math.abs;
  * Created by Tiji on 13/04/2018.
  */
 
-public class Summary extends Fragment {
+public class Summary extends Fragment implements HideBalanceSwitch {
 
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
@@ -464,6 +465,12 @@ public class Summary extends Fragment {
             toolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.decrease));
             toolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.decrease));
         }
+    }
+
+    @Override
+    public void buttonCheckedChange() {
+        preferencesManager.switchBalanceHiddenState();
+        displayBalance(preferencesManager.isBalanceHidden());
     }
 
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>

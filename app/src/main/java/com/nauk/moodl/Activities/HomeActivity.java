@@ -15,10 +15,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 
 import com.nauk.moodl.Activities.HomeActivityFragments.MarketCapitalization;
 import com.nauk.moodl.Activities.HomeActivityFragments.Summary;
 import com.nauk.moodl.Activities.HomeActivityFragments.Watchlist;
+import com.nauk.moodl.HideBalanceSwitch;
 import com.nauk.moodl.R;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
@@ -37,6 +40,9 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment marketFragment;
     private Fragment currentFragment;
 
+
+    private HideBalanceSwitch switchInterface;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +60,8 @@ public class HomeActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+
+        setListener((HideBalanceSwitch) holdingsFragment);
 
         showFragment(holdingsFragment);
 
@@ -89,9 +97,28 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        setupBalanceSwitch();
+
         //Objects initialization
 
         //Layouts setup
+    }
+
+    public void setListener(HideBalanceSwitch switchInterface)
+    {
+        this.switchInterface = switchInterface;
+    }
+
+    private void setupBalanceSwitch()
+    {
+        Switch balanceSwitch = findViewById(R.id.switchHideBalance);
+
+        balanceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                switchInterface.buttonCheckedChange();
+            }
+        });
     }
 
     private void showFragment(Fragment fragment) {

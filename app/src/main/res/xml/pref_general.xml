@@ -1,9 +1,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SwitchPreference
+    <!--<SwitchPreference
         android:defaultValue="false"
         android:key="hide_balance"
-        android:title="@string/pref_title_hide_balance" />
+        android:title="@string/pref_title_hide_balance" />-->
 
     <ListPreference
         android:defaultValue="USD"

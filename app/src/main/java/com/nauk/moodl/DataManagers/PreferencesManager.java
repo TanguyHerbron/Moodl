@@ -93,6 +93,15 @@ public class PreferencesManager {
         return settingPreferences.getBoolean("enable_hitbtc", false);
     }
 
+    public boolean switchBalanceHiddenState()
+    {
+        SharedPreferences.Editor editor = settingPreferences.edit();
+        editor.putBoolean("hide_balance", !isBalanceHidden());
+        editor.apply();
+
+        return isBalanceHidden();
+    }
+
     public boolean isBalanceHidden()
     {
         return settingPreferences.getBoolean("hide_balance", false);
