@@ -91,7 +91,7 @@
                             style="?android:attr/progressBarStyleLarge"
                             android:layout_gravity="center"
                             android:background="@drawable/circular_progress_bar"
-                            android:visibility="gone"/>
+                            android:visibility="visible"/>
 
                     </LinearLayout>
 

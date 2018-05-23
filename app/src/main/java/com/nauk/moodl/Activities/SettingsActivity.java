@@ -216,22 +216,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
-            /*findPreference("hide_balance").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    boolean isChecked = ((SwitchPreference) findPreference("hide_balance")).isChecked();
-
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-                    SharedPreferences.Editor editor = preferences.edit();
-
-                    editor.putBoolean("hide_balance", isChecked);
-                    editor.apply();
-
-                    return isChecked;
-                }
-            });*/
-
             findPreference("version").setSummary(BuildConfig.VERSION_NAME);
 
             bindPreferenceSummaryToValue(findPreference("default_currency"));

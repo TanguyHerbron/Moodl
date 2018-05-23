@@ -74,7 +74,7 @@ public class Watchlist extends Fragment {
         defaultCurrency = preferencesManager.getDefaultCurrency();
         currencyTickerList = new CurrencyTickerList(getActivity());
         tickerUpdated = false;
-        checkUpdatedData();
+        updateTickerList();
 
         editModeEnabled = false;
 
@@ -96,6 +96,25 @@ public class Watchlist extends Fragment {
         setupEditButton();
 
         return view;
+    }
+
+    private void updateTickerList()
+    {
+        AsyncTask<Void, Integer, Void> updater = new AsyncTask<Void, Integer, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                currencyTickerList.update(new BalanceManager.IconCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        tickerUpdated = true;
+                        checkUpdatedData();
+                    }
+                });
+                return null;
+            }
+        };
+
+        updater.execute();
     }
 
     private void setupEditButton()
