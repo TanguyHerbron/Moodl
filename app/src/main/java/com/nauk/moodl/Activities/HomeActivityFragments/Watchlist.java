@@ -11,6 +11,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -133,7 +134,7 @@ public class Watchlist extends Fragment {
                     {
                         View watchlistElement = watchlistLayout.getChildAt(i);
 
-                        if(watchlistElement instanceof LinearLayout)
+                        if(watchlistElement instanceof CurrencyCardview)
                         {
                             watchlistElement.setClickable(true);
                             collapseW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
@@ -148,7 +149,7 @@ public class Watchlist extends Fragment {
                     {
                         View watchlistElement = watchlistLayout.getChildAt(i);
 
-                        if(watchlistElement instanceof LinearLayout)
+                        if(watchlistElement instanceof CurrencyCardview)
                         {
                             watchlistElement.setClickable(false);
                             expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
