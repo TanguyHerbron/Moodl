@@ -1,15 +1,29 @@
 package com.nauk.moodl;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
+import com.nauk.moodl.Activities.HomeActivity;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.subtractExact;
 
 /**
  * Created by Guitoune on 30/04/2018.
@@ -187,5 +201,40 @@ public class MoodlBox {
         catch(Exception ex){
             return "xx";
         }
+    }
+
+    public static void getBitmapFromURL(String src, String symbol, Resources resources, Context context, HomeActivity.IconCallBack callBack) {
+
+        String filepath = context.getCacheDir() + "/" + symbol + ".png";
+        Bitmap result;
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+        result = BitmapFactory.decodeFile(filepath, options);
+
+        if(result == null)
+        {
+            try {
+                java.net.URL url = new java.net.URL(src);
+                HttpURLConnection connection = (HttpURLConnection) url
+                        .openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                result = BitmapFactory.decodeStream(input);
+
+                FileOutputStream out = new FileOutputStream(filepath);
+                result.compress(Bitmap.CompressFormat.PNG, 100, out);
+
+            } catch (IOException e) {
+                Log.d("moodl", "Error while downloading " + symbol + " icon");
+                result = BitmapFactory.decodeResource(resources,
+                        R.mipmap.ic_launcher_moodl);
+                result = Bitmap.createScaledBitmap(result, 50, 50, false);
+            }
+        }
+
+        callBack.onSuccess(result);
     }
 }

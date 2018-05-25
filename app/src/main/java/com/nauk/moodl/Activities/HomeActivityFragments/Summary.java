@@ -35,6 +35,7 @@ import com.nauk.moodl.DataManagers.CurrencyData.CurrencyCardview;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyTickerList;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.HideBalanceSwitch;
+import com.nauk.moodl.MoodlBox;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -569,27 +570,6 @@ public class Summary extends Fragment implements HideBalanceSwitch {
         }
     }
 
-    private void getBitmapFromURL(String src, HomeActivity.IconCallBack callBack) {
-        Bitmap result;
-
-        try {
-            java.net.URL url = new java.net.URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url
-                    .openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            result = BitmapFactory.decodeStream(input);
-        } catch (IOException e) {
-            Log.d("moodl", "Error while downloading icon");
-            result = BitmapFactory.decodeResource(this.getResources(),
-                    R.mipmap.ic_launcher_moodl);
-            result = Bitmap.createScaledBitmap(result, 50, 50, false);
-        }
-
-        callBack.onSuccess(result);
-    }
-
     private void displayBalance(boolean hideBalance)
     {
         updateTitle();
@@ -635,7 +615,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new HomeActivity.IconCallBack() {
+                MoodlBox.getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), localCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
                     @Override
                     public void onSuccess(Bitmap bitmapIcon) {
                         localCurrency.setIcon(bitmapIcon);

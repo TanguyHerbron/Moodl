@@ -30,6 +30,7 @@ import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyTickerList;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.DataManagers.WatchlistManager;
+import com.nauk.moodl.MoodlBox;
 import com.nauk.moodl.R;
 
 import org.json.JSONException;
@@ -305,27 +306,6 @@ public class Watchlist extends Fragment {
         return url;
     }
 
-    private void getBitmapFromURL(String src, HomeActivity.IconCallBack callBack) {
-        Bitmap result;
-
-        try {
-            java.net.URL url = new java.net.URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url
-                    .openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            result = BitmapFactory.decodeStream(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-            result = BitmapFactory.decodeResource(this.getResources(),
-                    R.mipmap.ic_launcher_moodl);
-            result = Bitmap.createScaledBitmap(result, 50, 50, false);
-        }
-
-        callBack.onSuccess(result);
-    }
-
     private void updateChartColor(Currency currency)
     {
         if(currency.getIcon() != null)
@@ -371,7 +351,7 @@ public class Watchlist extends Fragment {
                 currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(final Currency sucessCurrency) {
-                        getBitmapFromURL(getIconUrl(sucessCurrency.getSymbol()), new HomeActivity.IconCallBack() {
+                        MoodlBox.getBitmapFromURL(getIconUrl(sucessCurrency.getSymbol()), sucessCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
                             @Override
                             public void onSuccess(Bitmap bitmapIcon) {
                                 sucessCurrency.setIcon(bitmapIcon);
