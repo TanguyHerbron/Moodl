@@ -136,7 +136,7 @@ public class CurrencyDataRetriever {
         return result;
     }
 
-    public void updateHistory(final String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
+    void updateHistory(final String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
     {
         String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
 
@@ -157,7 +157,7 @@ public class CurrencyDataRetriever {
         requestQueue.add(stringRequest);
     }
 
-    public void updatePrice(String symbolCurrencyFrom, String symbolCurrencyTo, final CurrencyCallBack callBack)
+    void updatePrice(String symbolCurrencyFrom, String symbolCurrencyTo, final CurrencyCallBack callBack)
     {
         if(symbolCurrencyFrom.equals("MIOTA"))
         {
@@ -312,61 +312,6 @@ public class CurrencyDataRetriever {
         double volumeTo = Double.parseDouble(jsonObject.getString("volumeto"));
 
         return new CurrencyDataChart(timestamp, close, high, low, open, volumeFrom, volumeTo);
-    }
-
-    public void getPriceTimestamp(String symbolCurrencyFrom, final DataChartCallBack callBack, long timestamp)
-    {
-        getPriceTimestamp(symbolCurrencyFrom, "USD", callBack, timestamp);
-    }
-
-    public void updateHistory(String symbolCurrencyFrom, final DataChartCallBack callBack, int timeUnit)
-    {
-        if(symbolCurrencyFrom.equals("USD"))
-        {
-            callBack.onSuccess((List<CurrencyDataChart>) null);
-        }
-        else
-        {
-            updateHistory(symbolCurrencyFrom, "USD", callBack, timeUnit);
-        }
-    }
-
-    public void updatePrice(String symbolCurrencyFrom, final CurrencyCallBack callBack)
-    {
-        if(symbolCurrencyFrom.equals("USD"))
-        {
-            callBack.onSuccess(null);
-        }
-        else
-        {
-            updatePrice(symbolCurrencyFrom, "USD", callBack);
-        }
-    }
-
-    /*public void updateCryptocompareDetails(int id, final Currency.CurrencyCallBack callBack)
-    {
-        String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        callBack.onSuccess();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        callBack.onSuccess();
-                    }
-                });
-
-        requestQueue.add(stringRequest);
-    }*/
-
-    public void updateCoinMarketCapDetails()
-    {
-
     }
 
     public interface DataChartCallBack {

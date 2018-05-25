@@ -12,6 +12,9 @@ import android.view.animation.Transformation;
 
 import com.nauk.moodl.Activities.HomeActivity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -236,5 +239,18 @@ public class MoodlBox {
         }
 
         callBack.onSuccess(result);
+    }
+
+    public static String getIconUrl(String imageUrl)
+    {
+        String url;
+
+        try {
+            url = "https://www.cryptocompare.com" + imageUrl + "?width=50";
+        } catch (NullPointerException e) {
+            url = null;
+        }
+
+        return url;
     }
 }

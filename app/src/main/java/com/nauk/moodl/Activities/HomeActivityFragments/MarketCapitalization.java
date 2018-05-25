@@ -8,6 +8,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.SpannableString;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -245,7 +246,16 @@ public class MarketCapitalization extends Fragment {
 
         if(marketCapCounter == 2)
         {
+            updateIcons();
             refreshDisplayedData();
+        }
+    }
+
+    private void updateIcons()
+    {
+        for(int i = 0; i < marketCapManager.getTopCurrencies().size(); i++)
+        {
+            Log.d("moodl", "> " + marketCapManager.getTopCurrencies().get(i).getSymbol());
         }
     }
 

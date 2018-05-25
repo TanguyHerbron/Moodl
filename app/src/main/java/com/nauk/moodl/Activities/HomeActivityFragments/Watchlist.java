@@ -351,14 +351,28 @@ public class Watchlist extends Fragment {
                 currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(final Currency sucessCurrency) {
-                        MoodlBox.getBitmapFromURL(getIconUrl(sucessCurrency.getSymbol()), sucessCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
-                            @Override
-                            public void onSuccess(Bitmap bitmapIcon) {
-                                sucessCurrency.setIcon(bitmapIcon);
-                                updateChartColor(currency);
-                                countWatchlist();
-                            }
-                        });
+                        String iconUrl = getIconUrl(sucessCurrency.getSymbol());
+
+                        if(iconUrl != null)
+                        {
+                            MoodlBox.getBitmapFromURL(iconUrl, sucessCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
+                                @Override
+                                public void onSuccess(Bitmap bitmapIcon) {
+                                    sucessCurrency.setIcon(bitmapIcon);
+                                    updateChartColor(currency);
+                                    countWatchlist();
+                                }
+                            });
+                        }
+                        else
+                        {
+                            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_moodl);
+                            icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
+
+                            sucessCurrency.setIcon(icon);
+                            updateChartColor(currency);
+                            countWatchlist();
+                        }
                     }
                 });
             }

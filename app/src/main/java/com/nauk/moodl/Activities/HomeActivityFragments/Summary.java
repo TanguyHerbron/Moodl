@@ -615,13 +615,26 @@ public class Summary extends Fragment implements HideBalanceSwitch {
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                MoodlBox.getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), localCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
-                    @Override
-                    public void onSuccess(Bitmap bitmapIcon) {
-                        localCurrency.setIcon(bitmapIcon);
-                        countIcons();
-                    }
-                });
+                String iconUrl = balanceManager.getIconUrl(localCurrency.getSymbol());
+
+                if(iconUrl != null)
+                {
+                    MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
+                        @Override
+                        public void onSuccess(Bitmap bitmapIcon) {
+                            localCurrency.setIcon(bitmapIcon);
+                            countIcons();
+                        }
+                    });
+                }
+                else
+                {
+                    Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_moodl);
+                    icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
+
+                    localCurrency.setIcon(icon);
+                    countIcons();
+                }
             }
 
             return null;
