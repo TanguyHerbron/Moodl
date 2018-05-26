@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.nauk.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
 /**
@@ -213,8 +212,6 @@ public class MarketCapitalization extends Fragment {
 
     private void refreshDisplayedData()
     {
-        setupTextViewMarketCap();
-
         view.findViewById(R.id.progressBarMarketCap).setVisibility(View.GONE);
         view.findViewById(R.id.layoutProgressMarketCap).setVisibility(View.VISIBLE);
 
@@ -252,7 +249,7 @@ public class MarketCapitalization extends Fragment {
             colors.add(dominantCurrenciesColors.get(topCurrencies.get(i).getSymbol()));
         }
 
-        entries.add(new PieEntry(100-topCurrenciesDominance, "Others"));
+        entries.add(new PieEntry(100-topCurrenciesDominance, "Others", "others"));
         colors.add(-12369084);
 
         PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
@@ -323,6 +320,8 @@ public class MarketCapitalization extends Fragment {
         pieChart.setTouchEnabled(true);
         pieChart.setEntryLabelColor(Color.WHITE);
 
+        updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), "Global", 0);
+
         pieChart.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -350,19 +349,15 @@ public class MarketCapitalization extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(e.getData() != null)
-                        {
-                            view.findViewById(R.id.layoutMarketDetails).setVisibility(View.VISIBLE);
-                            view.findViewById(R.id.currencyIcon).setVisibility(View.VISIBLE);
 
+                        if(!e.getData().equals("others"))
+                        {
                             Currency currency = marketCapManager.getCurrencyFromSymbol((String) e.getData());
-                            
-                            ((TextView) view.findViewById(R.id.textViewMarketCap))
-                                    .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(currency.getMarketCapitalization()), getContext()));
-                            ((TextView) view.findViewById(R.id.textViewVolume))
-                                    .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(currency.getVolume24h()), getContext()));
-                            ((TextView) view.findViewById(R.id.textViewNameSymbol))
-                                    .setText(currency.getName() + " (" + currency.getSymbol() + ")");
+                            view.findViewById(R.id.currencyIcon).setVisibility(View.VISIBLE);
+                            view.findViewById(R.id.layoutPercentageDominance).setVisibility(View.VISIBLE);
+
+                            updateDetails(currency.getMarketCapitalization(), currency.getVolume24h(), currency.getName() + " (" + currency.getSymbol() + ")", h.getY());
+
                             ((ImageView) view.findViewById(R.id.currencyIcon))
                                     .setImageBitmap(currency.getIcon());
 
@@ -370,8 +365,20 @@ public class MarketCapitalization extends Fragment {
                         }
                         else
                         {
+                            double othersMarketCap = marketCapManager.getMarketCap();
+                            double othersVolume = marketCapManager.getDayVolume();
+
+                            for(int i = 0; i < marketCapManager.getTopCurrencies().size(); i++)
+                            {
+                                othersMarketCap -= marketCapManager.getTopCurrencies().get(i).getMarketCapitalization();
+                                othersVolume -= marketCapManager.getTopCurrencies().get(i).getVolume24h();
+                            }
+
                             view.findViewById(R.id.currencyIcon).setVisibility(View.GONE);
-                            view.findViewById(R.id.layoutMarketDetails).setVisibility(View.GONE);
+                            view.findViewById(R.id.layoutPercentageDominance).setVisibility(View.VISIBLE);
+
+                            updateDetails(othersMarketCap, othersVolume, "Other coins", h.getY());
+
                             pieChart.setDrawCenterText(true);
                         }
                     }
@@ -381,7 +388,10 @@ public class MarketCapitalization extends Fragment {
             @Override
             public void onNothingSelected() {
                 view.findViewById(R.id.currencyIcon).setVisibility(View.GONE);
-                view.findViewById(R.id.layoutMarketDetails).setVisibility(View.GONE);
+                view.findViewById(R.id.layoutPercentageDominance).setVisibility(View.GONE);
+
+                updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), "Global", 0);
+
                 pieChart.setDrawCenterText(true);
             }
         });
@@ -392,17 +402,21 @@ public class MarketCapitalization extends Fragment {
         pieChart.invalidate();
     }
 
+    private void updateDetails(double marketCap, double volume, String title, double percentage)
+    {
+        ((TextView) view.findViewById(R.id.textViewMarketCap))
+                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(marketCap), getContext()));
+        ((TextView) view.findViewById(R.id.textViewVolume))
+                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(volume), getContext()));
+        ((TextView) view.findViewById(R.id.textViewTitle))
+                .setText(title);
+        ((TextView) view.findViewById(R.id.textViewDominancePercentage))
+                .setText(PlaceholderManager.getPercentageString(MoodlBox.numberConformer(percentage), getContext()));
+    }
+
     private SpannableString generateCenterSpannableText() {
 
         SpannableString spannableString = new SpannableString("Market Capitalization Dominance");
         return spannableString;
-    }
-
-    private void setupTextViewMarketCap()
-    {
-        ((TextView) view.findViewById(R.id.marketCapTextView))
-                .setText(PlaceholderManager.getValueString(numberConformer(marketCapManager.getMarketCap()), getActivity()));
-        ((TextView) view.findViewById(R.id.dayVolumeTotalMarketCap))
-                .setText(PlaceholderManager.getValueString(numberConformer(marketCapManager.getDayVolume()), getActivity()));
     }
 }

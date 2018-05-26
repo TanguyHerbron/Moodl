@@ -403,12 +403,16 @@ public class Summary extends Fragment implements HideBalanceSwitch {
             loadingDialog.dismiss();
         }
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateTitle();
-            }
-        });
+        try {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateTitle();
+                }
+            });
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     protected void updateTitle()
