@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.graphics.Palette;
 import android.text.SpannableString;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -68,8 +69,6 @@ public class MarketCapitalization extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         view = inflater.inflate(R.layout.fragment_marketcap_homeactivity, container, false);
-
-        setupDominantCurrenciesColors();
 
         preferencesManager = new PreferencesManager(getContext());
         marketCapManager = new MarketCapManager(getContext());
@@ -145,27 +144,6 @@ public class MarketCapitalization extends Fragment {
             updateMarketCap(false);
         }
 
-    }
-
-    private void setupDominantCurrenciesColors()
-    {
-        dominantCurrenciesColors = new HashMap<>();
-
-        dominantCurrenciesColors.put("BTC", -489456);
-        dominantCurrenciesColors.put("ETH", -13619152);
-        dominantCurrenciesColors.put("XRP", -16744256);
-        dominantCurrenciesColors.put("BCH", -1011696);
-        dominantCurrenciesColors.put("LTC", -4671304);
-        dominantCurrenciesColors.put("EOS", -1513240);
-        dominantCurrenciesColors.put("ADA", -16773080);
-        dominantCurrenciesColors.put("XLM", -11509656);
-        dominantCurrenciesColors.put("MIOTA", -1513240);
-        dominantCurrenciesColors.put("NEO", -9390048);
-        dominantCurrenciesColors.put("XMR", -499712);
-        dominantCurrenciesColors.put("DASH", -15175496);
-        dominantCurrenciesColors.put("XEM", -7829368);
-        dominantCurrenciesColors.put("TRX", -7829360);
-        dominantCurrenciesColors.put("ETC", -10448784);
     }
 
     private void updateMarketCap(boolean mustUpdate)
@@ -246,7 +224,7 @@ public class MarketCapitalization extends Fragment {
 
             entries.add(pieEntry);
             topCurrenciesDominance += topCurrencies.get(i).getDominance(marketCapManager.getMarketCap());
-            colors.add(dominantCurrenciesColors.get(topCurrencies.get(i).getSymbol()));
+            colors.add(topCurrencies.get(i).getChartColor());
         }
 
         entries.add(new PieEntry(100-topCurrenciesDominance, "Others", "others"));
@@ -266,7 +244,6 @@ public class MarketCapitalization extends Fragment {
         if(isTopCurrenciesUpdated && isMarketpCapUpdated && isDetailsUpdated)
         {
             updateIcons();
-            //refreshDisplayedData();
         }
     }
 
@@ -294,7 +271,11 @@ public class MarketCapitalization extends Fragment {
                 MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
                     @Override
                     public void onSuccess(Bitmap bitmapIcon) {
+                        Palette.Builder builder = Palette.from(bitmapIcon);
+
                         marketCapManager.getTopCurrencies().get(index).setIcon(bitmapIcon);
+                        marketCapManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(0));
+
                         countIcons();
                     }
                 });

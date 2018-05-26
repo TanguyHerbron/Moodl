@@ -76,7 +76,7 @@ public class CurrencyCardview extends CardView {
                             public void onSuccess(Currency currency) {
                                 if(currency.getHistoryMinutes() != null)
                                 {
-                                    setupLineChart(view, currency);
+                                    setupLineChart(currency);
                                     view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
                                     view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
                                 }
@@ -157,7 +157,7 @@ public class CurrencyCardview extends CardView {
                             public void onSuccess(Currency currency) {
                                 if(currency.getHistoryMinutes() != null)
                                 {
-                                    setupLineChart(view, currency);
+                                    setupLineChart(currency);
                                     view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
                                     view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
                                 }
@@ -208,7 +208,7 @@ public class CurrencyCardview extends CardView {
         setCardBackgroundColor(context.getColor(R.color.white));
     }
 
-    private void setupLineChart(View view, final Currency currency)
+    private void setupLineChart(final Currency currency)
     {
         LineChart lineChart = findViewById(R.id.LineChartView);
 
