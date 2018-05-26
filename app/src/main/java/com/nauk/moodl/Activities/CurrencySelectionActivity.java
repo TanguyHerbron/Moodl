@@ -72,7 +72,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         ArrayList<Currency> currencyArrayList = new ArrayList<>();
 
-        for(int i = 0; i < currencyNames.size(); i++)
+        for(int i = currencyNames.size() - 1; i > 0; i--)
         {
             currencyArrayList.add(new Currency(currencyNames.get(i), currencySymbols.get(i)));
         }

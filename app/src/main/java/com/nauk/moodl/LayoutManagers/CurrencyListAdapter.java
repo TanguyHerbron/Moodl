@@ -79,16 +79,14 @@ public class CurrencyListAdapter extends ArrayAdapter<Currency> {
                     suggestions.clear();
 
                     int i = 0;
-                    int found = 0;
                     String temp = constraint.toString().toLowerCase();
 
-                    while(i < tempCurrency.size() && found < 50)
+                    while(i < tempCurrency.size())
                     {
                         Currency currency = tempCurrency.get(i);
                         if (currency.getName().toLowerCase().startsWith(temp)
                                 || currency.getSymbol().toLowerCase().startsWith(temp)) {
                             suggestions.add(currency);
-                            found++;
                         }
                         i++;
                     }
