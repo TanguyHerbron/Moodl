@@ -61,7 +61,7 @@ public class BalanceManager {
         databaseManager = new DatabaseManager(context);
         hitBtcManagers = new ArrayList<>();
         binanceManagers = new ArrayList<>();
-        currencyDetailsList = new CurrencyDetailsList(context);
+        currencyDetailsList = CurrencyDetailsList.getInstance(context);
 
         balanceCounter = 0;
     }
@@ -249,7 +249,14 @@ public class BalanceManager {
 
     public void updateDetails(final IconCallBack callBack)
     {
-        currencyDetailsList.update(callBack);
+        if(!currencyDetailsList.isUpToDate())
+        {
+            currencyDetailsList.update(callBack);
+        }
+        else
+        {
+            callBack.onSuccess();
+        }
         /*StringRequest strRequest = new StringRequest(Request.Method.GET, detailUrl,
                 new Response.Listener<String>() {
                     @Override

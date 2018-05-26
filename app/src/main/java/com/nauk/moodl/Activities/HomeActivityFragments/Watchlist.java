@@ -69,12 +69,12 @@ public class Watchlist extends Fragment {
         view = inflater.inflate(R.layout.fragment_watchlist_homeactivity, container, false);
 
         refreshLayout = view.findViewById(R.id.swiperefreshwatchlist);
-        currencyDetailsList = new CurrencyDetailsList(getContext());
+        currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
         preferencesManager = new PreferencesManager(getContext());
 
         lastTimestamp = 0;
         defaultCurrency = preferencesManager.getDefaultCurrency();
-        currencyTickerList = new CurrencyTickerList(getActivity());
+        currencyTickerList = CurrencyTickerList.getInstance(getActivity());
         tickerUpdated = false;
         updateTickerList();
 
@@ -105,13 +105,22 @@ public class Watchlist extends Fragment {
         AsyncTask<Void, Integer, Void> updater = new AsyncTask<Void, Integer, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                currencyTickerList.update(new BalanceManager.IconCallBack() {
-                    @Override
-                    public void onSuccess() {
-                        tickerUpdated = true;
-                        checkUpdatedData();
-                    }
-                });
+                if(!currencyTickerList.isUpToDate())
+                {
+                    currencyTickerList.update(new BalanceManager.IconCallBack() {
+                        @Override
+                        public void onSuccess() {
+                            tickerUpdated = true;
+                            checkUpdatedData();
+                        }
+                    });
+                }
+                else
+                {
+                    tickerUpdated = true;
+                    checkUpdatedData();
+                }
+
                 return null;
             }
         };
@@ -227,13 +236,21 @@ public class Watchlist extends Fragment {
                 protected Void doInBackground(Void... voids) {
                     watchlistManager.updateWatchlist();
 
-                    currencyDetailsList.update(new BalanceManager.IconCallBack() {
-                        @Override
-                        public void onSuccess() {
-                            detailsUpdated = true;
-                            checkUpdatedData();
-                        }
-                    });
+                    if(!currencyDetailsList.isUpToDate())
+                    {
+                        currencyDetailsList.update(new BalanceManager.IconCallBack() {
+                            @Override
+                            public void onSuccess() {
+                                detailsUpdated = true;
+                                checkUpdatedData();
+                            }
+                        });
+                    }
+                    else
+                    {
+                        detailsUpdated = true;
+                        checkUpdatedData();
+                    }
                     return null;
                 }
             };

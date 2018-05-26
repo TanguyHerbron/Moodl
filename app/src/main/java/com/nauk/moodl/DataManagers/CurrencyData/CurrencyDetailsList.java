@@ -1,5 +1,6 @@
 package com.nauk.moodl.DataManagers.CurrencyData;
 
+import android.content.Context;
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -29,12 +30,22 @@ public class CurrencyDetailsList {
     final private static String DETAILURL = "https://min-api.cryptocompare.com/data/all/coinlist";
     private RequestQueue requestQueue;
     private LinkedHashMap<String, String> coinInfosHashmap;
-    private android.content.Context context;
+    private static CurrencyDetailsList INSTANCE;
+    private boolean upToDate;
 
-    public CurrencyDetailsList(android.content.Context context)
+    private CurrencyDetailsList(Context context)
     {
-        this.context = context;
         requestQueue = Volley.newRequestQueue(context);
+    }
+
+    public static synchronized CurrencyDetailsList getInstance(Context context)
+    {
+        if(INSTANCE == null)
+        {
+            INSTANCE = new CurrencyDetailsList(context);
+        }
+
+        return INSTANCE;
     }
 
     public void update(final BalanceManager.IconCallBack callBack)
@@ -45,19 +56,25 @@ public class CurrencyDetailsList {
                     public void onResponse(String response) {
                         if (response.length() > 0) {
                             processDetailResult(response, callBack);
+
                         }
+                        upToDate = true;
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        upToDate = true;
                     }
                 });
 
         requestQueue.add(strRequest);
     }
 
+    public boolean isUpToDate()
+    {
+        return upToDate;
+    }
 
     private void processDetailResult(String response, final BalanceManager.IconCallBack callBack)
     {
@@ -87,7 +104,7 @@ public class CurrencyDetailsList {
                         break;
                 }
             } catch (JSONException e) {
-                Log.d(context.getResources().getString(R.string.debug), "ImageUrl not found.");
+                Log.d("moodl", "ImageUrl not found.");
             }
         }
 

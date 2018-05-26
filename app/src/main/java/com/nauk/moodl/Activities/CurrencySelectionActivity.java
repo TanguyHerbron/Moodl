@@ -44,7 +44,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         setContentView(R.layout.activity_add_currency);
 
-        currencyDetailsList = new CurrencyDetailsList(this);
+        currencyDetailsList = CurrencyDetailsList.getInstance(this);
 
         setTitle("Select a coin");
 
@@ -162,6 +162,23 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
         return false;
     }
 
+    private void detailsEvent()
+    {
+        setupAdapter();
+
+        setupList();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setupSearchView();
+
+                expand(findViewById(R.id.listContainerLayout));
+                findViewById(R.id.currencyListProgressBar).setVisibility(View.GONE);
+            }
+        });
+    }
+
     private class ListLoader extends AsyncTask<Void, Integer, Void>
     {
         @Override
@@ -184,24 +201,19 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
                 Looper.prepare();
             }
 
-            currencyDetailsList.update(new BalanceManager.IconCallBack() {
-                @Override
-                public void onSuccess() {
-                    setupAdapter();
-
-                    setupList();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            setupSearchView();
-
-                            expand(findViewById(R.id.listContainerLayout));
-                            findViewById(R.id.currencyListProgressBar).setVisibility(View.GONE);
-                        }
-                    });
-                }
-            });
+            if(!currencyDetailsList.isUpToDate())
+            {
+                currencyDetailsList.update(new BalanceManager.IconCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        detailsEvent();
+                    }
+                });
+            }
+            else
+            {
+                detailsEvent();
+            }
 
             return null;
         }

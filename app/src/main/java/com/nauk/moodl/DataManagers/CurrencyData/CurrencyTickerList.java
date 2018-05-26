@@ -1,5 +1,6 @@
 package com.nauk.moodl.DataManagers.CurrencyData;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -28,12 +29,27 @@ public class CurrencyTickerList {
     final private static String TICKERLISTURL = "https://api.coinmarketcap.com/v2/listings/";
     private RequestQueue requestQueue;
     private List<Currency> currencyTickerList;
-    private android.content.Context context;
+    private static CurrencyTickerList INSTANCE;
+    private boolean upToDate;
 
-    public CurrencyTickerList(android.content.Context context)
+    private CurrencyTickerList(Context context)
     {
-        this.context = context;
         requestQueue = Volley.newRequestQueue(context);
+    }
+
+    public static synchronized CurrencyTickerList getInstance(Context context)
+    {
+        if(INSTANCE == null)
+        {
+            INSTANCE = new CurrencyTickerList(context);
+        }
+
+        return INSTANCE;
+    }
+
+    public boolean isUpToDate()
+    {
+        return upToDate;
     }
 
     public void update(final BalanceManager.IconCallBack callBack)
@@ -46,12 +62,13 @@ public class CurrencyTickerList {
                         if (response.length() > 0) {
                             processTickerListResult(response, callBack);
                         }
+                        upToDate = true;
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        upToDate = true;
                     }
                 });
 

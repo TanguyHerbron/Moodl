@@ -87,7 +87,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
 
         preferencesManager = new PreferencesManager(getActivity());
         balanceManager = new BalanceManager(getActivity());
-        currencyTickerList = new CurrencyTickerList(getActivity());
+        currencyTickerList = CurrencyTickerList.getInstance(getActivity());
 
         currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
         refreshLayout = fragmentView.findViewById(R.id.swiperefreshsummary);
@@ -691,12 +691,20 @@ public class Summary extends Fragment implements HideBalanceSwitch {
         @Override
         protected Void doInBackground(Void... params)
         {
-            currencyTickerList.update(new BalanceManager.IconCallBack() {
-                @Override
-                public void onSuccess() {
-                    countCoins(false, false, true);
-                }
-            });
+            if(!currencyTickerList.isUpToDate())
+            {
+                currencyTickerList.update(new BalanceManager.IconCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        countCoins(false, false, true);
+                    }
+                });
+            }
+            else
+            {
+                countCoins(false, false, true);
+            }
+
             balanceManager.updateDetails(new BalanceManager.IconCallBack() {
                 @Override
                 public void onSuccess()

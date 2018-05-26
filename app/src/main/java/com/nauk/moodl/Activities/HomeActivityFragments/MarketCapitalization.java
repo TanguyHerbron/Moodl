@@ -73,14 +73,23 @@ public class MarketCapitalization extends Fragment {
         preferencesManager = new PreferencesManager(getContext());
         marketCapManager = new MarketCapManager(getContext());
 
-        currencyDetailsList = new CurrencyDetailsList(getContext());
-        currencyDetailsList.update(new BalanceManager.IconCallBack() {
-            @Override
-            public void onSuccess() {
-                isDetailsUpdated = true;
-                countCompletedMarketCapRequest();
-            }
-        });
+        currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
+
+        if(!currencyDetailsList.isUpToDate())
+        {
+            currencyDetailsList.update(new BalanceManager.IconCallBack() {
+                @Override
+                public void onSuccess() {
+                    isDetailsUpdated = true;
+                    countCompletedMarketCapRequest();
+                }
+            });
+        }
+        else
+        {
+            isDetailsUpdated = true;
+            countCompletedMarketCapRequest();
+        }
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
         lastTimestamp = 0;
