@@ -39,6 +39,8 @@ import com.nauk.moodl.MoodlBox;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -615,7 +617,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                String iconUrl = balanceManager.getIconUrl(localCurrency.getSymbol());
+                String iconUrl = MoodlBox.getIconUrl(localCurrency.getSymbol(), balanceManager.getCurrencyDetailList());
 
                 if(iconUrl != null)
                 {

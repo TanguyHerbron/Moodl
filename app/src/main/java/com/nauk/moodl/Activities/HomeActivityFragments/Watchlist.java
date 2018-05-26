@@ -255,6 +255,11 @@ public class Watchlist extends Fragment {
         {
             WatchlistUpdater watchlistUpdater = new WatchlistUpdater();
             watchlistUpdater.execute();
+
+            if(watchlistManager.getWatchlist().size() == 0)
+            {
+                generateCards();
+            }
         }
     }
 
@@ -351,7 +356,8 @@ public class Watchlist extends Fragment {
                 currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
                     @Override
                     public void onSuccess(final Currency sucessCurrency) {
-                        String iconUrl = getIconUrl(sucessCurrency.getSymbol());
+
+                        String iconUrl = MoodlBox.getIconUrl(sucessCurrency.getSymbol(), currencyDetailsList);
 
                         if(iconUrl != null)
                         {

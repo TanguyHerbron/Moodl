@@ -295,6 +295,11 @@ public class BalanceManager {
         return url;
     }
 
+    public CurrencyDetailsList getCurrencyDetailList()
+    {
+        return currencyDetailsList;
+    }
+
     public String getCurrencyName(String symbol)
     {
         String currencyName = null;

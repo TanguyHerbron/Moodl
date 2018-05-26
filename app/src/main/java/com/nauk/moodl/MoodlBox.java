@@ -11,6 +11,7 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 import com.nauk.moodl.Activities.HomeActivity;
+import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -206,9 +207,10 @@ public class MoodlBox {
         }
     }
 
-    public static void getBitmapFromURL(String src, String symbol, Resources resources, Context context, HomeActivity.IconCallBack callBack) {
-
-        String filepath = context.getCacheDir() + "/" + symbol + ".png";
+    public static void getBitmapFromURL(String src, String symbol, Resources resources, Context context, HomeActivity.IconCallBack callBack)
+    {
+        String size = src.substring(src.lastIndexOf("=") + 1, src.length());
+        String filepath = context.getCacheDir() + "/" + symbol + "x" + size + ".png";
         Bitmap result;
 
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -231,23 +233,29 @@ public class MoodlBox {
                 result.compress(Bitmap.CompressFormat.PNG, 100, out);
 
             } catch (IOException e) {
-                Log.d("moodl", "Error while downloading " + symbol + " icon");
+                Log.d("moodl", "Error while downloading " + symbol + " icon > " + e.getMessage());
                 result = BitmapFactory.decodeResource(resources,
                         R.mipmap.ic_launcher_moodl);
-                result = Bitmap.createScaledBitmap(result, 50, 50, false);
+                result = Bitmap.createScaledBitmap(result, Integer.valueOf(size), Integer.valueOf(size), false);
             }
         }
 
         callBack.onSuccess(result);
     }
 
-    public static String getIconUrl(String imageUrl)
+    public static String getIconUrl(String symbol, CurrencyDetailsList currencyDetailsList)
+    {
+        return getIconUrl(symbol, 50, currencyDetailsList);
+    }
+
+    public static String getIconUrl(String symbol, int size, CurrencyDetailsList currencyDetailsList)
     {
         String url;
 
         try {
-            url = "https://www.cryptocompare.com" + imageUrl + "?width=50";
-        } catch (NullPointerException e) {
+            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
+            url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=" + size;
+        } catch (JSONException | NullPointerException e) {
             url = null;
         }
 

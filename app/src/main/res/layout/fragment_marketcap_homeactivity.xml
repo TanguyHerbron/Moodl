@@ -100,10 +100,28 @@
                     android:textSize="18dp"
                     android:gravity="center_horizontal"/>
 
-                <com.nauk.moodl.LayoutManagers.CustomPieChart
-                    android:id="@+id/marketCapPieChart"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="350dp"/>
+                    android:layout_height="350dp">
+
+                    <com.nauk.moodl.LayoutManagers.CustomPieChart
+                        android:id="@+id/marketCapPieChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+
+                    <ImageView
+                        android:id="@+id/currencyIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:layout_gravity="center"
+                        android:visibility="gone"
+                        android:maxHeight="110dp"
+                        android:maxWidth="110dp"
+                        android:adjustViewBounds="true"/>
+
+                </FrameLayout>
 
                 <LinearLayout
                     android:id="@+id/layoutMarketDetails"

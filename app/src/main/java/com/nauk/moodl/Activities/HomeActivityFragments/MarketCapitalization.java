@@ -1,7 +1,10 @@
 package com.nauk.moodl.Activities.HomeActivityFragments;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -14,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.data.Entry;
@@ -23,7 +27,10 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.nauk.moodl.Activities.HomeActivity;
+import com.nauk.moodl.DataManagers.BalanceManager;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
+import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.moodl.DataManagers.MarketCapManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.LayoutManagers.CustomPieChart;
@@ -44,19 +51,22 @@ import static java.lang.Math.abs;
 
 public class MarketCapitalization extends Fragment {
 
-    private int marketCapCounter;
-
     private PreferencesManager preferencesManager;
     private MarketCapManager marketCapManager;
     private HashMap<String, Integer> dominantCurrenciesColors;
     private SwipeRefreshLayout refreshLayout;
     private long lastTimestamp;
     private String defaultCurrency;
+    private CurrencyDetailsList currencyDetailsList;
+    private boolean isDetailsUpdated;
+    private boolean isTopCurrenciesUpdated;
+    private boolean isMarketpCapUpdated;
+    private int iconCounter;
 
     private View view;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         view = inflater.inflate(R.layout.fragment_marketcap_homeactivity, container, false);
 
@@ -64,6 +74,15 @@ public class MarketCapitalization extends Fragment {
 
         preferencesManager = new PreferencesManager(getContext());
         marketCapManager = new MarketCapManager(getContext());
+
+        currencyDetailsList = new CurrencyDetailsList(getContext());
+        currencyDetailsList.update(new BalanceManager.IconCallBack() {
+            @Override
+            public void onSuccess() {
+                isDetailsUpdated = true;
+                countCompletedMarketCapRequest();
+            }
+        });
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
         lastTimestamp = 0;
@@ -159,7 +178,10 @@ public class MarketCapitalization extends Fragment {
                 refreshLayout.setRefreshing(true);
             }
 
-            marketCapCounter = 0;
+            iconCounter = 0;
+
+            isTopCurrenciesUpdated = false;
+            isMarketpCapUpdated = false;
 
             lastTimestamp = System.currentTimeMillis() / 1000;
 
@@ -167,6 +189,7 @@ public class MarketCapitalization extends Fragment {
                 @Override
                 public void onSuccess()
                 {
+                    isTopCurrenciesUpdated = true;
                     countCompletedMarketCapRequest();
                 }
             }, preferencesManager.getDefaultCurrency());
@@ -174,6 +197,7 @@ public class MarketCapitalization extends Fragment {
             marketCapManager.updateMarketCap(new MarketCapManager.VolleyCallBack() {
                 @Override
                 public void onSuccess() {
+                    isMarketpCapUpdated = true;
                     countCompletedMarketCapRequest();
                 }
             }, preferencesManager.getDefaultCurrency());
@@ -242,11 +266,19 @@ public class MarketCapitalization extends Fragment {
     @SuppressLint("ClickableViewAccessibility")
     private void countCompletedMarketCapRequest()
     {
-        marketCapCounter++;
-
-        if(marketCapCounter == 2)
+        if(isTopCurrenciesUpdated && isMarketpCapUpdated && isDetailsUpdated)
         {
             updateIcons();
+            //refreshDisplayedData();
+        }
+    }
+
+    private void countIcons()
+    {
+        iconCounter++;
+
+        if(iconCounter >= marketCapManager.getTopCurrencies().size())
+        {
             refreshDisplayedData();
         }
     }
@@ -255,7 +287,29 @@ public class MarketCapitalization extends Fragment {
     {
         for(int i = 0; i < marketCapManager.getTopCurrencies().size(); i++)
         {
-            Log.d("moodl", "> " + marketCapManager.getTopCurrencies().get(i).getSymbol());
+            final Currency localCurrency = marketCapManager.getTopCurrencies().get(i);
+            final int index = i;
+
+            String iconUrl = MoodlBox.getIconUrl(marketCapManager.getTopCurrencies().get(i).getSymbol(), 500, currencyDetailsList);
+
+            if(iconUrl != null)
+            {
+                MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
+                    @Override
+                    public void onSuccess(Bitmap bitmapIcon) {
+                        marketCapManager.getTopCurrencies().get(index).setIcon(bitmapIcon);
+                        countIcons();
+                    }
+                });
+            }
+            else
+            {
+                Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_moodl);
+                icon = Bitmap.createScaledBitmap(icon, 500, 500, false);
+
+                localCurrency.setIcon(icon);
+                countIcons();
+            }
         }
     }
 
@@ -299,6 +353,8 @@ public class MarketCapitalization extends Fragment {
                         if(e.getData() != null)
                         {
                             view.findViewById(R.id.layoutMarketDetails).setVisibility(View.VISIBLE);
+                            view.findViewById(R.id.currencyIcon).setVisibility(View.VISIBLE);
+
                             Currency currency = marketCapManager.getCurrencyFromSymbol((String) e.getData());
                             
                             ((TextView) view.findViewById(R.id.textViewMarketCap))
@@ -307,10 +363,16 @@ public class MarketCapitalization extends Fragment {
                                     .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(currency.getVolume24h()), getContext()));
                             ((TextView) view.findViewById(R.id.textViewNameSymbol))
                                     .setText(currency.getName() + " (" + currency.getSymbol() + ")");
+                            ((ImageView) view.findViewById(R.id.currencyIcon))
+                                    .setImageBitmap(currency.getIcon());
+
+                            pieChart.setDrawCenterText(false);
                         }
                         else
                         {
+                            view.findViewById(R.id.currencyIcon).setVisibility(View.GONE);
                             view.findViewById(R.id.layoutMarketDetails).setVisibility(View.GONE);
+                            pieChart.setDrawCenterText(true);
                         }
                     }
                 });
@@ -318,8 +380,9 @@ public class MarketCapitalization extends Fragment {
 
             @Override
             public void onNothingSelected() {
+                view.findViewById(R.id.currencyIcon).setVisibility(View.GONE);
                 view.findViewById(R.id.layoutMarketDetails).setVisibility(View.GONE);
-
+                pieChart.setDrawCenterText(true);
             }
         });
 
