@@ -33,6 +33,8 @@ public class MarketCapManager {
     private List<Currency> topCurrencies;
     private long marketCap;
     private long dayVolume;
+    private String active_crypto;
+    private String active_markets;
 
     public MarketCapManager(android.content.Context context)
     {
@@ -99,12 +101,23 @@ public class MarketCapManager {
             JSONObject quotesJsonObject = dataJsonObject.getJSONObject("quotes");
             JSONObject valuesJsonObject = quotesJsonObject.getJSONObject(toSymbol);
 
+            active_crypto = dataJsonObject.getString("active_cryptocurrencies");
+            active_markets = dataJsonObject.getString("active_markets");
             marketCap = valuesJsonObject.getLong("total_market_cap");
-
             dayVolume = valuesJsonObject.getLong("total_volume_24h");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getActive_crypto()
+    {
+        return active_crypto;
+    }
+
+    public String getActive_markets()
+    {
+        return active_markets;
     }
 
     public List<Currency> getTopCurrencies()

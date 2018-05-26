@@ -321,6 +321,10 @@ public class MarketCapitalization extends Fragment {
         pieChart.setEntryLabelColor(Color.WHITE);
 
         updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), "Global", 0);
+        ((TextView) view.findViewById(R.id.textViewActiveCrypto))
+                .setText(marketCapManager.getActive_crypto());
+        ((TextView) view.findViewById(R.id.textViewActiveMarkets))
+                .setText(marketCapManager.getActive_markets());
 
         pieChart.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -349,6 +353,9 @@ public class MarketCapitalization extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
+                        view.findViewById(R.id.layoutActiveCrypto).setVisibility(View.GONE);
+                        view.findViewById(R.id.layoutActiveMarkets).setVisibility(View.GONE);
 
                         if(!e.getData().equals("others"))
                         {
@@ -389,6 +396,9 @@ public class MarketCapitalization extends Fragment {
             public void onNothingSelected() {
                 view.findViewById(R.id.currencyIcon).setVisibility(View.GONE);
                 view.findViewById(R.id.layoutPercentageDominance).setVisibility(View.GONE);
+
+                view.findViewById(R.id.layoutActiveCrypto).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.layoutActiveMarkets).setVisibility(View.VISIBLE);
 
                 updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), "Global", 0);
 

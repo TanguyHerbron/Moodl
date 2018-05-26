@@ -167,6 +167,26 @@
 
                             </LinearLayout>
 
+                            <LinearLayout
+                                android:id="@+id/layoutActiveCrypto"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:layout_marginTop="5dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Active cryptocurrencies"
+                                    android:textStyle="bold"/>
+
+                                <TextView
+                                    android:id="@+id/textViewActiveCrypto"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"/>
+
+                            </LinearLayout>
+
                         </LinearLayout>
 
                         <LinearLayout
@@ -185,6 +205,26 @@
                                 android:id="@+id/textViewVolume"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"/>
+
+                            <LinearLayout
+                                android:id="@+id/layoutActiveMarkets"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:layout_marginTop="5dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Active markets"
+                                    android:textStyle="bold"/>
+
+                                <TextView
+                                    android:id="@+id/textViewActiveMarkets"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"/>
+
+                            </LinearLayout>
 
                         </LinearLayout>
 
