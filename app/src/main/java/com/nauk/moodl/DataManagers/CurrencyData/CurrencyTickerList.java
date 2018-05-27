@@ -9,6 +9,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.nauk.moodl.Activities.HomeActivityFragments.Overview;
 import com.nauk.moodl.DataManagers.BalanceManager;
 
 import org.json.JSONArray;
@@ -16,9 +17,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Created by Guitoune on 22/04/2018.
@@ -26,7 +26,8 @@ import java.util.regex.Pattern;
 
 public class CurrencyTickerList {
 
-    final private static String TICKERLISTURL = "https://api.coinmarketcap.com/v2/listings/";
+    final private static String LISTINGURL = "https://api.coinmarketcap.com/v2/listings/";
+    final private static String TICKERLISTURL1 = "https://api.coinmarketcap.com/v2/ticker/?start=";
     private RequestQueue requestQueue;
     private List<Currency> currencyTickerList;
     private static CurrencyTickerList INSTANCE;
@@ -52,10 +53,34 @@ public class CurrencyTickerList {
         return upToDate;
     }
 
-    public void update(final BalanceManager.IconCallBack callBack)
+    public void getCurrenciesFrom(int indexFrom, final String toSymbol, Overview.UpdateCallBack callBack)
+    {
+        String requetsString = TICKERLISTURL1 + indexFrom + "&limit=50&convert=" + toSymbol;
+
+        StringRequest strRequest = new StringRequest(Request.Method.GET, requetsString,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (response.length() > 0)
+                        {
+                            processTickersResult(response, toSymbol, callBack);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        requestQueue.add(strRequest);
+    }
+
+    public void updateListing(final BalanceManager.IconCallBack callBack)
     {
         currencyTickerList = new ArrayList<>();
-        StringRequest strRequest = new StringRequest(Request.Method.GET, TICKERLISTURL,
+        StringRequest strRequest = new StringRequest(Request.Method.GET, LISTINGURL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -91,6 +116,40 @@ public class CurrencyTickerList {
         }
 
         return tickerId;
+    }
+
+    private void processTickersResult(String response, String toSymbol, Overview.UpdateCallBack callBack)
+    {
+        List<Currency> currencyList = new ArrayList<>();
+
+        try {
+            JSONObject masterJsonObject = new JSONObject(response);
+
+            if(masterJsonObject.keys().hasNext())
+            {
+                JSONObject currencyJsonObject = masterJsonObject.getJSONObject(masterJsonObject.keys().next());
+                Iterator<?> keys = currencyJsonObject.keys();
+
+                while(keys.hasNext())
+                {
+                    String key = keys.next().toString();
+                    JSONObject subCurrencyJsonObject = currencyJsonObject.getJSONObject(key);
+                    Currency newCurrency = new Currency(subCurrencyJsonObject.getString("name"), subCurrencyJsonObject.getString("symbol"), subCurrencyJsonObject.getInt("id"));
+                    newCurrency.setRank(subCurrencyJsonObject.getInt("rank"));
+                    JSONObject quoteJsonObject = subCurrencyJsonObject.getJSONObject("quotes");
+                    JSONObject symJsonObject = quoteJsonObject.getJSONObject(toSymbol);
+                    newCurrency.setValue(symJsonObject.getDouble("price"));
+                    newCurrency.setDayFluctuationPercentage((float) symJsonObject.getDouble("percent_change_24h"));
+                    newCurrency.setDayFluctuation(newCurrency.getDayFluctuationPercentage() * newCurrency.getValue() / 100);
+
+                    currencyList.add(newCurrency);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        callBack.onSuccess(currencyList);
     }
 
     public void processTickerListResult(String response, BalanceManager.IconCallBack callBack)

@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -19,6 +18,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import com.nauk.moodl.Activities.HomeActivityFragments.MarketCapitalization;
+import com.nauk.moodl.Activities.HomeActivityFragments.Overview;
 import com.nauk.moodl.Activities.HomeActivityFragments.Summary;
 import com.nauk.moodl.Activities.HomeActivityFragments.Watchlist;
 import com.nauk.moodl.HideBalanceSwitch;
@@ -38,6 +38,7 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment watchlistFragment;
     private Fragment holdingsFragment;
     private Fragment marketFragment;
+    private Fragment overviewFragment;
     private Fragment currentFragment;
 
 
@@ -57,6 +58,7 @@ public class HomeActivity extends AppCompatActivity {
         watchlistFragment = new Watchlist();
         holdingsFragment = new Summary();
         marketFragment = new MarketCapitalization();
+        overviewFragment = new Overview();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -65,7 +67,7 @@ public class HomeActivity extends AppCompatActivity {
 
         showFragment(holdingsFragment);
 
-        navigationView.setCheckedItem(R.id.navigation_currencies_list);
+        navigationView.setCheckedItem(R.id.navigation_holdings);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -78,11 +80,14 @@ public class HomeActivity extends AppCompatActivity {
                     case R.id.navigation_watchlist:
                         showFragment(watchlistFragment);
                         break;
-                    case R.id.navigation_currencies_list:
+                    case R.id.navigation_holdings:
                         showFragment(holdingsFragment);
                         break;
                     case R.id.navigation_market_cap:
                         showFragment(marketFragment);
+                        break;
+                    case R.id.navigation_overview:
+                        showFragment(overviewFragment);
                         break;
                     case R.id.navigation_settings:
                         Intent settingIntent = new Intent(getApplicationContext(), SettingsActivity.class);
@@ -156,22 +161,6 @@ public class HomeActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.menu.menu_currency_summary, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        switch (id)
-        {
-            case R.id.navigation_settings:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public interface IconCallBack

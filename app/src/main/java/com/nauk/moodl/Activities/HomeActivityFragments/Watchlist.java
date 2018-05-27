@@ -11,7 +11,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +21,6 @@ import android.widget.LinearLayout;
 
 import com.nauk.moodl.Activities.CurrencySelectionActivity;
 import com.nauk.moodl.Activities.HomeActivity;
-import com.nauk.moodl.Activities.SettingsActivity;
 import com.nauk.moodl.DataManagers.BalanceManager;
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyCardview;
@@ -35,10 +33,6 @@ import com.nauk.moodl.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 
 import static com.nauk.moodl.MoodlBox.collapseW;
 import static com.nauk.moodl.MoodlBox.expandW;
@@ -107,7 +101,7 @@ public class Watchlist extends Fragment {
             protected Void doInBackground(Void... voids) {
                 if(!currencyTickerList.isUpToDate())
                 {
-                    currencyTickerList.update(new BalanceManager.IconCallBack() {
+                    currencyTickerList.updateListing(new BalanceManager.IconCallBack() {
                         @Override
                         public void onSuccess() {
                             tickerUpdated = true;

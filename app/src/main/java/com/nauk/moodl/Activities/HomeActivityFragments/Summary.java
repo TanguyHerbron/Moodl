@@ -16,7 +16,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,11 +38,6 @@ import com.nauk.moodl.MoodlBox;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -514,7 +508,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
 
         private void loadCurrency(Currency currency)
         {
-            if(!currency.getSymbol().equals("USD") && (currency.getBalance() * currency.getValue()) > preferencesManager.getMinimumAmount())
+            if(!currency.getSymbol().equals("USD"))
             {
                 currency.setName(balanceManager.getCurrencyName(currency.getSymbol()));
                 currency.setId(balanceManager.getCurrencyId(currency.getSymbol()));
@@ -693,7 +687,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
         {
             if(!currencyTickerList.isUpToDate())
             {
-                currencyTickerList.update(new BalanceManager.IconCallBack() {
+                currencyTickerList.updateListing(new BalanceManager.IconCallBack() {
                     @Override
                     public void onSuccess() {
                         countCoins(false, false, true);
