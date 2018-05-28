@@ -1,16 +1,22 @@
 package com.nauk.moodl.LayoutManagers;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
+import com.nauk.moodl.DataManagers.CurrencyData.CurrencyCardview;
+import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -24,12 +30,15 @@ import static com.nauk.moodl.MoodlBox.numberConformer;
 
 public class OverviewListAdapter extends ArrayAdapter<Currency> {
 
-    private Context context;
+    private Activity activity;
+    private CurrencyDetailsList currencyDetailsList;
 
-    public OverviewListAdapter(Context context, List<Currency> currencies)
+    public OverviewListAdapter(Context context, List<Currency> currencies, Activity activity)
     {
-        super(context, android.R.layout.simple_list_item_1, currencies);
-        this.context = context;
+        super(context, android.R.layout.simple_expandable_list_item_1, currencies);
+        this.activity = activity;
+
+        currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
     }
 
     @NonNull
@@ -38,24 +47,12 @@ public class OverviewListAdapter extends ArrayAdapter<Currency> {
     {
         Currency currency = getItem(position);
 
-        if(convertView == null)
-        {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.cardview_watchlist, parent, false);
-        }
+        currencyDetailsList.getCurrencyDetailsFromSymbol(currency.getSymbol());
 
-        TextView symbolTxtView = convertView.findViewById(R.id.currencySymbolTextView);
-        TextView nameTxtView = convertView.findViewById(R.id.currencyNameTextView);
-        TextView valueTxtView = convertView.findViewById(R.id.currencyValueTextView);
-        TextView fluctuationTxtView = convertView.findViewById(R.id.currencyFluctuationTextView);
-        TextView percentageTxtView = convertView.findViewById(R.id.currencyFluctuationPercentageTextView);
-        ImageView iconImageView = convertView.findViewById(R.id.currencyIcon);
-
-        symbolTxtView.setText(currency.getSymbol());
-        nameTxtView.setText(currency.getName());
-        valueTxtView.setText(PlaceholderManager.getValueString(numberConformer(currency.getValue()), getContext()));
-        fluctuationTxtView.setText(PlaceholderManager.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getContext()));
-        percentageTxtView.setText(PlaceholderManager.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getContext()));
-        iconImageView.setImageBitmap(currency.getIcon());
+        CurrencyCardview currencyCardview = new CurrencyCardview(getContext(), currency, activity);
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        linearLayout.addView(currencyCardview);
+        convertView = linearLayout;
 
         return convertView;
     }

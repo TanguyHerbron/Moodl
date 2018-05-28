@@ -276,11 +276,11 @@ public class Watchlist extends Fragment {
 
     private void generateCards()
     {
-        ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).removeAllViews();
-
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).removeAllViews();
+
                 for(Currency currency : watchlistManager.getWatchlist())
                 {
                     ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(new CurrencyCardview(getContext(), currency, getActivity()));
