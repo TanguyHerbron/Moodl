@@ -1,8 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <array name="time_button_text_size">
-        <item>12sp</item>
-        <item>14sp</item>
-        <item>18sp</item>
-    </array>
-</resources>
+<resources></resources>

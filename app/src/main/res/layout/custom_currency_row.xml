@@ -19,7 +19,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:text="Sample text"
+                android:text=""
                 android:textColor="@color/mainTextViewColor"
                 android:textSize="15dp" />
 
@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:text="Sample text"
+                android:text=""
                 android:textColor="@color/secondaryTextViewColor"
                 android:textSize="12dp" />
         </LinearLayout>

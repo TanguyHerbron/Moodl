@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:text="Transaction history"
+        android:text="@string/transaction_history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="@dimen/cardview_elevation"/>
@@ -25,7 +25,7 @@
     </LinearLayout>
 
     <TextView
-        android:text="Trade history"
+        android:text="@string/trade_history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="@dimen/cardview_elevation" />
@@ -51,7 +51,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Looking for trades..."/>
+                android:text="@string/trade_loading"/>
 
         </LinearLayout>
 

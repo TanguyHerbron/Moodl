@@ -31,14 +31,14 @@
                     android:background="@drawable/ic_drawer_white_24dp"
                     android:visibility="visible"
                     android:layout_gravity="start|center_vertical"
-                    android:contentDescription="Drawer"/>
+                    android:contentDescription="@string/drawer"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:text="Coin list"
+                    android:text="@string/title_coin_list"
                     android:textSize="18sp"
                     android:textColor="@color/white"
                     android:textStyle="bold"/>

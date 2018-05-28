@@ -31,14 +31,14 @@
                     android:background="@drawable/ic_drawer_white_24dp"
                     android:visibility="visible"
                     android:layout_gravity="start|center_vertical"
-                    android:contentDescription="Drawer"/>
+                    android:contentDescription="@string/drawer"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:text="Market Capitalization"
+                    android:text="@string/title_market_cap"
                     android:textSize="18sp"
                     android:textColor="@color/white"
                     android:textStyle="bold"/>
@@ -138,7 +138,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Market capitalization"
+                                android:text="@string/market_capitalization"
                                 android:textStyle="bold"/>
 
                             <TextView
@@ -157,7 +157,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Dominance percentage"
+                                    android:text="@string/dominance_percentage"
                                     android:textStyle="bold"/>
 
                                 <TextView
@@ -177,7 +177,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Active cryptocurrencies"
+                                    android:text="@string/active_cryptocurrencies"
                                     android:textStyle="bold"/>
 
                                 <TextView
@@ -198,7 +198,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="24h volume"
+                                android:text="@string/volume_24h"
                                 android:textStyle="bold"/>
 
                             <TextView
@@ -216,7 +216,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Active markets"
+                                    android:text="@string/active_marketes"
                                     android:textStyle="bold"/>
 
                                 <TextView

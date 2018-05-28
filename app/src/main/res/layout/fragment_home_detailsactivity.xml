@@ -10,7 +10,7 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:text="Line chart"
+            android:text="@string/line_chart"
             android:id="@+id/lineChartButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
             style="@style/Widget.AppCompat.Button.Colored"/>
 
         <Button
-            android:text="Candle stick chart"
+            android:text="@string/candle_stick_chart"
             android:id="@+id/candleStickChartButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
             android:layout_weight="0.33"
-            android:text="\n" />
+            android:text="@string/backline" />
 
         <TextView
             android:id="@+id/priceHightlight"
@@ -82,7 +82,7 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
             android:layout_weight="0.33"
-            android:text="\n" />
+            android:text="@string/backline" />
 
         <TextView
             android:id="@+id/volumeHightlight"
@@ -91,7 +91,7 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
             android:layout_weight="0.33"
-            android:text="\n"/>
+            android:text="@string/backline" />
 
     </LinearLayout>
 
@@ -214,7 +214,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autoSizeTextType="uniform"
-                    android:text="Beginning price"
+                    android:text="@string/beginning_price"
                     android:layout_weight="0.5"
                     android:textStyle="bold"/>
 
@@ -237,7 +237,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autoSizeTextType="uniform"
-                    android:text="Current price"
+                    android:text="@string/current_price"
                     android:layout_weight="0.5"
                     android:textStyle="bold"/>
 
@@ -260,7 +260,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autoSizeTextType="uniform"
-                    android:text="Delta"
+                    android:text="@string/delta"
                     android:layout_weight="0.5"
                     android:textStyle="bold"/>
 
@@ -291,7 +291,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autoSizeTextType="uniform"
-                    android:text="Total volume"
+                    android:text="@string/total_volume"
                     android:layout_weight="0.5"
                     android:textStyle="bold"/>
 
@@ -314,7 +314,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autoSizeTextType="uniform"
-                    android:text="Highest price"
+                    android:text="@string/highest_price"
                     android:layout_weight="0.5"
                     android:textStyle="bold" />
 
@@ -337,7 +337,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autoSizeTextType="uniform"
-                    android:text="Lowest price"
+                    android:text="@string/lowest_price"
                     android:layout_weight="0.5"
                     android:textStyle="bold"/>
 

@@ -35,15 +35,13 @@
                         android:id="@+id/amountPurchased"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="15dp"
-                        android:text="Amount"/>
+                        android:textSize="15dp"/>
 
                     <TextView
                         android:id="@+id/purchasedPrice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="10dp"
-                        android:text="Value"/>
+                        android:textSize="10dp"/>
 
                 </LinearLayout>
                 <LinearLayout
@@ -57,15 +55,13 @@
                         android:id="@+id/pair"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="15dp"
-                        android:text="Pair"/>
+                        android:textSize="15dp"/>
 
                     <TextView
                         android:id="@+id/tradeDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="10dp"
-                        android:text="Date"/>
+                        android:textSize="10dp"/>
 
                 </LinearLayout>
             </LinearLayout>

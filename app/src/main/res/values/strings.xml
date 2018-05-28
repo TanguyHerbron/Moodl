@@ -1,9 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">Moodl</string>
-    <string name="donation">Donation</string>
     <string name="debug" translatable="false">Moodl_debug</string>
     <string name="debug_volley" translatable="false">Moodl_debugVolley</string>
-    <string name="quick_button">Switch view</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
@@ -35,41 +33,54 @@
         <item>ETH</item>-->
     </string-array>
 
-    <string-array name="list_preference_entries">
-        <item>Entry 1</item>
-        <item>Entry 2</item>
-        <item>Entry 3</item>
-    </string-array>
-
-    <string-array name="list_preference_entry_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-
     <string name="buyText">Buy</string>
     <string name="sellText">Sell</string>
     <string name="transferText">Transfer</string>
 
     <string name="transaction_record">Save</string>
 
-    <string-array name="multi_select_list_preference_default_value" />
-
-    <string name="pref_title_system_sync_settings">System sync settings</string>
-
     <!-- Example settings for Notifications -->
-    <string name="pref_header_notifications">Notifications</string>
 
-    <string name="pref_title_new_message_notifications">New message notifications</string>
-
-    <string name="pref_title_ringtone">Ringtone</string>
     <string name="pref_ringtone_silent">Silent</string>
 
-    <string name="pref_title_vibrate">Vibrate</string>
-
     <!--Fingerprint authentification-->
-    <string name="fingerprint_verification">Verify your fingerprint</string>
 
+    <!--Cardviews-->
+    <string name="day_history">Day history</string>
+
+    <!--Details activity-->
+    <string name="line_chart">Line chart</string>
+    <string name="candle_stick_chart">Candle stick chart</string>
+    <string name="backline">\n</string>
+    <string name="beginning_price">Beginning price</string>
+    <string name="current_price">Current price</string>
+    <string name="delta">Delta</string>
+    <string name="total_volume">Total volume</string>
+    <string name="highest_price">Highest price</string>
+    <string name="lowest_price">Lowest price</string>
+    <string name="total_supply">Total supply</string>
+    <string name="circulating_supply">Circulating supply</string>
+    <string name="market_capitalization">Market capitalization</string>
+    <string name="rank">Rank</string>
+    <string name="algorithm">Algorithm</string>
+    <string name="proof_type">Proof type</string>
+    <string name="start_date">Start date</string>
+    <string name="description">Description</string>
+    <string name="transaction_history">Transaction history</string>
+    <string name="trade_history">Trade history</string>
+    <string name="trade_loading">Looking for trades&#8230;</string>
+    <string name="default_value">--</string>
+
+    <!--Home activity-->
+    <string name="drawer">Drawer</string>
+    <string name="dominance_percentage">Dominance percentage</string>
+    <string name="active_cryptocurrencies">Active cryptocurrencies</string>
+    <string name="volume_24h">24h volume</string>
+    <string name="active_marketes">Active markets</string>
+    <string name="add_transaction">Add transaction</string>
+    <string name="add_watchlist">Add to watchlist</string>
+    <string name="edit_mode">Edit mode</string>
+    <string name="loading_coin_list">Hodl&#8230;</string>
 
     <!--Exchange strings-->
     <string name="pref_header_exchange">Exchanges settings</string>
@@ -117,6 +128,7 @@
     <string name="title_transactions">Transactions</string>
     <string name="title_home">Holdings</string>
     <string name="title_market_cap">Market Capitalization</string>
+    <string name="title_coin_list">Coin list</string>
 
     <!--Chart buttons texts-->
     <string name="button1h">1h</string>
@@ -165,27 +177,16 @@
     <string name="volumeYenPlaceholder">Volume\n%1$s¥</string>
     <string name="priceYenPlaceholder">Price\n%1$s¥</string>
 
-    <string name="title_activity_main">MainActivity</string>
-
     <string name="fingerprint_dialog_cancel">Cancel</string>
     <string name="fingerprint_dialog_title">Verify your fingerprint to continue</string>
 
 
     <!--Marketcap placeholders-->
     <!--Dollar-->
-    <string name="market_cap_dollar_textview">Total Market Capitalization :\nUS$%1$s</string>
-    <string name="volume_dollar_market_cap_textview">24h volume :\nUS$%1$s</string>
     <!--Euro-->
-    <string name="market_cap_euros_textview">Total Market Capitalization :\n%1$s€</string>
-    <string name="volume_euros_market_cap_textview">24h volume :\n%1$s€</string>
     <!--Pound-->
-    <string name="market_cap_pound_textview">Total Market Capitalization :\n%1$s£</string>
-    <string name="volume_pound_market_cap_textview">24h volume :\n%1$s£</string>
     <!--Yen-->
-    <string name="market_cap_yen_textview">Total Market Capitalization :\n%1$s¥</string>
-    <string name="volume_yen_market_cap_textview">24h volume :\n%1$s¥</string>
 
-    <string name="title_activity_scrolling">ScrollingActivity</string>
     <string name="action_settings">Settings</string>
     <string name="action_edit_mode">Edition</string>
 

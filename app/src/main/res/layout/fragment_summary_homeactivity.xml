@@ -60,7 +60,7 @@
                     android:background="@drawable/ic_drawer_white_24dp"
                     android:visibility="visible"
                     android:layout_gravity="start|center_vertical"
-                    android:contentDescription="Drawer"/>
+                    android:contentDescription="@string/drawer"/>
 
             </FrameLayout>
 
@@ -93,7 +93,7 @@
 
                 <Button
                     android:id="@+id/buttonAddTransaction"
-                    android:text="Add transaction"
+                    android:text="@string/add_transaction"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_dashed_background"

@@ -38,7 +38,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Total supply"
+                    android:text="@string/total_supply"
                     android:textStyle="bold"/>
 
                 <TextView
@@ -57,7 +57,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Circulating supply"
+                    android:text="@string/circulating_supply"
                     android:textStyle="bold"/>
 
                 <TextView
@@ -87,14 +87,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Market capitalizaion"
+                    android:text="@string/market_capitalization"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/txtViewMarketCapitalization"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="--"/>
+                    android:text="@string/default_value"/>
 
             </LinearLayout>
 
@@ -109,14 +109,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Rank"
+                    android:text="@string/rank"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/txtViewRank"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="--"/>
+                    android:text="@string/default_value"/>
 
             </LinearLayout>
 
@@ -138,14 +138,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Algorithm"
+                    android:text="@string/algorithm"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/txtViewAlgorithm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="--"/>
+                    android:text="@string/default_value"/>
 
             </LinearLayout>
 
@@ -158,14 +158,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Proof type"
+                    android:text="@string/proof_type"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/txtViewProofType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="--"/>
+                    android:text="@string/default_value"/>
 
             </LinearLayout>
 
@@ -186,14 +186,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Start date"
+                    android:text="@string/start_date"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/txtViewStartDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="--"/>
+                    android:text="@string/default_value"/>
 
             </LinearLayout>
 
@@ -208,7 +208,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Description"
+                android:text="@string/description"
                 android:textStyle="bold"/>
 
             <TextView

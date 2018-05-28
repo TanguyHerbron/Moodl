@@ -20,11 +20,11 @@
         <item
             android:id="@+id/navigation_overview"
             android:icon="@drawable/ic_view_list_black_24dp"
-            android:title="Coin list"/>
+            android:title="@string/title_coin_list"/>
 
     </group>
 
-    <item android:title="Other">
+    <item android:title="">
         <menu>
             <group android:checkableBehavior="single">
 

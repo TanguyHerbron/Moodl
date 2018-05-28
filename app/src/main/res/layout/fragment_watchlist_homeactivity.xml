@@ -31,14 +31,14 @@
                     android:background="@drawable/ic_drawer_white_24dp"
                     android:visibility="visible"
                     android:layout_gravity="start|center_vertical"
-                    android:contentDescription="Drawer"/>
+                    android:contentDescription="@string/drawer"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:text="Watchlist"
+                    android:text="@string/title_watchlist"
                     android:textSize="18sp"
                     android:textColor="@color/white"
                     android:textStyle="bold"/>
@@ -51,7 +51,7 @@
                     android:background="@drawable/ic_mode_edit_white_24dp"
                     android:visibility="visible"
                     android:layout_gravity="end|center_vertical"
-                    android:contentDescription="Edit mode"/>
+                    android:contentDescription="@string/edit_mode"/>
 
             </FrameLayout>
 
@@ -97,7 +97,7 @@
 
                 <Button
                     android:id="@+id/buttonAddWatchlist"
-                    android:text="Add to watchlist"
+                    android:text="@string/add_watchlist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_dashed_background"
