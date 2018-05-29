@@ -28,6 +28,7 @@ import com.nauk.moodl.Activities.CurrencyDetailsActivity;
 import com.nauk.moodl.Activities.HomeActivityFragments.Summary;
 import com.nauk.moodl.DataManagers.DatabaseManager;
 import com.nauk.moodl.DataManagers.PreferencesManager;
+import com.nauk.moodl.MoodlBox;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -125,11 +126,6 @@ public class CurrencyCardview extends CardView {
         updateColor(currency);
     }
 
-    private float convertDpToPx(float dp)
-    {
-        return dp * this.getResources().getDisplayMetrics().density;
-    }
-
     public CurrencyCardview(@NonNull final Context context, final Currency currency, float totalValue, boolean isBalanceHidden)
     {
         super(context);
@@ -198,11 +194,11 @@ public class CurrencyCardview extends CardView {
     private void setupCardView(Context context)
     {
         ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.MATCH_PARENT, ViewGroup.MarginLayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins((int) convertDpToPx(10), 0, (int) convertDpToPx(10), (int) convertDpToPx(10));
+        layoutParams.setMargins((int) MoodlBox.convertDpToPx(10, getResources()), 0, (int) MoodlBox.convertDpToPx(10, getResources()), (int) MoodlBox.convertDpToPx(10, getResources()));
 
         setLayoutParams(layoutParams);
 
-        setRadius(convertDpToPx(2));
+        setRadius(MoodlBox.convertDpToPx(2, getResources()));
 
         setClickable(false);
         setFocusable(false);

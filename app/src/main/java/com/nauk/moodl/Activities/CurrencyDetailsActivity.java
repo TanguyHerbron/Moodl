@@ -60,6 +60,7 @@ import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.DetailsActivityPagerAdapter;
 import com.nauk.moodl.LayoutManagers.TradeListAdapter;
 import com.nauk.moodl.LayoutManagers.TransactionListAdapter;
+import com.nauk.moodl.MoodlBox;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -188,7 +189,12 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
         canvas.drawBitmap(Bitmap.createScaledBitmap(currency.getIcon(), 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
 
-        getSupportActionBar().setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(result, 120, 120, false)));
+        getSupportActionBar()
+                .setIcon(new BitmapDrawable(getResources(),
+                        Bitmap.createScaledBitmap(result
+                                , (int) MoodlBox.convertDpToPx(25, getResources())
+                                , (int) MoodlBox.convertDpToPx(25, getResources())
+                                , false)));
     }
 }
 /*for(int i = 0; i < dataChartList.size(); i++)

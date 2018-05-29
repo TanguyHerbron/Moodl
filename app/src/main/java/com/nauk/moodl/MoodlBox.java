@@ -247,6 +247,11 @@ public class MoodlBox {
         return getIconUrl(symbol, 50, currencyDetailsList);
     }
 
+    public static float convertDpToPx(float dp, Resources resources)
+    {
+        return dp * resources.getDisplayMetrics().density;
+    }
+
     public static String getIconUrl(String symbol, int size, CurrencyDetailsList currencyDetailsList)
     {
         String url;

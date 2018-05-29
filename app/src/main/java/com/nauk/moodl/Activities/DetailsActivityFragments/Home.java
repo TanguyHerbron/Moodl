@@ -34,6 +34,7 @@ import com.nauk.moodl.DataManagers.CurrencyData.Currency;
 import com.nauk.moodl.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.moodl.DataManagers.PreferencesManager;
 import com.nauk.moodl.LayoutManagers.CustomViewPager;
+import com.nauk.moodl.MoodlBox;
 import com.nauk.moodl.PlaceholderManager;
 import com.nauk.moodl.R;
 
@@ -170,7 +171,7 @@ public class Home extends Fragment {
     private void buttonEvent(View v)
     {
         v.setEnabled(false);
-        v.setElevation(convertDpToPx(8));
+        v.setElevation(MoodlBox.convertDpToPx(8, getResources()));
 
         LinearLayout buttonLayout = (LinearLayout) v.getParent();
 
@@ -181,7 +182,7 @@ public class Home extends Fragment {
             if(button != v)
             {
                 button.setEnabled(true);
-                button.setElevation(convertDpToPx(2));
+                button.setElevation(MoodlBox.convertDpToPx(2, getResources()));
             }
         }
 
@@ -317,11 +318,6 @@ public class Home extends Fragment {
                 });
                 break;
         }
-    }
-
-    private float convertDpToPx(float dp)
-    {
-        return dp * this.getResources().getDisplayMetrics().density;
     }
 
     private void updateChartTab(int timeUnit, int amount)
