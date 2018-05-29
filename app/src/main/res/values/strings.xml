@@ -4,7 +4,7 @@
     <string name="debug_volley" translatable="false">Moodl_debugVolley</string>
     <string name="title_activity_settings">Settings</string>
 
-    <!-- Strings related to Settings -->
+    <string name="currency">currency</string>
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>

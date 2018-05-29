@@ -65,6 +65,7 @@ import com.nauk.moodl.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.nauk.moodl.MoodlBox.numberConformer;
 import static com.nauk.moodl.MoodlBox.getDateFromTimestamp;
@@ -130,7 +131,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currency_details);
 
-        currency = getIntent().getParcelableExtra("currency");
+        currency = getIntent().getParcelableExtra(getBaseContext().getString(R.string.currency));
         viewPager = findViewById(R.id.vfCurrencyDetails);
         final DetailsActivityPagerAdapter adapter = new DetailsActivityPagerAdapter(getSupportFragmentManager(), 3);
 
@@ -174,7 +175,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
             setTitle(" " + currency.getName() + " | " + numberConformer(currency.getBalance()));
         }
 
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME |
+        Objects.requireNonNull(getSupportActionBar()).setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME |
                 ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_USE_LOGO);
 
         Bitmap result = Bitmap.createBitmap(150, 150, currency.getIcon().getConfig());
@@ -187,7 +188,7 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
         canvas.drawBitmap(Bitmap.createScaledBitmap(currency.getIcon(), 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
 
-        getSupportActionBar().setIcon(new BitmapDrawable(Bitmap.createScaledBitmap(result, 120, 120, false)));
+        getSupportActionBar().setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(result, 120, 120, false)));
     }
 }
 /*for(int i = 0; i < dataChartList.size(); i++)

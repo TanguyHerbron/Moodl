@@ -9,6 +9,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -186,7 +187,7 @@ public class CurrencyCardview extends CardView {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
+                intent.putExtra(getContext().getString(R.string.currency), currency);
                 context.getApplicationContext().startActivity(intent);
             }
         });
@@ -321,7 +322,7 @@ public class CurrencyCardview extends CardView {
             values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
         }
 
-        dataSet = new LineDataSet(values, "History");
+        dataSet = new LineDataSet(values, "");
         dataSet.setDrawIcons(false);
         dataSet.setColor(currency.getChartColor());
         dataSet.setLineWidth(1);
@@ -341,16 +342,16 @@ public class CurrencyCardview extends CardView {
         if(currency.getDayFluctuationPercentage() >= 0)
         {
             ((TextView) findViewById(R.id.currencyFluctuationPercentageTextView))
-                    .setTextColor(getResources().getColor(R.color.increase));
+                    .setTextColor(ContextCompat.getColor(getContext(), R.color.increase));
             ((TextView) findViewById(R.id.currencyFluctuationTextView))
-                    .setTextColor(getResources().getColor(R.color.increase));
+                    .setTextColor(ContextCompat.getColor(getContext(), R.color.increase));
         }
         else
         {
             ((TextView) findViewById(R.id.currencyFluctuationPercentageTextView))
-                    .setTextColor(getResources().getColor(R.color.decrease));
+                    .setTextColor(ContextCompat.getColor(getContext(), R.color.decrease));
             ((TextView) findViewById(R.id.currencyFluctuationTextView))
-                    .setTextColor(getResources().getColor(R.color.decrease));
+                    .setTextColor(ContextCompat.getColor(getContext(), R.color.decrease));
         }
     }
 
