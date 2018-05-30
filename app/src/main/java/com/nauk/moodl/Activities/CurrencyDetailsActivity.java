@@ -10,6 +10,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -115,7 +116,10 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
 
                 if(viewPager.getCurrentItem() == 0)
                 {
-                    finishAfterTransition();
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    {
+                        finishAfterTransition();
+                    }
                 }
                 else
                 {

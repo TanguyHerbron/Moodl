@@ -2,6 +2,7 @@ package com.nauk.moodl.Activities.DetailsActivityFragments;
 
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -171,7 +172,11 @@ public class Home extends Fragment {
     private void buttonEvent(View v)
     {
         v.setEnabled(false);
-        v.setElevation(MoodlBox.convertDpToPx(8, getResources()));
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            v.setElevation(MoodlBox.convertDpToPx(8, getResources()));
+        }
 
         LinearLayout buttonLayout = (LinearLayout) v.getParent();
 
@@ -182,7 +187,11 @@ public class Home extends Fragment {
             if(button != v)
             {
                 button.setEnabled(true);
-                button.setElevation(MoodlBox.convertDpToPx(2, getResources()));
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                {
+                    button.setElevation(MoodlBox.convertDpToPx(2, getResources()));
+                }
             }
         }
 
@@ -638,17 +647,17 @@ public class Home extends Fragment {
                     , (float) dataChartList.get(i).getClose()));
         }
 
-        dataSet = new CandleDataSet(values, "History");
+        dataSet = new CandleDataSet(values, "");
         dataSet.setDrawIcons(false);
         dataSet.setDrawValues(false);
-        dataSet.setDecreasingColor(getContext().getColor(R.color.decreaseCandle));
+        dataSet.setDecreasingColor(MoodlBox.getColor(R.color.decreaseCandle, getContext()));
         dataSet.setShowCandleBar(true);
         dataSet.setShadowColorSameAsCandle(true);
         dataSet.setDecreasingPaintStyle(Paint.Style.FILL);
-        dataSet.setIncreasingColor(getContext().getColor(R.color.increaseCandle));
+        dataSet.setIncreasingColor(MoodlBox.getColor(R.color.increaseCandle, getContext()));
         dataSet.setIncreasingPaintStyle(Paint.Style.STROKE);
-        dataSet.setNeutralColor(getContext().getColor(R.color.increaseCandle));
-        dataSet.setHighLightColor(getContext().getColor(R.color.colorAccent));
+        dataSet.setNeutralColor(MoodlBox.getColor(R.color.increaseCandle, getContext()));
+        dataSet.setHighLightColor(MoodlBox.getColor(R.color.colorAccent, getContext()));
         dataSet.setDrawHorizontalHighlightIndicator(false);
 
         return new CandleData(dataSet);

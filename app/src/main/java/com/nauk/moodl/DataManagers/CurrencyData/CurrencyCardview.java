@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
@@ -58,7 +59,7 @@ public class CurrencyCardview extends CardView {
 
         ((LineChart) findViewById(R.id.LineChartView)).setNoDataTextColor(currency.getChartColor());
 
-        setupCardView(context);
+        setupCardView();
 
         setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,8 +119,17 @@ public class CurrencyCardview extends CardView {
                 Intent intent = new Intent(activity, CurrencyDetailsActivity.class);
                 intent.putExtra("currency", currency);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                ActivityOptions activityOptions = ActivityOptions.makeSceneTransitionAnimation(activity, findViewById(R.id.LineChartView), "chart");
-                activity.startActivity(intent, activityOptions.toBundle());
+
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                {
+                    ActivityOptions activityOptions = ActivityOptions.makeSceneTransitionAnimation(activity, findViewById(R.id.LineChartView), "chart");
+                    activity.startActivity(intent, activityOptions.toBundle());
+                }
+                else
+                {
+                    activity.startActivity(intent);
+                }
             }
         });
 
@@ -134,7 +144,7 @@ public class CurrencyCardview extends CardView {
 
         ((LineChart) findViewById(R.id.LineChartView)).setNoDataTextColor(currency.getChartColor());
 
-        setupCardView(context);
+        setupCardView();
 
         setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,6 +194,7 @@ public class CurrencyCardview extends CardView {
             public void onClick(View view) {
                 Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
                 intent.putExtra(getContext().getString(R.string.currency), currency);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.getApplicationContext().startActivity(intent);
             }
         });
@@ -191,7 +202,7 @@ public class CurrencyCardview extends CardView {
         updateColor(currency);
     }
 
-    private void setupCardView(Context context)
+    private void setupCardView()
     {
         ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.MATCH_PARENT, ViewGroup.MarginLayoutParams.WRAP_CONTENT);
         layoutParams.setMargins((int) MoodlBox.convertDpToPx(10, getResources()), 0, (int) MoodlBox.convertDpToPx(10, getResources()), (int) MoodlBox.convertDpToPx(10, getResources()));
@@ -202,7 +213,8 @@ public class CurrencyCardview extends CardView {
 
         setClickable(false);
         setFocusable(false);
-        setCardBackgroundColor(context.getColor(R.color.white));
+
+        setCardBackgroundColor(MoodlBox.getColor(R.id.withText, getContext()));
     }
 
     private void setupLineChart(final Currency currency)

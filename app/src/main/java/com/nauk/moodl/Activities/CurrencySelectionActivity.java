@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -72,7 +73,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         ArrayList<Currency> currencyArrayList = new ArrayList<>();
 
-        for(int i = currencyNames.size() - 1; i > 0; i--)
+        for(int i = 0; i < currencyNames.size(); i++)
         {
             currencyArrayList.add(new Currency(currencyNames.get(i), currencySymbols.get(i)));
         }
@@ -151,8 +152,10 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
         if (TextUtils.isEmpty(text)) {
             listView.clearTextFilter();
         } else {
+            Log.d("moodl", "Set filter : " + text);
             listView.setFilterText(text);
         }
+
         return true;
     }
 

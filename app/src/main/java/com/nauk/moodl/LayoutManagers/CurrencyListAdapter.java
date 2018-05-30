@@ -2,6 +2,7 @@ package com.nauk.moodl.LayoutManagers;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,7 +67,7 @@ public class CurrencyListAdapter extends ArrayAdapter<Currency> {
             return myFilter;
         }
 
-        Filter myFilter = new Filter() {
+        private Filter myFilter = new Filter() {
             @Override
             public CharSequence convertResultToString(Object resultValue) {
                 Currency currency = (Currency) resultValue;
@@ -103,6 +104,9 @@ public class CurrencyListAdapter extends ArrayAdapter<Currency> {
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 ArrayList<Currency> c = (ArrayList<Currency>) results.values;
+
+                Log.d("moodl", "Q " + constraint);
+
                 if (results != null && results.count > 0) {
                     clear();
                     for (Currency currency : c) {
