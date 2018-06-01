@@ -214,7 +214,7 @@ public class CurrencyCardview extends CardView {
         setClickable(false);
         setFocusable(false);
 
-        setCardBackgroundColor(MoodlBox.getColor(R.id.withText, getContext()));
+        setCardBackgroundColor(MoodlBox.getColor(R.color.white, getContext()));
     }
 
     private void setupLineChart(final Currency currency)

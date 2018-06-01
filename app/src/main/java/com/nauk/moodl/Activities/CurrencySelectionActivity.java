@@ -147,16 +147,9 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
     @Override
     public boolean onQueryTextChange(String text)
     {
-        filter.filter(text);
+        adapter.getFilter().filter(text);
 
-        if (TextUtils.isEmpty(text)) {
-            listView.clearTextFilter();
-        } else {
-            Log.d("moodl", "Set filter : " + text);
-            listView.setFilterText(text);
-        }
-
-        return true;
+        return false;
     }
 
     @Override
@@ -167,13 +160,11 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
     private void detailsEvent()
     {
-        setupAdapter();
-
-        setupList();
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                setupAdapter();
+                setupList();
                 setupSearchView();
 
                 expand(findViewById(R.id.listContainerLayout));

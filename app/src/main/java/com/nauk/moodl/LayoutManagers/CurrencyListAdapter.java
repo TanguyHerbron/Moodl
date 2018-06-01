@@ -7,7 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.nauk.moodl.DataManagers.CurrencyData.Currency;
@@ -19,38 +21,52 @@ import java.util.ArrayList;
  * Created by Guitoune on 17/01/2018.
  */
 
-public class CurrencyListAdapter extends ArrayAdapter<Currency> {
+public class CurrencyListAdapter extends BaseAdapter implements Filterable {
 
-        private ArrayList<Currency> tempCurrency, suggestions;
+        private ArrayList<Currency> currencies, suggestions;
         private Context context;
+        private CustomFilter filter;
 
         public CurrencyListAdapter(Context context, ArrayList<Currency> currencies) {
-            super(context, android.R.layout.simple_list_item_1, currencies);
-            this.tempCurrency = new ArrayList<>(currencies);
-            this.suggestions = new ArrayList<>(currencies);
-
             this.context = context;
+            this.currencies = currencies;
+            this.suggestions = currencies;
+        }
+
+        @Override
+        public int getCount() {
+            return currencies.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return currencies.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return currencies.indexOf(getItem(position));
         }
 
         @NonNull
         @Override
         public View getView(int position, View convertView, @NonNull ViewGroup parent)
         {
-            Currency currency = getItem(position);
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_currency_row, parent, false);
+                convertView = inflater.inflate(R.layout.custom_currency_row, parent, false);
             }
 
             TextView currencyName = convertView.findViewById(R.id.currencyName);
             TextView currencySymbol = convertView.findViewById(R.id.currencySymbol);
 
             if (currencyName != null)
-                currencyName.setText(currency.getName());
+                currencyName.setText(currencies.get(position).getName());
 
             if(currencySymbol != null)
             {
-                currencySymbol.setText(currency.getSymbol());
+                currencySymbol.setText(currencies.get(position).getSymbol());
             }
 
             if (position % 2 == 0)
@@ -64,56 +80,57 @@ public class CurrencyListAdapter extends ArrayAdapter<Currency> {
         @NonNull
         @Override
         public Filter getFilter() {
-            return myFilter;
+
+            if(filter == null)
+            {
+                filter = new CustomFilter();
+            }
+            return filter;
         }
 
-        private Filter myFilter = new Filter() {
-            @Override
-            public CharSequence convertResultToString(Object resultValue) {
-                Currency currency = (Currency) resultValue;
-                return currency.getName();
-            }
-
+        class CustomFilter extends Filter
+        {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                if (constraint != null) {
-                    suggestions.clear();
+                FilterResults results = new FilterResults();
 
-                    int i = 0;
-                    String temp = constraint.toString().toLowerCase();
+                if(constraint != null && constraint.length() > 0)
+                {
+                    constraint = constraint.toString().toLowerCase();
 
-                    while(i < tempCurrency.size())
+                    ArrayList<Currency> filters = new ArrayList<Currency>();
+
+                    for(int i = 0; i < suggestions.size(); i++)
                     {
-                        Currency currency = tempCurrency.get(i);
-                        if (currency.getName().toLowerCase().startsWith(temp)
-                                || currency.getSymbol().toLowerCase().startsWith(temp)) {
-                            suggestions.add(currency);
+                        if(suggestions.get(i).getName().toLowerCase().contains(constraint) || suggestions.get(i).getSymbol().toLowerCase().contains(constraint))
+                        {
+                            Currency currency = new Currency(suggestions.get(i).getName(), suggestions.get(i).getSymbol());
+
+                            filters.add(currency);
                         }
-                        i++;
                     }
 
-                    FilterResults filterResults = new FilterResults();
-                    filterResults.values = suggestions;
-                    filterResults.count = suggestions.size();
-                    return filterResults;
-                } else {
-                    return new FilterResults();
+                    results.count = filters.size();
+                    results.values = filters;
                 }
+                else
+                {
+                    results.count = suggestions.size();
+                    results.values = suggestions;
+                }
+
+                return results;
             }
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                ArrayList<Currency> c = (ArrayList<Currency>) results.values;
 
-                Log.d("moodl", "Q " + constraint);
-
-                if (results != null && results.count > 0) {
-                    clear();
-                    for (Currency currency : c) {
-                        add(currency);
-                        notifyDataSetChanged();
-                    }
+                if(results != null)
+                {
+                    currencies = (ArrayList<Currency>) results.values;
                 }
+
+                notifyDataSetChanged();
             }
-        };
+        }
 }
