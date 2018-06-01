@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.nauk.moodl">
+    package="com.herbron.moodl">
 
     <uses-feature android:name="android.hardware.fingerprint"
         android:required="false"/>
@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.nauk.moodl.Activities.HomeActivity"
+            android:name="com.herbron.moodl.Activities.HomeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
@@ -28,30 +28,30 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.nauk.moodl.Activities.SettingsActivity"
+            android:name="com.herbron.moodl.Activities.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.nauk.moodl.Activities.CurrencySelectionActivity"
+            android:name="com.herbron.moodl.Activities.CurrencySelectionActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nauk.moodl.Activities.HomeActivity"/>
+                android:value="com.herbron.moodl.Activities.HomeActivity"/>
         </activity>
         <activity
-            android:name="com.nauk.moodl.Activities.RecordTransactionActivity"
+            android:name="com.herbron.moodl.Activities.RecordTransactionActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nauk.moodl.Activities.HomeActivity"/>
+                android:value="com.herbron.moodl.Activities.HomeActivity"/>
         </activity>
         <activity
-            android:name="com.nauk.moodl.Activities.CurrencyDetailsActivity"
+            android:name="com.herbron.moodl.Activities.CurrencyDetailsActivity"
             android:label="@string/title_activity_currency_details"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nauk.moodl.Activities.HomeActivity"/>
+                android:value="com.herbron.moodl.Activities.HomeActivity"/>
         </activity>
     </application>
 

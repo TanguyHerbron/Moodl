@@ -83,7 +83,7 @@
                     android:layout_height="350dp"
                     android:layout_marginTop="5dp">
 
-                    <com.nauk.moodl.LayoutManagers.CustomPieChart
+                    <com.herbron.moodl.LayoutManagers.CustomPieChart
                         android:id="@+id/marketCapPieChart"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.nauk.moodl.Activities.RecordTransactionActivity">
+    tools:context="com.herbron.moodl.Activities.RecordTransactionActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
