@@ -99,9 +99,31 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         values.put(KEY_WATCHLIST_SYMBOL, currency.getSymbol());
         values.put(KEY_WATCHLIST_NAME, currency.getName());
+        values.put(KEY_WATCHLIST_POSITION, getWatchlistRowCount(db));
 
         db.insert(TABLE_WATCHLIST, null, values);
         db.close();
+    }
+
+    public void updateWatchlistPosition(String symbol, int position)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(KEY_WATCHLIST_POSITION, position);
+
+        db.update(TABLE_WATCHLIST, cv, KEY_WATCHLIST_SYMBOL + "='" + symbol + "'", null);
+
+    }
+
+    private int getWatchlistRowCount(SQLiteDatabase db)
+    {
+        String countQuerry = "SELECT COUNT() FROM " + TABLE_WATCHLIST;
+        Cursor result = db.rawQuery(countQuerry, null);
+
+        result.moveToFirst();
+
+        return result.getInt(0);
     }
 
     public int deleteCurrencyFromWatchlist(String symbol)
@@ -113,15 +135,15 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public List<Currency> getAllCurrenciesFromWatchlist()
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_WATCHLIST;
+        String searchQuerry = "SELECT * FROM " + TABLE_WATCHLIST + " ORDER BY " + KEY_WATCHLIST_POSITION + " ASC";
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor resultatList = db.rawQuery(searchQuerry, null);
+        Cursor resultList = db.rawQuery(searchQuerry, null);
 
         List<Currency> currencyList = new ArrayList<>();
 
-        while(resultatList.moveToNext())
+        while(resultList.moveToNext())
         {
-            currencyList.add(new Currency(resultatList.getString(2), resultatList.getString(1)));
+            currencyList.add(new Currency(resultList.getString(2), resultList.getString(1)));
         }
 
         return currencyList;

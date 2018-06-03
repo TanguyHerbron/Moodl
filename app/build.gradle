@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
     implementation 'com.mattprecious.swirl:swirl:1.1.0'
     implementation 'com.wdullaer:materialdatetimepicker:3.5.2'
+    implementation 'com.jmedeisis:draglinearlayout:1.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

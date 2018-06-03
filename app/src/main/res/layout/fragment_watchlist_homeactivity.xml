@@ -78,22 +78,19 @@
                 android:orientation="vertical"
                 android:paddingTop="25dp">
 
-                    <LinearLayout android:id="@+id/linearLayoutWatchlist"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        xmlns:android="http://schemas.android.com/apk/res/android">
+                <com.jmedeisis.draglinearlayout.DragLinearLayout android:id="@+id/linearLayoutWatchlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
 
-                        <ProgressBar
-                            android:id="@+id/progressBarWatchlist"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            style="?android:attr/progressBarStyleLarge"
-                            android:layout_gravity="center"
-                            android:background="@drawable/circular_progress_bar"
-                            android:visibility="visible"/>
-
-                    </LinearLayout>
+                <ProgressBar
+                    android:id="@+id/progressBarWatchlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circular_progress_bar"
+                    android:visibility="visible"/>
 
                 <Button
                     android:id="@+id/buttonAddWatchlist"

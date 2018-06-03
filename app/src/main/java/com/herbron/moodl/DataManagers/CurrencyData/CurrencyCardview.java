@@ -43,6 +43,8 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
 
 public class CurrencyCardview extends CardView {
 
+    private Currency currency;
+
     public CurrencyCardview(@NonNull Context context) {
         super(context);
     }
@@ -50,6 +52,8 @@ public class CurrencyCardview extends CardView {
     public CurrencyCardview(@NonNull final Context context, final Currency currency, final Activity activity)
     {
         super (context);
+
+        this.currency = currency;
 
         LayoutInflater.from(context).inflate(R.layout.cardview_watchlist, this, true);
 
@@ -136,6 +140,8 @@ public class CurrencyCardview extends CardView {
     {
         super(context);
 
+        this.currency = currency;
+
         LayoutInflater.from(context).inflate(R.layout.cardview_currency, this, true);
 
         ((LineChart) findViewById(R.id.LineChartView)).setNoDataTextColor(currency.getChartColor());
@@ -196,6 +202,11 @@ public class CurrencyCardview extends CardView {
         });
 
         updateColor(currency);
+    }
+
+    public Currency getCurrency()
+    {
+        return currency;
     }
 
     private void setupCardView()

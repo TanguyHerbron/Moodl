@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -255,6 +256,22 @@ public class MoodlBox {
         }
 
         return color;
+    }
+
+    public static Drawable getDrawable(int id, Context context)
+    {
+        Drawable drawable;
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            drawable = context.getDrawable(id);
+        }
+        else
+        {
+            drawable = context.getResources().getDrawable(id);
+        }
+
+        return drawable;
     }
 
     public static String getIconUrl(String symbol, CurrencyDetailsList currencyDetailsList)

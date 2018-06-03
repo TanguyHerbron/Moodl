@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.herbron.moodl.Activities.CurrencySelectionActivity;
@@ -26,10 +27,12 @@ import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyCardview;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyTickerList;
+import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.DataManagers.WatchlistManager;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.R;
+import com.jmedeisis.draglinearlayout.DragLinearLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +52,7 @@ public class Watchlist extends Fragment {
     private int watchlistCounter;
     private CurrencyDetailsList currencyDetailsList;
     private SwipeRefreshLayout refreshLayout;
+    private DragLinearLayout dragLinearLayout;
     private long lastTimestamp;
     private PreferencesManager preferencesManager;
     private String defaultCurrency;
@@ -56,6 +60,7 @@ public class Watchlist extends Fragment {
     private boolean tickerUpdated;
     private boolean detailsUpdated;
     private boolean editModeEnabled;
+    private DatabaseManager databaseManager;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -63,14 +68,27 @@ public class Watchlist extends Fragment {
         view = inflater.inflate(R.layout.fragment_watchlist_homeactivity, container, false);
 
         refreshLayout = view.findViewById(R.id.swiperefreshwatchlist);
+        dragLinearLayout = view.findViewById(R.id.linearLayoutWatchlist);
         currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
         preferencesManager = new PreferencesManager(getContext());
+        databaseManager = new DatabaseManager(getContext());
 
         lastTimestamp = 0;
         defaultCurrency = preferencesManager.getDefaultCurrency();
         currencyTickerList = CurrencyTickerList.getInstance(getActivity());
         tickerUpdated = false;
         updateTickerList();
+
+        dragLinearLayout.setOnViewSwapListener(new DragLinearLayout.OnViewSwapListener() {
+            @Override
+            public void onSwap(View firstView, int firstPosition, View secondView, int secondPosition) {
+                CurrencyCardview currencyCardviewMoved = (CurrencyCardview) firstView;
+                CurrencyCardview currencyCardviewSwaped = (CurrencyCardview) secondView;
+
+                databaseManager.updateWatchlistPosition(currencyCardviewMoved.getCurrency().getSymbol(), secondPosition);
+                databaseManager.updateWatchlistPosition(currencyCardviewSwaped.getCurrency().getSymbol(), firstPosition);
+            }
+        });
 
         editModeEnabled = false;
 
@@ -128,35 +146,40 @@ public class Watchlist extends Fragment {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LinearLayout watchlistLayout = Watchlist.this.view.findViewById(R.id.linearLayoutWatchlist);
 
                 if(editModeEnabled)
                 {
+                    ((ImageView) view.findViewById(R.id.edit_button)).setBackground(MoodlBox.getDrawable(R.drawable.ic_mode_edit_white_24dp, getContext()));
+
                     editModeEnabled = false;
 
-                    for(int i = 0; i < watchlistLayout.getChildCount(); i++)
+                    for(int i = 0; i < dragLinearLayout.getChildCount(); i++)
                     {
-                        View watchlistElement = watchlistLayout.getChildAt(i);
+                        View watchlistElement = dragLinearLayout.getChildAt(i);
 
                         if(watchlistElement instanceof CurrencyCardview)
                         {
                             watchlistElement.setClickable(true);
                             collapseW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
+                            collapseW(watchlistElement.findViewById(R.id.dragCardWatchlist));
                         }
                     }
                 }
                 else
                 {
+                    ((ImageView) view.findViewById(R.id.edit_button)).setBackground(MoodlBox.getDrawable(R.drawable.ic_check_white_24dp, getContext()));
+
                     editModeEnabled = true;
 
-                    for(int i = 0; i < watchlistLayout.getChildCount(); i++)
+                    for(int i = 0; i < dragLinearLayout.getChildCount(); i++)
                     {
-                        View watchlistElement = watchlistLayout.getChildAt(i);
+                        View watchlistElement = dragLinearLayout.getChildAt(i);
 
                         if(watchlistElement instanceof CurrencyCardview)
                         {
                             watchlistElement.setClickable(false);
                             expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
+                            expandW(watchlistElement.findViewById(R.id.dragCardWatchlist));
                         }
                     }
                 }
@@ -279,11 +302,14 @@ public class Watchlist extends Fragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).removeAllViews();
+                dragLinearLayout.removeAllViews();
+                view.findViewById(R.id.progressBarWatchlist).setVisibility(View.GONE);
 
                 for(Currency currency : watchlistManager.getWatchlist())
                 {
-                    ((LinearLayout) view.findViewById(R.id.linearLayoutWatchlist)).addView(new CurrencyCardview(getContext(), currency, getActivity()));
+                    View addedView = new CurrencyCardview(getContext(), currency, getActivity());
+
+                    dragLinearLayout.addDragView(addedView, addedView.findViewById(R.id.dragCardWatchlist));
                 }
             }
         });
