@@ -8,8 +8,10 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -103,10 +105,11 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         setupBalanceSwitch();
+    }
 
-        //Objects initialization
-
-        //Layouts setup
+    @Override
+    public void onBackPressed() {
+        drawerLayout.openDrawer(GravityCompat.START);
     }
 
     public void setListener(HideBalanceSwitch switchInterface)
