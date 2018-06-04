@@ -16,6 +16,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,12 +29,12 @@ import android.widget.TextView;
 
 import com.herbron.moodl.Activities.CurrencySelectionActivity;
 import com.herbron.moodl.Activities.HomeActivity;
-import com.herbron.moodl.DataManagers.BalanceManager;
+import com.herbron.moodl.BalanceUpdateInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyCardview;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyTickerList;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.HideBalanceSwitch;
+import com.herbron.moodl.BalanceSwitchManagerInterface;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
@@ -48,11 +49,11 @@ import static java.lang.Math.abs;
  * Created by Tiji on 13/04/2018.
  */
 
-public class Summary extends Fragment implements HideBalanceSwitch {
+public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
-    private BalanceManager balanceManager;
+    private com.herbron.moodl.DataManagers.BalanceManager balanceManager;
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
     private String defaultCurrency;
@@ -73,6 +74,8 @@ public class Summary extends Fragment implements HideBalanceSwitch {
     protected float totalFluctuation;
     private long lastTimestamp;
 
+    private BalanceUpdateInterface balanceUpdateInterface;
+
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -80,7 +83,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
         View fragmentView = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
 
         preferencesManager = new PreferencesManager(getActivity());
-        balanceManager = new BalanceManager(getActivity());
+        balanceManager = new com.herbron.moodl.DataManagers.BalanceManager(getActivity());
         currencyTickerList = CurrencyTickerList.getInstance(getActivity());
 
         currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
@@ -88,6 +91,8 @@ public class Summary extends Fragment implements HideBalanceSwitch {
         toolbarSubtitle = fragmentView.findViewById(R.id.toolbarSubtitle);
 
         resetCounters();
+
+        setListener((BalanceUpdateInterface) getActivity());
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
 
@@ -119,6 +124,11 @@ public class Summary extends Fragment implements HideBalanceSwitch {
         generateSplashScreen();
 
         return fragmentView;
+    }
+
+    public void setListener(BalanceUpdateInterface balanceUpdateInterface)
+    {
+        this.balanceUpdateInterface = balanceUpdateInterface;
     }
 
     private void setupDrawerButton(View view)
@@ -416,10 +426,12 @@ public class Summary extends Fragment implements HideBalanceSwitch {
         if(preferencesManager.isBalanceHidden())
         {
             updateHideBalanceTitle(totalFluctuationPercentage);
+            balanceUpdateInterface.onBalanceUpdated(totalFluctuationPercentage);
         }
         else
         {
             updateBalanceDisplayedTitle(totalFluctuationPercentage);
+            balanceUpdateInterface.onBalanceUpdated(totalValue);
         }
     }
 
@@ -687,7 +699,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
         {
             if(!currencyTickerList.isUpToDate())
             {
-                currencyTickerList.updateListing(new BalanceManager.IconCallBack() {
+                currencyTickerList.updateListing(new com.herbron.moodl.DataManagers.BalanceManager.IconCallBack() {
                     @Override
                     public void onSuccess() {
                         countCoins(false, false, true);
@@ -699,7 +711,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
                 countCoins(false, false, true);
             }
 
-            balanceManager.updateDetails(new BalanceManager.IconCallBack() {
+            balanceManager.updateDetails(new com.herbron.moodl.DataManagers.BalanceManager.IconCallBack() {
                 @Override
                 public void onSuccess()
                 {
@@ -707,7 +719,7 @@ public class Summary extends Fragment implements HideBalanceSwitch {
                 }
             });
 
-            balanceManager.updateTotalBalance(new BalanceManager.VolleyCallBack() {
+            balanceManager.updateTotalBalance(new com.herbron.moodl.DataManagers.BalanceManager.VolleyCallBack() {
                 @Override
                 public void onSuccess() {
                     final List<Currency> balance = balanceManager.getTotalBalance();

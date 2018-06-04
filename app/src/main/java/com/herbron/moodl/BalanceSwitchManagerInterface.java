@@ -1,6 +1,6 @@
 package com.herbron.moodl;
 
-public interface HideBalanceSwitch {
+public interface BalanceSwitchManagerInterface {
 
     void buttonCheckedChange();
 

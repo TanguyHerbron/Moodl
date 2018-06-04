@@ -3,6 +3,7 @@ package com.herbron.moodl.Activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -18,13 +19,19 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.herbron.moodl.Activities.HomeActivityFragments.MarketCapitalization;
 import com.herbron.moodl.Activities.HomeActivityFragments.Overview;
 import com.herbron.moodl.Activities.HomeActivityFragments.Summary;
 import com.herbron.moodl.Activities.HomeActivityFragments.Watchlist;
-import com.herbron.moodl.HideBalanceSwitch;
+import com.herbron.moodl.BalanceSwitchManagerInterface;
+import com.herbron.moodl.BalanceUpdateInterface;
+import com.herbron.moodl.DataManagers.PreferencesManager;
+import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
+
+import static com.herbron.moodl.MoodlBox.numberConformer;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
 
@@ -34,7 +41,7 @@ import com.herbron.moodl.R;
 //Add reddit link ?
 //
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements BalanceUpdateInterface {
 
     private DrawerLayout drawerLayout;
     private Fragment watchlistFragment;
@@ -44,7 +51,7 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment currentFragment;
 
 
-    private HideBalanceSwitch switchInterface;
+    private BalanceSwitchManagerInterface switchInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +72,7 @@ public class HomeActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
 
-        setListener((HideBalanceSwitch) holdingsFragment);
+        setListener((BalanceSwitchManagerInterface) holdingsFragment);
 
         showFragment(holdingsFragment);
 
@@ -112,7 +119,7 @@ public class HomeActivity extends AppCompatActivity {
         drawerLayout.openDrawer(GravityCompat.START);
     }
 
-    public void setListener(HideBalanceSwitch switchInterface)
+    public void setListener(BalanceSwitchManagerInterface switchInterface)
     {
         this.switchInterface = switchInterface;
     }
@@ -164,6 +171,22 @@ public class HomeActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.menu.menu_currency_summary, menu);
         return true;
+    }
+
+    @Override
+    public void onBalanceUpdated(float value) {
+        PreferencesManager preferencesManager = new PreferencesManager(getApplicationContext());
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        TextView drawerBalanceTextView = navigationView.getHeaderView(0).findViewById(R.id.balanceTextView);
+
+        if(preferencesManager.isBalanceHidden())
+        {
+            drawerBalanceTextView.setText(PlaceholderManager.getPercentageString(numberConformer(value), getApplicationContext()));
+        }
+        else
+        {
+            drawerBalanceTextView.setText(PlaceholderManager.getValueString(numberConformer(value), getApplicationContext()));
+        }
     }
 
     public interface IconCallBack
