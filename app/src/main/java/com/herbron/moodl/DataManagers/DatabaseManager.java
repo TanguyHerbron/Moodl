@@ -102,7 +102,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return result.moveToFirst();
     }
 
-    public void addCurrencyToWatchlist(Currency currency)
+    public boolean addCurrencyToWatchlist(Currency currency)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -116,7 +116,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
             db.insert(TABLE_WATCHLIST, null, values);
             db.close();
+
+            return true;
         }
+
+        return false;
     }
 
     public void updateWatchlistPosition(String symbol, int position)

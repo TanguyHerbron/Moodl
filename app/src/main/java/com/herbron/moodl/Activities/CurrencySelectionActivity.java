@@ -14,6 +14,7 @@ import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.herbron.moodl.DataManagers.BalanceManager;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
@@ -96,8 +97,14 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
                     PreferencesManager preferencesManager = new PreferencesManager(getApplicationContext());
                     DatabaseManager databaseManager = new DatabaseManager(getApplicationContext());
 
-                    databaseManager.addCurrencyToWatchlist(selectedCurrency);
-                    preferencesManager.setMustUpdateWatchlist(true);
+                    if(databaseManager.addCurrencyToWatchlist(selectedCurrency))
+                    {
+                        preferencesManager.setMustUpdateWatchlist(true);
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(), "Currency already in watchlist.", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 else
                 {
