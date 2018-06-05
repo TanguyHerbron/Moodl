@@ -56,29 +56,33 @@ public class RecordTransactionActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_record:
-                double amount = Double.parseDouble(amountTxtView.getText().toString());
-                double purchasedPrice = Double.parseDouble(purchasedPriceEditText.getText().toString());
-                double fees = Double.parseDouble(feesTxtView.getText().toString());
 
-                if(!sellButton.isEnabled())
+                if(checkAmountText() && checkPriceText())
                 {
-                    amount *= -1;
-                }
+                    double amount = Double.parseDouble(amountTxtView.getText().toString());
+                    double purchasedPrice = Double.parseDouble(purchasedPriceEditText.getText().toString());
+                    double fees = Double.parseDouble(feesTxtView.getText().toString());
 
-                if(transactionId != -1)
-                {
-                    databaseManager.updateTransactionWithId(transactionId, amount, calendar.getTime(), purchasedPrice, fees);
-                }
-                else
-                {
-                    databaseManager.addCurrencyToManualCurrency(symbol, amount, calendar.getTime(), purchasedPrice, fees);
-                }
+                    if(!sellButton.isEnabled())
+                    {
+                        amount *= -1;
+                    }
 
-                preferenceManager.setMustUpdateSummary(true);
-                Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                startActivity(intent);
-                finish();
+                    if(transactionId != -1)
+                    {
+                        databaseManager.updateTransactionWithId(transactionId, amount, calendar.getTime(), purchasedPrice, fees);
+                    }
+                    else
+                    {
+                        databaseManager.addCurrencyToManualCurrency(symbol, amount, calendar.getTime(), purchasedPrice, fees);
+                    }
+
+                    preferenceManager.setMustUpdateSummary(true);
+                    Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    finish();
+                }
                 break;
             case android.R.id.home:
                 //NavUtils.navigateUpFromSameTask(this);
@@ -87,6 +91,30 @@ public class RecordTransactionActivity extends AppCompatActivity {
             default:
                 break;
         }
+        return true;
+    }
+
+    private boolean checkPriceText()
+    {
+        if(purchasedPriceEditText.getText().toString().equals(""))
+        {
+            purchasedPriceEditText.setError(getResources().getString(R.string.field_empty));
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean checkAmountText()
+    {
+        if(amountTxtView.getText().toString().equals(""))
+        {
+            amountTxtView.setError(getResources().getString(R.string.field_empty));
+
+            return false;
+        }
+
         return true;
     }
 

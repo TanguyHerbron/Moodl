@@ -288,7 +288,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
             lastTimestamp = System.currentTimeMillis() / 1000;
             balanceManager.updateExchangeKeys();
-            refreshLayout.setRefreshing(true);
 
             resetCounters();
             DataUpdater updater = new DataUpdater();
@@ -319,8 +318,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
     {
         coinCounter = 0;
         iconCounter = 0;
-        detailsChecker = false;
-        tickersChecker = false;
 
         totalValue = 0;
         totalFluctuation = 0;
@@ -350,17 +347,18 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
         if(balanceManager.getTotalBalance() != null)
         {
-            if(coinCounter == balanceManager.getTotalBalance().size() && detailsChecker && tickersChecker)
+            if(balanceManager.getTotalBalance().size() == 0)
             {
-                IconDownloader iconDownloader = new IconDownloader();
-                iconDownloader.execute();
+                countIcons();
             }
             else
             {
-                if(balanceManager.getTotalBalance().size() == 0)
+                if(coinCounter >= balanceManager.getTotalBalance().size() && detailsChecker && tickersChecker)
                 {
-                    countIcons();
+                    IconDownloader iconDownloader = new IconDownloader();
+                    iconDownloader.execute();
                 }
+
             }
         }
     }
@@ -398,25 +396,21 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
     private void updateNoBalance()
     {
-        refreshLayout.setRefreshing(false);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                refreshLayout.setRefreshing(false);
 
-        currencyLayout.removeAllViews();
+                currencyLayout.removeAllViews();
 
-        if(loadingDialog.isShowing())
-        {
-            loadingDialog.dismiss();
-        }
-
-        try {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    updateTitle();
+                if(loadingDialog.isShowing())
+                {
+                    loadingDialog.dismiss();
                 }
-            });
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
+
+                updateTitle();
+            }
+        });
     }
 
     protected void updateTitle()

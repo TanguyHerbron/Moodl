@@ -4,7 +4,7 @@
     <string name="debug_volley" translatable="false">Moodl_debugVolley</string>
     <string name="title_activity_settings">Settings</string>
 
-    <string name="currency">currency</string>
+    <string name="currency" translatable="false">currency</string>
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
@@ -39,10 +39,6 @@
 
     <string name="transaction_record">Save</string>
 
-    <!-- Example settings for Notifications -->
-
-    <string name="pref_ringtone_silent">Silent</string>
-
     <!--Fingerprint authentification-->
 
     <!--Cardviews-->
@@ -51,7 +47,7 @@
     <!--Details activity-->
     <string name="line_chart">Line chart</string>
     <string name="candle_stick_chart">Candle stick chart</string>
-    <string name="backline">\n</string>
+    <string name="backline" translatable="false">\n</string>
     <string name="beginning_price">Beginning price</string>
     <string name="current_price">Current price</string>
     <string name="delta">Delta</string>
@@ -69,7 +65,7 @@
     <string name="transaction_history">Transaction history</string>
     <string name="trade_history">Trade history</string>
     <string name="trade_loading">Looking for trades&#8230;</string>
-    <string name="default_value">--</string>
+    <string name="default_value" translatable="false">--</string>
 
     <!--Home activity-->
     <string name="drawer">Drawer</string>
@@ -80,7 +76,7 @@
     <string name="add_transaction">Add transaction</string>
     <string name="add_watchlist">Add to watchlist</string>
     <string name="edit_mode">Edit mode</string>
-    <string name="loading_coin_list">Hodl&#8230;</string>
+    <string name="loading_coin_list" translatable="false">Hodl&#8230;</string>
 
     <!--Exchange strings-->
     <string name="pref_header_exchange">Exchanges settings</string>
@@ -102,28 +98,28 @@
     <string name="pref_title_enable_synchronization_binance">Enable synchronization</string>
     <string name="pref_title_binance_publickey">Public key</string>
     <string name="pref_title_binance_privatekey">Private key</string>
-    <string name="pref_title_exchange_binance">Binance</string>
+    <string name="pref_title_exchange_binance" translatable="false">Binance</string>
 
     <!--Poloniex-->
     <string name="pref_title_enable_synchronization_poloniex">Enable synchronization</string>
     <string name="pref_title_poloniex_publickey">Public key</string>
     <string name="pref_title_poloniex_privatekey">Private key</string>
-    <string name="pref_title_exchange_poloniex">Poloniex</string>
+    <string name="pref_title_exchange_poloniex" translatable="false">Poloniex</string>
 
     <!--Kraken-->
     <string name="pref_title_enable_synchronization_kraken">Enable synchronization</string>
     <string name="pref_title_kraken_publickey">Public key</string>
     <string name="pref_title_kraken_privatekey">Private key</string>
-    <string name="pref_title_exchange_kraken">Kraken</string>
+    <string name="pref_title_exchange_kraken" translatable="false">Kraken</string>
 
     <!--Add transaction activity-->
     <string name="activity_add_amount">Amount</string>
     <string name="activity_purchased_price">Purchased price</string>
     <string name="activity_purchased_date">Purchased date</string>
     <string name="activity_fees">Fees</string>
-    <string name="title_activity_currency_details">CurrencyDetailsActivity</string>
+    <string name="title_activity_currency_details" translatable="false">CurrencyDetailsActivity</string>
     <string name="title_history">History charts</string>
-    <string name="title_watchlist" translatable="false">Watchlist</string>
+    <string name="title_watchlist">Watchlist</string>
     <string name="title_infos">Infos</string>
     <string name="title_transactions">Transactions</string>
     <string name="title_home">Holdings</string>
@@ -142,25 +138,25 @@
     <string name="button1y">1y</string>
 
     <!--Cardview placeholders-->
-    <string name="currencySymbolPlaceholder">(%1$s)</string>
-    <string name="currencyBalancePlaceholder">%1$s%2$s</string>
-    <string name="currencyPercentagePlaceholder">%1$s%%</string>
+    <string name="currencySymbolPlaceholder" translatable="false">(%1$s)</string>
+    <string name="currencyBalancePlaceholder" translatable="false">%1$s%2$s</string>
+    <string name="currencyPercentagePlaceholder" translatable="false">%1$s%%</string>
     <!--Dollar-->
-    <string name="currencyDollarParenthesisPlaceholder">(US$%1$s)</string>
-    <string name="currencyDollarPlaceholder">US$%1$s</string>
-    <string name="fluctuationDollarPercentagePlaceholder">US$%1$s (%2$s%%)</string>
+    <string name="currencyDollarParenthesisPlaceholder" translatable="false">(US$%1$s)</string>
+    <string name="currencyDollarPlaceholder" translatable="false">US$%1$s</string>
+    <string name="fluctuationDollarPercentagePlaceholder" translatable="false">US$%1$s (%2$s%%)</string>
     <!--Euro-->
-    <string name="currencyEurosParenthesisPlaceholder">(%1$s€)</string>
-    <string name="currencyEurosPlaceholder">%1$s€</string>
-    <string name="fluctuationEurosPercentagePlaceholder">%1$s€ (%2$s%%)</string>
+    <string name="currencyEurosParenthesisPlaceholder" translatable="false">(%1$s€)</string>
+    <string name="currencyEurosPlaceholder" translatable="false">%1$s€</string>
+    <string name="fluctuationEurosPercentagePlaceholder" translatable="false">%1$s€ (%2$s%%)</string>
     <!--Pound-->
-    <string name="currencyPoundParenthesisPlaceholder">(%1$s£)</string>
-    <string name="currencyPoundPlaceholder">%1$s£</string>
-    <string name="fluctuationPoundPercentagePlaceholder">%1$s£ (%2$s%%)</string>
+    <string name="currencyPoundParenthesisPlaceholder" translatable="false">(%1$s£)</string>
+    <string name="currencyPoundPlaceholder" translatable="false">%1$s£</string>
+    <string name="fluctuationPoundPercentagePlaceholder" translatable="false">%1$s£ (%2$s%%)</string>
     <!--Yen-->
-    <string name="currencyYenParenthesisPlaceholder">(%1$s¥)</string>
-    <string name="currencyYenPlaceholder">%1$s¥</string>
-    <string name="fluctuationYenPercentagePlaceholder">%1$s¥ (%2$s%%)</string>
+    <string name="currencyYenParenthesisPlaceholder" translatable="false">(%1$s¥)</string>
+    <string name="currencyYenPlaceholder" translatable="false">%1$s¥</string>
+    <string name="fluctuationYenPercentagePlaceholder" translatable="false">%1$s¥ (%2$s%%)</string>
 
     <!--DetailsActivity placeholders-->
     <string name="timestampPlaceholder">Date\n%1$s</string>
@@ -189,5 +185,7 @@
 
     <string name="action_settings">Settings</string>
     <string name="action_edit_mode">Edition</string>
+
+    <string name="field_empty">This field cannot be blank</string>
 
 </resources>
