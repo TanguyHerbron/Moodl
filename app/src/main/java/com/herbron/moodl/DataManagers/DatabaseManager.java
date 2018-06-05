@@ -92,17 +92,31 @@ public class DatabaseManager extends SQLiteOpenHelper{
         onCreate(db);
     }
 
+    private boolean isCurrencyInWatchlist(String symbol)
+    {
+        String searchQuerry = "SELECT * FROM " + TABLE_WATCHLIST + " WHERE " + KEY_WATCHLIST_SYMBOL + "='" + symbol + "'";
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor result = db.rawQuery(searchQuerry, null);
+
+        return result.moveToFirst();
+    }
+
     public void addCurrencyToWatchlist(Currency currency)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
 
-        values.put(KEY_WATCHLIST_SYMBOL, currency.getSymbol());
-        values.put(KEY_WATCHLIST_NAME, currency.getName());
-        values.put(KEY_WATCHLIST_POSITION, getWatchlistRowCount(db));
+        if(!isCurrencyInWatchlist(currency.getSymbol()))
+        {
+            ContentValues values = new ContentValues();
 
-        db.insert(TABLE_WATCHLIST, null, values);
-        db.close();
+            values.put(KEY_WATCHLIST_SYMBOL, currency.getSymbol());
+            values.put(KEY_WATCHLIST_NAME, currency.getName());
+            values.put(KEY_WATCHLIST_POSITION, getWatchlistRowCount(db));
+
+            db.insert(TABLE_WATCHLIST, null, values);
+            db.close();
+        }
     }
 
     public void updateWatchlistPosition(String symbol, int position)
