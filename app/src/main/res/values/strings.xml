@@ -187,5 +187,6 @@
     <string name="action_edit_mode">Edition</string>
 
     <string name="field_empty">This field cannot be blank</string>
+    <string name="field_nan">This field must be a number</string>
 
 </resources>

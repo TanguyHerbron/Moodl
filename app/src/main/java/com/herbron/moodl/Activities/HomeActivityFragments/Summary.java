@@ -419,13 +419,29 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
         if(preferencesManager.isBalanceHidden())
         {
-            updateHideBalanceTitle(totalFluctuationPercentage);
-            balanceUpdateInterface.onBalanceUpdated(totalFluctuationPercentage);
+            if(Double.isNaN(totalFluctuationPercentage))
+            {
+                updateHideBalanceTitle(0);
+                balanceUpdateInterface.onBalanceUpdated(0);
+            }
+            else
+            {
+                updateHideBalanceTitle(totalFluctuationPercentage);
+                balanceUpdateInterface.onBalanceUpdated(totalFluctuationPercentage);
+            }
         }
         else
         {
-            updateBalanceDisplayedTitle(totalFluctuationPercentage);
-            balanceUpdateInterface.onBalanceUpdated(totalValue);
+            if(Double.isNaN(totalFluctuation))
+            {
+                updateBalanceDisplayedTitle(0);
+                balanceUpdateInterface.onBalanceUpdated(0);
+            }
+            else
+            {
+                updateBalanceDisplayedTitle(totalValue);
+                balanceUpdateInterface.onBalanceUpdated(totalValue);
+            }
         }
     }
 

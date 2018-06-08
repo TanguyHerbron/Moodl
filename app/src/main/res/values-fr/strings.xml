@@ -86,4 +86,6 @@
     <string name="fingerprint_dialog_title">Vérifier votre empreinte digitale pour continuer</string>
     <string name="action_settings">Paramètres</string>
     <string name="action_edit_mode">Edition</string>
+    <string name="field_empty">Ce champ en peut pas être vide</string>
+    <string name="field_nan">Ce champ doit être un nombre</string>
 </resources>

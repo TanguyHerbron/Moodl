@@ -21,6 +21,7 @@ import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.R;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -96,7 +97,17 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
     private boolean checkPriceText()
     {
-        if(purchasedPriceEditText.getText().toString().equals(""))
+        String purchasedPriceText = purchasedPriceEditText.getText().toString();
+
+        try {
+            Double.parseDouble(purchasedPriceText);
+        } catch (NumberFormatException e) {
+            purchasedPriceEditText.setError(getResources().getString(R.string.field_nan));
+
+            return false;
+        }
+
+        if(purchasedPriceText.equals(""))
         {
             purchasedPriceEditText.setError(getResources().getString(R.string.field_empty));
 
@@ -108,7 +119,17 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
     private boolean checkAmountText()
     {
-        if(amountTxtView.getText().toString().equals(""))
+        String amountText = amountTxtView.getText().toString();
+
+        try {
+            Double.parseDouble(amountText);
+        } catch (NumberFormatException e) {
+            amountTxtView.setError(getResources().getString(R.string.field_nan));
+
+            return false;
+        }
+
+        if(amountText.equals(""))
         {
             amountTxtView.setError(getResources().getString(R.string.field_empty));
 

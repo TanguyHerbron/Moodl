@@ -59,8 +59,6 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
 
         /**Interface setup**/
         Window w = getWindow();
-        w.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        w.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
         setContentView(R.layout.activity_currency_summary);
 

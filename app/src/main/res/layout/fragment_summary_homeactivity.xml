@@ -5,7 +5,6 @@
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context="com.herbron.moodl.Activities.HomeActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -13,7 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/app_bar_height"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:paddingTop="@dimen/fragment_padding"
         android:background="@drawable/gradient_background">
 
         <android.support.design.widget.CollapsingToolbarLayout
