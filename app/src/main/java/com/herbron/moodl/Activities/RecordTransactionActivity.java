@@ -98,9 +98,15 @@ public class RecordTransactionActivity extends AppCompatActivity {
     private boolean checkPriceText()
     {
         String purchasedPriceText = purchasedPriceEditText.getText().toString();
+        double purchasedPrice;
 
         try {
-            Double.parseDouble(purchasedPriceText);
+            purchasedPrice = Double.parseDouble(purchasedPriceText);
+
+            if(purchasedPrice < 0)
+            {
+                purchasedPriceEditText.setError(getResources().getString(R.string.field_negative));
+            }
         } catch (NumberFormatException e) {
             purchasedPriceEditText.setError(getResources().getString(R.string.field_nan));
 

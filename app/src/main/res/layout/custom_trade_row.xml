@@ -67,4 +67,11 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/separationLineSize"
+        android:layout_gravity="center_vertical"
+        android:background="@color/separationColor" />
+
 </LinearLayout>

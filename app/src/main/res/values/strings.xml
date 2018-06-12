@@ -188,5 +188,6 @@
 
     <string name="field_empty">This field cannot be blank</string>
     <string name="field_nan">This field must be a number</string>
+    <string name="field_negative">This field must be positive</string>
 
 </resources>

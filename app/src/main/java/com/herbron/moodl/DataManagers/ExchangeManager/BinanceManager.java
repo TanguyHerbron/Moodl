@@ -1,5 +1,7 @@
 package com.herbron.moodl.DataManagers.ExchangeManager;
 
+import android.util.Log;
+
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.account.Account;
@@ -96,6 +98,12 @@ public class BinanceManager {
         }
 
         callBack.onSuccess();
+    }
+
+    public void updateTransactions(String symbol)
+    {
+        BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
+        BinanceApiRestClient client = factory.newRestClient();
     }
 
 

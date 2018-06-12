@@ -88,4 +88,5 @@
     <string name="action_edit_mode">Edition</string>
     <string name="field_empty">Ce champ en peut pas être vide</string>
     <string name="field_nan">Ce champ doit être un nombre</string>
+    <string name="field_negative">Ce champ doit être positif</string>
 </resources>

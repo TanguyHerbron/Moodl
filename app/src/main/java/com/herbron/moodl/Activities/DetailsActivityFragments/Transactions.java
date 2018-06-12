@@ -60,8 +60,6 @@ public class Transactions extends Fragment {
 
         flag_loading = false;
 
-
-
         TransactionUpdater transactionUpdater = new TransactionUpdater();
         transactionUpdater.execute();
 
@@ -196,6 +194,8 @@ public class Transactions extends Fragment {
             {
                 Looper.prepare();
             }
+
+            //binanceManager.updateTransactions(currency.getSymbol());
 
             final ArrayList<Transaction> transactionList = databaseManager.getCurrencyTransactionsForSymbol(currency.getSymbol());
             getActivity().runOnUiThread(new Runnable() {
