@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,47 +14,40 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewParent;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
-import com.github.mikephil.charting.utils.ColorTemplate;
-import com.luseen.spacenavigation.SpaceItem;
-import com.luseen.spacenavigation.SpaceNavigationView;
-import com.luseen.spacenavigation.SpaceOnClickListener;
 import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.MarketCapManager;
 import com.nauk.coinfolio.DataManagers.PreferencesManager;
 import com.nauk.coinfolio.LayoutManagers.HomeLayoutGenerator;
+import com.nauk.coinfolio.PagerAdapter;
 import com.nauk.coinfolio.R;
 
 import java.io.IOException;
@@ -69,7 +61,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 //Use WilliamChart for charts https://github.com/diogobernardino/WilliamChart
 
@@ -84,46 +75,34 @@ import java.util.Random;
 public class HomeActivity extends AppCompatActivity {
 
     private PreferencesManager preferencesManager;
-    private HomeLayoutGenerator layoutGenerator;
-    private BalanceManager balanceManager;
-    private MarketCapManager marketCapManager;
-
-    private int coinCounter;
-    private int iconCounter;
-    private int marketCapCounter;
-    private long lastTimestamp;
-    private boolean detailsChecker;
-    private boolean isDetailed;
 
     private CollapsingToolbarLayout toolbarLayout;
-    private SwipeRefreshLayout refreshLayout;
-    private LinearLayout currencyLayout;
-    private TextView toolbarSubtitle;
-    private Dialog loadingDialog;
-    private Handler handler;
-    private Runnable updateRunnable;
     private ViewFlipper viewFlipper;
+    private HomeLayoutGenerator layoutGenerator;
+    private BottomNavigationView bottomNavigationView;
 
-    private HashMap<String, Integer> dominantCurrenciesColors;
+    private ViewPager viewPager;
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+
+    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_something:
-
-                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
-                    return true;
-                case R.id.navigation_view_list:
-                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
-                    //viewFlipper.setDisplayedChild(1);
-                    return true;
+            item.setChecked(true);
+            switch (item.getItemId())
+            {
+                case R.id.navigation_watchlist:
+                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+                    viewPager.setCurrentItem(0);
+                    break;
+                case R.id.navigation_currencies_list:
+                    viewPager.setCurrentItem(1);
+                    break;
                 case R.id.navigation_market_cap:
-                    //((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
-                    //viewFlipper.setDisplayedChild(2);
-                    return true;
+                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+                    viewPager.setCurrentItem(2);
+                    break;
             }
             return false;
         }
@@ -136,72 +115,54 @@ public class HomeActivity extends AppCompatActivity {
         /**Interface setup**/
 
         //Setup main interface
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
         setContentView(R.layout.activity_currency_summary);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
-        generateSplash();
+        viewPager = findViewById(R.id.viewPager);
+        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), 3);
+
+        viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(2);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                bottomNavigationView.getMenu().getItem(position).setChecked(true);
+
+                if(position % 2 == 0)
+                {
+                    ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+                }
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         //Objects initialization
         preferencesManager = new PreferencesManager(this);
-        layoutGenerator = new HomeLayoutGenerator(this);
-        balanceManager = new BalanceManager(this);
-        marketCapManager = new MarketCapManager(this);
-        handler = new Handler();
-        updateRunnable = new  Runnable() {
-            @Override
-            public void run() {
-                if (refreshLayout.isRefreshing())
-                {
-                    refreshLayout.setRefreshing(false);
-
-                    showErrorSnackbar();
-                }
-
-                if (loadingDialog.isShowing())
-                {
-                    loadingDialog.dismiss();
-
-                    showErrorSnackbar();
-                }
-            }
-        };
-
-        isDetailed = preferencesManager.getDetailOption();
 
         //Layouts setup
-        refreshLayout = findViewById(R.id.swiperefresh);
         toolbarLayout = findViewById(R.id.toolbar_layout);
-        toolbarSubtitle = findViewById(R.id.toolbarSubtitle);
-        currencyLayout = findViewById(R.id.currencyListLayout);
         viewFlipper = findViewById(R.id.viewFlipperSummary);
-        viewFlipper.setDisplayedChild(1);
 
-        ImageButton addCurrencyButton = findViewById(R.id.floatingAddButton);
-        ImageButton detailsButton = findViewById(R.id.switch_button);
-        ImageButton settingsButton = findViewById(R.id.settings_button);
-
-        toolbarLayout.setExpandedTitleGravity(Gravity.CENTER);
-        toolbarLayout.setCollapsedTitleGravity(Gravity.CENTER);
+        bottomNavigationView = findViewById(R.id.navigationSummary);
+        bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_currencies_list);
         toolbarLayout.setForegroundGravity(Gravity.CENTER);
-        toolbarLayout.setTitle("US$0.00");
 
-        toolbarSubtitle.setText("US$0.00");
-
-        /*BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation_home);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        navigation.setSelectedItemId(R.id.navigation_view_list);
-        navigation.setFitsSystemWindows(true);
-        navigation.setItemBackgroundResource(R.color.colorAccent);*/
-
-        //Events setup
-        detailsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchView();
-            }
-        });
+        ImageButton settingsButton = findViewById(R.id.settings_button);
 
         settingsButton.setBackground(this.getResources().getDrawable(R.drawable.ic_settings_black_24dp));
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -212,171 +173,75 @@ public class HomeActivity extends AppCompatActivity {
                 //overridePendingTransition(R.anim.activity_enter, R.anim.activity_exit);
             }
         });
-
-        refreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        switch (viewFlipper.getDisplayedChild())
-                        {
-                            case 0:
-                                Log.d(getResources().getString(R.string.debug), "Watchlist");
-                                refreshLayout.setRefreshing(false);
-                                break;
-                            case 1:
-                                updateAll(false);
-                                break;
-                            case 2:
-                                Log.d(getResources().getString(R.string.debug), "Market cap");
-                                refreshLayout.setRefreshing(false);
-                                break;
-                        }
-
-                    }
-                }
-        );
-
-        addCurrencyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent addIntent = new Intent(HomeActivity.this, CurrencySelectionActivity.class);
-
-                String[] symbolList = new String[balanceManager.getCurrenciesSymbol().size()];
-                symbolList = balanceManager.getCurrenciesSymbol().toArray(symbolList);
-                String[] nameList = new String[balanceManager.getCurrenciesName().size()];
-                nameList = balanceManager.getCurrenciesName().toArray(nameList);
-
-                addIntent.putExtra("currencyListSymbols", symbolList);
-                addIntent.putExtra("currencyListNames", nameList);
-
-                startActivity(addIntent);
-            }
-        });
-
-        updateViewButtonIcon();
-
-        lastTimestamp = 0;
-
-        setupNavBar(savedInstanceState);
-
-        setupDominantCurrenciesColors();
     }
 
-    private void setupDominantCurrenciesColors()
+    private void switchMainView()
     {
-        dominantCurrenciesColors = new HashMap<>();
+        Log.d("coinfolio", "Should");
+        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
+        findViewById(R.id.swiperefresh).setNestedScrollingEnabled(true);
 
-        dominantCurrenciesColors.put("BTC", -489456);
-        dominantCurrenciesColors.put("ETH", -13619152);
-        dominantCurrenciesColors.put("XRP", -16744256);
-        dominantCurrenciesColors.put("BCH", -1011696);
-        dominantCurrenciesColors.put("LTC", -4671304);
-        dominantCurrenciesColors.put("ADA", -16773080);
-        dominantCurrenciesColors.put("NEO", -9390048);
-        dominantCurrenciesColors.put("XLM", -11509656);
-        dominantCurrenciesColors.put("XMR", -499712);
-        dominantCurrenciesColors.put("EOS", -1513240);
-        dominantCurrenciesColors.put("IOT", -1513240);
-        dominantCurrenciesColors.put("DASH", -15175496);
-        dominantCurrenciesColors.put("XEM", -7829368);
-        dominantCurrenciesColors.put("TRX", -7829360);
-        dominantCurrenciesColors.put("ETC", -10448784);
+        findViewById(R.id.toolbar_layout).setFocusable(true);
+        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
+        ((AppBarLayout) findViewById(R.id.app_bar)).setActivated(true);
+        findViewById(R.id.app_bar).setClickable(true);
+        findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
+
+        findViewById(R.id.app_bar).setEnabled(true);
+        findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(true);
+        findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(true);
+
+        findViewById(R.id.switch_button).setVisibility(View.VISIBLE);
+
+        viewFlipper.setDisplayedChild(1);
     }
 
-    private void setupNavBar(Bundle savedInstanceState)
+    private void switchSecondaryViews(int itemIndex)
     {
-        final SpaceNavigationView spaceNavigationView = findViewById(R.id.space);
-        spaceNavigationView.initWithSaveInstanceState(savedInstanceState);
-        spaceNavigationView.addSpaceItem(new SpaceItem("WatchList", R.drawable.ic_remove_red_eye_black_24dp));
-        spaceNavigationView.addSpaceItem(new SpaceItem("Market Cap.", R.drawable.ic_pie_chart_black_24dp));
-        spaceNavigationView.setSpaceBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        spaceNavigationView.setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
-        spaceNavigationView.setCentreButtonColor(getResources().getColor(R.color.colorAccent));
-        spaceNavigationView.setCentreButtonIconColorFilterEnabled(false);
-        spaceNavigationView.changeCurrentItem(-1);
+        Log.d("coinfolio", "Should not");
+        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+        findViewById(R.id.swiperefresh).setNestedScrollingEnabled(false);
 
-        spaceNavigationView.setSpaceOnClickListener(new SpaceOnClickListener() {
-            @Override
-            public void onCentreButtonClick() {
-                //Toast.makeText(MainActivity.this,"onCentreButtonClick", Toast.LENGTH_SHORT).show();
-                ((FloatingActionButton) findViewById(R.id.floatingAddButton)).show();
-                SpaceNavigationView nav = findViewById(R.id.space);
+        findViewById(R.id.toolbar_layout).setFocusable(false);
+        ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
+        ((AppBarLayout) findViewById(R.id.app_bar)).setActivated(false);
+        findViewById(R.id.app_bar).setClickable(false);
+        findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
 
-                nav.changeCurrentItem(-1);
+        findViewById(R.id.app_bar).setEnabled(false);
+        findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(false);
+        findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(false);
 
-                findViewById(R.id.toolbar_layout).setFocusable(true);
-                ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(true, true);
-                findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(true);
+        findViewById(R.id.switch_button).setVisibility(View.GONE);
 
-                findViewById(R.id.app_bar).setEnabled(true);
-                findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(true);
-                findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(true);
-
-                findViewById(R.id.switch_button).setVisibility(View.VISIBLE);
-
-                viewFlipper.setDisplayedChild(1);
-            }
-
-            @Override
-            public void onItemClick(int itemIndex, String itemName) {
-                ((FloatingActionButton) findViewById(R.id.floatingAddButton)).hide();
-                ((SpaceNavigationView) findViewById(R.id.space)).setCentreButtonIcon(R.drawable.ic_view_list_white_24dp);
-
-                //0 : Watchlist
-                //1 : Market cap
-                findViewById(R.id.toolbar_layout).setFocusable(false);
-                ((AppBarLayout) findViewById(R.id.app_bar)).setExpanded(false, true);
-                findViewById(R.id.nestedScrollViewLayout).setNestedScrollingEnabled(false);
-
-                findViewById(R.id.app_bar).setEnabled(false);
-                findViewById(R.id.toolbar_layout).setNestedScrollingEnabled(false);
-                findViewById(R.id.coordinatorLayout).setNestedScrollingEnabled(false);
-
-                findViewById(R.id.switch_button).setVisibility(View.GONE);
-
-
-
-                viewFlipper.setDisplayedChild(itemIndex * 2);
-
-                if(itemIndex == 1)
-                {
-                    ((PieChart) findViewById(R.id.marketCapPieChart)).animateX(1000);
-                }
-            }
-
-            @Override
-            public void onItemReselected(int itemIndex, String itemName) {
-                //Toast.makeText(MainActivity.this, itemIndex + " " + itemName, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        ((SpaceNavigationView) findViewById(R.id.space)).onSaveInstanceState(outState);
-    }
-
-    private void showErrorSnackbar()
-    {
-        Snackbar.make(findViewById(R.id.currencyListLayout), "Error while updating data", Snackbar.LENGTH_LONG)
-                .setAction("Update", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        updateAll(true);
-                    }
-                })
-                .show();
+        viewFlipper.setDisplayedChild(itemIndex);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        Intent intent = getIntent();
+    }
 
-        updateAll(intent.getBooleanExtra("update", false));
-        ((SpaceNavigationView) findViewById(R.id.space)).changeCenterButtonIcon(R.drawable.ic_view_list_white_24dp);
+    private void addTestWatchlistCardview()
+    {
+        View view = LayoutInflater.from(this).inflate(R.layout.cardview_watchlist, null);
+
+        ((TextView) view.findViewById(R.id.currencyFluctuationPercentageTextView)).setText("3%");
+        ((TextView) view.findViewById(R.id.currencyFluctuationTextView)).setText("$3");
+        ((TextView) view.findViewById(R.id.currencyNameTextView)).setText("TanguyCoin");
+        ((TextView) view.findViewById(R.id.currencySymbolTextView)).setText("TGC");
+        ((TextView) view.findViewById(R.id.currencyValueTextView)).setText("$100");
+
+        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("coinfolio", "Clicked !");
+            }
+        });
+
+        ((LinearLayout) findViewById(R.id.linearLayoutWatchlist)).addView(view);
     }
 
     @Override
@@ -401,607 +266,6 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void switchView()
-    {
-        if(isDetailed)
-        {
-            isDetailed = false;
-
-            adaptView();
-        }
-        else
-        {
-            isDetailed = true;
-
-            adaptView();
-        }
-    }
-
-    private void adaptView()
-    {
-
-        currencyLayout.removeAllViews();
-
-        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-        {
-            final Currency currency = balanceManager.getTotalBalance().get(i);
-
-            if(!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) > 0.001 || currency.getHistoryMinutes() == null))
-            {
-                //currencyLayout.addView(layoutGenerator.getInfoLayout(currency));
-                currencyLayout.addView(layoutGenerator.getInfoLayout(currency, isDetailed));
-            }
-        }
-
-        updateViewButtonIcon();
-    }
-
-    private void updateAll(boolean mustUpdate)
-    {
-        if(System.currentTimeMillis()/1000 - lastTimestamp > 60 || mustUpdate)
-        {
-            lastTimestamp = System.currentTimeMillis() / 1000;
-            balanceManager.updateExchangeKeys();
-            refreshLayout.setRefreshing(true);
-
-            resetCounters();
-            DataUpdater updater = new DataUpdater();
-            updater.execute();
-
-            handler.postDelayed(updateRunnable, 10000);
-        }
-        else
-        {
-            if(refreshLayout.isRefreshing())
-            {
-                refreshLayout.setRefreshing(false);
-            }
-        }
-    }
-
-    private void resetCounters()
-    {
-        coinCounter = 0;
-        iconCounter = 0;
-        detailsChecker = false;
-    }
-
-    private void getBitmapFromURL(String src, IconCallBack callBack) {
-        Bitmap result;
-
-        try {
-            java.net.URL url = new java.net.URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url
-                    .openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            result = BitmapFactory.decodeStream(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-            result = BitmapFactory.decodeResource(this.getResources(),
-                    R.mipmap.icon_coinfolio);
-            result = Bitmap.createScaledBitmap(result, 50, 50, false);
-        }
-
-        callBack.onSuccess(result);
-    }
-
-    private void countIcons()
-    {
-        int offset = 0;
-
-        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-        {
-            if(balanceManager.getTotalBalance().get(i).getSymbol().equals("USD"))
-            {
-                offset++;
-            }
-        }
-
-        iconCounter++;
-
-        if(balanceManager.getTotalBalance() != null)
-        {
-            if(balanceManager.getTotalBalance().size() == 0)
-            {
-                updateNoBalance();
-            }
-            else
-            {
-                if(iconCounter == balanceManager.getTotalBalance().size() - offset)
-                {
-                    Log.d(getResources().getString(R.string.debug), "Loading heavy");
-
-                    UiHeavyLoadCalculator uiHeavyLoadCalculator = new UiHeavyLoadCalculator();
-                    uiHeavyLoadCalculator.execute();
-                }
-            }
-        }
-    }
-
-    private void updateNoBalance()
-    {
-        refreshLayout.setRefreshing(false);
-
-        currencyLayout.removeAllViews();
-
-        if(loadingDialog.isShowing())
-        {
-            loadingDialog.dismiss();
-        }
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                toolbarLayout.setTitle("US$0.00");
-
-                toolbarSubtitle.setText("US$0.00");
-
-                toolbarSubtitle.setTextColor(-1275068417);
-            }
-        });
-    }
-
-    private void updateMarketCap()
-    {
-        marketCapCounter = 0;
-
-        marketCapManager.updateTopCurrencies(new MarketCapManager.VolleyCallBack() {
-            @Override
-            public void onSuccess()
-            {
-                countCompletedMarketCapRequest();
-            }
-        });
-
-        marketCapManager.updateMarketCap(new MarketCapManager.VolleyCallBack() {
-            @Override
-            public void onSuccess() {
-                countCompletedMarketCapRequest();
-            }
-        });
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private void countCompletedMarketCapRequest()
-    {
-        marketCapCounter++;
-
-        if(marketCapCounter == 2)
-        {
-            setupTextViewMarketCap();
-
-            findViewById(R.id.progressBarMarketCap).setVisibility(View.GONE);
-            findViewById(R.id.layoutProgressMarketCap).setVisibility(View.VISIBLE);
-
-            List<PieEntry> entries = new ArrayList<>();
-
-            ArrayList<Integer> colors = new ArrayList<>();
-
-            final PieChart pieChart = findViewById(R.id.marketCapPieChart);
-
-            float otherCurrenciesDominance = 0;
-
-            for(Iterator i = marketCapManager.getDominance().keySet().iterator(); i.hasNext(); )
-            {
-                String key = (String) i.next();
-                entries.add(new PieEntry(marketCapManager.getDominance().get(key), key));
-                otherCurrenciesDominance += marketCapManager.getDominance().get(key);
-                colors.add(dominantCurrenciesColors.get(key));
-            }
-            entries.add(new PieEntry(100-otherCurrenciesDominance, "Others"));
-            colors.add(-12369084);
-
-            PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
-            set.setColors(colors);
-            set.setSliceSpace(1);
-            set.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-            set.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-            PieData data = new PieData(set);
-            data.setValueTextSize(10);
-            data.setValueFormatter(new PercentFormatter());
-            pieChart.setData(data);
-
-            pieChart.setDrawSlicesUnderHole(false);
-            pieChart.setUsePercentValues(true);
-            pieChart.setTouchEnabled(true);
-
-            pieChart.setEntryLabelColor(Color.parseColor("#FF000000"));
-
-            pieChart.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    switch (motionEvent.getAction())
-                    {
-                        case MotionEvent.ACTION_DOWN:
-                            refreshLayout.setEnabled(false);
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            break;
-                        default:
-                            refreshLayout.setEnabled(true);
-                            break;
-                    }
-                    return false;
-                }
-            });
-
-            pieChart.getDescription().setEnabled(false);
-            pieChart.getLegend().setEnabled(false);
-            pieChart.setCenterText(generateCenterSpannableText());
-            pieChart.invalidate(); // refresh
-        }
-    }
-
-    private void setupTextViewMarketCap()
-    {
-        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
-        DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
-
-        symbols.setGroupingSeparator(' ');
-        formatter.setDecimalFormatSymbols(symbols);
-
-        ((TextView) findViewById(R.id.marketCapTextView)).setText(getResources().getString(R.string.market_cap_textview, formatter.format(marketCapManager.getMarketCap())));
-
-        ((TextView) findViewById(R.id.dayVolumeTotalMarketCap)).setText(getResources().getString(R.string.volume_market_cap_textview, formatter.format(marketCapManager.getDayVolume())));
-    }
-
-    private SpannableString generateCenterSpannableText() {
-
-        SpannableString s = new SpannableString("Market Capitalization Dominance");
-        return s;
-    }
-
-    private void countCoins(boolean isCoin, boolean isDetails)
-    {
-        if(isCoin)
-        {
-            coinCounter++;
-        }
-
-        if(isDetails)
-        {
-            detailsChecker = true;
-        }
-
-        if(balanceManager.getTotalBalance() != null)
-        {
-            if(coinCounter == balanceManager.getTotalBalance().size() && detailsChecker)
-            {
-                IconDownloader iconDownloader = new IconDownloader();
-                iconDownloader.execute();
-            }
-            else
-            {
-                if(balanceManager.getTotalBalance().size() == 0)
-                {
-                    Log.d("coinfolio", "Empty");
-
-                    countIcons();
-                }
-            }
-        }
-    }
-
-    private void updateViewButtonIcon()
-    {
-        ImageButton imgButton = findViewById(R.id.switch_button);
-
-        imgButton.setBackgroundColor(this.getResources().getColor(R.color.buttonColor));
-
-        if(isDetailed)
-        {
-            imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_unfold_less_black_24dp));
-            preferencesManager.setDetailOption(true);
-        }
-        else
-        {
-            imgButton.setBackground(this.getResources().getDrawable(R.drawable.ic_details_black_24dp));
-            preferencesManager.setDetailOption(false);
-        }
-    }
-
-    private void generateSplash()
-    {
-        LinearLayout loadingLayout = new LinearLayout(this);
-
-        loadingLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        loadingLayout.setGravity(Gravity.CENTER);
-        loadingLayout.setOrientation(LinearLayout.VERTICAL);
-
-        loadingDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-
-        TextView txtView = new TextView(this);
-        txtView.setText("Loading data...");
-        txtView.setTextSize(20);
-        txtView.setGravity(Gravity.CENTER);
-        txtView.setTextColor(this.getResources().getColor(R.color.cardview_light_background));
-
-        ProgressBar progressBar = new ProgressBar(this);
-        progressBar.setIndeterminate(true);
-
-        loadingLayout.setBackgroundColor(this.getResources().getColor(R.color.colorPrimaryDark));
-        loadingLayout.addView(txtView);
-        loadingLayout.addView(progressBar);
-
-        loadingDialog.setContentView(loadingLayout);
-        loadingDialog.show();
-    }
-
-    private class IconDownloader extends AsyncTask<Void, Integer, Void>
-    {
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values)
-        {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params)
-        {
-            for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-            {
-                final Currency localCurrency = balanceManager.getTotalBalance().get(i);
-
-                if(balanceManager.getIconUrl(localCurrency.getSymbol()) != null)
-                {
-                    getBitmapFromURL(balanceManager.getIconUrl(localCurrency.getSymbol()), new IconCallBack() {
-                        @Override
-                        public void onSuccess(Bitmap bitmapIcon) {
-                            localCurrency.setIcon(bitmapIcon);
-                            countIcons();
-                        }
-                    });
-                }
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result)
-        {
-
-        }
-    }
-
-    private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
-    {
-
-        private float totalValue;
-        private float totalFluctuation;
-        private float totalFluctuationPercentage;
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-
-            totalValue = 0;
-            totalFluctuation = 0;
-            totalFluctuationPercentage = 0;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values)
-        {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params)
-        {
-            final List<View> cardList = new ArrayList<>();
-
-            Looper.prepare();
-
-            balanceManager.sortCoins();
-
-            for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-            {
-                final Currency localCurrency = balanceManager.getTotalBalance().get(i);
-
-                if(localCurrency.getIcon() != null)
-                {
-                    Palette.Builder builder = Palette.from(localCurrency.getIcon());
-
-                    localCurrency.setChartColor(builder.generate().getDominantColor(0));
-
-                }
-                else
-                {
-                    localCurrency.setChartColor(12369084);
-                }
-
-                if(!localCurrency.getSymbol().equals("USD") && (localCurrency.getBalance() * localCurrency.getValue()) > 0.001)
-                {
-                    localCurrency.setName(balanceManager.getCurrencyName(localCurrency.getSymbol()));
-                    localCurrency.setId(balanceManager.getCurrencyId(localCurrency.getSymbol()));
-                    totalValue += localCurrency.getValue() * localCurrency.getBalance();
-                    totalFluctuation += (localCurrency.getValue() * localCurrency.getBalance()) * (localCurrency.getDayFluctuationPercentage() / 100);
-
-                    cardList.add(layoutGenerator.getInfoLayout(localCurrency, true));
-                }
-
-                if(!localCurrency.getSymbol().equals("USD") && localCurrency.getHistoryMinutes() == null)
-                {
-                    cardList.add(layoutGenerator.getInfoLayout(localCurrency, true));
-                }
-
-                balanceManager.getTotalBalance().set(i, localCurrency);
-            }
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    refreshLayout.setRefreshing(false);
-                    currencyLayout.removeAllViews();
-
-                    for(int i = 0; i < cardList.size(); i++)
-                    {
-                        currencyLayout.addView(cardList.get(i));
-                    }
-
-                    adaptView();
-                }
-            });
-
-            toolbarLayout.setTitle("US$" + String.format("%.2f", totalValue));
-
-            if(totalFluctuation > 0)
-            {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toolbarSubtitle.setTextColor(getResources().getColor(R.color.increase));
-                    }
-                });
-            }
-            else
-            {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toolbarSubtitle.setTextColor(getResources().getColor(R.color.decrease));
-                    }
-                });
-            }
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) *100;
-
-                    toolbarSubtitle.setText("US$" + String.format("%.2f", totalFluctuation) + " (" + String.format("%.2f", totalFluctuationPercentage) + "%)");
-
-                    if(loadingDialog.isShowing())
-                    {
-                        loadingDialog.dismiss();
-                    }
-                }
-            });
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result)
-        {
-            handler.removeCallbacks(updateRunnable);
-        }
-    }
-
-    private class DataUpdater extends AsyncTask<Void, Integer, Void>
-    {
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values)
-        {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params)
-        {
-            balanceManager.updateDetails(new BalanceManager.IconCallBack() {
-                @Override
-                public void onSuccess()
-                {
-                    countCoins(false, true);
-                }
-            });
-
-            balanceManager.updateTotalBalance(new BalanceManager.VolleyCallBack() {
-                @Override
-                public void onSuccess() {
-
-                    final List<Currency> balance = balanceManager.getTotalBalance();
-
-                    if(balanceManager.getTotalBalance().size() > 0)
-                    {
-                        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-                        {
-                            balance.get(i).updateHistoryMinutes(getApplicationContext(), new Currency.CurrencyCallBack() {
-                                @Override
-                                public void onSuccess(Currency currency) {
-                                    countCoins(true, false);
-                                }
-                            });
-                        }
-                    }
-                    else
-                    {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                countCoins(false, false);
-                            }
-                        });
-                    }
-                }
-
-                public void onError(String error)
-                {
-                    switch (error)
-                    {
-                        case "com.android.volley.AuthFailureError":
-                            preferencesManager.disableHitBTC();
-                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
-                                    .show();
-                            refreshLayout.setRefreshing(false);
-                            updateAll(true);
-                            break;
-                        case "API-key format invalid.":
-                            preferencesManager.disableBinance();
-                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
-                                    .show();
-                            updateAll(true);
-                            break;
-                        default:
-                            Snackbar.make(findViewById(R.id.viewFlipperSummary), "Unexpected error", Snackbar.LENGTH_LONG)
-                                    .show();
-                            Log.d("coinfolio", error);
-                            updateAll(true);
-                    }
-                }
-            });
-
-            updateMarketCap();
-
-            /*marketCapManager.updateTopCurrencies(new BalanceManager.VolleyCallBack() {
-                @Override
-                public void onSuccess() {
-
-                }
-
-                @Override
-                public void onError(String error) {
-
-                }});*/
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result)
-        {
-
-        }
     }
 
     public interface IconCallBack

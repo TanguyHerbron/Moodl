@@ -1,5 +1,6 @@
 package com.nauk.coinfolio.DataManagers.CurrencyData;
 
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -42,7 +43,58 @@ public class CurrencyDataRetriever {
         requestQueue = Volley.newRequestQueue(context);
     }
 
+    private void getPriceTimestamp(final String symbolCurrencyFrom, String symbolCurrencyTo, final DataChartCallBack callBack, long timestamp)
+    {
+        final String requestUrl = "https://min-api.cryptocompare.com/data/pricehistorical?fsym=" + symbolCurrencyFrom + "&tsyms=" + symbolCurrencyTo + "&ts=" + timestamp;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("coinfolio", response + " " + requestUrl);
+                        callBack.onSuccess(processPriceTimestampResult(response));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }
+
+    private String processPriceTimestampResult(String result)
+    {
+        result = result.substring(result.lastIndexOf(':')+1);
+        result = result.substring(0, result.indexOf('}'));
+
+        return result;
+    }
+
     private void updateHistory(final String symbolCurrencyFrom, String symbolCyrrencyTo, final DataChartCallBack callBack, int timeUnit)
+    {
+        String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callBack.onSuccess(processHistoryResult(response));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        callBack.onSuccess((List<CurrencyDataChart>) null);
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }
+
+    private String getRequestUrl(int timeUnit, String symbolCurrencyFrom, String symbolCyrrencyTo)
     {
         String requestUrl = null;
 
@@ -59,21 +111,7 @@ public class CurrencyDataRetriever {
                 break;
         }
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        callBack.onSuccess(processHistoryResult(response));
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        callBack.onSuccess(null);
-                    }
-                });
-
-        requestQueue.add(stringRequest);
+        return requestUrl;
     }
 
     private List<CurrencyDataChart> processHistoryResult(String response)
@@ -99,13 +137,7 @@ public class CurrencyDataRetriever {
                 try {
                     JSONObject jsonObject = new JSONObject(tab[i]);
 
-                    long timestamp = Long.parseLong(jsonObject.getString("time"));
-                    double close = Double.parseDouble(jsonObject.getString("close"));
-                    double high = Double.parseDouble(jsonObject.getString("high"));
-                    double low = Double.parseDouble(jsonObject.getString("low"));
-                    double open = Double.parseDouble(jsonObject.getString("open"));
-
-                    dataChart.add(new CurrencyDataChart(timestamp, close, high, low, open));
+                    dataChart.add(parseJSON(jsonObject));
 
                 } catch (JSONException e) {
                     Log.d(context.getResources().getString(R.string.debug_volley), "API Request error: " + e + " index: " + i);
@@ -120,11 +152,29 @@ public class CurrencyDataRetriever {
         return dataChart;
     }
 
-    void updateHistory(String symbolCurrencyFrom, final DataChartCallBack callBack, int timeUnit)
+    private CurrencyDataChart parseJSON(JSONObject jsonObject) throws JSONException {
+
+        long timestamp = Long.parseLong(jsonObject.getString("time"));
+        double close = Double.parseDouble(jsonObject.getString("close"));
+        double high = Double.parseDouble(jsonObject.getString("high"));
+        double low = Double.parseDouble(jsonObject.getString("low"));
+        double open = Double.parseDouble(jsonObject.getString("open"));
+        double volumeFrom = Double.parseDouble(jsonObject.getString("volumefrom"));
+        double volumeTo = Double.parseDouble(jsonObject.getString("volumeto"));
+
+        return new CurrencyDataChart(timestamp, close, high, low, open, volumeFrom, volumeTo);
+    }
+
+    public void getPriceTimestamp(String symbolCurrencyFrom, final DataChartCallBack callBack, long timestamp)
+    {
+        getPriceTimestamp(symbolCurrencyFrom, "USD", callBack, timestamp);
+    }
+
+    public void updateHistory(String symbolCurrencyFrom, final DataChartCallBack callBack, int timeUnit)
     {
         if(symbolCurrencyFrom.equals("USD"))
         {
-            callBack.onSuccess(null);
+            callBack.onSuccess((List<CurrencyDataChart>) null);
         }
         else
         {
@@ -132,7 +182,34 @@ public class CurrencyDataRetriever {
         }
     }
 
+    /*public void updateCryptocompareDetails(int id, final Currency.CurrencyCallBack callBack)
+    {
+        String requestUrl = getRequestUrl(timeUnit, symbolCurrencyFrom, symbolCyrrencyTo);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callBack.onSuccess();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        callBack.onSuccess();
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }*/
+
+    public void updateCoinMarketCapDetails()
+    {
+
+    }
+
     public interface DataChartCallBack {
         void onSuccess(List<CurrencyDataChart> dataChart);
+        void onSuccess(String price);
     }
 }

@@ -15,4 +15,10 @@
     <dimen name="swirl_size">60dp</dimen>
     <dimen name="fingerprint_dialog_height">125dp</dimen>
     <dimen name="fingerprint_dialog_width">250dp</dimen>
+
+    <dimen name="separationLineSize">1dp</dimen>
+
+    <dimen name="cardview_elevation">8dp</dimen>
+    <dimen name="toolbar_height">56dp</dimen>
+    <dimen name="toolbar_height_expand">70dp</dimen>
 </resources>

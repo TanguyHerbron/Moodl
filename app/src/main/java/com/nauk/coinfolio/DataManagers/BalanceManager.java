@@ -10,6 +10,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
+import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.nauk.coinfolio.DataManagers.ExchangeManager.BinanceManager;
 import com.nauk.coinfolio.DataManagers.ExchangeManager.HitBtcManager;
 import com.nauk.coinfolio.R;
@@ -46,6 +47,7 @@ public class BalanceManager {
     private LinkedHashMap<String, String> coinInfosHashmap;
     private PreferencesManager preferenceManager;
     private DatabaseManager databaseManager;
+    private CurrencyDetailsList currencyDetailsList;
 
     private int balanceCounter;
 
@@ -65,25 +67,9 @@ public class BalanceManager {
         databaseManager = new DatabaseManager(context);
         hitBtcManagers = new ArrayList<>();
         binanceManagers = new ArrayList<>();
+        currencyDetailsList = new CurrencyDetailsList(context);
 
         balanceCounter = 0;
-    }
-
-    public List<String> getCurrenciesName()
-    {
-        List<String> currenciesName = new ArrayList<>();
-
-        for (String symbol : coinInfosHashmap.keySet())
-        {
-            try {
-                JSONObject jsonObject = new JSONObject(coinInfosHashmap.get(symbol));
-                currenciesName.add(jsonObject.getString("CoinName"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return currenciesName;
     }
 
     public List<String> getBiggestCurrencies()
@@ -91,39 +77,16 @@ public class BalanceManager {
         List<String> currenciesDetails = new ArrayList<>();
 
         int index = 0;
-        Iterator<String> coinIterator = coinInfosHashmap.keySet().iterator();
+        Iterator<String> coinIterator = currencyDetailsList.getCoinInfosHashmap().keySet().iterator();
 
         while(index < 11)
         {
-            //currenciesDetails.add(index, coinInfosHashmap.keySet().iterator().next());
             index++;
 
             Log.d("coinfolio", "For " + index + " : " + coinIterator.next());
         }
 
         return currenciesDetails;
-    }
-
-    public List<String> getOrders()
-    {
-        List<String> currenciesOrder = new ArrayList<>();
-
-        for(String symbol : coinInfosHashmap.keySet())
-        {
-            try {
-                JSONObject jsonObject = new JSONObject(coinInfosHashmap.get(symbol));
-                currenciesOrder.add(jsonObject.getString("SortOrder"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return currenciesOrder;
-    }
-
-    public List<String> getCurrenciesSymbol()
-    {
-        return new ArrayList<>(coinInfosHashmap.keySet());
     }
 
     public void updateExchangeKeys()
@@ -158,7 +121,7 @@ public class BalanceManager {
     {
         boolean isUpdated = false;
 
-        manualBalances = databaseManager.getAllCurrencyFromManualCurrency();
+        manualBalances = databaseManager.getAllCurrenciesFromManualCurrency();
 
         if(binanceManagers.size() > 0)
         {
@@ -290,7 +253,8 @@ public class BalanceManager {
 
     public void updateDetails(final IconCallBack callBack)
     {
-        StringRequest strRequest = new StringRequest(Request.Method.GET, detailUrl,
+        currencyDetailsList.update(callBack);
+        /*StringRequest strRequest = new StringRequest(Request.Method.GET, detailUrl,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -306,7 +270,7 @@ public class BalanceManager {
                     }
                 });
 
-        requestQueue.add(strRequest);
+        requestQueue.add(strRequest);*/
     }
 
     public String getIconUrl(String symbol)
@@ -314,7 +278,7 @@ public class BalanceManager {
         String url;
 
         try {
-            JSONObject jsonObject = new JSONObject(coinInfosHashmap.get(symbol));
+            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
             url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
         } catch (NullPointerException e) {
             Log.d(context.getResources().getString(R.string.debug), symbol + " has no icon URL");
@@ -332,7 +296,7 @@ public class BalanceManager {
         String currencyName = null;
 
         try {
-            JSONObject jsonObject = new JSONObject(coinInfosHashmap.get(symbol));
+            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
             currencyName = jsonObject.getString("CoinName");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -346,39 +310,13 @@ public class BalanceManager {
         int id = 0;
 
         try {
-            JSONObject jsonObject = new JSONObject(coinInfosHashmap.get(symbol));
+            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
             id = jsonObject.getInt("Id");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return id;
-    }
-
-    private void processDetailResult(String response, final IconCallBack callBack)
-    {
-        response = response.substring(response.indexOf("\"Data\"") + 7, response.lastIndexOf("},\"Type\":100}"));
-        String[] tab = response.split(Pattern.quote("},"));
-
-        coinInfosHashmap = new LinkedHashMap<>();
-
-        for(int i = 0; i < tab.length; i++)
-        {
-            tab[i] = tab[i].substring(tab[i].indexOf("\":{")+2, tab[i].length()) + "}";
-            try {
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-                JSONObject jsonObject = new JSONObject(tab[i]);
-
-                coinInfosHashmap.put(jsonObject.getString("Symbol"), tab[i]);
-            } catch (JSONException e) {
-                Log.d(context.getResources().getString(R.string.debug), "ImageUrl not found.");
-            }
-        }
-
-        sortDetails();
-
-        callBack.onSuccess();
     }
 
     private void sortDetails()

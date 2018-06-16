@@ -3,6 +3,12 @@ package com.nauk.coinfolio.DataManagers.CurrencyData;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
+import com.nauk.coinfolio.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,21 +34,12 @@ public class Currency implements Parcelable {
     private CurrencyDataRetriever dataRetriver;
     private Bitmap icon;
     private int chartColor;
-
-    public Currency(Currency currency)
-    {
-        this.id = currency.id;
-        this.name = currency.name;
-        this.symbol = currency.symbol;
-        this.value = currency.value;
-        this.balance = currency.balance;
-        this.dayFluctuationPercentage = currency.getDayFluctuationPercentage();
-        this.dayFluctuation = currency.getDayFluctuation();
-        this.historyMinutes = currency.historyMinutes;
-        this.dataRetriver = currency.getDataRetriver();
-        this.icon = currency.icon;
-        this.chartColor = currency.chartColor;
-    }
+    private int circulatingSupply;
+    private int totalSupply;
+    private double marketCapitalization;
+    private List<String> socialMediaLinks;
+    private String algorithm;
+    //private String proofType
 
     public Currency(String symbol, double balance)
     {
@@ -61,6 +58,41 @@ public class Currency implements Parcelable {
     {
         this.name = name;
         this.symbol = symbol;
+    }
+
+    //public Currency(int id, String symbol, String name, String algorithm, String proofType, )
+
+    public void getTimestampPrice(android.content.Context context, final PriceCallBack callBack, long timestamp)
+    {
+        dataRetriver = new CurrencyDataRetriever(context);
+
+        dataRetriver.getPriceTimestamp(symbol, new CurrencyDataRetriever.DataChartCallBack() {
+            @Override
+            public void onSuccess(List<CurrencyDataChart> dataChart) {}
+
+            @Override
+            public void onSuccess(String price) {
+                callBack.onSuccess(price);
+            }
+        }, timestamp);
+    }
+
+    public static String getIconUrl(String currencyDetails)
+    {
+        String url;
+
+        try {
+            JSONObject jsonObject = new JSONObject(currencyDetails);
+            url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
+        } catch (NullPointerException e) {
+            //Log.d(context.getResources().getString(R.string.debug), symbol + " has no icon URL");
+            url = null;
+        } catch (JSONException e) {
+            //Log.d(context.getResources().getString(R.string.debug), "Url parsing error for " + symbol);
+            url = null;
+        }
+
+        return url;
     }
 
     public void updateHistoryMinutes(android.content.Context context, final CurrencyCallBack callBack)
@@ -84,6 +116,9 @@ public class Currency implements Parcelable {
 
                 callBack.onSuccess(Currency.this);
             }
+
+            @Override
+            public void onSuccess(String result){}
         }, CurrencyDataRetriever.MINUTES);
     }
 
@@ -97,6 +132,9 @@ public class Currency implements Parcelable {
 
                 callBack.onSuccess(Currency.this);
             }
+
+            @Override
+            public void onSuccess(String price) {}
         }, CurrencyDataRetriever.HOURS);
     }
 
@@ -110,7 +148,16 @@ public class Currency implements Parcelable {
 
                 callBack.onSuccess(Currency.this);
             }
+
+            @Override
+            public void onSuccess(String price) {}
         }, CurrencyDataRetriever.DAYS);
+    }
+
+    public void updateDetails(android.content.Context context, final CurrencyCallBack callBack)
+    {
+            dataRetriver = new CurrencyDataRetriever(context);
+
     }
 
     public void setId(int id)
@@ -237,6 +284,9 @@ public class Currency implements Parcelable {
         void onSuccess(Currency currency);
     }
 
+    public interface PriceCallBack {
+        void onSuccess(String price);
+    }
 
     @Override
     public int describeContents() {

@@ -12,10 +12,7 @@
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
-    </string>
+    <string name="pref_title_hide_balance">Hide balance</string>
 
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
@@ -120,6 +117,7 @@
     <!--Add transaction activity-->
     <string name="activity_add_amount">Amount</string>
     <string name="activity_purchased_price">Purchased price</string>
+    <string name="activity_purchased_date">Purchased date</string>
     <string name="title_activity_currency_details">CurrencyDetailsActivity</string>
     <string name="title_history">History charts</string>
     <string name="title_watchlist">Watchlist</string>
@@ -145,6 +143,13 @@
     <string name="currencyDollarParenthesisPlaceholder">(US$%1$s)</string>
     <string name="currencyDollarPlaceholder">US$%1$s</string>
     <string name="currencyPercentagePlaceholder">%1$s%%</string>
+    <string name="fluctuationDollarPercentagePlaceholder">US$%1$s (%2$s%)</string>
+
+    <!--DetailsActivity placeholders-->
+    <string name="volumePlaceholder">Volume\nUS$%1$s</string>
+    <string name="pricePlaceholder">Price\nUS$%1$s</string>
+    <string name="timestampPlaceholder">Date\n%1$s</string>
+
     <string name="title_activity_main">MainActivity</string>
 
     <string name="fingerprint_dialog_cancel">Cancel</string>
@@ -153,5 +158,6 @@
 
     <string name="market_cap_textview">Total Market Capitalization :\nUS$%1$s</string>
     <string name="volume_market_cap_textview">24h volume :\nUS$%1$s</string>
+    <string name="title_activity_scrolling">ScrollingActivity</string>
 
 </resources>

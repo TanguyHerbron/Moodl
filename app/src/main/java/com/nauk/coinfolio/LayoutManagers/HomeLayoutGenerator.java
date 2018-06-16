@@ -5,16 +5,17 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.db.chart.model.ChartSet;
-import com.db.chart.model.LineSet;
-import com.db.chart.renderer.AxisRenderer;
-import com.db.chart.view.LineChartView;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -24,9 +25,8 @@ import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDataChart;
 import com.nauk.coinfolio.R;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,31 +38,140 @@ import static java.lang.Math.abs;
 
 public class HomeLayoutGenerator {
 
-    android.content.Context context;
+    private android.content.Context context;
 
     public HomeLayoutGenerator(Context context)
     {
         this.context = context;
     }
 
-    public View getInfoLayout(final Currency currency, boolean isExtended)
+    public View getInfoLayout(final Currency currency, boolean isExtended, float totalValue, boolean isBalanceHidden)
     {
-
-        View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, null);
+        View view = LayoutInflater.from(context).inflate(R.layout.cardview_currency, null, true);
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(view.findViewById(R.id.LineChartView).getVisibility() == View.VISIBLE || view.findViewById(R.id.errorTextView).getVisibility() == View.VISIBLE)
+                if(view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE)
                 {
                     collapseView(view);
                 }
                 else
                 {
-                    extendView(currency, view);
+                    extendView(view);
                 }
             }
         });
+
+        updateCardViewInfos(view, currency, totalValue, isBalanceHidden);
+
+        view.findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
+                intent.putExtra("currency", currency);
+                context.getApplicationContext().startActivity(intent);
+            }
+        });
+
+        if(currency.getHistoryMinutes() != null)
+        {
+            setupLineChart(view, currency);
+        }
+
+        if(isExtended)
+        {
+            extendView(view);
+        }
+        else
+        {
+            collapseView(view);
+        }
+
+        updateColor(view, currency);
+
+        return view;
+    }
+
+    private static void expand(final View v) {
+        v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? CardView.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+    private static void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+    private void setupLineChart(View view, final Currency currency)
+    {
+        LineChart lineChart = view.findViewById(R.id.LineChartView);
+
+        lineChart.setDrawGridBackground(false);
+        lineChart.setDrawBorders(false);
+        lineChart.setDrawMarkers(false);
+        lineChart.setDoubleTapToZoomEnabled(false);
+        lineChart.setPinchZoom(false);
+        lineChart.setScaleEnabled(false);
+        lineChart.setDragEnabled(false);
+        lineChart.getDescription().setEnabled(false);
+        lineChart.getAxisLeft().setEnabled(false);
+        lineChart.getAxisRight().setEnabled(false);
+        lineChart.getLegend().setEnabled(false);
+        lineChart.getXAxis().setEnabled(false);
+        lineChart.setViewPortOffsets(0, 0, 0, 0);
+        lineChart.setData(generateData(currency));
+    }
+
+    private void updateCardViewInfos(View view, Currency currency, float totalValue, boolean isBalanceHidden)
+    {
+        double value = currency.getValue() * currency.getBalance();
+        double percentage = value / totalValue * 100;
+        DecimalFormat df = new DecimalFormat(".##");
 
         ((ImageView) view.findViewById(R.id.currencyIcon))
                 .setImageBitmap(currency.getIcon());
@@ -81,114 +190,43 @@ public class HomeLayoutGenerator {
                 .setText(context.getResources().getString(R.string.currencyPercentagePlaceholder, numberConformer(currency.getDayFluctuationPercentage())));
         ((TextView) view.findViewById(R.id.currencyFluctuationTextView))
                 .setText(context.getResources().getString(R.string.currencyDollarParenthesisPlaceholder, numberConformer(currency.getDayFluctuation())));
-        ((ImageView) view.findViewById(R.id.detailsArrow))
-                .getDrawable().setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
 
-        view.findViewById(R.id.errorTextView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                context.getApplicationContext().startActivity(intent);
-            }
-        });
+        Drawable arrowDrawable = ((ImageView) view.findViewById(R.id.detailsArrow)).getDrawable();
+        arrowDrawable.mutate();
+        arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        arrowDrawable.invalidateSelf();
 
-        if(currency.getHistoryMinutes() != null)
+        Drawable progressBarDrawable = ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).getProgressDrawable();
+        progressBarDrawable.mutate();
+        progressBarDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        progressBarDrawable.invalidateSelf();
+
+        ((ProgressBar) view.findViewById(R.id.currencyPortfolioDominance)).setProgress((int) Math.round(percentage));
+        ((TextView) view.findViewById(R.id.percentageOwnedTextView)).setText(context.getResources().getString(R.string.currencyPercentagePlaceholder, df.format(percentage)));
+
+        if(isBalanceHidden)
         {
-            LineChart lineChart = view.findViewById(R.id.LineChartView);
-
-            lineChart.setDrawGridBackground(false);
-            lineChart.setDrawBorders(false);
-            lineChart.setDrawMarkers(false);
-            lineChart.setDoubleTapToZoomEnabled(false);
-            lineChart.setPinchZoom(false);
-            lineChart.setScaleEnabled(false);
-            lineChart.setDragEnabled(false);
-            lineChart.getDescription().setEnabled(false);
-            lineChart.getAxisLeft().setEnabled(false);
-            lineChart.getAxisRight().setEnabled(false);
-            lineChart.getLegend().setEnabled(false);
-            lineChart.getXAxis().setEnabled(false);
-            lineChart.setViewPortOffsets(0, 0, 0, 0);
-            lineChart.setData(generateData(currency));
-
-            lineChart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                    intent.putExtra("currency", currency);
-                    context.getApplicationContext().startActivity(intent);
-                }
-            });
-        }
-
-        if(isExtended)
-        {
-            extendView(currency, view);
+            view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.percentageOwnedTextView).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.GONE);
         }
         else
         {
-            collapseView(view);
+            view.findViewById(R.id.currencyPortfolioDominance).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.percentageOwnedTextView).setVisibility(View.GONE);
+            view.findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.VISIBLE);
         }
-
-        updateColor(view, currency);
-
-        return view;
     }
 
     private void collapseView(View view)
     {
-        view.findViewById(R.id.separationLayout).setVisibility(View.GONE);
-        view.findViewById(R.id.frameLayoutChart).setVisibility(View.GONE);
-        view.findViewById(R.id.LineChartView).setVisibility(View.GONE);
-        view.findViewById(R.id.errorTextView).setVisibility(View.GONE);
-        view.findViewById(R.id.detailsArrow).setVisibility(View.GONE);
+        collapse(view.findViewById(R.id.collapsableLayout));
     }
 
-    private void extendView(Currency currency, View view)
+    private void extendView(View view)
     {
-        view.findViewById(R.id.separationLayout).setVisibility(View.VISIBLE);
-        view.findViewById(R.id.detailsArrow).setVisibility(View.VISIBLE);
-        view.findViewById(R.id.frameLayoutChart).setVisibility(View.VISIBLE);
-
-        if(currency.getHistoryMinutes() != null)
-        {
-            view.findViewById(R.id.LineChartView).setVisibility(View.VISIBLE);
-            ((LineChart) view.findViewById(R.id.LineChartView)).invalidate();
-            view.findViewById(R.id.errorTextView).setVisibility(View.GONE);
-        }
-        else
-        {
-            view.findViewById(R.id.LineChartView).setVisibility(View.GONE);
-
-            view.findViewById(R.id.errorTextView).setVisibility(View.VISIBLE);
-        }
-
-    }
-
-    private List<Double> getAxisBorders(Currency currency)
-    {
-        List<Double> borders = new ArrayList<>();
-
-        List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
-
-        borders.add(0, currency.getHistoryMinutes().get(0).getOpen());
-        borders.add(1, currency.getHistoryMinutes().get(0).getOpen());
-
-        for(int i = 0; i < dataChartList.size(); i++)
-        {
-            if(borders.get(0) > dataChartList.get(i).getOpen())
-            {
-                borders.set(0, dataChartList.get(i).getOpen());
-            }
-
-            if(borders.get(1) < dataChartList.get(i).getOpen())
-            {
-                borders.set(1, dataChartList.get(i).getOpen());
-            }
-        }
-
-        return borders;
+        expand(view.findViewById(R.id.collapsableLayout));
+        view.findViewById(R.id.LineChartView).invalidate();
     }
 
     private void updateColor(View view, Currency currency)
@@ -215,6 +253,7 @@ public class HomeLayoutGenerator {
         List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
         ArrayList<Entry> values = new ArrayList<>();
 
+        Log.d("coinfolio", "Generating data for " + currency.getSymbol());
         for(int i = 0; i < dataChartList.size(); i+=10)
         {
             values.add(new Entry(i, (float) dataChartList.get(i).getOpen()));
@@ -242,7 +281,9 @@ public class HomeLayoutGenerator {
         int r = Color.red(color);
         int g = Color.green(color);
         int b = Color.blue(color);
+
         transColor = Color.argb(alpha, r, g, b);
+
         return transColor ;
     }
 
@@ -252,11 +293,11 @@ public class HomeLayoutGenerator {
 
         if(abs(number) > 1)
         {
-            str = String.format( Locale.UK, "%.2f", number);
+            str = String.format( Locale.UK, "%.2f", number).replaceAll("\\.?0*$", "");
         }
         else
         {
-            str = String.format( Locale.UK, "%.4f", number);
+            str = String.format( Locale.UK, "%.4f", number).replaceAll("\\.?0*$", "");
         }
 
         return str;

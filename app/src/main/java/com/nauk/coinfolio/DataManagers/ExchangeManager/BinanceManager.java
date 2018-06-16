@@ -1,13 +1,19 @@
 package com.nauk.coinfolio.DataManagers.ExchangeManager;
 
+import android.util.Log;
+
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.account.Account;
 import com.binance.api.client.domain.account.AssetBalance;
+import com.binance.api.client.domain.account.Order;
+import com.binance.api.client.domain.account.Trade;
+import com.binance.api.client.domain.account.request.OrderRequest;
 import com.binance.api.client.exception.BinanceApiException;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,8 +27,7 @@ public class BinanceManager {
     private String privateKey;
 
     private List<Currency> balance;
-
-    public BinanceManager(){}
+    private HashMap<String, List<Trade>> trades;
 
     public BinanceManager(String publicKey, String privateKey)
     {
@@ -32,7 +37,6 @@ public class BinanceManager {
 
     public void updateBalance(BinanceCallBack callBack)
     {
-        Map<String, AssetBalance> accountBalanceCache;
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
         BinanceApiRestClient client = factory.newRestClient();
 
@@ -56,19 +60,56 @@ public class BinanceManager {
         }
     }
 
-    public void setPublicKey(String publicKey)
+    public void updateTrades(BinanceCallBack callBack, String symbol)
     {
-        this.publicKey = publicKey;
+        trades = new HashMap<>();
+
+        trades.put("BTC", updateTrades(null, symbol, "BTC"));
+
+        trades.put("ETH", updateTrades(null, symbol, "ETH"));
+
+        trades.put("USDT", updateTrades(null, symbol, "USDT"));
+
+        callBack.onSuccess();
     }
 
-    public void setPrivateKey(String privateKey)
+    public List<Trade> updateTrades(BinanceCallBack callBack, String symbol, String pairSymbol)
     {
-        this.privateKey = privateKey;
+        List<Trade> presentTrades = new ArrayList<>();
+        BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
+        BinanceApiRestClient client = factory.newRestClient();
+
+        if(!symbol.equals(pairSymbol))
+        {
+            try {
+                presentTrades = client.getMyTrades(symbol + pairSymbol);
+
+            } catch (BinanceApiException e) {
+                try {
+                    presentTrades = client.getMyTrades(pairSymbol + symbol);
+
+                } catch (BinanceApiException f) {
+                    f.printStackTrace();
+                }
+            }
+        }
+
+        if(callBack != null)
+        {
+            callBack.onSuccess();
+        }
+
+        return presentTrades;
     }
 
     public List<Currency> getBalance()
     {
         return balance;
+    }
+
+    public HashMap<String, List<Trade>> getTrades()
+    {
+        return trades;
     }
 
     public interface BinanceCallBack {

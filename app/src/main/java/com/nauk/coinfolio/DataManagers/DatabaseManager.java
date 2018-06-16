@@ -5,11 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Transaction;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,12 +20,13 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     private static final String DATABASE_NAME = "Currencies.db";
 
     private static final String TABLE_MANUAL_CURRENCIES = "ManualCurrencies";
     private static final String TABLE_EXCHANGE_KEYS = "ExchangeKeys";
+    private static final String TABLE_WATCHLIST = "Watchlist";
 
     private static final String KEY_CURRENCY_ID = "idCurrency";
     private static final String KEY_CURRENCY_SYMBOL = "symbol";
@@ -38,6 +41,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
     private static final String KEY_EXCHANGE_PUBLIC_KEY = "publicKey";
     private static final String KEY_EXCHANGE_SECRET_KEY = "secretKey";
 
+    private static final String KEY_WATCHLIST_ID = "idWatchlist";
+    private static final String KEY_WATCHLIST_SYMBOL = "symbol";
+    private static final String KEY_WATCHLIST_NAME = "name";
+    private static final String KEY_WATCHLIST_POSITION = "position";
+
     public DatabaseManager(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,8 +59,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
                 + KEY_CURRENCY_NAME + " VARCHAR(45),"
                 + KEY_CURRENCY_BALANCE + " TEXT,"
-                + KEY_CURRENCY_DATE + " DATE,"
-                + KEY_CURRENCY_PURCHASED_PRICE + " TEXT,"
+                + KEY_CURRENCY_DATE + " TEXT,"
+                + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
                 + KEY_CURRENCY_IS_MINED + " INTEGER"
                 + ");");
 
@@ -63,6 +71,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 + KEY_EXCHANGE_SECRET_KEY + " TEXT"
                 + ");");
 
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_WATCHLIST + "("
+                + KEY_WATCHLIST_ID + " INTEGER PRIMARY KEY,"
+                + KEY_WATCHLIST_SYMBOL + " VARCHAR(4),"
+                + KEY_WATCHLIST_NAME + " TEXT,"
+                + KEY_WATCHLIST_POSITION + " INTEGER"
+                + ");");
+
         //loadSample(db);
     }
 
@@ -71,25 +86,55 @@ public class DatabaseManager extends SQLiteOpenHelper{
     {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANUAL_CURRENCIES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXCHANGE_KEYS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_WATCHLIST);
 
         onCreate(db);
     }
 
-    public void addCurrencyToManualCurrency(String symbol, double balance)
+    public void addCurrencyToWatchlist(Currency currency)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_WATCHLIST_SYMBOL, currency.getSymbol());
+        values.put(KEY_WATCHLIST_NAME, currency.getName());
+
+        db.insert(TABLE_WATCHLIST, null, values);
+        db.close();
+    }
+
+    public List<Currency> getAllCurrenciesFromWatchlist()
+    {
+        String searchQuerry = "SELECT * FROM " + TABLE_WATCHLIST;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor resultatList = db.rawQuery(searchQuerry, null);
+
+        List<Currency> currencyList = new ArrayList<>();
+
+        while(resultatList.moveToNext())
+        {
+            currencyList.add(new Currency(resultatList.getString(2), resultatList.getString(1)));
+        }
+
+        return currencyList;
+    }
+
+    public void addCurrencyToManualCurrency(String symbol, double balance, Date date, String purchasedPrice)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(KEY_CURRENCY_SYMBOL, symbol);
         values.put(KEY_CURRENCY_BALANCE, balance);
-        //values.put(KEY_CURRENCY_DATE, getDate());
+        values.put(KEY_CURRENCY_DATE, date.getTime());
+        values.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
         //values.put(KEY_CURRENCY_PURCHASED_PRICE, something);
 
         db.insert(TABLE_MANUAL_CURRENCIES, null, values);
         db.close();
     }
 
-    public List<Currency> getAllCurrencyFromManualCurrency()
+    public List<Currency> getAllCurrenciesFromManualCurrency()
     {
         String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES;
         SQLiteDatabase db = this.getWritableDatabase();
@@ -100,6 +145,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         while(resultatList.moveToNext())
         {
             currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(3)));
+            Log.d("coinfolio", "Database output : " + resultatList.getString(1));
         }
 
         resultatList.close();
@@ -109,20 +155,17 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return currencyList;
     }
 
-    //public HashMap<Integer, Double> getCurrencyTransactions(String symbol)
     public List<Transaction> getCurrencyTransactions(String symbol)
     {
         String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE symbol='" + symbol.toUpperCase() + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
-        //HashMap<Integer, Double> transactionList = new HashMap<>();
         List<Transaction> transactionList = new ArrayList<>();
 
         while(resultatList.moveToNext())
         {
-            //transactionList.put(resultatList.getInt(0), resultatList.getDouble(3));
-            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3)));
+            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5)));
         }
 
         resultatList.close();

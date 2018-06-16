@@ -1,30 +1,39 @@
 package com.nauk.coinfolio.Activities;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.text.TextUtils;
-import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 
+import com.nauk.coinfolio.DataManagers.BalanceManager;
 import com.nauk.coinfolio.DataManagers.CurrencyData.Currency;
-import com.nauk.coinfolio.LayoutManagers.CurrencyAdapter;
+import com.nauk.coinfolio.DataManagers.CurrencyData.CurrencyDetailsList;
+import com.nauk.coinfolio.DataManagers.DatabaseManager;
+import com.nauk.coinfolio.DataManagers.PreferencesManager;
+import com.nauk.coinfolio.LayoutManagers.CurrencyListAdapter;
 import com.nauk.coinfolio.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CurrencySelectionActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
 
-    private String[] currencySymbols;
-    private String[] currencyNames;
-    private CurrencyAdapter adapter;
+    private CurrencyListAdapter adapter;
     private ListView listView;
     private android.widget.Filter filter;
+    private CurrencyDetailsList currencyDetailsList;
+    private boolean isWatchList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,17 +44,19 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         setContentView(R.layout.activity_add_currency);
 
-        Intent intent = getIntent();
-
-        currencySymbols = intent.getStringArrayExtra("currencyListSymbols");
-        currencyNames = intent.getStringArrayExtra("currencyListNames");
+        currencyDetailsList = new CurrencyDetailsList(this);
 
         setTitle("Select a coin");
 
-        setupAdapter();
+        Intent intent = getIntent();
+        isWatchList = intent.getBooleanExtra("isWatchList", false);
 
-        setupList();
+        ListLoader listLoader = new ListLoader();
+        listLoader.execute();
+    }
 
+    private void setupSearchView()
+    {
         SearchView searchView = findViewById(R.id.search_bar);
 
         searchView.setIconifiedByDefault(false);
@@ -56,21 +67,17 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
     private void setupAdapter()
     {
-        String[] currencyFullname = new String[currencyNames.length];
-
-        for(int i = 0; i < currencyFullname.length; i++)
-        {
-            currencyFullname[i] = currencyNames[i] + " " + currencySymbols[i];
-        }
+        List<String> currencyNames = currencyDetailsList.getCurrenciesName();
+        List<String> currencySymbols = currencyDetailsList.getCurrenciesSymbol();
 
         ArrayList<Currency> currencyArrayList = new ArrayList<>();
 
-        for(int i = 0; i < currencyNames.length; i++)
+        for(int i = 0; i < currencyNames.size(); i++)
         {
-            currencyArrayList.add(new Currency(currencyNames[i], currencySymbols[i]));
+            currencyArrayList.add(new Currency(currencyNames.get(i), currencySymbols.get(i)));
         }
 
-        adapter = new CurrencyAdapter(this, currencyArrayList);
+        adapter = new CurrencyListAdapter(this, currencyArrayList);
     }
 
     private void setupList()
@@ -84,10 +91,23 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Currency selectedCurrency = (Currency) adapterView.getItemAtPosition(i);
-                Intent intent = new Intent(CurrencySelectionActivity.this, RecordTransactionActivity.class);
-                intent.putExtra("coin", selectedCurrency.getName());
-                intent.putExtra("symbol", selectedCurrency.getSymbol());
-                startActivity(intent);
+
+                if(isWatchList)
+                {
+                    PreferencesManager preferencesManager = new PreferencesManager(getApplicationContext());
+                    DatabaseManager databaseManager = new DatabaseManager(getApplicationContext());
+
+                    databaseManager.addCurrencyToWatchlist(selectedCurrency);
+                    preferencesManager.setMustUpdateWatchlist(true);
+                }
+                else
+                {
+                    Intent intent = new Intent(CurrencySelectionActivity.this, RecordTransactionActivity.class);
+                    intent.putExtra("coin", selectedCurrency.getName());
+                    intent.putExtra("symbol", selectedCurrency.getSymbol());
+                    startActivity(intent);
+                }
+
                 finish();
             }
         });
@@ -95,27 +115,32 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
         filter = adapter.getFilter();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        /*final AutoCompleteTextView searchAutoComplete = findViewById(R.id.search_bar);
+    private static void expand(final View v) {
+        v.measure(CardView.LayoutParams.MATCH_PARENT, CardView.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
 
-        searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Currency selectedCurrency = (Currency) adapterView.getItemAtPosition(i);
-                Intent intent = new Intent(CurrencySelectionActivity.this, RecordTransactionActivity.class);
-                intent.putExtra("coin", selectedCurrency.getName());
-                intent.putExtra("symbol", selectedCurrency.getSymbol());
-                startActivity(intent);
-                finish();
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? CardView.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
             }
-        });
 
-        searchAutoComplete.setAdapter(adapter);
-        searchAutoComplete.setThreshold(0);*/
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
 
-        return true;
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
     }
 
     @Override
@@ -135,5 +160,56 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
     public boolean onQueryTextSubmit(String query)
     {
         return false;
+    }
+
+    private class ListLoader extends AsyncTask<Void, Integer, Void>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values)
+        {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            if(Looper.myLooper() == null)
+            {
+                Looper.prepare();
+            }
+
+            currencyDetailsList.update(new BalanceManager.IconCallBack() {
+                @Override
+                public void onSuccess() {
+                    setupAdapter();
+
+                    setupList();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setupSearchView();
+
+                            expand(findViewById(R.id.listContainerLayout));
+                            findViewById(R.id.currencyListProgressBar).setVisibility(View.GONE);
+                        }
+                    });
+                }
+            });
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result)
+        {
+
+        }
     }
 }

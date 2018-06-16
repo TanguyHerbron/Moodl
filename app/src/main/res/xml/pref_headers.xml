@@ -3,6 +3,11 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
+        android:fragment="com.nauk.coinfolio.Activities.SettingsActivity$GeneralPreferenceFragment"
+        android:icon="@drawable/ic_info_black_24dp"
+        android:title="@string/pref_header_general" />
+
+    <header
         android:fragment="com.nauk.coinfolio.Activities.SettingsActivity$ExchangePreferenceFragment"
         android:icon="@drawable/ic_developer_board_black_24dp"
         android:title="@string/pref_header_exchange" />
@@ -18,3 +23,5 @@
         android:title="@string/pref_header_data_sync" />-->
 
 </preference-headers>
+
+

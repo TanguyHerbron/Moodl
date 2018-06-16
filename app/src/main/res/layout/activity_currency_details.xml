@@ -19,10 +19,32 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:text="Line chart"
+                    android:id="@+id/lineChartButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:enabled="false"
+                    style="@style/Widget.AppCompat.Button.Colored"/>
+
+                <Button
+                    android:text="Candle stick chart"
+                    android:id="@+id/candleStickChartButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    style="@style/Widget.AppCompat.Button.Colored"/>
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/progressLayoutChart"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginTop="15dp"
+                android:layout_height="305dp"
                 android:visibility="gone"
                 android:gravity="center">
 
@@ -37,10 +59,55 @@
 
 
             <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/chartView"
+                android:id="@+id/chartPriceView"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginTop="15dp" />
+                android:layout_height="250dp"/>
+
+            <com.github.mikephil.charting.charts.CandleStickChart
+                android:id="@+id/chartCandleStickView"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/timestampHightlight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="0.33"
+                    android:text="\n" />
+
+                <TextView
+                    android:id="@+id/priceHightlight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="0.33"
+                    android:text="\n" />
+
+                <TextView
+                    android:id="@+id/volumeHightlight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="0.33"
+                    android:text="\n"/>
+
+            </LinearLayout>
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/chartVolumeView"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp" />
 
             <LinearLayout
                 android:id="@+id/layoutChartButtons"
@@ -114,44 +181,151 @@
 
             </LinearLayout>
 
-            <!--<ScrollView
-                android:id="@+id/svCharts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            </ScrollView>-->
-
             <LinearLayout
                 android:id="@+id/llCharts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/txtViewPriceStart"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.33"
-                        android:gravity="center"/>
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_weight="0.16">
 
-                    <TextView
-                        android:id="@+id/txtViewPriceNow"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.33"
-                        android:gravity="center"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Beginning price"
+                            android:layout_weight="0.5"
+                            android:textStyle="bold"/>
 
-                    <TextView
-                        android:id="@+id/txtViewPercentage"
+                        <TextView
+                            android:id="@+id/txtViewPriceStart"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.5"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.33"
-                        android:gravity="center"/>
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_weight="0.16">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Current price"
+                            android:layout_weight="0.5"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/txtViewPriceNow"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.5"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_weight="0.16">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Delta"
+                            android:layout_weight="0.5"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/txtViewPercentage"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.5"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_weight="0.16">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Total volume"
+                            android:layout_weight="0.5"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/totalVolume"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.5" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_weight="0.16">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Highest price"
+                            android:layout_weight="0.5"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/highestPrice"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.5" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_weight="0.16">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Lowest price"
+                            android:layout_weight="0.5"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/lowestPrice"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.5" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -163,69 +337,151 @@
         <LinearLayout
             android:id="@+id/infosLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <ProgressBar
-                android:id="@+id/progressBar"
+                android:id="@+id/currencyPortfolioDominance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_gravity="center"
-                android:background="@drawable/circular_progress_bar" />
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:visibility="invisible"
+                android:background="@color/colorAccent"
+                android:padding="@dimen/mdtp_ampm_left_padding"/>
 
-            <!--<ScrollView
-                android:id="@+id/svInfos"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_weight="0.5">
 
-                    <ProgressBar
-                        android:id="@+id/progressBar"
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="?android:attr/progressBarStyleLarge"
-                        android:layout_gravity="center"
-                        android:background="@drawable/circular_progress_bar" />
+                        android:text="Total supply"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/txtViewTotalSupply"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
 
                 </LinearLayout>
 
-            </ScrollView>-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_weight="0.5">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Circulating supply"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/txtViewCirculatingSupply"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Market capitalizaion"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/txtViewMarketCapitalization"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/transactionsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:text="Transaction history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/cardview_elevation"/>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5">
+
+                <LinearLayout
+                    android:id="@+id/listTransactions"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"/>
+
+            </ScrollView>
+
+            <TextView
+                android:text="Trade history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/cardview_elevation" />
+
+            <ScrollView
+                android:id="@+id/svTransactions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5">
+
+                <LinearLayout
+                    android:id="@+id/listTrades"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ProgressBar
+                        android:id="@+id/tradeProgressBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"/>
+
+                </LinearLayout>
+
+            </ScrollView>
 
         </LinearLayout>
 
         <ScrollView
-            android:id="@+id/svTransactions"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <LinearLayout
-                android:id="@+id/listTransactions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-            </LinearLayout>
 
         </ScrollView>
-
-        <!--<ScrollView
-            android:id="@+id/svTransactions"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:id="@+id/transactionsLinearLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-            </LinearLayout>
-
-        </ScrollView>-->
 
     </ViewFlipper>
 
@@ -243,24 +499,3 @@
         android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
-<!--<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.nauk.coinfolio.Activities.CurrencyDetailsActivity">
-
-    <TextView
-        android:id="@+id/message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="@string/title_home"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-</android.support.constraint.ConstraintLayout>
--->

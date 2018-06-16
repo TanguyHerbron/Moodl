@@ -14,13 +14,13 @@
     <color name="listBackground2">#000046</color>
     <color name="separationLine">#FF999999</color>
     <color name="red">#FFF44336</color>
-    <color name="green">#FF4CAF50</color>
+    <color name="green">#FF4CAF50</color>#FBFCFF
 </resources>
 -->
 
 <resources>
-    <color name="colorPrimary">#000046</color>
-    <color name="colorPrimaryDark">#111124</color>
+    <color name="colorPrimary">#004e92</color>
+    <color name="colorPrimaryDark">#000428</color>
     <color name="colorAccent">#1CB5E0</color>
     <color name="mainTextViewColor">#FF000000</color>
     <color name="secondaryTextViewColor">#FF222222</color>
@@ -29,9 +29,13 @@
     <color name="increase">#FF00E000</color>
     <color name="listBackground">#FFEEEEEE</color>
     <color name="listBackground2">#FFFFFFFF</color>
-    <color name="separationLine">#FF999999</color>
+    <color name="separationColor">#66999999</color>
     <color name="buttonColor">#FFFFFFFF</color>
     <color name="red">#FFF44336</color>
     <color name="green">#FF4CAF50</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="cardview_background">#FFFFFFFF</color>
+    <color name="summary_background">#FBFCFF</color>
+    <color name="decreaseCandle">#FFFF5754</color>
+    <color name="increaseCandle">#FF45B64A</color>
 </resources>

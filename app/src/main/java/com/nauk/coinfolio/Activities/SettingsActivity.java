@@ -20,6 +20,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.preference.SwitchPreference;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
@@ -131,8 +132,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return true;
         }
 
-        Log.d("coinfolio", "hello");
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -198,7 +197,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                //|| GeneralPreferenceFragment.class.getName().equals(fragmentName)
+                || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || DataSyncPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName)
                 || ExchangePreferenceFragment.class.getName().equals(fragmentName);
@@ -216,12 +215,21 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
+            findPreference("hide_balance").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    boolean isChecked = ((SwitchPreference) findPreference("hide_balance")).isChecked();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+                    SharedPreferences.Editor editor = preferences.edit();
+
+                    editor.putBoolean("hide_balance", isChecked);
+                    editor.apply();
+
+                    return isChecked;
+                }
+            });
         }
 
         @Override
@@ -259,6 +267,38 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("hitbtc_privatekey"));
             bindPreferenceSummaryToValue(findPreference("binance_privatekey"));
 
+            findPreference("enable_hitbtc").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    boolean isChecked = ((SwitchPreference) findPreference("enable_hitbtc")).isChecked();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+                    SharedPreferences.Editor editor = preferences.edit();
+
+                    editor.putBoolean("mustUpdateSummary", true);
+                    editor.apply();
+
+                    return isChecked;
+                }
+            });
+
+            findPreference("enable_binance").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    boolean isChecked = ((SwitchPreference) findPreference("enable_binance")).isChecked();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+                    SharedPreferences.Editor editor = preferences.edit();
+
+                    editor.putBoolean("mustUpdateSummary", true);
+                    editor.apply();
+
+                    return isChecked;
+                }
+            });
+
             startFingerprintProtocol();
         }
 
@@ -280,7 +320,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             if(preferences.getBoolean("enable_fingerprint", false))
             {
-
                 newFragment.setCancelable(false);
                 newFragment.show(getFragmentManager(), "dialog");
 

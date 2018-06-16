@@ -14,21 +14,12 @@ public class PreferencesManager {
     private SharedPreferences settingPreferences;
     private SharedPreferences currencyList;
     private SharedPreferences preferencesList;
-    android.content.Context context;
 
     public PreferencesManager(android.content.Context context)
     {
-        this.context = context;
         settingPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         currencyList = context.getSharedPreferences(currencyListFile, 0);
         preferencesList = context.getSharedPreferences(preferencesFile, 0);
-    }
-
-    public void addCurrency(String symbol, double balance)
-    {
-        SharedPreferences.Editor editor = currencyList.edit();
-        editor.putString(symbol, String.valueOf(balance));
-        editor.apply();
     }
 
     public void setDetailOption(boolean isExtended)
@@ -58,6 +49,11 @@ public class PreferencesManager {
         return settingPreferences.getBoolean("enable_hitbtc", false);
     }
 
+    public boolean isBalanceHidden()
+    {
+        return settingPreferences.getBoolean("hide_balance", false);
+    }
+
     public void disableHitBTC()
     {
         SharedPreferences.Editor editor = settingPreferences.edit();
@@ -85,5 +81,43 @@ public class PreferencesManager {
         SharedPreferences.Editor editor = settingPreferences.edit();
         editor.putBoolean("enable_binance", false);
         editor.apply();
+    }
+
+    public void setMustUpdateWatchlist(boolean mustUpdate)
+    {
+        SharedPreferences.Editor editor = settingPreferences.edit();
+        editor.putBoolean("mustUpdateWatchlist", mustUpdate);
+        editor.apply();
+    }
+
+    public boolean mustUpdateWatchlist()
+    {
+        boolean mustUpdate = settingPreferences.getBoolean("mustUpdateWatchlist", false);
+
+        if(mustUpdate)
+        {
+            setMustUpdateWatchlist(false);
+        }
+
+        return mustUpdate;
+    }
+
+    public void setMustUpdateSummary(boolean mustUpdate)
+    {
+        SharedPreferences.Editor editor = settingPreferences.edit();
+        editor.putBoolean("mustUpdateSummary", mustUpdate);
+        editor.apply();
+    }
+
+    public boolean mustUpdateSummary()
+    {
+        boolean mustUpdate = settingPreferences.getBoolean("mustUpdateSummary", false);
+
+        if(mustUpdate)
+        {
+            setMustUpdateSummary(false);
+        }
+
+        return mustUpdate;
     }
 }

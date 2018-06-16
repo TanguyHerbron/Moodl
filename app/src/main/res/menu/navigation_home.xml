@@ -2,13 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_something"
+        android:id="@+id/navigation_watchlist"
         android:icon="@drawable/ic_remove_red_eye_black_24dp"
         android:title="@string/title_watchlist" />
 
     <item
-        android:id="@+id/navigation_view_list"
-        android:icon="@drawable/ic_view_list_white_24dp"
+        android:id="@+id/navigation_currencies_list"
+        android:icon="@drawable/ic_view_list_black_24dp"
         android:title="@string/title_home" />
 
     <item
