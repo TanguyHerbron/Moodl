@@ -440,7 +440,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
             }
             else
             {
-                updateBalanceDisplayedTitle(totalValue);
+                updateBalanceDisplayedTitle(totalFluctuationPercentage);
                 balanceUpdateInterface.onBalanceUpdated(totalValue);
             }
         }
