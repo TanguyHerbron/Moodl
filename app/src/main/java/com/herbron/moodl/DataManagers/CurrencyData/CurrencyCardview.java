@@ -12,6 +12,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.collapseH;
 import static com.herbron.moodl.MoodlBox.expandH;
+import static com.herbron.moodl.MoodlBox.getColor;
 import static com.herbron.moodl.MoodlBox.numberConformer;
 
 /**
@@ -341,9 +343,9 @@ public class CurrencyCardview extends CardView {
         dataSet = new LineDataSet(values, "");
         dataSet.setDrawIcons(false);
         dataSet.setColor(currency.getChartColor());
+        dataSet.setFillColor(getColorWithAplha(currency.getChartColor(), 0.5f));
         dataSet.setLineWidth(1);
         dataSet.setDrawFilled(true);
-        dataSet.setFillColor(getColorWithAplha(currency.getChartColor(), 0.5f));
         dataSet.setFormLineWidth(1);
         dataSet.setFormSize(15);
         dataSet.setDrawCircles(false);

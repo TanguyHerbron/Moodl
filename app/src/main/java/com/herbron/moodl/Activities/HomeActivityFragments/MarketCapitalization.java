@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.herbron.moodl.MoodlBox.getColor;
 import static java.lang.Math.abs;
 
 /**
@@ -282,7 +283,7 @@ public class MarketCapitalization extends Fragment {
                         Palette.Builder builder = Palette.from(bitmapIcon);
 
                         marketCapManager.getTopCurrencies().get(index).setIcon(bitmapIcon);
-                        marketCapManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(0));
+                        marketCapManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
 
                         countIcons();
                     }

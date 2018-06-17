@@ -42,6 +42,7 @@ import com.herbron.moodl.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.herbron.moodl.MoodlBox.getColor;
 import static com.herbron.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
@@ -520,11 +521,11 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
             {
                 Palette.Builder builder = Palette.from(currency.getIcon());
 
-                currency.setChartColor(builder.generate().getDominantColor(0));
+                currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
             }
             else
             {
-                currency.setChartColor(12369084);
+                currency.setChartColor(getColor(R.color.default_color, getContext()));
             }
         }
 
