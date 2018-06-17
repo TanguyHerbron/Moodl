@@ -53,17 +53,17 @@ public class CurrencyDetailsList {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+
                         if (response.length() > 0) {
                             processDetailResult(response, callBack);
-
+                            upToDate = true;
                         }
-                        upToDate = true;
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        upToDate = true;
+
                     }
                 });
 

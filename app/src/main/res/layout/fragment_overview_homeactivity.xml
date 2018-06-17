@@ -51,8 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="?attr/actionBarSize"
-        android:background="@color/summary_background"
-        android:paddingTop="15dp">
+        android:background="@color/summary_background">
 
         <ListView android:id="@+id/linearLayoutOverview"
             android:layout_width="match_parent"
@@ -61,7 +60,8 @@
             android:orientation="vertical"
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:divider="@null"
-            android:dividerHeight="0dp"/>
+            android:dividerHeight="0dp"
+            android:clipChildren="false"/>
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

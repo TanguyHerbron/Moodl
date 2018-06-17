@@ -212,7 +212,8 @@ public class CurrencyCardview extends CardView {
     private void setupCardView()
     {
         ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.MATCH_PARENT, ViewGroup.MarginLayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins((int) MoodlBox.convertDpToPx(10, getResources()), 0, (int) MoodlBox.convertDpToPx(10, getResources()), (int) MoodlBox.convertDpToPx(10, getResources()));
+        int margin = (int) MoodlBox.convertDpToPx(10, getResources());
+        layoutParams.setMargins(margin, margin, margin, 0);
 
         setLayoutParams(layoutParams);
 
