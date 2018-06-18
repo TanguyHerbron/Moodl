@@ -158,6 +158,11 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
         currentFragment = fragment;
     }
 
+    public Fragment getHoldingsFragment()
+    {
+        return holdingsFragment;
+    }
+
     @Override
     protected void onResume() {
         super.onResume();

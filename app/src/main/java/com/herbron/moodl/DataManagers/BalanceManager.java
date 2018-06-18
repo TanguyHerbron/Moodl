@@ -4,10 +4,12 @@ import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.herbron.moodl.Activities.HomeActivity;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.herbron.moodl.DataManagers.ExchangeManager.BinanceManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.HitBtcManager;
+import com.herbron.moodl.DataNotifierInterface;
 import com.herbron.moodl.R;
 
 import org.json.JSONException;
@@ -49,6 +51,8 @@ public class BalanceManager {
     private List<HitBtcManager> hitBtcManagers;
     private List<BinanceManager> binanceManagers;
 
+    private DataNotifierInterface dataNotifierInterface;
+
     public BalanceManager(android.content.Context context)
     {
         this.context = context;
@@ -64,6 +68,13 @@ public class BalanceManager {
         currencyDetailsList = CurrencyDetailsList.getInstance(context);
 
         balanceCounter = 0;
+
+        setListener((DataNotifierInterface) ((HomeActivity) context).getHoldingsFragment());
+    }
+
+    public void setListener(DataNotifierInterface dataNotifierInterface)
+    {
+        this.dataNotifierInterface = dataNotifierInterface;
     }
 
     public List<String> getBiggestCurrencies()
@@ -111,7 +122,7 @@ public class BalanceManager {
         return totalBalance;
     }
 
-    public void updateTotalBalance(final VolleyCallBack callBack)
+    public void updateTotalBalance()
     {
         boolean isUpdated = false;
         
@@ -128,12 +139,12 @@ public class BalanceManager {
                 binanceManagers.get(i).updateBalance(new BinanceManager.BinanceCallBack() {
                     @Override
                     public void onSuccess() {
-                        countBalances(callBack);
+                        countBalances();
                     }
 
                     @Override
                     public void onError(String error) {
-                        callBack.onError(error);
+                        dataNotifierInterface.onBalanceError(error);
                     }
                 });
             }
@@ -148,12 +159,12 @@ public class BalanceManager {
                 hitBtcManagers.get(i).updateGlobalBalance(new HitBtcManager.HitBtcCallBack() {
                     @Override
                     public void onSuccess() {
-                        countBalances(callBack);
+                        countBalances();
                     }
 
                     @Override
                     public void onError(String error) {
-                        callBack.onError(error);
+                        dataNotifierInterface.onBalanceError(error);
                     }
                 });
             }
@@ -161,23 +172,23 @@ public class BalanceManager {
 
         if(!isUpdated)
         {
-            refreshAllBalances(callBack);
+            refreshAllBalances();
         }
     }
 
-    private void countBalances(VolleyCallBack callBack)
+    private void countBalances()
     {
         balanceCounter++;
 
         if(balanceCounter == hitBtcManagers.size() + binanceManagers.size())
         {
-            refreshAllBalances(callBack);
+            refreshAllBalances();
 
             balanceCounter = 0;
         }
     }
 
-    private void refreshAllBalances(final VolleyCallBack callBack)
+    private void refreshAllBalances()
     {
         totalBalance = new ArrayList<>();
 
@@ -193,7 +204,7 @@ public class BalanceManager {
 
         mergeBalanceTotal(manualBalances);
 
-        callBack.onSuccess();
+        dataNotifierInterface.onBalanceDataUpdated();
     }
 
     private void mergeBalanceTotal(List<Currency> balance)
@@ -257,23 +268,6 @@ public class BalanceManager {
         {
             callBack.onSuccess();
         }
-        /*StringRequest strRequest = new StringRequest(Request.Method.GET, detailUrl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        if (response.length() > 0) {
-                            processDetailResult(response, callBack);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-        requestQueue.add(strRequest);*/
     }
 
     public String getIconUrl(String symbol)

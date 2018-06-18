@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -30,11 +31,13 @@ import android.widget.TextView;
 import com.herbron.moodl.Activities.CurrencySelectionActivity;
 import com.herbron.moodl.Activities.HomeActivity;
 import com.herbron.moodl.BalanceUpdateInterface;
+import com.herbron.moodl.DataManagers.BalanceManager;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyCardview;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyTickerList;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.BalanceSwitchManagerInterface;
+import com.herbron.moodl.DataNotifierInterface;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
@@ -50,7 +53,7 @@ import static java.lang.Math.abs;
  * Created by Tiji on 13/04/2018.
  */
 
-public class Summary extends Fragment implements BalanceSwitchManagerInterface {
+public class Summary extends Fragment implements BalanceSwitchManagerInterface, DataNotifierInterface {
 
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
@@ -84,7 +87,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
         View fragmentView = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
 
         preferencesManager = new PreferencesManager(getActivity());
-        balanceManager = new com.herbron.moodl.DataManagers.BalanceManager(getActivity());
+        balanceManager = new BalanceManager(getContext());
         currencyTickerList = CurrencyTickerList.getInstance(getActivity());
 
         currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
@@ -305,14 +308,14 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
     private void showErrorSnackbar()
     {
-        /*Snackbar.make(getActivity().findViewById(R.id.snackbar_placer), "Error while updating data", Snackbar.LENGTH_LONG)
+        Snackbar.make(getActivity().findViewById(R.id.content_frame), "Error while updating data", Snackbar.LENGTH_LONG)
                 .setAction("Update", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
                     }
                 })
-                .show();*/
+                .show();
     }
 
     private void resetCounters()
@@ -497,6 +500,87 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
         displayBalance(preferencesManager.isBalanceHidden());
     }
 
+    @Override
+    public void onTickerListUpdated() {
+
+    }
+
+    @Override
+    public void onDetailsUpdated() {
+
+    }
+
+    @Override
+    public void onBalanceDataUpdated() {
+        final List<Currency> balance = balanceManager.getTotalBalance();
+
+        if(balanceManager.getTotalBalance().size() > 0)
+        {
+            for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+            {
+                balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        countCoins(true, false, false);
+                    }
+                });
+            }
+        }
+        else
+        {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    countCoins(false, false, false);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onBalanceError(String error)
+    {
+        generateSnackBarError(error);
+    }
+
+    private void generateSnackBarError(String error)
+    {
+            View view = getActivity().findViewById(R.id.content_frame);
+
+            switch (error)
+            {
+                case "com.android.volley.AuthFailureError":
+                    preferencesManager.disableHitBTC();
+                    Snackbar.make(view, "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                            .show();
+
+                    refreshLayout.setRefreshing(false);
+
+                    updateAll(true);
+                    break;
+                case "API-key format invalid.":
+                    preferencesManager.disableBinance();
+                    Snackbar.make(view, "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                            .show();
+
+                    updateAll(true);
+                    break;
+                case "com.android.volley.NoConnectionError: java.net.UnknownHostException: Unable to resolve host \"api.hitbtc.com\": No address associated with hostname":
+                    Snackbar.make(view, "Can't resolve host", Snackbar.LENGTH_LONG)
+                            .show();
+                    break;
+                case "com.android.volley.TimeoutError":
+                    break;
+                default:
+                    Snackbar.make(view, "Unexpected error", Snackbar.LENGTH_LONG)
+                            .show();
+
+                    Log.d("moodl", error);
+
+                    updateAll(false);
+            }
+    }
+
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
     {
 
@@ -667,44 +751,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
     private class DataUpdater extends AsyncTask<Void, Integer, Void>
     {
-        private void generateSnackBarError(String error)
-        {
-            /*View view = getActivity().findViewById(R.id.snackbar_placer);
-
-            switch (error)
-            {
-                case "com.android.volley.AuthFailureError":
-                    preferencesManager.disableHitBTC();
-                    Snackbar.make(view, "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
-                            .show();
-
-                    refreshLayout.setRefreshing(false);
-
-                    updateAll(true);
-                    break;
-                case "API-key format invalid.":
-                    preferencesManager.disableBinance();
-                    Snackbar.make(view, "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
-                            .show();
-
-                    updateAll(true);
-                    break;
-                case "com.android.volley.NoConnectionError: java.net.UnknownHostException: Unable to resolve host \"api.hitbtc.com\": No address associated with hostname":
-                    Snackbar.make(view, "Can't resolve host", Snackbar.LENGTH_LONG)
-                            .show();
-                    break;
-                case "com.android.volley.TimeoutError":
-                    break;
-                default:
-                    Snackbar.make(view, "Unexpected error", Snackbar.LENGTH_LONG)
-                            .show();
-
-                    Log.d("moodl", error);
-
-                    updateAll(false);
-            }*/
-        }
-
         @Override
         protected Void doInBackground(Void... params)
         {
@@ -730,39 +776,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
                 }
             });
 
-            balanceManager.updateTotalBalance(new com.herbron.moodl.DataManagers.BalanceManager.VolleyCallBack() {
-                @Override
-                public void onSuccess() {
-                    final List<Currency> balance = balanceManager.getTotalBalance();
-
-                    if(balanceManager.getTotalBalance().size() > 0)
-                    {
-                        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-                        {
-                            balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
-                                @Override
-                                public void onSuccess(Currency currency) {
-                                    countCoins(true, false, false);
-                                }
-                            });
-                        }
-                    }
-                    else
-                    {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                countCoins(false, false, false);
-                            }
-                        });
-                    }
-                }
-
-                public void onError(String error)
-                {
-                    generateSnackBarError(error);
-                }
-            });
+            balanceManager.updateTotalBalance();
 
             return null;
         }
