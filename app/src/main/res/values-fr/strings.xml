@@ -89,4 +89,10 @@
     <string name="field_empty">Ce champ en peut pas être vide</string>
     <string name="field_nan">Ce champ doit être un nombre</string>
     <string name="field_negative">Ce champ doit être positif</string>
+    <string name="pref_title_category_display">Affichage</string>
+    <string name="pref_title_category_data_backup">Sauvegarde des données</string>
+    <string name="pref_title_category_other">Autre</string>
+    <string name="pref_title_version">Version</string>
+    <string name="pref_title_export">Exporter les entrées manuelles</string>
+    <string name="pref_title_import">Importer de nouvelles entrées</string>
 </resources>
