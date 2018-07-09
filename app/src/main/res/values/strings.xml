@@ -14,6 +14,7 @@
     <!-- Example settings for Data & Sync -->
     <string name="pref_title_category_display">Display</string>
     <string name="pref_title_category_data_backup">Data backup</string>
+    <string name="pref_title_category_synchronization">Synchronization</string>
     <string name="pref_title_category_other">Other</string>
 
     <string name="pref_title_minimum_amount_displayed">Minimum amount displayed</string>
@@ -89,6 +90,7 @@
 
     <!--Exchange strings-->
     <string name="pref_header_exchange">Exchanges settings</string>
+    <string name="pref_header_wallet">Wallets settings</string>
     <string name="pref_fingerprint" translatable="false">Touch ID</string>
 
     <!--HitBTC-->
@@ -198,5 +200,10 @@
     <string name="field_empty">This field cannot be blank</string>
     <string name="field_nan">This field must be a number</string>
     <string name="field_negative">This field must be positive</string>
+    <string name="conserve_data">Conserve current data</string>
+    <string name="restore_manual_entries">Restore manual entries</string>
+    <string name="restore_keys">Restore API keys</string>
+    <string name="enter_password">Enter password</string>
+    <string name="password">Password</string>
 
 </resources>

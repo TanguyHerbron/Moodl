@@ -514,9 +514,9 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     public void onBalanceDataUpdated() {
         final List<Currency> balance = balanceManager.getTotalBalance();
 
-        if(balanceManager.getTotalBalance().size() > 0)
+        if(balance.size() > 0)
         {
-            for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
+            for(int i = 0; i < balance.size(); i++)
             {
                 balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
                     @Override

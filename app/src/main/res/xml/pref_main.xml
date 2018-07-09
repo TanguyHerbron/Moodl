@@ -28,19 +28,30 @@
         android:title="@string/pref_title_category_data_backup">
 
         <PreferenceScreen android:title="@string/pref_title_export"
-            android:key="export"/>
+            android:key="export"
+            android:enabled="false"/>
 
-        <PreferenceScreen android:title="@string/pref_title_import"
+        <Preference android:title="@string/pref_title_import"
             android:key="import"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/pref_title_category_other">
+        android:title="@string/pref_title_category_synchronization">
 
-        <Preference
+        <PreferenceScreen
             android:fragment="com.herbron.moodl.Activities.SettingsActivity$ExchangePreferenceFragment"
-            android:title="@string/pref_header_exchange" />
+            android:title="@string/pref_header_exchange"
+            android:enabled="false"/>
+
+        <PreferenceScreen
+            android:title="@string/pref_header_wallet"
+            android:enabled="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_category_other">
 
         <PreferenceScreen android:title="@string/pref_title_version"
             android:key="version"/>

@@ -2,41 +2,58 @@ package com.herbron.moodl.Activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.fingerprint.FingerprintManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
-import android.preference.RingtonePreference;
 import android.preference.SwitchPreference;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
-import android.text.TextUtils;
+import android.support.v7.view.ContextThemeWrapper;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.herbron.moodl.BuildConfig;
 import com.herbron.moodl.FingerprintToolkit.FingerprintDialogFragment;
 import com.herbron.moodl.FingerprintToolkit.FingerprintHandler;
+import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.R;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
@@ -45,7 +62,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -147,9 +169,123 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("default_currency"));
         bindPreferenceSummaryToValue(findPreference("minimum_value_displayed"));
 
+        findPreference("import").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                Context context = SettingsActivity.this;
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
+                dialogBuilder.setView(dialogView);
+
+                CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
+                final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
+
+                enterPasswordCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        if(b && textInputLayoutPassword.getVisibility() == View.GONE)
+                        {
+                            MoodlBox.expandH(textInputLayoutPassword);
+                        }
+
+                        if(!b && textInputLayoutPassword.getVisibility() == View.VISIBLE)
+                        {
+                            MoodlBox.collapseH(textInputLayoutPassword);
+                        }
+                    }
+                });
+
+                dialogBuilder.setTitle("Restore backup");
+                dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                        checkPermissions();
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                        Date currentDate = new Date();
+                        //String fileName = getString(R.string.app_name) + "_" + formatter.format(currentDate) + ".backup";
+                        String fileName = "backup.moodl";
+
+                        File dir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+
+                        if (!dir.exists()) {
+                            if (!dir.mkdirs()) {
+                                Log.d("moodl", "Error while creating directory");
+                            }
+                        }
+
+                        File backupFile = new File(dir + "/" + fileName);
+
+                        if(backupFile.exists())
+                        {
+                            try (FileReader fileReader = new FileReader(backupFile)) {
+                                BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                                String line;
+
+                                while((line = bufferedReader.readLine()) != null)
+                                {
+                                    Log.d("moodl", line);
+                                }
+                            } catch (IOException e) {
+                                Log.d("moodl", "Error > " + e);
+                            }
+                        }
+                        else
+                        {
+                            Log.d("moodl", "Not backup file found");
+
+                            try (PrintWriter printWriter = new PrintWriter(new FileWriter(backupFile, true))) {
+
+                                printWriter.write("Some data");
+
+                                printWriter.close();
+                            } catch (IOException e) {
+                                Log.d("moodl", "Error > " + e);
+                            }
+                        }
+
+                        dialog.dismiss();
+                    }
+                });
+                dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.dismiss();
+                    }
+                });
+
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+
+                return false;
+            }
+        });
+
         EditTextPreference editTextPreference = (EditTextPreference) findPreference("minimum_value_displayed");
         editTextPreference.setPositiveButtonText("Save");
         editTextPreference.setNegativeButtonText("Cancel");
+    }
+
+    private boolean checkPermissions() {
+
+        String[] permissions = new String[]{
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        };
+
+        int result;
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String p : permissions) {
+            result = ContextCompat.checkSelfPermission(this, p);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(p);
+            }
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 100);
+            return false;
+        }
+        return true;
     }
 
     /**
