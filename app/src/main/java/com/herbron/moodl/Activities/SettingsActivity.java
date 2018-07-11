@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -42,7 +43,12 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.applandeo.FilePicker;
+import com.applandeo.constants.FileType;
+import com.applandeo.listeners.OnSelectFileListener;
 import com.herbron.moodl.BuildConfig;
+import com.herbron.moodl.DataManagers.DataCrypter;
+import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.FingerprintToolkit.FingerprintDialogFragment;
 import com.herbron.moodl.FingerprintToolkit.FingerprintHandler;
 import com.herbron.moodl.MoodlBox;
@@ -64,10 +70,10 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -169,7 +175,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("default_currency"));
         bindPreferenceSummaryToValue(findPreference("minimum_value_displayed"));
 
-        findPreference("import").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        findPreference("export").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
 
@@ -178,7 +184,33 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
                 dialogBuilder.setView(dialogView);
 
-                CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
+                File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+
+                if (!backupDirectory.exists()) {
+                    if (!backupDirectory.mkdirs()) {
+                        Log.d("moodl", "Error while creating directory");
+                    }
+                }
+
+                final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
+                textViewFilePath.setText(backupDirectory.getAbsolutePath());
+                textViewFilePath.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        new FilePicker.Builder(SettingsActivity.this, new OnSelectFileListener() {
+                            @Override
+                            public void onSelect(File file) {
+                                textViewFilePath.setText(file.getAbsolutePath());
+                            }
+                        }).fileType("moodl")
+                                .hideFiles(true)
+                                .directory(backupDirectory.getAbsolutePath())
+                                .mainDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
+                                .show();
+                    }
+                });
+
+                final CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
                 final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
 
                 enterPasswordCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -196,53 +228,33 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     }
                 });
 
-                dialogBuilder.setTitle("Restore backup");
+                dialogBuilder.setTitle("Create backup");
                 dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
 
                         checkPermissions();
                         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                         Date currentDate = new Date();
-                        //String fileName = getString(R.string.app_name) + "_" + formatter.format(currentDate) + ".backup";
-                        String fileName = "backup.moodl";
+                        String fileName = getString(R.string.app_name) + "_" + formatter.format(currentDate) + ".backup";
+                        DatabaseManager databaseManager = new DatabaseManager(SettingsActivity.this);
 
-                        File dir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+                        File backupFile = new File(textViewFilePath.getText() + "/" + fileName);
 
-                        if (!dir.exists()) {
-                            if (!dir.mkdirs()) {
-                                Log.d("moodl", "Error while creating directory");
+                        try (PrintWriter printWriter = new PrintWriter(new FileWriter(backupFile, true))) {
+
+                            if(enterPasswordCheckbox.isChecked())
+                            {
+                                DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
+                                printWriter.write(DataCrypter.encrypt(SettingsActivity.this, databaseManager.getBackupData()));
                             }
-                        }
-
-                        File backupFile = new File(dir + "/" + fileName);
-
-                        if(backupFile.exists())
-                        {
-                            try (FileReader fileReader = new FileReader(backupFile)) {
-                                BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-                                String line;
-
-                                while((line = bufferedReader.readLine()) != null)
-                                {
-                                    Log.d("moodl", line);
-                                }
-                            } catch (IOException e) {
-                                Log.d("moodl", "Error > " + e);
+                            else
+                            {
+                                printWriter.write(databaseManager.getBackupData());
                             }
-                        }
-                        else
-                        {
-                            Log.d("moodl", "Not backup file found");
 
-                            try (PrintWriter printWriter = new PrintWriter(new FileWriter(backupFile, true))) {
-
-                                printWriter.write("Some data");
-
-                                printWriter.close();
-                            } catch (IOException e) {
-                                Log.d("moodl", "Error > " + e);
-                            }
+                            printWriter.close();
+                        } catch (IOException e) {
+                            Log.d("moodl", "Error > " + e);
                         }
 
                         dialog.dismiss();

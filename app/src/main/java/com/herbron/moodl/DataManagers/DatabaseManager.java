@@ -144,11 +144,33 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return result.getInt(0);
     }
 
-    public int deleteCurrencyFromWatchlist(String symbol)
+    public void deleteCurrencyFromWatchlist(String symbol)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        return db.delete(TABLE_WATCHLIST, KEY_WATCHLIST_SYMBOL + " = '" + symbol + "'", null);
+        db.delete(TABLE_WATCHLIST, KEY_WATCHLIST_SYMBOL + " = '" + symbol + "'", null);
+        db.close();
+    }
+
+    public String getBackupData()
+    {
+        String selectQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery(selectQuerry, null);
+
+        String backupData = "";
+
+        while(result.moveToNext())
+        {
+            for(int i = 0; i < result.getColumnCount(); i++)
+            {
+                backupData += result.getString(i) + ";@";
+            }
+
+            backupData += "\n";
+        }
+
+        return backupData;
     }
 
     public List<Currency> getAllCurrenciesFromWatchlist()

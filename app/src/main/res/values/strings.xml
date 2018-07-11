@@ -21,6 +21,8 @@
 
     <string name="pref_title_version">Version</string>
 
+    <string name="ivKey">0123456789MoodlH</string> <!--Must be 16 characters-->
+
     <string name="pref_title_export">Export manual entries</string>
     <string name="pref_title_import">Import manual entries</string>
 

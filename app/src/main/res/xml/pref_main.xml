@@ -28,11 +28,11 @@
         android:title="@string/pref_title_category_data_backup">
 
         <PreferenceScreen android:title="@string/pref_title_export"
-            android:key="export"
-            android:enabled="false"/>
+            android:key="export"/>
 
         <Preference android:title="@string/pref_title_import"
-            android:key="import"/>
+            android:key="import"
+            android:enabled="false"/>
 
     </PreferenceCategory>
 
