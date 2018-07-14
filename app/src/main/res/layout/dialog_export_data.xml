@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/conserve_data"
-        android:enabled="false"/>
+        android:enabled="false" />
 
     <CheckBox
         android:id="@+id/checkboxRestoreEntries"

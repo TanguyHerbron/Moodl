@@ -31,8 +31,7 @@
             android:key="export"/>
 
         <Preference android:title="@string/pref_title_import"
-            android:key="import"
-            android:enabled="false"/>
+            android:key="import"/>
 
     </PreferenceCategory>
 

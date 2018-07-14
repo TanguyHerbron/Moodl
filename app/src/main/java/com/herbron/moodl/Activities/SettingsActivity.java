@@ -3,11 +3,9 @@ package com.herbron.moodl.Activities;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -29,22 +27,15 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.view.ContextThemeWrapper;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.applandeo.FilePicker;
-import com.applandeo.constants.FileType;
 import com.applandeo.listeners.OnSelectFileListener;
 import com.herbron.moodl.BuildConfig;
 import com.herbron.moodl.DataManagers.DataCrypter;
@@ -181,7 +172,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                 Context context = SettingsActivity.this;
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-                View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
+                View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_export_data, null, true);
                 dialogBuilder.setView(dialogView);
 
                 File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
@@ -202,7 +193,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             public void onSelect(File file) {
                                 textViewFilePath.setText(file.getAbsolutePath());
                             }
-                        }).fileType("moodl")
+                        }).fileType(".moodl")
                                 .hideFiles(true)
                                 .directory(backupDirectory.getAbsolutePath())
                                 .mainDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
@@ -263,6 +254,93 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         dialog.dismiss();
+                    }
+                });
+
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+
+                return false;
+            }
+        });
+
+        findPreference("import").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                Context context = SettingsActivity.this;
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
+                dialogBuilder.setView(dialogView);
+
+                File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+
+                if(!backupDirectory.exists())
+                {
+                    if(!backupDirectory.mkdirs())
+                    {
+                        Log.d("moodl", "Error while creating directory");
+                    }
+                }
+
+                final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
+                textViewFilePath.setText(backupDirectory.getAbsolutePath());
+                textViewFilePath.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        new FilePicker.Builder(SettingsActivity.this, new OnSelectFileListener() {
+                            @Override
+                            public void onSelect(File file) {
+                                textViewFilePath.setText(file.getAbsolutePath());
+                            }
+                        }).hideFiles(false)
+                                .directory(backupDirectory.getAbsolutePath())
+                                .mainDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
+                                .show();
+                    }
+                });
+
+                dialogBuilder.setTitle("Restore backup");
+                dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int whichButton) {
+
+                        checkPermissions();
+
+                        DatabaseManager databaseManager = new DatabaseManager(context);
+
+                        File backupFile = new File(textViewFilePath.getText().toString());
+
+                        try {
+                            FileReader fileReader = new FileReader(backupFile);
+                            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                            String str;
+                            String completeFile = "";
+
+                            while ((str = bufferedReader.readLine()) != null) {
+                                completeFile += str;
+                            }
+
+                            String[] results = completeFile.split(Pattern.quote("]"));
+
+                            for(int i = 0; i < results.length; i++)
+                            {
+                                String[] columnValues = results[i].split(Pattern.quote(";@"));
+
+                                databaseManager.addRowTransaction(columnValues);
+                            }
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
                     }
                 });
 

@@ -173,6 +173,20 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return backupData;
     }
 
+    public void addRowTransaction(String[] rowValues)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_CURRENCY_SYMBOL, rowValues[1]);
+        values.put(KEY_CURRENCY_BALANCE, rowValues[3]);
+        values.put(KEY_CURRENCY_DATE, rowValues[4]);
+        values.put(KEY_CURRENCY_PURCHASED_PRICE, rowValues[5]);
+
+        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.close();
+    }
+
     public List<Currency> getAllCurrenciesFromWatchlist()
     {
         String searchQuerry = "SELECT * FROM " + TABLE_WATCHLIST + " ORDER BY " + KEY_WATCHLIST_POSITION + " ASC";

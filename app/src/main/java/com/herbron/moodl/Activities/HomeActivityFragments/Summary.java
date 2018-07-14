@@ -1,10 +1,14 @@
 package com.herbron.moodl.Activities.HomeActivityFragments;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,6 +17,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -24,10 +29,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.daasuu.ei.Ease;
+import com.daasuu.ei.EasingInterpolator;
 import com.herbron.moodl.Activities.CurrencySelectionActivity;
 import com.herbron.moodl.Activities.HomeActivity;
 import com.herbron.moodl.BalanceUpdateInterface;
@@ -42,8 +50,10 @@ import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static com.herbron.moodl.MoodlBox.getColor;
 import static com.herbron.moodl.MoodlBox.numberConformer;
@@ -238,28 +248,48 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
     private void generateSplashScreen()
     {
-        LinearLayout loadingLayout = new LinearLayout(getActivity());
-
-        loadingLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        loadingLayout.setGravity(Gravity.CENTER);
-        loadingLayout.setOrientation(LinearLayout.VERTICAL);
-
         loadingDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 
-        TextView txtView = new TextView(getActivity());
-        txtView.setText("Loading data...");
-        txtView.setTextSize(20);
-        txtView.setGravity(Gravity.CENTER);
-        txtView.setTextColor(this.getResources().getColor(R.color.cardview_light_background));
+        Random random = new Random();
 
-        ProgressBar progressBar = new ProgressBar(getActivity());
-        progressBar.setIndeterminate(true);
+        LinearLayout splashLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.splash_screen, null, true);
+        LinearLayout animatedLayout = splashLayout.findViewById(R.id.animatedViewsLayout);
 
-        loadingLayout.setBackgroundColor(getActivity().getResources().getColor(R.color.colorPrimaryDark));
-        loadingLayout.addView(txtView);
-        loadingLayout.addView(progressBar);
+        File cacheDir = new File(getContext().getCacheDir().getAbsolutePath());
+        File[] cacheFiles = cacheDir.listFiles();
 
-        loadingDialog.setContentView(loadingLayout);
+        for(int i = 0; i < 4; i++)
+        {
+            File cachedIcon = null;
+
+            while(cachedIcon == null || cachedIcon.isDirectory())
+            {
+                cachedIcon = cacheFiles[random.nextInt(cacheFiles.length) + 1];
+            }
+
+            Bitmap icon = BitmapFactory.decodeFile(cachedIcon.getAbsolutePath());
+
+            Bitmap result = Bitmap.createBitmap(150, 150, icon.getConfig());
+
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.white));
+
+            Canvas canvas = new Canvas(result);
+            canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
+            canvas.drawBitmap(Bitmap.createScaledBitmap(icon, 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
+
+            ((ImageView) animatedLayout.getChildAt(i)).setImageBitmap(result);
+
+            ObjectAnimator animator = ObjectAnimator.ofFloat(animatedLayout.getChildAt(i), "translationY", 0, -100, 0);
+            animator.setInterpolator(new EasingInterpolator(Ease.CIRC_IN_OUT));
+            animator.setStartDelay(i*200);
+            animator.setDuration(1500);
+            animator.setRepeatCount(ValueAnimator.INFINITE);
+            animator.start();
+        }
+
+        loadingDialog.setContentView(splashLayout);
         loadingDialog.show();
     }
 
