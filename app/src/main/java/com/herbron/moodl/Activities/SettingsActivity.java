@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -159,223 +160,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-        addPreferencesFromResource(R.xml.pref_main);
-
-        findPreference("version").setSummary(BuildConfig.VERSION_NAME);
-
-        bindPreferenceSummaryToValue(findPreference("default_currency"));
-        bindPreferenceSummaryToValue(findPreference("minimum_value_displayed"));
-
-        findPreference("export").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-
-                Context context = SettingsActivity.this;
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-                View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_export_data, null, true);
-                dialogBuilder.setView(dialogView);
-
-                File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
-
-                if (!backupDirectory.exists()) {
-                    if (!backupDirectory.mkdirs()) {
-                        Log.d("moodl", "Error while creating directory");
-                    }
-                }
-
-                final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
-                textViewFilePath.setText(backupDirectory.getAbsolutePath());
-                textViewFilePath.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        new FilePicker.Builder(SettingsActivity.this, new OnSelectFileListener() {
-                            @Override
-                            public void onSelect(File file) {
-                                textViewFilePath.setText(file.getAbsolutePath());
-                            }
-                        }).fileType(".moodl")
-                                .hideFiles(true)
-                                .directory(backupDirectory.getAbsolutePath())
-                                .mainDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
-                                .show();
-                    }
-                });
-
-                final CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
-                final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
-
-                enterPasswordCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                        if(b && textInputLayoutPassword.getVisibility() == View.GONE)
-                        {
-                            MoodlBox.expandH(textInputLayoutPassword);
-                        }
-
-                        if(!b && textInputLayoutPassword.getVisibility() == View.VISIBLE)
-                        {
-                            MoodlBox.collapseH(textInputLayoutPassword);
-                        }
-                    }
-                });
-
-                dialogBuilder.setTitle("Create backup");
-                dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-
-                        checkPermissions();
-                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
-                        Date currentDate = new Date();
-                        String fileName = getString(R.string.app_name) + "_" + formatter.format(currentDate) + ".backup";
-                        DatabaseManager databaseManager = new DatabaseManager(SettingsActivity.this);
-
-                        File backupFile = new File(textViewFilePath.getText() + "/" + fileName);
-
-                        try (PrintWriter printWriter = new PrintWriter(new FileWriter(backupFile, true))) {
-
-                            if(enterPasswordCheckbox.isChecked())
-                            {
-                                DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
-                                printWriter.write(DataCrypter.encrypt(SettingsActivity.this, databaseManager.getBackupData()));
-                            }
-                            else
-                            {
-                                printWriter.write(databaseManager.getBackupData());
-                            }
-
-                            printWriter.close();
-                        } catch (IOException e) {
-                            Log.d("moodl", "Error > " + e);
-                        }
-
-                        dialog.dismiss();
-                    }
-                });
-                dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        dialog.dismiss();
-                    }
-                });
-
-                AlertDialog alertDialog = dialogBuilder.create();
-                alertDialog.show();
-
-                return false;
-            }
-        });
-
-        findPreference("import").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-
-                Context context = SettingsActivity.this;
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-                View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
-                dialogBuilder.setView(dialogView);
-
-                File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
-
-                if(!backupDirectory.exists())
-                {
-                    if(!backupDirectory.mkdirs())
-                    {
-                        Log.d("moodl", "Error while creating directory");
-                    }
-                }
-
-                final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
-                textViewFilePath.setText(backupDirectory.getAbsolutePath());
-                textViewFilePath.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        new FilePicker.Builder(SettingsActivity.this, new OnSelectFileListener() {
-                            @Override
-                            public void onSelect(File file) {
-                                textViewFilePath.setText(file.getAbsolutePath());
-                            }
-                        }).hideFiles(false)
-                                .directory(backupDirectory.getAbsolutePath())
-                                .mainDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
-                                .show();
-                    }
-                });
-
-                dialogBuilder.setTitle("Restore backup");
-                dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int whichButton) {
-
-                        checkPermissions();
-
-                        DatabaseManager databaseManager = new DatabaseManager(context);
-
-                        File backupFile = new File(textViewFilePath.getText().toString());
-
-                        try {
-                            FileReader fileReader = new FileReader(backupFile);
-                            BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-                            String str;
-                            String completeFile = "";
-
-                            while ((str = bufferedReader.readLine()) != null) {
-                                completeFile += str;
-                            }
-
-                            String[] results = completeFile.split(Pattern.quote("]"));
-
-                            for(int i = 0; i < results.length; i++)
-                            {
-                                String[] columnValues = results[i].split(Pattern.quote(";@"));
-
-                                databaseManager.addRowTransaction(columnValues);
-                            }
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-                dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-
-                AlertDialog alertDialog = dialogBuilder.create();
-                alertDialog.show();
-
-                return false;
-            }
-        });
-
-        EditTextPreference editTextPreference = (EditTextPreference) findPreference("minimum_value_displayed");
-        editTextPreference.setPositiveButtonText("Save");
-        editTextPreference.setNegativeButtonText("Cancel");
-    }
-
-    private boolean checkPermissions() {
-
-        String[] permissions = new String[]{
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        };
-
-        int result;
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        for (String p : permissions) {
-            result = ContextCompat.checkSelfPermission(this, p);
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(p);
-            }
-        }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 100);
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -412,7 +196,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || ExchangePreferenceFragment.class.getName().equals(fragmentName);
+                || ExchangePreferenceFragment.class.getName().equals(fragmentName)
+                || MainPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -438,6 +223,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             bindPreferenceSummaryToValue(findPreference("hitbtc_privatekey"));
             bindPreferenceSummaryToValue(findPreference("binance_privatekey"));
+
+            findPreference("enable_fingerprint").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object o) {
+                    
+                    return false;
+                }
+            });
 
             findPreference("enable_hitbtc").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -600,4 +393,243 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
         }
     }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class MainPreferenceFragment extends PreferenceFragment {
+
+        @Override
+        public void onCreate(Bundle savedInstanceState)
+        {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_main);
+
+            findPreference("version").setSummary(BuildConfig.VERSION_NAME);
+
+            bindPreferenceSummaryToValue(findPreference("default_currency"));
+            bindPreferenceSummaryToValue(findPreference("minimum_value_displayed"));
+
+            findPreference("export").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    Context context = getContext();
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                    View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_export_data, null, true);
+                    dialogBuilder.setView(dialogView);
+
+                    File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+
+                    if (!backupDirectory.exists()) {
+                        if (!backupDirectory.mkdirs()) {
+                            Log.d("moodl", "Error while creating directory");
+                        }
+                    }
+
+                    final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
+                    textViewFilePath.setText(backupDirectory.getAbsolutePath());
+                    textViewFilePath.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            new FilePicker.Builder(getActivity(), new OnSelectFileListener() {
+                                @Override
+                                public void onSelect(File file) {
+                                    textViewFilePath.setText(file.getAbsolutePath());
+                                }
+                            }).fileType(".moodl")
+                                    .hideFiles(true)
+                                    .directory(backupDirectory.getAbsolutePath())
+                                    .mainDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
+                                    .show();
+                        }
+                    });
+
+                    final CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
+                    final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
+
+                    enterPasswordCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                            if(b && textInputLayoutPassword.getVisibility() == View.GONE)
+                            {
+                                MoodlBox.expandH(textInputLayoutPassword);
+                            }
+
+                            if(!b && textInputLayoutPassword.getVisibility() == View.VISIBLE)
+                            {
+                                MoodlBox.collapseH(textInputLayoutPassword);
+                            }
+                        }
+                    });
+
+                    dialogBuilder.setTitle("Create backup");
+                    dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+
+                            checkPermissions();
+                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                            Date currentDate = new Date();
+                            String fileName = getString(R.string.app_name) + "_" + formatter.format(currentDate) + ".backup";
+                            DatabaseManager databaseManager = new DatabaseManager(getContext());
+
+                            File backupFile = new File(textViewFilePath.getText() + "/" + fileName);
+
+                            try (PrintWriter printWriter = new PrintWriter(new FileWriter(backupFile, true))) {
+
+                                if(enterPasswordCheckbox.isChecked())
+                                {
+                                    DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
+                                    printWriter.write(DataCrypter.encrypt(getActivity(), databaseManager.getBackupData()));
+                                }
+                                else
+                                {
+                                    printWriter.write(databaseManager.getBackupData());
+                                }
+
+                                printWriter.close();
+                            } catch (IOException e) {
+                                Log.d("moodl", "Error > " + e);
+                            }
+
+                            dialog.dismiss();
+                        }
+                    });
+                    dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    AlertDialog alertDialog = dialogBuilder.create();
+                    alertDialog.show();
+
+                    return false;
+                }
+            });
+
+            findPreference("import").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    Context context = getContext();
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                    View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
+                    dialogBuilder.setView(dialogView);
+
+                    File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+
+                    if(!backupDirectory.exists())
+                    {
+                        if(!backupDirectory.mkdirs())
+                        {
+                            Log.d("moodl", "Error while creating directory");
+                        }
+                    }
+
+                    final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
+                    textViewFilePath.setText(backupDirectory.getAbsolutePath());
+                    textViewFilePath.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            new FilePicker.Builder(getActivity(), new OnSelectFileListener() {
+                                @Override
+                                public void onSelect(File file) {
+                                    textViewFilePath.setText(file.getAbsolutePath());
+                                }
+                            }).hideFiles(false)
+                                    .directory(backupDirectory.getAbsolutePath())
+                                    .mainDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
+                                    .show();
+                        }
+                    });
+
+                    dialogBuilder.setTitle("Restore backup");
+                    dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int whichButton) {
+
+                            checkPermissions();
+
+                            DatabaseManager databaseManager = new DatabaseManager(context);
+
+                            File backupFile = new File(textViewFilePath.getText().toString());
+
+                            try {
+                                FileReader fileReader = new FileReader(backupFile);
+                                BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                                String str;
+                                String completeFile = "";
+
+                                while ((str = bufferedReader.readLine()) != null) {
+                                    completeFile += str;
+                                }
+
+                                String[] results = completeFile.split(Pattern.quote("]"));
+
+                                for(int i = 0; i < results.length; i++)
+                                {
+                                    String[] columnValues = results[i].split(Pattern.quote(";@"));
+
+                                    databaseManager.addRowTransaction(columnValues);
+                                }
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
+                    dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+
+                    AlertDialog alertDialog = dialogBuilder.create();
+                    alertDialog.show();
+
+                    return false;
+                }
+            });
+
+            EditTextPreference editTextPreference = (EditTextPreference) findPreference("minimum_value_displayed");
+            editTextPreference.setPositiveButtonText("Save");
+            editTextPreference.setNegativeButtonText("Cancel");
+        }
+
+        private boolean checkPermissions() {
+
+            String[] permissions = new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            };
+
+            int result;
+            List<String> listPermissionsNeeded = new ArrayList<>();
+            for (String p : permissions) {
+                result = ContextCompat.checkSelfPermission(getContext(), p);
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    listPermissionsNeeded.add(p);
+                }
+            }
+            if (!listPermissionsNeeded.isEmpty()) {
+                ActivityCompat.requestPermissions(getActivity(), listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 100);
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == android.R.id.home) {
+                //startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+
 }

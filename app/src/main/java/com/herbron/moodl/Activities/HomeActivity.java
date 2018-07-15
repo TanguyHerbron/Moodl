@@ -3,6 +3,7 @@ package com.herbron.moodl.Activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -98,6 +99,8 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
                         break;
                     case R.id.navigation_settings:
                         Intent settingIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+                        settingIntent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.MainPreferenceFragment.class.getName() );
+                        settingIntent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true );
                         startActivity(settingIntent);
                         item.setChecked(false);
                         break;

@@ -41,7 +41,7 @@
         <PreferenceScreen
             android:fragment="com.herbron.moodl.Activities.SettingsActivity$ExchangePreferenceFragment"
             android:title="@string/pref_header_exchange"
-            android:enabled="false"/>
+            android:key="exchange"/>
 
         <PreferenceScreen
             android:title="@string/pref_header_wallet"

@@ -9,6 +9,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -56,6 +58,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.herbron.moodl.MoodlBox.getColor;
+import static com.herbron.moodl.MoodlBox.getDrawable;
 import static com.herbron.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
@@ -264,7 +267,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
             while(cachedIcon == null || cachedIcon.isDirectory())
             {
-                cachedIcon = cacheFiles[random.nextInt(cacheFiles.length) + 1];
+                cachedIcon = cacheFiles[random.nextInt(cacheFiles.length)];
             }
 
             Bitmap icon = BitmapFactory.decodeFile(cachedIcon.getAbsolutePath());
@@ -766,7 +769,14 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                 }
                 else
                 {
-                    Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_moodl);
+                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getContext());
+
+                    Bitmap icon = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
+                    Canvas canvas = new Canvas(icon);
+                    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    drawable.draw(canvas);
+
                     icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
 
                     localCurrency.setIcon(icon);

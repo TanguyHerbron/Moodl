@@ -2,6 +2,8 @@ package com.herbron.moodl.Activities.HomeActivityFragments;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -26,6 +28,8 @@ import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.R;
 
 import java.util.List;
+
+import static com.herbron.moodl.MoodlBox.getDrawable;
 
 /**
  * Created by Administrator on 27/05/2018.
@@ -185,7 +189,14 @@ public class Overview extends Fragment {
                 }
                 else
                 {
-                    Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_moodl);
+                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getContext());
+
+                    Bitmap icon = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
+                    Canvas canvas = new Canvas(icon);
+                    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    drawable.draw(canvas);
+
                     icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
 
                     currency.setIcon(icon);

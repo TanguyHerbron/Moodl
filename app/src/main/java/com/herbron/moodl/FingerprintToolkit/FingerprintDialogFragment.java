@@ -35,7 +35,8 @@ public class FingerprintDialogFragment extends DialogFragment{
             @Override
             public void onClick(View view) {
                 dismiss();
-                getActivity().finish();
+                getActivity().getFragmentManager().popBackStack();
+                //getActivity().finish();
             }
         });
 
