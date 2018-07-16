@@ -93,25 +93,6 @@ public class Currency implements Parcelable {
         }, timestamp);
     }
 
-    public static String getIconUrl(String currencyDetails)
-    {
-        String url;
-
-        try {
-            JSONObject jsonObject = new JSONObject(currencyDetails);
-            url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
-
-        } catch (NullPointerException e) {
-            //Log.d(context.getResources().getString(R.string.debug), symbol + " has no icon URL");
-            url = null;
-        } catch (JSONException e) {
-            //Log.d(context.getResources().getString(R.string.debug), "Url parsing error for " + symbol);
-            url = null;
-        }
-
-        return url;
-    }
-
     public void updatePrice(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);

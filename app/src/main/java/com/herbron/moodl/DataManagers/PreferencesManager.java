@@ -9,43 +9,11 @@ import android.preference.PreferenceManager;
 
 public class PreferencesManager {
 
-    private static int fragmentUpdated = 0;
-    private static final String currencyListFile = "CustomCurrencies";
-    private static final String preferencesFile = "Preferences";
     private SharedPreferences settingPreferences;
-    private SharedPreferences currencyList;
-    private SharedPreferences preferencesList;
 
     public PreferencesManager(android.content.Context context)
     {
         settingPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        currencyList = context.getSharedPreferences(currencyListFile, 0);
-        preferencesList = context.getSharedPreferences(preferencesFile, 0);
-    }
-
-    public void setDetailOption(boolean isExtended)
-    {
-        SharedPreferences.Editor editor = preferencesList.edit();
-        editor.putBoolean("DetailOption", isExtended);
-        editor.apply();
-    }
-
-    public boolean getDetailOption()
-    {
-        return preferencesList.getBoolean("DetailOption", true);
-    }
-
-    public boolean mustRefreshDefaultCurrency()
-    {
-        fragmentUpdated++;
-
-        if(fragmentUpdated == 3)
-        {
-            disableRefreshDefaultCurrency();
-            fragmentUpdated = 0;
-        }
-
-        return settingPreferences.getBoolean("refresh_default_currency", false);
     }
 
     public float getMinimumAmount()
@@ -63,13 +31,6 @@ public class PreferencesManager {
         }
 
         return ret;
-    }
-
-    private void disableRefreshDefaultCurrency()
-    {
-        SharedPreferences.Editor editor = settingPreferences.edit();
-        editor.putBoolean("refresh_default_currency", false);
-        editor.apply();
     }
 
     public String getDefaultCurrency()

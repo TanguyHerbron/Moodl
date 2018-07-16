@@ -61,15 +61,6 @@
     <string name="pref_title_kraken_privatekey">Clé privée</string>
     <string name="title_watchlist">Liste suivie</string>
     <string name="title_coin_list">Liste des monnaies</string>
-    <string name="button1h">1h</string>
-    <string name="button3h">3h</string>
-    <string name="button1d">1j</string>
-    <string name="button3d">3j</string>
-    <string name="button1w">1S</string>
-    <string name="button1m">1M</string>
-    <string name="button3m">3M</string>
-    <string name="button6m">6M</string>
-    <string name="button1y">1A</string>
     <string name="timestampPlaceholder">Date\n%1$s</string>
     <string name="volumeDollarPlaceholder">Volume\nUS$%1$s</string>
     <string name="priceDollarPlaceholder">Prix\nUS$%1$s</string>
@@ -95,4 +86,28 @@
     <string name="pref_title_version">Version</string>
     <string name="pref_title_export">Exporter les entrées manuelles</string>
     <string name="pref_title_import">Importer de nouvelles entrées</string>
+    <string name="pref_title_category_synchronization">Synchronisation</string>
+    <string name="conserve_data">Conserver les données</string>
+    <string name="restore_manual_entries">Restaurer les transactions manuelles</string>
+    <string name="restore_keys">Restaurer les clefs d\'API</string>
+    <string name="enter_password">Entrerr un mot de passe</string>
+    <string name="password">Mot de passe</string>
+    <string name="title_activity_exchange_settings">Réglages</string>
+    <string name="save">Sauvegarder</string>
+    <string name="cancel">Annuler</string>
+    <string name="confirm">Confirmer</string>
+    <string name="restoreBackup">Restaurer une sauvegarde</string>
+    <string name="pref_header_wallet">Paramètre des portes-monnaies</string>
+
+    <string-array name="time_interval_string_array">
+        <item>1 heure</item>
+        <item>3 heures</item>
+        <item>1 jour</item>
+        <item>3 jours</item>
+        <item>1 semaine</item>
+        <item>1 mois</item>
+        <item>3 mois</item>
+        <item>6 mois</item>
+        <item>1 année</item>
+    </string-array>
 </resources>

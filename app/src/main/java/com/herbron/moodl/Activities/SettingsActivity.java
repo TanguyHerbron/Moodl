@@ -227,7 +227,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             findPreference("enable_fingerprint").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    
+
                     return false;
                 }
             });
@@ -542,8 +542,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
                     });
 
-                    dialogBuilder.setTitle("Restore backup");
-                    dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    dialogBuilder.setTitle(getString(R.string.restoreBackup));
+                    dialogBuilder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int whichButton) {
 
@@ -579,7 +579,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
                     });
 
-                    dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             dialogInterface.dismiss();
@@ -594,8 +594,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             });
 
             EditTextPreference editTextPreference = (EditTextPreference) findPreference("minimum_value_displayed");
-            editTextPreference.setPositiveButtonText("Save");
-            editTextPreference.setNegativeButtonText("Cancel");
+            editTextPreference.setPositiveButtonText(getString(R.string.save));
+            editTextPreference.setNegativeButtonText(getString(R.string.cancel));
         }
 
         private boolean checkPermissions() {
