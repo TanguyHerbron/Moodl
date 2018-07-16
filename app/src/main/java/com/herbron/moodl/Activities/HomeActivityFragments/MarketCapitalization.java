@@ -236,10 +236,10 @@ public class MarketCapitalization extends Fragment {
             colors.add(topCurrencies.get(i).getChartColor());
         }
 
-        entries.add(new PieEntry(100-topCurrenciesDominance, "Others", "others"));
+        entries.add(new PieEntry(100-topCurrenciesDominance, getString(R.string.others), "others"));
         colors.add(-12369084);
 
-        PieDataSet set = new PieDataSet(entries, "Market Cap Dominance");
+        PieDataSet set = new PieDataSet(entries, getString(R.string.market_dominance));
         set.setColors(colors);
         set.setSliceSpace(1);
         set.setDrawValues(false);
@@ -310,7 +310,7 @@ public class MarketCapitalization extends Fragment {
         pieChart.setTouchEnabled(true);
         pieChart.setEntryLabelColor(Color.WHITE);
 
-        updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), "Global", 0);
+        updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), getString(R.string.global), 0);
         ((TextView) view.findViewById(R.id.textViewActiveCrypto))
                 .setText(marketCapManager.getActive_crypto());
         ((TextView) view.findViewById(R.id.textViewActiveMarkets))
@@ -374,7 +374,7 @@ public class MarketCapitalization extends Fragment {
                             view.findViewById(R.id.currencyIcon).setVisibility(View.GONE);
                             view.findViewById(R.id.layoutPercentageDominance).setVisibility(View.VISIBLE);
 
-                            updateDetails(othersMarketCap, othersVolume, "Other coins", h.getY());
+                            updateDetails(othersMarketCap, othersVolume, getString(R.string.other_coins), h.getY());
 
                             pieChart.setDrawCenterText(true);
                         }
@@ -390,7 +390,7 @@ public class MarketCapitalization extends Fragment {
                 view.findViewById(R.id.layoutActiveCrypto).setVisibility(View.VISIBLE);
                 view.findViewById(R.id.layoutActiveMarkets).setVisibility(View.VISIBLE);
 
-                updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), "Global", 0);
+                updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), getString(R.string.global), 0);
 
                 pieChart.setDrawCenterText(true);
             }
@@ -416,7 +416,7 @@ public class MarketCapitalization extends Fragment {
 
     private SpannableString generateCenterSpannableText() {
 
-        SpannableString spannableString = new SpannableString("Market Capitalization Dominance");
+        SpannableString spannableString = new SpannableString(getString(R.string.market_dominance));
         return spannableString;
     }
 }

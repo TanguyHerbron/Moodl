@@ -214,5 +214,10 @@
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
+    <string name="infinity">Infinity</string>
+    <string name="others">Others</string>
+    <string name="market_dominance">Market Cap Dominance</string>
+    <string name="global">Global</string>
+    <string name="other_coins">Other coins</string>
 
 </resources>

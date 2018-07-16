@@ -139,7 +139,7 @@ public class Informations extends Fragment {
         if(currency.getMaxCoinSupply() == 0)
         {
             ((TextView) view.findViewById(R.id.txtViewTotalSupply))
-                    .setText(PlaceholderManager.getSymbolString("Infinity", getActivity()));
+                    .setText(PlaceholderManager.getSymbolString(getString(R.string.infinity), getActivity()));
         }
         else
         {

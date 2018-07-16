@@ -99,6 +99,12 @@
     <string name="restoreBackup">Restaurer une sauvegarde</string>
     <string name="pref_header_wallet">Paramètre des portes-monnaies</string>
 
+    <string name="infinity">Infini</string>
+    <string name="others">Autres</string>
+    <string name="market_dominance">Dominance du marché</string>
+    <string name="global">Global</string>
+    <string name="other_coins">Autres monnaies</string>
+
     <string-array name="time_interval_string_array">
         <item>1 heure</item>
         <item>3 heures</item>
