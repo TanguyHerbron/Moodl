@@ -46,6 +46,10 @@ import com.herbron.moodl.FingerprintToolkit.FingerprintHandler;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -468,21 +472,34 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             checkPermissions();
                             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                             Date currentDate = new Date();
-                            String fileName = getString(R.string.app_name) + "_" + formatter.format(currentDate) + ".backup";
+                            String fileName = "Bakup_" + formatter.format(currentDate) + ".moodl";
                             DatabaseManager databaseManager = new DatabaseManager(getContext());
+
+                            if(enterPasswordCheckbox.isChecked())
+                            {
+                                DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
+                            }
 
                             File backupFile = new File(textViewFilePath.getText() + "/" + fileName);
 
                             try (PrintWriter printWriter = new PrintWriter(new FileWriter(backupFile, true))) {
 
-                                if(enterPasswordCheckbox.isChecked())
-                                {
-                                    DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
-                                    printWriter.write(DataCrypter.encrypt(getActivity(), databaseManager.getBackupData()));
-                                }
-                                else
-                                {
-                                    printWriter.write(databaseManager.getBackupData());
+                                try {
+                                    JSONObject backupJson = new JSONObject();
+
+                                    if(enterPasswordCheckbox.isChecked())
+                                    {
+                                        backupJson.put("encodeChecker", DataCrypter.encrypt(getContext(), "NaukVerification"));
+                                    }
+                                    else
+                                    {
+                                        backupJson.put("encodeChecker", "NaukVerification");
+                                    }
+                                    backupJson.put("transactions", databaseManager.getBackupData(getContext(),enterPasswordCheckbox.isChecked()));
+
+                                    printWriter.write(backupJson.toString());
+                                } catch (JSONException e) {
+                                    Log.d("moodl", "Error while creating backup json " + e.getMessage());
                                 }
 
                                 printWriter.close();
@@ -542,6 +559,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
                     });
 
+                    final CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
+                    final CheckBox wipeCheckbox = dialogView.findViewById(R.id.checkboxWipeData);
+                    final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
+
                     dialogBuilder.setTitle(getString(R.string.restoreBackup));
                     dialogBuilder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                         @Override
@@ -550,6 +571,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             checkPermissions();
 
                             DatabaseManager databaseManager = new DatabaseManager(context);
+
+                            if(enterPasswordCheckbox.isChecked())
+                            {
+                                DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
+                            }
+
+                            if(wipeCheckbox.isChecked())
+                            {
+                                databaseManager.wipeTransactions();
+                            }
 
                             File backupFile = new File(textViewFilePath.getText().toString());
 
@@ -564,13 +595,37 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     completeFile += str;
                                 }
 
-                                String[] results = completeFile.split(Pattern.quote("]"));
+                                try {
+                                    JSONObject backupJson = new JSONObject(completeFile);
+                                    String checker;
 
-                                for(int i = 0; i < results.length; i++)
-                                {
-                                    String[] columnValues = results[i].split(Pattern.quote(";@"));
+                                    if(enterPasswordCheckbox.isChecked())
+                                    {
+                                        checker = DataCrypter.decrypt(getContext(), backupJson.getString("encodeChecker"));
+                                    }
+                                    else
+                                    {
+                                        checker = backupJson.getString("encodeChecker");
+                                    }
 
-                                    databaseManager.addRowTransaction(columnValues);
+                                    if(checker.equals("NaukVerification"))
+                                    {
+                                        JSONArray transactionsArray = backupJson.getJSONArray("transactions");
+
+                                        for(int i = 0; i < transactionsArray.length(); i++)
+                                        {
+                                            JSONObject transactionObject = transactionsArray.getJSONObject(i);
+
+                                            databaseManager.addRowTransaction(transactionObject, getContext(), enterPasswordCheckbox.isChecked());
+                                        }
+                                    }
+                                    else
+                                    {
+                                        textInputLayoutPassword.setError("Wrong password");
+                                    }
+
+                                } catch (JSONException e) {
+                                    Log.d("moodl", "Error while creating backup json " + e);
                                 }
 
                             } catch (IOException e) {

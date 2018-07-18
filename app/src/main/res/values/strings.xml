@@ -203,7 +203,7 @@
     <string name="field_empty">This field cannot be blank</string>
     <string name="field_nan">This field must be a number</string>
     <string name="field_negative">This field must be positive</string>
-    <string name="conserve_data">Conserve current data</string>
+    <string name="wipe_data">Wipe current data</string>
     <string name="restore_manual_entries">Restore manual entries</string>
     <string name="restore_keys">Restore API keys</string>
     <string name="enter_password">Enter password</string>

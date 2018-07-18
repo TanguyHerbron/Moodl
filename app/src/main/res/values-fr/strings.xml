@@ -87,10 +87,10 @@
     <string name="pref_title_export">Exporter les entrées manuelles</string>
     <string name="pref_title_import">Importer de nouvelles entrées</string>
     <string name="pref_title_category_synchronization">Synchronisation</string>
-    <string name="conserve_data">Conserver les données</string>
+    <string name="wipe_data">Supprimer les données actuelles</string>
     <string name="restore_manual_entries">Restaurer les transactions manuelles</string>
     <string name="restore_keys">Restaurer les clefs d\'API</string>
-    <string name="enter_password">Entrerr un mot de passe</string>
+    <string name="enter_password">Entrer un mot de passe</string>
     <string name="password">Mot de passe</string>
     <string name="title_activity_exchange_settings">Réglages</string>
     <string name="save">Sauvegarder</string>

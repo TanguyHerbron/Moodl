@@ -17,10 +17,10 @@
         android:background="@drawable/background_filepath"/>
 
     <CheckBox
-        android:id="@+id/checkboxConserveData"
+        android:id="@+id/checkboxWipeData"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/conserve_data"
+        android:text="@string/wipe_data"
         android:enabled="false" />
 
     <CheckBox
@@ -41,8 +41,7 @@
         android:id="@+id/checkboxEnterPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/enter_password"
-        android:enabled="false"/>
+        android:text="@string/enter_password"/>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputLayoutPassword"

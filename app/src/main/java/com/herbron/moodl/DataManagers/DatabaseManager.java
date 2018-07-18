@@ -5,9 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -152,36 +157,82 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.close();
     }
 
-    public String getBackupData()
+    public JSONArray getBackupData(Context context, boolean encryptData)
     {
         String selectQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery(selectQuerry, null);
 
-        String backupData = "";
+        JSONArray transactionsArray = new JSONArray();
 
         while(result.moveToNext())
         {
+            JSONObject transactionJson = new JSONObject();
+
             for(int i = 0; i < result.getColumnCount(); i++)
             {
-                backupData += result.getString(i) + ";@";
+                try {
+                    if(result.getString(i) != null)
+                    {
+                        if(encryptData)
+                        {
+                            transactionJson.put(result.getColumnName(i), DataCrypter.encrypt(context, result.getString(i)));
+                        }
+                        else
+                        {
+                            transactionJson.put(result.getColumnName(i), result.getString(i));
+                        }
+                    }
+                    else
+                    {
+                        transactionJson.put(result.getColumnName(i), "");
+                    }
+                } catch (JSONException e) {
+                    Log.d("moodl", "Error while creating a json transaction");
+                }
             }
 
-            backupData += "\n";
+            transactionsArray.put(transactionJson);
         }
 
-        return backupData;
+        return transactionsArray;
     }
 
-    public void addRowTransaction(String[] rowValues)
+    public void wipeTransactions()
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+ TABLE_MANUAL_CURRENCIES);
+    }
+
+    public void addRowTransaction(JSONObject rawValues, Context context, boolean decrypt)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(KEY_CURRENCY_SYMBOL, rowValues[1]);
-        values.put(KEY_CURRENCY_BALANCE, rowValues[3]);
-        values.put(KEY_CURRENCY_DATE, rowValues[4]);
-        values.put(KEY_CURRENCY_PURCHASED_PRICE, rowValues[5]);
+        try {
+            if(decrypt)
+            {
+                values.put(KEY_CURRENCY_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_SYMBOL)));
+                values.put(KEY_CURRENCY_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_NAME)));
+                values.put(KEY_CURRENCY_BALANCE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_BALANCE)));
+                values.put(KEY_CURRENCY_DATE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_DATE)));
+                values.put(KEY_CURRENCY_PURCHASED_PRICE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE)));
+                values.put(KEY_CURRENCY_IS_MINED, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_IS_MINED)));
+                values.put(KEY_CURRENCY_FEES, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_FEES)));
+            }
+            else
+            {
+                values.put(KEY_CURRENCY_SYMBOL, rawValues.getString(KEY_CURRENCY_SYMBOL));
+                values.put(KEY_CURRENCY_NAME, rawValues.getString(KEY_CURRENCY_NAME));
+                values.put(KEY_CURRENCY_BALANCE, rawValues.getString(KEY_CURRENCY_BALANCE));
+                values.put(KEY_CURRENCY_DATE, rawValues.getString(KEY_CURRENCY_DATE));
+                values.put(KEY_CURRENCY_PURCHASED_PRICE, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE));
+                values.put(KEY_CURRENCY_IS_MINED, rawValues.getString(KEY_CURRENCY_IS_MINED));
+                values.put(KEY_CURRENCY_FEES, rawValues.getString(KEY_CURRENCY_FEES));
+            }
+        } catch (JSONException e) {
+            Log.d("moodl", "Error while inserting transaction");
+        }
 
         db.insert(TABLE_MANUAL_CURRENCIES, null, values);
         db.close();

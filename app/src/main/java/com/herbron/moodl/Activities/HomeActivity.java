@@ -28,6 +28,7 @@ import com.herbron.moodl.Activities.HomeActivityFragments.Summary;
 import com.herbron.moodl.Activities.HomeActivityFragments.Watchlist;
 import com.herbron.moodl.BalanceSwitchManagerInterface;
 import com.herbron.moodl.BalanceUpdateInterface;
+import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
@@ -59,7 +60,6 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
         super.onCreate(savedInstanceState);
 
         /**Interface setup**/
-        Window w = getWindow();
 
         setContentView(R.layout.activity_currency_summary);
 

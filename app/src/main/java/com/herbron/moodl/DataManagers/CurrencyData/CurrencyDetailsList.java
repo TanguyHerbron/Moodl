@@ -56,7 +56,6 @@ public class CurrencyDetailsList {
 
                         if (response.length() > 0) {
                             processDetailResult(response, callBack);
-                            upToDate = true;
                         }
                     }
                 },
@@ -108,6 +107,8 @@ public class CurrencyDetailsList {
         }
 
         sortDetails();
+
+        upToDate = true;
 
         callBack.onSuccess();
     }

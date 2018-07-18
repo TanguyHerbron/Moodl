@@ -70,7 +70,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
-    private com.herbron.moodl.DataManagers.BalanceManager balanceManager;
+    private BalanceManager balanceManager;
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
     private String defaultCurrency;
