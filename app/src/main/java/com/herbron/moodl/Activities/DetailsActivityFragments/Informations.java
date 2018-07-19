@@ -120,7 +120,7 @@ public class Informations extends Fragment {
         ((TextView) view.findViewById(R.id.txtViewDescription))
                 .setMovementMethod(LinkMovementMethod.getInstance());
         ((TextView) view.findViewById(R.id.txtViewPercentageCoinEmited))
-                .setText("Percentage of coin emited : " + numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100) + "%");
+                .setText(PlaceholderManager.getEmitedPercentageString(numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100), getContext()));
 
         if(currency.getMarketCapitalization() != 0)
         {

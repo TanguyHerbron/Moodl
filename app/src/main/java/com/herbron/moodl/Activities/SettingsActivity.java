@@ -465,8 +465,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
                     });
 
-                    dialogBuilder.setTitle("Create backup");
-                    dialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    dialogBuilder.setTitle(getString(R.string.create_backup));
+                    dialogBuilder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
 
                             checkPermissions();
@@ -510,7 +510,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             dialog.dismiss();
                         }
                     });
-                    dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             dialog.dismiss();
                         }
@@ -621,7 +621,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     }
                                     else
                                     {
-                                        textInputLayoutPassword.setError("Wrong password");
+                                        textInputLayoutPassword.setError(getString(R.string.wrong_password));
                                     }
 
                                 } catch (JSONException e) {

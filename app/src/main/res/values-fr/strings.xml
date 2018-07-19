@@ -116,4 +116,19 @@
         <item>6 mois</item>
         <item>1 année</item>
     </string-array>
+    <string name="emitedPlaceholder">Pourcentage de coin émis : %1$s%%</string>
+    <string name="edit_transaction">Edition d\'une transaction de %1$s</string>
+    <string name="add_coin_transaction">Ajouter d\'une transaction de %1$s</string>
+    <string name="error_update_data">Erreur lors de l\'actualisation des données</string>
+    <string name="update">Rafraichir</string>
+    <string name="invalid_keys_hitbtc">Erreur de synchronisation avec HitBTC : Clefs invalides</string>
+    <string name="invalid_keys_binance">Erreur de synchronisation avec Binance : Clefs invalides</string>
+    <string name="cannot_resole_host">Impossible de résoudre l\'hôte</string>
+    <string name="unexpected">Erreur inconnue</string>
+    <string name="select_coin">Selectionner une monnaie</string>
+    <string name="already_watchlisr">Monnaie déjà présente dans la liste suivie</string>
+    <string name="create_backup">Créer une sauvegarde</string>
+    <string name="wrong_password">Mauvais mot de passe</string>
+    <string name="error">Erreur</string>
+    <string name="wrong_fingerprint">Mauvaise empreinte digitale</string>
 </resources>

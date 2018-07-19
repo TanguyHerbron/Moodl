@@ -1,5 +1,7 @@
 package com.herbron.moodl;
 
+import android.content.Context;
+
 import com.herbron.moodl.DataManagers.PreferencesManager;
 
 /**
@@ -32,7 +34,21 @@ public class PlaceholderManager {
         return formattedString;
     }
 
-    public static String getValuePercentageString(String value, String percentage, android.content.Context context)
+    public static String getAddCoinTransactionString(String coinName, Context context) {
+        return context.getResources().getString(R.string.add_coin_transaction, coinName);
+    }
+
+    public static String getEditTransactionString(String coinName, Context context)
+    {
+        return context.getResources().getString(R.string.edit_transaction, coinName);
+    }
+
+    public static String getEmitedPercentageString(String percentage, Context context)
+    {
+        return context.getResources().getString(R.string.emitedPlaceholder, percentage);
+    }
+
+    public static String getValuePercentageString(String value, String percentage, Context context)
     {
         PreferencesManager preferencesManager = new PreferencesManager(context);
         String formattedString = null;

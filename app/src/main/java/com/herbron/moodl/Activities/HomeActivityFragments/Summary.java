@@ -341,8 +341,8 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
     private void showErrorSnackbar()
     {
-        Snackbar.make(getActivity().findViewById(R.id.content_frame), "Error while updating data", Snackbar.LENGTH_LONG)
-                .setAction("Update", new View.OnClickListener() {
+        Snackbar.make(getActivity().findViewById(R.id.content_frame), getString(R.string.error_update_data), Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.update), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
@@ -584,7 +584,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 case "com.android.volley.AuthFailureError":
                     preferencesManager.disableHitBTC();
-                    Snackbar.make(view, "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, getString(R.string.invalid_keys_hitbtc), Snackbar.LENGTH_LONG)
                             .show();
 
                     refreshLayout.setRefreshing(false);
@@ -593,19 +593,19 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     break;
                 case "API-key format invalid.":
                     preferencesManager.disableBinance();
-                    Snackbar.make(view, "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, getString(R.string.invalid_keys_binance), Snackbar.LENGTH_LONG)
                             .show();
 
                     updateAll(true);
                     break;
                 case "com.android.volley.NoConnectionError: java.net.UnknownHostException: Unable to resolve host \"api.hitbtc.com\": No address associated with hostname":
-                    Snackbar.make(view, "Can't resolve host", Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, getString(R.string.cannot_resole_host), Snackbar.LENGTH_LONG)
                             .show();
                     break;
                 case "com.android.volley.TimeoutError":
                     break;
                 default:
-                    Snackbar.make(view, "Unexpected error", Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, R.string.unexpected, Snackbar.LENGTH_LONG)
                             .show();
 
                     Log.d("moodl", error);

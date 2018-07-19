@@ -19,6 +19,7 @@ import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
+import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
 
 import java.text.ParseException;
@@ -168,7 +169,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
         if(transactionId != -1)
         {
-            setTitle("Edit " + coin + " transaction");
+            setTitle(PlaceholderManager.getEditTransactionString(coin, getBaseContext()));
 
             DatabaseManager databaseManager = new DatabaseManager(this);
             Transaction transaction = databaseManager.getCurrencyTransactionById(transactionId);
@@ -180,7 +181,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
         }
         else
         {
-            setTitle("Add " + coin + " transaction");
+            setTitle(PlaceholderManager.getAddCoinTransactionString(coin, getBaseContext()));
 
             purchaseDate.setText(sdf.format(calendar.getTime()));
             symbolTxtView.setText(symbol);
@@ -300,7 +301,6 @@ public class RecordTransactionActivity extends AppCompatActivity {
                                 purchasedPriceEditText.setText(price);
                             }
                         }, calendar.getTimeInMillis() / 1000);
-                        Log.d("moodl", "Time : " + calendar.getTimeInMillis());
                     }
                 },
                 calendar.get(Calendar.HOUR_OF_DAY),
