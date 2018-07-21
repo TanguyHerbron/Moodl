@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:theme="@style/AppTheme"
+    android:padding="5dp"
+    android:focusableInTouchMode="true">
+
+    <TextView
+        android:id="@+id/textViewFilePath"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_filepath"/>
+
+    <CheckBox
+        android:id="@+id/checkboxBackupManualEntries"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/backup_manual_entries" />
+
+    <CheckBox
+        android:id="@+id/checkboxBackupWatchlist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/backup_watchlist" />
+
+    <CheckBox
+        android:id="@+id/checkboxBackupKeys"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/backup_keys" />
+
+    <CheckBox
+        android:id="@+id/checkboxEnterPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/enter_password" />
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/textInputLayoutPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/editTextPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:inputType="textPassword"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+</LinearLayout>

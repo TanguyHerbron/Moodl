@@ -12,7 +12,19 @@
     <string name="pref_title_hide_balance">Hide balance</string>
 
     <!-- Example settings for Data & Sync -->
+    <string name="pref_title_category_display">Display</string>
+    <string name="pref_title_category_data_backup">Data backup</string>
+    <string name="pref_title_category_synchronization">Synchronization</string>
+    <string name="pref_title_category_other">Other</string>
+
     <string name="pref_title_minimum_amount_displayed">Minimum amount displayed</string>
+
+    <string name="pref_title_version">Version</string>
+
+    <string name="ivKey" translatable="false">0123456789MoodlH</string> <!--Must be 16 characters-->
+
+    <string name="pref_title_export">Export manual entries</string>
+    <string name="pref_title_import">Import manual entries</string>
 
     <string name="pref_title_default_currency">Default currency</string>
     <string-array name="pref_default_currencies_titles">
@@ -67,7 +79,7 @@
     <string name="trade_loading">Looking for trades&#8230;</string>
     <string name="default_value" translatable="false">--</string>
 
-    <!--Home activity-->
+    <!--Charts activity-->
     <string name="drawer">Drawer</string>
     <string name="dominance_percentage">Dominance percentage</string>
     <string name="active_cryptocurrencies">Active cryptocurrencies</string>
@@ -80,6 +92,7 @@
 
     <!--Exchange strings-->
     <string name="pref_header_exchange">Exchanges settings</string>
+    <string name="pref_header_wallet">Wallets settings</string>
     <string name="pref_fingerprint" translatable="false">Touch ID</string>
 
     <!--HitBTC-->
@@ -126,16 +139,23 @@
     <string name="title_market_cap">Market Capitalization</string>
     <string name="title_coin_list">Coin list</string>
 
-    <!--Chart buttons texts-->
-    <string name="button1h">1h</string>
-    <string name="button3h">3h</string>
-    <string name="button1d">1d</string>
-    <string name="button3d">3d</string>
-    <string name="button1w">1w</string>
-    <string name="button1m">1M</string>
-    <string name="button3m">3M</string>
-    <string name="button6m">6M</string>
-    <string name="button1y">1y</string>
+    <string-array name="time_interval_string_array">
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>1 day</item>
+        <item>3 days</item>
+        <item>1 week</item>
+        <item>1 month</item>
+        <item>3 months</item>
+        <item>6 months</item>
+        <item>1 year</item>
+    </string-array>
+
+    <string-array name="wipe_options_string_array">
+        <item>Manual entries</item>
+        <item>Watchlist</item>
+        <item>API keys</item>
+    </string-array>
 
     <!--Cardview placeholders-->
     <string name="currencySymbolPlaceholder" translatable="false">(%1$s)</string>
@@ -160,6 +180,7 @@
 
     <!--DetailsActivity placeholders-->
     <string name="timestampPlaceholder">Date\n%1$s</string>
+    <string name="emitedPlaceholder">Percentage of coin emitted : %1$s%%</string>
     <!--Dollar-->
     <string name="volumeDollarPlaceholder">Volume\nUS$%1$s</string>
     <string name="priceDollarPlaceholder">Price\nUS$%1$s</string>
@@ -176,6 +197,9 @@
     <string name="fingerprint_dialog_cancel">Cancel</string>
     <string name="fingerprint_dialog_title">Verify your fingerprint to continue</string>
 
+    <string name="edit_transaction">Edit %1$s transaction</string>
+    <string name="new_transaction">New transaction</string>
+
 
     <!--Marketcap placeholders-->
     <!--Dollar-->
@@ -189,5 +213,41 @@
     <string name="field_empty">This field cannot be blank</string>
     <string name="field_nan">This field must be a number</string>
     <string name="field_negative">This field must be positive</string>
+    <string name="wipe_data">Wipe current data</string>
+    <string name="restore_manual_entries">Restore manual entries</string>
+    <string name="restore_keys">Restore API keys</string>
+    <string name="enter_password">Enter password</string>
+    <string name="password">Password</string>
+    <string name="title_activity_exchange_settings">Settings</string>
+
+    <string name="restoreBackup">Restore backup</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="infinity">Infinity</string>
+    <string name="others">Others</string>
+    <string name="market_dominance">Market Cap Dominance</string>
+    <string name="global">Global</string>
+    <string name="other_coins">Other coins</string>
+    <string name="error_update_data">Error while updating data</string>
+    <string name="update">Update</string>
+    <string name="invalid_keys_hitbtc">HitBTC synchronization error : Invalid keys</string>
+    <string name="invalid_keys_binance">Binance synchronization error : Invalid keys</string>
+    <string name="cannot_resole_host">Can\'t resolve host</string>
+    <string name="unexpected">Unexpected error</string>
+    <string name="select_coin">Select a coin</string>
+    <string name="already_watchlisr">Currency already in watchlist</string>
+    <string name="create_backup">Create backup</string>
+    <string name="wrong_password">Wrong password</string>
+    <string name="error">Error</string>
+    <string name="wrong_fingerprint">Wrong fingerprint</string>
+    <string name="backup_manual_entries">Backup manual entries</string>
+    <string name="backup_watchlist">Backup watchlist</string>
+    <string name="backup_keys">Backup API keys</string>
+    <string name="must_be_filled">Cannot be blank</string>
+    <string name="restore_watchlist">Restore watchlist</string>
+    <string name="wipe_manual_entries">Wipe current entries</string>
+    <string name="wipe_watchlist">Wipe current watchlist</string>
+    <string name="wipe_api_keys">Wipe current API keys</string>
 
 </resources>

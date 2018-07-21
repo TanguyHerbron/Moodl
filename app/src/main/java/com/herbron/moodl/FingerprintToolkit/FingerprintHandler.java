@@ -8,6 +8,8 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 
+import com.herbron.moodl.R;
+
 /**
  * Created by Guitoune on 28/02/2018.
  */
@@ -39,7 +41,7 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     {
         if(dialogFragment.isVisible())
         {
-            dialogFragment.wrongFingerprint("Error");
+            dialogFragment.wrongFingerprint(context.getString(R.string.error));
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -57,7 +59,7 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     {
         if(dialogFragment.isVisible())
         {
-            dialogFragment.wrongFingerprint("Wrong fingerprint");
+            dialogFragment.wrongFingerprint(context.getString(R.string.wrong_fingerprint));
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {

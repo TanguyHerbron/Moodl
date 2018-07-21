@@ -5,9 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,13 +24,13 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     private static final String DATABASE_NAME = "Currencies.db";
 
-    private static final String TABLE_MANUAL_CURRENCIES = "ManualCurrencies";
-    private static final String TABLE_EXCHANGE_KEYS = "ExchangeKeys";
-    private static final String TABLE_WATCHLIST = "Watchlist";
+    public static final String TABLE_MANUAL_CURRENCIES = "ManualCurrencies";
+    public static final String TABLE_EXCHANGE_KEYS = "ExchangeKeys";
+    public static final String TABLE_WATCHLIST = "Watchlist";
 
     private static final String KEY_CURRENCY_ID = "idCurrency";
     private static final String KEY_CURRENCY_SYMBOL = "symbol";
@@ -38,6 +43,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     private static final String KEY_EXCHANGE_ID = "idExchange";
     private static final String KEY_EXCHANGE_NAME = "name";
+    private static final String KEY_EXCHANGE_DESCRIPTION = "description";
     private static final String KEY_EXCHANGE_PUBLIC_KEY = "publicKey";
     private static final String KEY_EXCHANGE_SECRET_KEY = "secretKey";
 
@@ -68,6 +74,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
                 + KEY_EXCHANGE_ID + " INTEGER PRIMARY KEY,"
                 + KEY_EXCHANGE_NAME + " TEXT,"
+                + KEY_EXCHANGE_DESCRIPTION + " TEXT,"
                 + KEY_EXCHANGE_PUBLIC_KEY + " TEXT,"
                 + KEY_EXCHANGE_SECRET_KEY + " TEXT"
                 + ");");
@@ -85,11 +92,12 @@ public class DatabaseManager extends SQLiteOpenHelper{
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANUAL_CURRENCIES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXCHANGE_KEYS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_WATCHLIST);
-
-        onCreate(db);
+        switch (oldVersion)
+        {
+            case 6:
+                db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
+                        + "  ADD " + KEY_EXCHANGE_DESCRIPTION+ " VARCHAR");
+        }
     }
 
     private boolean isCurrencyInWatchlist(String symbol)
@@ -144,11 +152,119 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return result.getInt(0);
     }
 
-    public int deleteCurrencyFromWatchlist(String symbol)
+    public void deleteCurrencyFromWatchlist(String symbol)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        return db.delete(TABLE_WATCHLIST, KEY_WATCHLIST_SYMBOL + " = '" + symbol + "'", null);
+        db.delete(TABLE_WATCHLIST, KEY_WATCHLIST_SYMBOL + " = '" + symbol + "'", null);
+        db.close();
+    }
+
+    public JSONArray getDatabaseBackup(Context context, String table, boolean encryptData)
+    {
+        String selectQuerry = "SELECT * FROM " + table;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery(selectQuerry, null);
+
+        JSONArray backupArray = new JSONArray();
+
+        while(result.moveToNext())
+        {
+            JSONObject backupObject = new JSONObject();
+
+            for(int i = 0; i < result.getColumnCount(); i++)
+            {
+                try {
+                    if(result.getString(i) != null)
+                    {
+                        if(encryptData)
+                        {
+                            backupObject.put(result.getColumnName(i), DataCrypter.encrypt(context, result.getString(i)));
+                        }
+                        else
+                        {
+                            backupObject.put(result.getColumnName(i), result.getString(i));
+                        }
+                    }
+                    else
+                    {
+                        backupObject.put(result.getColumnName(i), "");
+                    }
+                } catch (JSONException e) {
+                    Log.d("moodl", "Error while creating a json backup");
+                }
+            }
+
+            backupArray.put(backupObject);
+        }
+
+        return backupArray;
+    }
+
+    public void wipeData(String table)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+ table);
+    }
+
+    public void addRowWatchlist(JSONObject rawValues, Context context, boolean decrypt)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        try {
+            if(decrypt)
+            {
+                values.put(KEY_WATCHLIST_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_WATCHLIST_SYMBOL)));
+                values.put(KEY_WATCHLIST_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_WATCHLIST_NAME)));
+                values.put(KEY_WATCHLIST_POSITION, DataCrypter.decrypt(context, rawValues.getString(KEY_WATCHLIST_POSITION)));
+            }
+            else
+            {
+                values.put(KEY_WATCHLIST_SYMBOL, rawValues.getString(KEY_WATCHLIST_SYMBOL));
+                values.put(KEY_WATCHLIST_NAME, rawValues.getString(KEY_WATCHLIST_NAME));
+                values.put(KEY_WATCHLIST_POSITION, rawValues.getString(KEY_WATCHLIST_POSITION));
+            }
+        } catch (JSONException e) {
+            Log.d("moodl", "Error while inserting transaction");
+        }
+
+        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.close();
+    }
+
+    public void addRowTransaction(JSONObject rawValues, Context context, boolean decrypt)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        try {
+            if(decrypt)
+            {
+                values.put(KEY_CURRENCY_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_SYMBOL)));
+                values.put(KEY_CURRENCY_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_NAME)));
+                values.put(KEY_CURRENCY_BALANCE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_BALANCE)));
+                values.put(KEY_CURRENCY_DATE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_DATE)));
+                values.put(KEY_CURRENCY_PURCHASED_PRICE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE)));
+                values.put(KEY_CURRENCY_IS_MINED, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_IS_MINED)));
+                values.put(KEY_CURRENCY_FEES, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_FEES)));
+            }
+            else
+            {
+                values.put(KEY_CURRENCY_SYMBOL, rawValues.getString(KEY_CURRENCY_SYMBOL));
+                values.put(KEY_CURRENCY_NAME, rawValues.getString(KEY_CURRENCY_NAME));
+                values.put(KEY_CURRENCY_BALANCE, rawValues.getString(KEY_CURRENCY_BALANCE));
+                values.put(KEY_CURRENCY_DATE, rawValues.getString(KEY_CURRENCY_DATE));
+                values.put(KEY_CURRENCY_PURCHASED_PRICE, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE));
+                values.put(KEY_CURRENCY_IS_MINED, rawValues.getString(KEY_CURRENCY_IS_MINED));
+                values.put(KEY_CURRENCY_FEES, rawValues.getString(KEY_CURRENCY_FEES));
+            }
+        } catch (JSONException e) {
+            Log.d("moodl", "Error while inserting transaction");
+        }
+
+        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.close();
     }
 
     public List<Currency> getAllCurrenciesFromWatchlist()

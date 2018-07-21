@@ -1,17 +1,25 @@
 package com.herbron.moodl.Activities.HomeActivityFragments;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -23,25 +31,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.daasuu.ei.Ease;
+import com.daasuu.ei.EasingInterpolator;
 import com.herbron.moodl.Activities.CurrencySelectionActivity;
 import com.herbron.moodl.Activities.HomeActivity;
 import com.herbron.moodl.BalanceUpdateInterface;
+import com.herbron.moodl.DataManagers.BalanceManager;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyCardview;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyTickerList;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.BalanceSwitchManagerInterface;
+import com.herbron.moodl.DataNotifierInterface;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import static com.herbron.moodl.MoodlBox.getColor;
+import static com.herbron.moodl.MoodlBox.getDrawable;
 import static com.herbron.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
@@ -49,11 +66,11 @@ import static java.lang.Math.abs;
  * Created by Tiji on 13/04/2018.
  */
 
-public class Summary extends Fragment implements BalanceSwitchManagerInterface {
+public class Summary extends Fragment implements BalanceSwitchManagerInterface, DataNotifierInterface {
 
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
-    private com.herbron.moodl.DataManagers.BalanceManager balanceManager;
+    private BalanceManager balanceManager;
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
     private String defaultCurrency;
@@ -83,7 +100,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
         View fragmentView = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
 
         preferencesManager = new PreferencesManager(getActivity());
-        balanceManager = new com.herbron.moodl.DataManagers.BalanceManager(getActivity());
+        balanceManager = new BalanceManager(getContext());
         currencyTickerList = CurrencyTickerList.getInstance(getActivity());
 
         currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
@@ -234,28 +251,48 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
     private void generateSplashScreen()
     {
-        LinearLayout loadingLayout = new LinearLayout(getActivity());
-
-        loadingLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        loadingLayout.setGravity(Gravity.CENTER);
-        loadingLayout.setOrientation(LinearLayout.VERTICAL);
-
         loadingDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 
-        TextView txtView = new TextView(getActivity());
-        txtView.setText("Loading data...");
-        txtView.setTextSize(20);
-        txtView.setGravity(Gravity.CENTER);
-        txtView.setTextColor(this.getResources().getColor(R.color.cardview_light_background));
+        Random random = new Random();
 
-        ProgressBar progressBar = new ProgressBar(getActivity());
-        progressBar.setIndeterminate(true);
+        LinearLayout splashLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.splash_screen, null, true);
+        LinearLayout animatedLayout = splashLayout.findViewById(R.id.animatedViewsLayout);
 
-        loadingLayout.setBackgroundColor(getActivity().getResources().getColor(R.color.colorPrimaryDark));
-        loadingLayout.addView(txtView);
-        loadingLayout.addView(progressBar);
+        File cacheDir = new File(getContext().getCacheDir().getAbsolutePath());
+        File[] cacheFiles = cacheDir.listFiles();
 
-        loadingDialog.setContentView(loadingLayout);
+        for(int i = 0; i < 4; i++)
+        {
+            File cachedIcon = null;
+
+            while(cachedIcon == null || cachedIcon.isDirectory())
+            {
+                cachedIcon = cacheFiles[random.nextInt(cacheFiles.length)];
+            }
+
+            Bitmap icon = BitmapFactory.decodeFile(cachedIcon.getAbsolutePath());
+
+            Bitmap result = Bitmap.createBitmap(150, 150, icon.getConfig());
+
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.white));
+
+            Canvas canvas = new Canvas(result);
+            canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
+            canvas.drawBitmap(Bitmap.createScaledBitmap(icon, 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
+
+            ((ImageView) animatedLayout.getChildAt(i)).setImageBitmap(result);
+
+            ObjectAnimator animator = ObjectAnimator.ofFloat(animatedLayout.getChildAt(i), "translationY", 0, -100, 0);
+            animator.setInterpolator(new EasingInterpolator(Ease.CIRC_IN_OUT));
+            animator.setStartDelay(i*200);
+            animator.setDuration(1500);
+            animator.setRepeatCount(ValueAnimator.INFINITE);
+            animator.start();
+        }
+
+        loadingDialog.setContentView(splashLayout);
         loadingDialog.show();
     }
 
@@ -304,14 +341,14 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
     private void showErrorSnackbar()
     {
-        /*Snackbar.make(getActivity().findViewById(R.id.snackbar_placer), "Error while updating data", Snackbar.LENGTH_LONG)
-                .setAction("Update", new View.OnClickListener() {
+        Snackbar.make(getActivity().findViewById(R.id.content_frame), getString(R.string.error_update_data), Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.update), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
                     }
                 })
-                .show();*/
+                .show();
     }
 
     private void resetCounters()
@@ -439,7 +476,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
             }
             else
             {
-                updateBalanceDisplayedTitle(totalValue);
+                updateBalanceDisplayedTitle(totalFluctuationPercentage);
                 balanceUpdateInterface.onBalanceUpdated(totalValue);
             }
         }
@@ -496,6 +533,87 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
         displayBalance(preferencesManager.isBalanceHidden());
     }
 
+    @Override
+    public void onTickerListUpdated() {
+
+    }
+
+    @Override
+    public void onDetailsUpdated() {
+
+    }
+
+    @Override
+    public void onBalanceDataUpdated() {
+        final List<Currency> balance = balanceManager.getTotalBalance();
+
+        if(balance.size() > 0)
+        {
+            for(int i = 0; i < balance.size(); i++)
+            {
+                balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        countCoins(true, false, false);
+                    }
+                });
+            }
+        }
+        else
+        {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    countCoins(false, false, false);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onBalanceError(String error)
+    {
+        generateSnackBarError(error);
+    }
+
+    private void generateSnackBarError(String error)
+    {
+            View view = getActivity().findViewById(R.id.content_frame);
+
+            switch (error)
+            {
+                case "com.android.volley.AuthFailureError":
+                    preferencesManager.disableHitBTC();
+                    Snackbar.make(view, getString(R.string.invalid_keys_hitbtc), Snackbar.LENGTH_LONG)
+                            .show();
+
+                    refreshLayout.setRefreshing(false);
+
+                    updateAll(true);
+                    break;
+                case "API-key format invalid.":
+                    preferencesManager.disableBinance();
+                    Snackbar.make(view, getString(R.string.invalid_keys_binance), Snackbar.LENGTH_LONG)
+                            .show();
+
+                    updateAll(true);
+                    break;
+                case "com.android.volley.NoConnectionError: java.net.UnknownHostException: Unable to resolve host \"api.hitbtc.com\": No address associated with hostname":
+                    Snackbar.make(view, getString(R.string.cannot_resole_host), Snackbar.LENGTH_LONG)
+                            .show();
+                    break;
+                case "com.android.volley.TimeoutError":
+                    break;
+                default:
+                    Snackbar.make(view, R.string.unexpected, Snackbar.LENGTH_LONG)
+                            .show();
+
+                    Log.d("moodl", error);
+
+                    updateAll(false);
+            }
+    }
+
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
     {
 
@@ -520,11 +638,11 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
             {
                 Palette.Builder builder = Palette.from(currency.getIcon());
 
-                currency.setChartColor(builder.generate().getDominantColor(0));
+                currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
             }
             else
             {
-                currency.setChartColor(12369084);
+                currency.setChartColor(getColor(R.color.default_color, getContext()));
             }
         }
 
@@ -651,7 +769,14 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
                 }
                 else
                 {
-                    Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_moodl);
+                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getContext());
+
+                    Bitmap icon = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
+                    Canvas canvas = new Canvas(icon);
+                    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    drawable.draw(canvas);
+
                     icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
 
                     localCurrency.setIcon(icon);
@@ -666,44 +791,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
 
     private class DataUpdater extends AsyncTask<Void, Integer, Void>
     {
-        private void generateSnackBarError(String error)
-        {
-            /*View view = getActivity().findViewById(R.id.snackbar_placer);
-
-            switch (error)
-            {
-                case "com.android.volley.AuthFailureError":
-                    preferencesManager.disableHitBTC();
-                    Snackbar.make(view, "HitBTC synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
-                            .show();
-
-                    refreshLayout.setRefreshing(false);
-
-                    updateAll(true);
-                    break;
-                case "API-key format invalid.":
-                    preferencesManager.disableBinance();
-                    Snackbar.make(view, "Binance synchronization error : Invalid keys", Snackbar.LENGTH_LONG)
-                            .show();
-
-                    updateAll(true);
-                    break;
-                case "com.android.volley.NoConnectionError: java.net.UnknownHostException: Unable to resolve host \"api.hitbtc.com\": No address associated with hostname":
-                    Snackbar.make(view, "Can't resolve host", Snackbar.LENGTH_LONG)
-                            .show();
-                    break;
-                case "com.android.volley.TimeoutError":
-                    break;
-                default:
-                    Snackbar.make(view, "Unexpected error", Snackbar.LENGTH_LONG)
-                            .show();
-
-                    Log.d("moodl", error);
-
-                    updateAll(false);
-            }*/
-        }
-
         @Override
         protected Void doInBackground(Void... params)
         {
@@ -729,39 +816,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface {
                 }
             });
 
-            balanceManager.updateTotalBalance(new com.herbron.moodl.DataManagers.BalanceManager.VolleyCallBack() {
-                @Override
-                public void onSuccess() {
-                    final List<Currency> balance = balanceManager.getTotalBalance();
-
-                    if(balanceManager.getTotalBalance().size() > 0)
-                    {
-                        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-                        {
-                            balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
-                                @Override
-                                public void onSuccess(Currency currency) {
-                                    countCoins(true, false, false);
-                                }
-                            });
-                        }
-                    }
-                    else
-                    {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                countCoins(false, false, false);
-                            }
-                        });
-                    }
-                }
-
-                public void onError(String error)
-                {
-                    generateSnackBarError(error);
-                }
-            });
+            balanceManager.updateTotalBalance();
 
             return null;
         }

@@ -53,17 +53,16 @@ public class CurrencyDetailsList {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+
                         if (response.length() > 0) {
                             processDetailResult(response, callBack);
-
                         }
-                        upToDate = true;
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        upToDate = true;
+
                     }
                 });
 
@@ -77,7 +76,7 @@ public class CurrencyDetailsList {
 
     private void processDetailResult(String response, final BalanceManager.IconCallBack callBack)
     {
-        response = response.substring(response.indexOf("\"Data\"") + 7, response.lastIndexOf("},\"Type\":100}"));
+        response = response.substring(response.indexOf("\"Data\"") + 7, response.lastIndexOf("},\"BaseImageUrl\""));
         String[] tab = response.split(Pattern.quote("},"));
 
         coinInfosHashmap = new LinkedHashMap<>();
@@ -108,6 +107,8 @@ public class CurrencyDetailsList {
         }
 
         sortDetails();
+
+        upToDate = true;
 
         callBack.onSuccess();
     }

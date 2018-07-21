@@ -40,4 +40,5 @@
     <color name="transparent_green">#225DBF61</color>
     <color name="blue">#FF689afe</color>
     <color name="transparent_blue">#22689afe</color>
+    <color name="default_color">#FFAAAAAA</color>
 </resources>

@@ -5,14 +5,16 @@
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.herbron.moodl.Activities.HomeActivity">
+    tools:context="com.herbron.moodl.Activities.HomeActivity"
+    android:background="@drawable/gradient_background">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/app_bar_height"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:background="@drawable/gradient_background">
+        android:background="@drawable/gradient_background"
+        app:elevation="0dp">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
@@ -22,7 +24,8 @@
             app:toolbarId="@+id/toolbar"
             app:collapsedTitleGravity="center"
             app:expandedTitleGravity="center"
-            app:titleEnabled="true">
+            app:titleEnabled="true"
+            app:elevation="0dp">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -70,19 +73,19 @@
         android:id="@+id/swiperefreshsummary"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:background="@color/summary_background">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/nestedScrollViewLayout"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@drawable/list_background">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="10dp">
+                android:clipChildren="false">
 
                 <LinearLayout
                     android:id="@+id/currencyListLayout"
@@ -96,11 +99,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_dashed_background"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_margin="10dp"
                     android:textColor="@color/separationColor"
                     style="@style/Widget.AppCompat.Button.Borderless"/>
 

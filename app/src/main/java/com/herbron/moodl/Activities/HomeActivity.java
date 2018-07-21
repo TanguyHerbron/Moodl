@@ -1,8 +1,13 @@
 package com.herbron.moodl.Activities;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -27,6 +32,7 @@ import com.herbron.moodl.Activities.HomeActivityFragments.Summary;
 import com.herbron.moodl.Activities.HomeActivityFragments.Watchlist;
 import com.herbron.moodl.BalanceSwitchManagerInterface;
 import com.herbron.moodl.BalanceUpdateInterface;
+import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
@@ -57,8 +63,9 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setStatusBarGradiant(this);
+
         /**Interface setup**/
-        Window w = getWindow();
 
         setContentView(R.layout.activity_currency_summary);
 
@@ -98,6 +105,8 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
                         break;
                     case R.id.navigation_settings:
                         Intent settingIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+                        settingIntent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.MainPreferenceFragment.class.getName() );
+                        settingIntent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true );
                         startActivity(settingIntent);
                         item.setChecked(false);
                         break;
@@ -110,6 +119,18 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
         });
 
         setupBalanceSwitch();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void setStatusBarGradiant(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = activity.getWindow();
+            Drawable background = activity.getResources().getDrawable(R.drawable.gradient_background);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(activity.getResources().getColor(android.R.color.transparent));
+            window.setNavigationBarColor(activity.getResources().getColor(android.R.color.transparent));
+            window.setBackgroundDrawable(background);
+        }
     }
 
     @Override
@@ -125,6 +146,10 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
     private void setupBalanceSwitch()
     {
         Switch balanceSwitch = findViewById(R.id.switchHideBalance);
+
+        PreferencesManager preferencesManager = new PreferencesManager(getBaseContext());
+
+        balanceSwitch.setChecked(preferencesManager.isBalanceHidden());
 
         balanceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -156,6 +181,11 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
                 .commit();
 
         currentFragment = fragment;
+    }
+
+    public Fragment getHoldingsFragment()
+    {
+        return holdingsFragment;
     }
 
     @Override

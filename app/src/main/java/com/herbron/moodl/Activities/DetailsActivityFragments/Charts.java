@@ -7,12 +7,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -47,7 +51,7 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
  * Created by Tiji on 13/05/2018.
  */
 
-public class Home extends Fragment {
+public class Charts extends Fragment {
 
     private final static int HOUR = 0;
     private final static int DAY = 1;
@@ -72,7 +76,7 @@ public class Home extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        view = inflater.inflate(R.layout.fragment_home_detailsactivity, container, false);
+        view = inflater.inflate(R.layout.fragment_charts_detailsactivity, container, false);
 
         currency = getActivity().getIntent().getParcelableExtra("currency");
 
@@ -111,13 +115,166 @@ public class Home extends Fragment {
             }
         });
 
-        initializeButtons();
         initializeLineChart(lineChart);
         initializeCandleStickChart(candleStickChart);
 
-        updateChartTab(DAY, 1);
+        initializeSpinners();
 
         return view;
+    }
+
+    private void initializeSpinners()
+    {
+        Spinner spinner = view.findViewById(R.id.timeIntervalSinner);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.time_interval_string_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinner.setAdapter(adapter);
+
+        spinner.setSelection(2);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                updateCharts(i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void updateCharts(int index)
+    {
+        view.findViewById(R.id.chartPriceView).setVisibility(View.GONE);
+        view.findViewById(R.id.chartCandleStickView).setVisibility(View.GONE);
+        view.findViewById(R.id.chartVolumeView).setVisibility(View.GONE);
+        view.findViewById(R.id.progressLayoutChart).setVisibility(View.VISIBLE);
+
+        switch (index)
+        {
+            case 0:
+                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.HOUR, 1);
+                            }
+                        });
+                    }
+                });
+                break;
+            case 1:
+                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.HOUR, 3);
+                            }
+                        });
+                    }
+                });
+                break;
+            case 2:
+                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.DAY, 1);
+                            }
+                        });
+                    }
+                });
+                break;
+            case 3:
+                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.DAY, 3);
+                            }
+                        });
+                    }
+                });
+                break;
+            case 4:
+                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.WEEK, 11);
+                            }
+                        });
+                    }
+                });
+                break;
+            case 5:
+                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.MONTH, 1);
+                            }
+                        });
+                    }
+                });
+                break;
+            case 6:
+                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.MONTH, 3);
+                            }
+                        });
+                    }
+                });
+                break;
+            case 7:
+                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.MONTH, 6);
+                            }
+                        });
+                    }
+                });
+                break;
+            case 8:
+                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                    @Override
+                    public void onSuccess(Currency currency) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateChartTab(Charts.YEAR, 1);
+                            }
+                        });
+                    }
+                });
+                break;
+        }
     }
 
     private void initializeCandleStickChart(CandleStickChart candleStickChart)
@@ -148,182 +305,6 @@ public class Home extends Fragment {
         lineChart.getLegend().setEnabled(false);
         lineChart.getXAxis().setEnabled(false);
         lineChart.setViewPortOffsets(0, 0, 0, 0);
-    }
-
-    private void initializeButtons()
-    {
-        LinearLayout buttonLayout = view.findViewById(R.id.layoutChartButtons);
-
-        for(int i = 0; i < buttonLayout.getChildCount(); i++)
-        {
-            final Button button = (Button) buttonLayout.getChildAt(i);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    buttonEvent(v);
-                }
-            });
-        }
-    }
-
-    private void buttonEvent(View v)
-    {
-        v.setEnabled(false);
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        {
-            v.setElevation(MoodlBox.convertDpToPx(8, getResources()));
-        }
-
-        LinearLayout buttonLayout = (LinearLayout) v.getParent();
-
-        for(int i = 0; i < buttonLayout.getChildCount(); i++)
-        {
-            Button button = (Button) buttonLayout.getChildAt(i);
-
-            if(button != v)
-            {
-                button.setEnabled(true);
-
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                {
-                    button.setElevation(MoodlBox.convertDpToPx(2, getResources()));
-                }
-            }
-        }
-
-        updateCharts((Button) v);
-    }
-
-    private void updateCharts(Button button)
-    {
-        view.findViewById(R.id.chartPriceView).setVisibility(View.GONE);
-        view.findViewById(R.id.chartCandleStickView).setVisibility(View.GONE);
-        view.findViewById(R.id.chartVolumeView).setVisibility(View.GONE);
-        view.findViewById(R.id.progressLayoutChart).setVisibility(View.VISIBLE);
-
-        String interval = button.getText().toString().substring(button.getText().toString().length()-2);
-
-        switch (interval)
-        {
-            case "1h":
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.HOUR, 1);
-                            }
-                        });
-                    }
-                });
-                break;
-            case "3h":
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.HOUR, 3);
-                            }
-                        });
-                    }
-                });
-                break;
-            case "1d":
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.DAY, 1);
-                            }
-                        });
-                    }
-                });
-                break;
-            case "3d":
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.DAY, 3);
-                            }
-                        });
-                    }
-                });
-                break;
-            case "1w":
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.WEEK, 11);
-                            }
-                        });
-                    }
-                });
-                break;
-            case "1M":
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.MONTH, 1);
-                            }
-                        });
-                    }
-                });
-                break;
-            case "3M":
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.MONTH, 3);
-                            }
-                        });
-                    }
-                });
-                break;
-            case "6M":
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.MONTH, 6);
-                            }
-                        });
-                    }
-                });
-                break;
-            case "1y":
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Home.YEAR, 1);
-                            }
-                        });
-                    }
-                });
-                break;
-        }
     }
 
     private void updateChartTab(int timeUnit, int amount)

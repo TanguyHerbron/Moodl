@@ -4,7 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.herbron.moodl.Activities.DetailsActivityFragments.Home;
+import com.herbron.moodl.Activities.DetailsActivityFragments.Charts;
 import com.herbron.moodl.Activities.DetailsActivityFragments.Informations;
 import com.herbron.moodl.Activities.DetailsActivityFragments.Transactions;
 
@@ -27,7 +27,7 @@ public class DetailsActivityPagerAdapter extends FragmentStatePagerAdapter {
         switch (position)
         {
             case 0:
-                return new Home();
+                return new Charts();
             case 1:
                 return new Informations();
             case 2:

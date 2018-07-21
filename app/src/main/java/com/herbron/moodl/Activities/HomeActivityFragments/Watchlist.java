@@ -39,6 +39,7 @@ import org.json.JSONObject;
 
 import static com.herbron.moodl.MoodlBox.collapseW;
 import static com.herbron.moodl.MoodlBox.expandW;
+import static com.herbron.moodl.MoodlBox.getColor;
 import static java.lang.Math.abs;
 
 /**
@@ -354,11 +355,11 @@ public class Watchlist extends Fragment {
         {
             Palette.Builder builder = Palette.from(currency.getIcon());
 
-            currency.setChartColor(builder.generate().getDominantColor(0));
+            currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
         }
         else
         {
-            currency.setChartColor(12369084);
+            currency.setChartColor(getColor(R.color.default_color, getContext()));
         }
     }
 

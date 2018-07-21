@@ -4,55 +4,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background">
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/gradient_background"
+        app:layout_collapseMode="pin">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:layout_collapseMode="pin">
+            android:layout_height="wrap_content"
+            app:layout_collapseMode="pin"
+            android:layout_margin="10dp">
 
-            <FrameLayout
-                android:layout_width="match_parent"
+            <ImageButton
+                android:id="@+id/drawer_button"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_collapseMode="pin"
-                android:layout_margin="10dp">
+                android:text="@string/action_settings"
+                android:background="@drawable/ic_drawer_white_24dp"
+                android:visibility="visible"
+                android:layout_gravity="start|center_vertical"
+                android:contentDescription="@string/drawer"/>
 
-                <ImageButton
-                    android:id="@+id/drawer_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/action_settings"
-                    android:background="@drawable/ic_drawer_white_24dp"
-                    android:visibility="visible"
-                    android:layout_gravity="start|center_vertical"
-                    android:contentDescription="@string/drawer"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="@string/title_coin_list"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"/>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:text="@string/title_coin_list"
-                    android:textSize="18sp"
-                    android:textColor="@color/white"
-                    android:textStyle="bold"/>
+        </FrameLayout>
 
-            </FrameLayout>
-
-        </android.support.v7.widget.Toolbar>
-
-    </android.support.design.widget.AppBarLayout>
+    </android.support.v7.widget.Toolbar>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="?attr/actionBarSize"
-        android:background="@color/summary_background"
-        android:paddingTop="15dp">
+        android:background="@drawable/gradient_background"
+        android:elevation="0dp">
 
         <ListView android:id="@+id/linearLayoutOverview"
             android:layout_width="match_parent"
@@ -61,7 +55,9 @@
             android:orientation="vertical"
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:divider="@null"
-            android:dividerHeight="0dp"/>
+            android:dividerHeight="0dp"
+            android:clipChildren="false"
+            android:background="@drawable/list_background"/>
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

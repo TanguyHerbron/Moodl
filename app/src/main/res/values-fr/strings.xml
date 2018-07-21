@@ -61,15 +61,6 @@
     <string name="pref_title_kraken_privatekey">Clé privée</string>
     <string name="title_watchlist">Liste suivie</string>
     <string name="title_coin_list">Liste des monnaies</string>
-    <string name="button1h">1h</string>
-    <string name="button3h">3h</string>
-    <string name="button1d">1j</string>
-    <string name="button3d">3j</string>
-    <string name="button1w">1S</string>
-    <string name="button1m">1M</string>
-    <string name="button3m">3M</string>
-    <string name="button6m">6M</string>
-    <string name="button1y">1A</string>
     <string name="timestampPlaceholder">Date\n%1$s</string>
     <string name="volumeDollarPlaceholder">Volume\nUS$%1$s</string>
     <string name="priceDollarPlaceholder">Prix\nUS$%1$s</string>
@@ -89,4 +80,63 @@
     <string name="field_empty">Ce champ en peut pas être vide</string>
     <string name="field_nan">Ce champ doit être un nombre</string>
     <string name="field_negative">Ce champ doit être positif</string>
+    <string name="pref_title_category_display">Affichage</string>
+    <string name="pref_title_category_data_backup">Sauvegarde des données</string>
+    <string name="pref_title_category_other">Autre</string>
+    <string name="pref_title_version">Version</string>
+    <string name="pref_title_export">Exporter les entrées manuelles</string>
+    <string name="pref_title_import">Importer de nouvelles entrées</string>
+    <string name="pref_title_category_synchronization">Synchronisation</string>
+    <string name="wipe_data">Supprimer les données actuelles</string>
+    <string name="restore_manual_entries">Restaurer les transactions manuelles</string>
+    <string name="restore_keys">Restaurer les clefs d\'API</string>
+    <string name="enter_password">Entrer un mot de passe</string>
+    <string name="password">Mot de passe</string>
+    <string name="title_activity_exchange_settings">Réglages</string>
+    <string name="save">Sauvegarder</string>
+    <string name="cancel">Annuler</string>
+    <string name="confirm">Confirmer</string>
+    <string name="restoreBackup">Restaurer une sauvegarde</string>
+    <string name="pref_header_wallet">Paramètre des portes-monnaies</string>
+
+    <string name="infinity">Infini</string>
+    <string name="others">Autres</string>
+    <string name="market_dominance">Dominance du marché</string>
+    <string name="global">Global</string>
+    <string name="other_coins">Autres monnaies</string>
+
+    <string-array name="time_interval_string_array">
+        <item>1 heure</item>
+        <item>3 heures</item>
+        <item>1 jour</item>
+        <item>3 jours</item>
+        <item>1 semaine</item>
+        <item>1 mois</item>
+        <item>3 mois</item>
+        <item>6 mois</item>
+        <item>1 année</item>
+    </string-array>
+    <string name="emitedPlaceholder">Pourcentage de coin émis : %1$s%%</string>
+    <string name="edit_transaction">Edition d\'une transaction de %1$s</string>
+    <string name="new_transaction">Nouvelle transaction</string>
+    <string name="error_update_data">Erreur lors de l\'actualisation des données</string>
+    <string name="update">Rafraichir</string>
+    <string name="invalid_keys_hitbtc">Erreur de synchronisation avec HitBTC : Clefs invalides</string>
+    <string name="invalid_keys_binance">Erreur de synchronisation avec Binance : Clefs invalides</string>
+    <string name="cannot_resole_host">Impossible de résoudre l\'hôte</string>
+    <string name="unexpected">Erreur inconnue</string>
+    <string name="select_coin">Selectionner une monnaie</string>
+    <string name="already_watchlisr">Monnaie déjà présente dans la liste suivie</string>
+    <string name="create_backup">Créer une sauvegarde</string>
+    <string name="wrong_password">Mauvais mot de passe</string>
+    <string name="error">Erreur</string>
+    <string name="wrong_fingerprint">Mauvaise empreinte digitale</string>
+    <string name="backup_manual_entries">Sauvegarder les entrées manuelles</string>
+    <string name="backup_watchlist">Sauvegarder la liste suivie</string>
+    <string name="backup_keys">Sauvegarder les clefs API</string>
+    <string name="must_be_filled">Ne peut pas être vide</string>
+    <string name="restore_watchlist">Restaurer la liste suivie</string>
+    <string name="wipe_manual_entries">Supprimer les entrées manuelles actuelles</string>
+    <string name="wipe_watchlist">Supprimer la liste suivie actuelle</string>
+    <string name="wipe_api_keys">Supprimer les clefs API actuelles</string>
 </resources>

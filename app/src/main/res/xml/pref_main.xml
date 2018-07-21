@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_title_category_display">
+
+        <ListPreference
+            android:defaultValue="USD"
+            android:entries="@array/pref_default_currencies_titles"
+            android:entryValues="@array/pref_default_currencies_values"
+            android:key="default_currency"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_default_currency" />
+
+        <EditTextPreference
+            android:defaultValue="0"
+            android:key="minimum_value_displayed"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_minimum_amount_displayed"
+            android:inputType="numberDecimal"
+            android:hint="Let blank for none" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_category_data_backup">
+
+        <PreferenceScreen android:title="@string/pref_title_export"
+            android:key="export"/>
+
+        <Preference android:title="@string/pref_title_import"
+            android:key="import"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_category_synchronization">
+
+        <PreferenceScreen
+            android:fragment="com.herbron.moodl.Activities.SettingsActivity$ExchangePreferenceFragment"
+            android:title="@string/pref_header_exchange"
+            android:key="exchange"/>
+
+        <PreferenceScreen
+            android:title="@string/pref_header_wallet"
+            android:enabled="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_category_other">
+
+        <PreferenceScreen android:title="@string/pref_title_version"
+            android:key="version"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

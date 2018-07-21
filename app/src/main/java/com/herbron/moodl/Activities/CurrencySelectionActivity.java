@@ -46,7 +46,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         currencyDetailsList = CurrencyDetailsList.getInstance(this);
 
-        setTitle("Select a coin");
+        setTitle(getString(R.string.select_coin));
 
         Intent intent = getIntent();
         isWatchList = intent.getBooleanExtra("isWatchList", false);
@@ -103,7 +103,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
                     }
                     else
                     {
-                        Toast.makeText(getApplicationContext(), "Currency already in watchlist.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), getString(R.string.already_watchlisr), Toast.LENGTH_SHORT).show();
                     }
                 }
                 else
