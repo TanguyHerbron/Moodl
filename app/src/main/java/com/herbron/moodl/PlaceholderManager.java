@@ -34,10 +34,6 @@ public class PlaceholderManager {
         return formattedString;
     }
 
-    public static String getAddCoinTransactionString(String coinName, Context context) {
-        return context.getResources().getString(R.string.add_coin_transaction, coinName);
-    }
-
     public static String getEditTransactionString(String coinName, Context context)
     {
         return context.getResources().getString(R.string.edit_transaction, coinName);

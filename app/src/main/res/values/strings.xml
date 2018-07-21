@@ -198,7 +198,7 @@
     <string name="fingerprint_dialog_title">Verify your fingerprint to continue</string>
 
     <string name="edit_transaction">Edit %1$s transaction</string>
-    <string name="add_coin_transaction">Add %1$s transaction</string>
+    <string name="new_transaction">New transaction</string>
 
 
     <!--Marketcap placeholders-->

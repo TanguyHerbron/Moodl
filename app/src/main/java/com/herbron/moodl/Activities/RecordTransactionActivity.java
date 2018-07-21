@@ -181,7 +181,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
         }
         else
         {
-            setTitle(PlaceholderManager.getAddCoinTransactionString(coin, getBaseContext()));
+            setTitle(getString(R.string.new_transaction));
 
             purchaseDate.setText(sdf.format(calendar.getTime()));
             symbolTxtView.setText(symbol);

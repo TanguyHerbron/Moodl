@@ -118,7 +118,7 @@
     </string-array>
     <string name="emitedPlaceholder">Pourcentage de coin émis : %1$s%%</string>
     <string name="edit_transaction">Edition d\'une transaction de %1$s</string>
-    <string name="add_coin_transaction">Ajouter d\'une transaction de %1$s</string>
+    <string name="new_transaction">Nouvelle transaction</string>
     <string name="error_update_data">Erreur lors de l\'actualisation des données</string>
     <string name="update">Rafraichir</string>
     <string name="invalid_keys_hitbtc">Erreur de synchronisation avec HitBTC : Clefs invalides</string>
