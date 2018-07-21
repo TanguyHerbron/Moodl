@@ -13,28 +13,49 @@
         android:id="@+id/textViewFilePath"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Click to select"
         android:background="@drawable/background_filepath"/>
-
-    <CheckBox
-        android:id="@+id/checkboxWipeData"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/wipe_data"/>
 
     <CheckBox
         android:id="@+id/checkboxRestoreEntries"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/restore_manual_entries"
-        android:enabled="false" />
+        android:text="@string/restore_manual_entries"/>
+
+    <CheckBox
+        android:id="@+id/checkboxWipeManualEntries"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wipe_manual_entries"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"/>
+
+    <CheckBox
+        android:id="@+id/checkboxRestoreWatchlist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/restore_watchlist"/>
+
+    <CheckBox
+        android:id="@+id/checkboxWipeWatchlist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wipe_watchlist"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"/>
 
     <CheckBox
         android:id="@+id/checkboxRestoreKeys"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/restore_keys"
-        android:enabled="false" />
+        android:text="@string/restore_keys"/>
+
+    <CheckBox
+        android:id="@+id/checkboxWipeAPIKeys"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wipe_api_keys"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"/>
 
     <CheckBox
         android:id="@+id/checkboxEnterPassword"

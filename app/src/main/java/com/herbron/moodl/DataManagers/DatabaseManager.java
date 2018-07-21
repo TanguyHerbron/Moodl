@@ -24,13 +24,13 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     private static final String DATABASE_NAME = "Currencies.db";
 
-    private static final String TABLE_MANUAL_CURRENCIES = "ManualCurrencies";
-    private static final String TABLE_EXCHANGE_KEYS = "ExchangeKeys";
-    private static final String TABLE_WATCHLIST = "Watchlist";
+    public static final String TABLE_MANUAL_CURRENCIES = "ManualCurrencies";
+    public static final String TABLE_EXCHANGE_KEYS = "ExchangeKeys";
+    public static final String TABLE_WATCHLIST = "Watchlist";
 
     private static final String KEY_CURRENCY_ID = "idCurrency";
     private static final String KEY_CURRENCY_SYMBOL = "symbol";
@@ -43,6 +43,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     private static final String KEY_EXCHANGE_ID = "idExchange";
     private static final String KEY_EXCHANGE_NAME = "name";
+    private static final String KEY_EXCHANGE_DESCRIPTION = "description";
     private static final String KEY_EXCHANGE_PUBLIC_KEY = "publicKey";
     private static final String KEY_EXCHANGE_SECRET_KEY = "secretKey";
 
@@ -73,6 +74,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
                 + KEY_EXCHANGE_ID + " INTEGER PRIMARY KEY,"
                 + KEY_EXCHANGE_NAME + " TEXT,"
+                + KEY_EXCHANGE_DESCRIPTION + " TEXT,"
                 + KEY_EXCHANGE_PUBLIC_KEY + " TEXT,"
                 + KEY_EXCHANGE_SECRET_KEY + " TEXT"
                 + ");");
@@ -90,11 +92,12 @@ public class DatabaseManager extends SQLiteOpenHelper{
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANUAL_CURRENCIES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXCHANGE_KEYS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_WATCHLIST);
-
-        onCreate(db);
+        switch (oldVersion)
+        {
+            case 6:
+                db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
+                        + "  ADD " + KEY_EXCHANGE_DESCRIPTION+ " VARCHAR");
+        }
     }
 
     private boolean isCurrencyInWatchlist(String symbol)
@@ -157,17 +160,17 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.close();
     }
 
-    public JSONArray getBackupData(Context context, boolean encryptData)
+    public JSONArray getDatabaseBackup(Context context, String table, boolean encryptData)
     {
-        String selectQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES;
+        String selectQuerry = "SELECT * FROM " + table;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery(selectQuerry, null);
 
-        JSONArray transactionsArray = new JSONArray();
+        JSONArray backupArray = new JSONArray();
 
         while(result.moveToNext())
         {
-            JSONObject transactionJson = new JSONObject();
+            JSONObject backupObject = new JSONObject();
 
             for(int i = 0; i < result.getColumnCount(); i++)
             {
@@ -176,32 +179,58 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     {
                         if(encryptData)
                         {
-                            transactionJson.put(result.getColumnName(i), DataCrypter.encrypt(context, result.getString(i)));
+                            backupObject.put(result.getColumnName(i), DataCrypter.encrypt(context, result.getString(i)));
                         }
                         else
                         {
-                            transactionJson.put(result.getColumnName(i), result.getString(i));
+                            backupObject.put(result.getColumnName(i), result.getString(i));
                         }
                     }
                     else
                     {
-                        transactionJson.put(result.getColumnName(i), "");
+                        backupObject.put(result.getColumnName(i), "");
                     }
                 } catch (JSONException e) {
-                    Log.d("moodl", "Error while creating a json transaction");
+                    Log.d("moodl", "Error while creating a json backup");
                 }
             }
 
-            transactionsArray.put(transactionJson);
+            backupArray.put(backupObject);
         }
 
-        return transactionsArray;
+        return backupArray;
     }
 
-    public void wipeTransactions()
+    public void wipeData(String table)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM "+ TABLE_MANUAL_CURRENCIES);
+        db.execSQL("DELETE FROM "+ table);
+    }
+
+    public void addRowWatchlist(JSONObject rawValues, Context context, boolean decrypt)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        try {
+            if(decrypt)
+            {
+                values.put(KEY_WATCHLIST_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_WATCHLIST_SYMBOL)));
+                values.put(KEY_WATCHLIST_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_WATCHLIST_NAME)));
+                values.put(KEY_WATCHLIST_POSITION, DataCrypter.decrypt(context, rawValues.getString(KEY_WATCHLIST_POSITION)));
+            }
+            else
+            {
+                values.put(KEY_WATCHLIST_SYMBOL, rawValues.getString(KEY_WATCHLIST_SYMBOL));
+                values.put(KEY_WATCHLIST_NAME, rawValues.getString(KEY_WATCHLIST_NAME));
+                values.put(KEY_WATCHLIST_POSITION, rawValues.getString(KEY_WATCHLIST_POSITION));
+            }
+        } catch (JSONException e) {
+            Log.d("moodl", "Error while inserting transaction");
+        }
+
+        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.close();
     }
 
     public void addRowTransaction(JSONObject rawValues, Context context, boolean decrypt)

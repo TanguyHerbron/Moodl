@@ -5,14 +5,16 @@
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.herbron.moodl.Activities.HomeActivity">
+    tools:context="com.herbron.moodl.Activities.HomeActivity"
+    android:background="@drawable/gradient_background">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/app_bar_height"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:background="@drawable/gradient_background">
+        android:background="@drawable/gradient_background"
+        app:elevation="0dp">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
@@ -70,13 +72,13 @@
         android:id="@+id/swiperefreshsummary"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:background="@color/summary_background">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/nestedScrollViewLayout"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@drawable/list_background">
 
             <LinearLayout
                 android:layout_width="match_parent"

@@ -129,6 +129,10 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
     {
         Switch balanceSwitch = findViewById(R.id.switchHideBalance);
 
+        PreferencesManager preferencesManager = new PreferencesManager(getBaseContext());
+
+        balanceSwitch.setChecked(preferencesManager.isBalanceHidden());
+
         balanceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {

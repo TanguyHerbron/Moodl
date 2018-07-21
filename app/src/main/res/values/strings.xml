@@ -151,6 +151,12 @@
         <item>1 year</item>
     </string-array>
 
+    <string-array name="wipe_options_string_array">
+        <item>Manual entries</item>
+        <item>Watchlist</item>
+        <item>API keys</item>
+    </string-array>
+
     <!--Cardview placeholders-->
     <string name="currencySymbolPlaceholder" translatable="false">(%1$s)</string>
     <string name="currencyBalancePlaceholder" translatable="false">%1$s%2$s</string>
@@ -235,5 +241,13 @@
     <string name="wrong_password">Wrong password</string>
     <string name="error">Error</string>
     <string name="wrong_fingerprint">Wrong fingerprint</string>
+    <string name="backup_manual_entries">Backup manual entries</string>
+    <string name="backup_watchlist">Backup watchlist</string>
+    <string name="backup_keys">Backup API keys</string>
+    <string name="must_be_filled">Cannot be blank</string>
+    <string name="restore_watchlist">Restore watchlist</string>
+    <string name="wipe_manual_entries">Wipe current entries</string>
+    <string name="wipe_watchlist">Wipe current watchlist</string>
+    <string name="wipe_api_keys">Wipe current API keys</string>
 
 </resources>

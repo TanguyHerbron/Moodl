@@ -131,4 +131,12 @@
     <string name="wrong_password">Mauvais mot de passe</string>
     <string name="error">Erreur</string>
     <string name="wrong_fingerprint">Mauvaise empreinte digitale</string>
+    <string name="backup_manual_entries">Sauvegarder les entrées manuelles</string>
+    <string name="backup_watchlist">Sauvegarder la liste suivie</string>
+    <string name="backup_keys">Sauvegarder les clefs API</string>
+    <string name="must_be_filled">Ne peut pas être vide</string>
+    <string name="restore_watchlist">Restaurer la liste suivie</string>
+    <string name="wipe_manual_entries">Supprimer les entrées manuelles actuelles</string>
+    <string name="wipe_watchlist">Supprimer la liste suivie actuelle</string>
+    <string name="wipe_api_keys">Supprimer les clefs API actuelles</string>
 </resources>

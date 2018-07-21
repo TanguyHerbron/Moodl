@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -34,7 +33,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.applandeo.FilePicker;
 import com.applandeo.listeners.OnSelectFileListener;
@@ -66,10 +67,11 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -421,15 +423,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_export_data, null, true);
                     dialogBuilder.setView(dialogView);
 
+                    final CheckBox backupManualEntriesCheckbox = dialogView.findViewById(R.id.checkboxBackupManualEntries);
+                    final CheckBox backupWatchlistCheckbox = dialogView.findViewById(R.id.checkboxBackupWatchlist);
+                    final CheckBox backupKeysCheckbox = dialogView.findViewById(R.id.checkboxBackupKeys);
+                    final CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
+                    final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
+                    final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
+
                     File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
 
-                    if (!backupDirectory.exists()) {
-                        if (!backupDirectory.mkdirs()) {
-                            Log.d("moodl", "Error while creating directory");
-                        }
-                    }
+                    createDefaultBackupDirectory(backupDirectory);
 
-                    final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
                     textViewFilePath.setText(backupDirectory.getAbsolutePath());
                     textViewFilePath.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -446,9 +450,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     .show();
                         }
                     });
-
-                    final CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
-                    final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
 
                     enterPasswordCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
@@ -477,7 +478,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                             if(enterPasswordCheckbox.isChecked())
                             {
-                                DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
+                                if(textInputLayoutPassword.getEditText().getText().equals(""))
+                                {
+                                    textInputLayoutPassword.setError(getString(R.string.must_be_filled));
+                                }
+                                else
+                                {
+                                    DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
+                                }
                             }
 
                             File backupFile = new File(textViewFilePath.getText() + "/" + fileName);
@@ -487,15 +495,31 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                 try {
                                     JSONObject backupJson = new JSONObject();
 
-                                    if(enterPasswordCheckbox.isChecked())
+                                    initiateJsonBackup(backupJson, enterPasswordCheckbox.isChecked());
+
+                                    if(backupManualEntriesCheckbox.isChecked())
                                     {
-                                        backupJson.put("encodeChecker", DataCrypter.encrypt(getContext(), "NaukVerification"));
+                                        backupJson.put("transactions",
+                                                databaseManager.getDatabaseBackup(getContext(),
+                                                        DatabaseManager.TABLE_MANUAL_CURRENCIES,
+                                                        enterPasswordCheckbox.isChecked()));
                                     }
-                                    else
+
+                                    if(backupWatchlistCheckbox.isChecked())
                                     {
-                                        backupJson.put("encodeChecker", "NaukVerification");
+                                        backupJson.put("watchlist",
+                                                databaseManager.getDatabaseBackup(getContext(),
+                                                        DatabaseManager.TABLE_WATCHLIST,
+                                                        enterPasswordCheckbox.isChecked()));
                                     }
-                                    backupJson.put("transactions", databaseManager.getBackupData(getContext(),enterPasswordCheckbox.isChecked()));
+
+                                    if(backupKeysCheckbox.isChecked())
+                                    {
+                                        backupJson.put("apiKeys",
+                                                databaseManager.getDatabaseBackup(getContext(),
+                                                        DatabaseManager.TABLE_EXCHANGE_KEYS,
+                                                        enterPasswordCheckbox.isChecked()));
+                                    }
 
                                     printWriter.write(backupJson.toString());
                                 } catch (JSONException e) {
@@ -510,6 +534,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             dialog.dismiss();
                         }
                     });
+
                     dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             dialog.dismiss();
@@ -532,17 +557,78 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
                     dialogBuilder.setView(dialogView);
 
+                    final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
+                    final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
+                    final CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
+                    final CheckBox restoreManualEntriesCheckbox = dialogView.findViewById(R.id.checkboxRestoreEntries);
+                    final CheckBox restoreWatchlistCheckbox = dialogView.findViewById(R.id.checkboxRestoreWatchlist);
+                    final CheckBox restoreApiKeysCheckbox = dialogView.findViewById(R.id.checkboxRestoreKeys);
+
+                    final CheckBox wipeManualEntriesCheckbox = dialogView.findViewById(R.id.checkboxWipeManualEntries);
+                    final CheckBox wipeWatchlistCheckbox = dialogView.findViewById(R.id.checkboxWipeWatchlist);
+                    final CheckBox wipeApiKeyxCheckbox = dialogView.findViewById(R.id.checkboxWipeAPIKeys);
+
+                    restoreManualEntriesCheckbox.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if(restoreManualEntriesCheckbox.isChecked())
+                            {
+                                MoodlBox.expandH(wipeManualEntriesCheckbox);
+                            }
+                            else
+                            {
+                                MoodlBox.collapseH(wipeManualEntriesCheckbox);
+                            }
+                        }
+                    });
+
+                    restoreWatchlistCheckbox.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if(restoreWatchlistCheckbox.isChecked())
+                            {
+                                MoodlBox.expandH(wipeWatchlistCheckbox);
+                            }
+                            else
+                            {
+                                MoodlBox.collapseH(wipeWatchlistCheckbox);
+                            }
+                        }
+                    });
+
+                    restoreApiKeysCheckbox.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if(restoreApiKeysCheckbox.isChecked())
+                            {
+                                MoodlBox.expandH(wipeApiKeyxCheckbox);
+                            }
+                            else
+                            {
+                                MoodlBox.collapseH(wipeApiKeyxCheckbox);
+                            }
+                        }
+                    });
+
+                    enterPasswordCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                            if(b && textInputLayoutPassword.getVisibility() == View.GONE)
+                            {
+                                MoodlBox.expandH(textInputLayoutPassword);
+                            }
+
+                            if(!b && textInputLayoutPassword.getVisibility() == View.VISIBLE)
+                            {
+                                MoodlBox.collapseH(textInputLayoutPassword);
+                            }
+                        }
+                    });
+
                     File backupDirectory = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
 
-                    if(!backupDirectory.exists())
-                    {
-                        if(!backupDirectory.mkdirs())
-                        {
-                            Log.d("moodl", "Error while creating directory");
-                        }
-                    }
+                    createDefaultBackupDirectory(backupDirectory);
 
-                    final TextView textViewFilePath = dialogView.findViewById(R.id.textViewFilePath);
                     textViewFilePath.setText(backupDirectory.getAbsolutePath());
                     textViewFilePath.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -559,10 +645,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
                     });
 
-                    final CheckBox enterPasswordCheckbox = dialogView.findViewById(R.id.checkboxEnterPassword);
-                    final CheckBox wipeCheckbox = dialogView.findViewById(R.id.checkboxWipeData);
-                    final TextInputLayout textInputLayoutPassword = dialogView.findViewById(R.id.textInputLayoutPassword);
-
                     dialogBuilder.setTitle(getString(R.string.restoreBackup));
                     dialogBuilder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                         @Override
@@ -575,11 +657,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             if(enterPasswordCheckbox.isChecked())
                             {
                                 DataCrypter.updateKey(textInputLayoutPassword.getEditText().getText().toString());
-                            }
-
-                            if(wipeCheckbox.isChecked())
-                            {
-                                databaseManager.wipeTransactions();
                             }
 
                             File backupFile = new File(textViewFilePath.getText().toString());
@@ -610,13 +687,44 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                                     if(checker.equals("NaukVerification"))
                                     {
-                                        JSONArray transactionsArray = backupJson.getJSONArray("transactions");
-
-                                        for(int i = 0; i < transactionsArray.length(); i++)
+                                        if(restoreManualEntriesCheckbox.isChecked())
                                         {
-                                            JSONObject transactionObject = transactionsArray.getJSONObject(i);
+                                            if(wipeManualEntriesCheckbox.isChecked())
+                                            {
+                                                databaseManager.wipeData(DatabaseManager.TABLE_MANUAL_CURRENCIES);
+                                            }
 
-                                            databaseManager.addRowTransaction(transactionObject, getContext(), enterPasswordCheckbox.isChecked());
+                                            if(backupJson.has("transactions"))
+                                            {
+                                                JSONArray transactionsArray = backupJson.getJSONArray("transactions");
+
+                                                for(int i = 0; i < transactionsArray.length(); i++)
+                                                {
+                                                    JSONObject transactionObject = transactionsArray.getJSONObject(i);
+
+                                                    databaseManager.addRowTransaction(transactionObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                }
+                                            }
+                                        }
+
+                                        if(restoreWatchlistCheckbox.isChecked())
+                                        {
+                                            if(wipeWatchlistCheckbox.isChecked())
+                                            {
+                                                databaseManager.wipeData(DatabaseManager.TABLE_WATCHLIST);
+                                            }
+
+                                            if(backupJson.has("watchlist"))
+                                            {
+                                                JSONArray watchlistArray = backupJson.getJSONArray("watchlist");
+
+                                                for(int i = 0; i < watchlistArray.length(); i++)
+                                                {
+                                                    JSONObject transactionObject = watchlistArray.getJSONObject(i);
+
+                                                    databaseManager.addRowWatchlist(transactionObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                }
+                                            }
                                         }
                                     }
                                     else
@@ -651,6 +759,27 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             EditTextPreference editTextPreference = (EditTextPreference) findPreference("minimum_value_displayed");
             editTextPreference.setPositiveButtonText(getString(R.string.save));
             editTextPreference.setNegativeButtonText(getString(R.string.cancel));
+        }
+
+        private void initiateJsonBackup(JSONObject backupJson, boolean mustEncrypt) throws JSONException
+        {
+            if(mustEncrypt)
+            {
+                backupJson.put("encodeChecker", DataCrypter.encrypt(getContext(), "NaukVerification"));
+            }
+            else
+            {
+                backupJson.put("encodeChecker", "NaukVerification");
+            }
+        }
+
+        private void createDefaultBackupDirectory(File backupDirectory)
+        {
+            if (!backupDirectory.exists()) {
+                if (!backupDirectory.mkdirs()) {
+                    Log.d("moodl", "Error while creating directory");
+                }
+            }
         }
 
         private boolean checkPermissions() {

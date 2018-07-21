@@ -57,6 +57,8 @@ public class Overview extends Fragment {
         currencyTickerList = CurrencyTickerList.getInstance(getContext());
         currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
 
+        fragmentView.findViewById(R.id.toolbar).bringToFront();
+
         preferenceManager = new PreferencesManager(getContext());
 
         listLayout = fragmentView.findViewById(R.id.linearLayoutOverview);
