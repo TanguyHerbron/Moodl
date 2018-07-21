@@ -24,7 +24,8 @@
             app:toolbarId="@+id/toolbar"
             app:collapsedTitleGravity="center"
             app:expandedTitleGravity="center"
-            app:titleEnabled="true">
+            app:titleEnabled="true"
+            app:elevation="0dp">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
