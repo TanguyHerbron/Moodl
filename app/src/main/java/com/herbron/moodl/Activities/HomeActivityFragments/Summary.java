@@ -251,7 +251,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
     private void generateSplashScreen()
     {
-        loadingDialog = new Dialog(getActivity(), android.R.style.Theme_Black);
+        loadingDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 
         Random random = new Random();
 

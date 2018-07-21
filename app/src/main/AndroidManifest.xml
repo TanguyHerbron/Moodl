@@ -42,7 +42,8 @@
         </activity>
         <activity
             android:name=".Activities.RecordTransactionActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/RecordTransactionTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.herbron.moodl.Activities.HomeActivity" />
