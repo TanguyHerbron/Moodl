@@ -3,7 +3,9 @@ package com.herbron.moodl.Activities.HomeActivityFragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -143,14 +145,20 @@ public class Watchlist extends Fragment {
 
     private void setupEditButton()
     {
-        ImageButton editButton = view.findViewById(R.id.edit_button);
+        final ImageButton editButton = view.findViewById(R.id.edit_button);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if(editModeEnabled)
                 {
-                    ((ImageView) view.findViewById(R.id.edit_button)).setBackground(MoodlBox.getDrawable(R.drawable.ic_mode_edit_white_24dp, getContext()));
+                    editButton.setBackground(MoodlBox.getDrawable(R.drawable.check_to_edit, getContext()));
+
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    {
+                        AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) editButton.getBackground();
+                        animatedVectorDrawable.start();
+                    }
 
                     editModeEnabled = false;
 
@@ -168,7 +176,13 @@ public class Watchlist extends Fragment {
                 }
                 else
                 {
-                    ((ImageView) view.findViewById(R.id.edit_button)).setBackground(MoodlBox.getDrawable(R.drawable.ic_check_white_24dp, getContext()));
+                    editButton.setBackground(MoodlBox.getDrawable(R.drawable.edit_to_check, getContext()));
+
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    {
+                        AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) editButton.getBackground();
+                        animatedVectorDrawable.start();
+                    }
 
                     editModeEnabled = true;
 
