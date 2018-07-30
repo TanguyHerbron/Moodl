@@ -64,6 +64,7 @@ public class Watchlist extends Fragment {
     private boolean detailsUpdated;
     private boolean editModeEnabled;
     private DatabaseManager databaseManager;
+    private ImageButton editButton;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -143,60 +144,70 @@ public class Watchlist extends Fragment {
         updater.execute();
     }
 
+    private void disableEdition()
+    {
+        editButton.setBackground(MoodlBox.getDrawable(R.drawable.check_to_edit, getContext()));
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) editButton.getBackground();
+            animatedVectorDrawable.start();
+        }
+
+        editModeEnabled = false;
+
+        for(int i = 0; i < dragLinearLayout.getChildCount(); i++)
+        {
+            View watchlistElement = dragLinearLayout.getChildAt(i);
+
+            if(watchlistElement instanceof CurrencyCardview)
+            {
+                watchlistElement.setClickable(true);
+                collapseW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
+                collapseW(watchlistElement.findViewById(R.id.dragCardWatchlist));
+            }
+        }
+    }
+
+    private void enableEdition()
+    {
+        editButton.setBackground(MoodlBox.getDrawable(R.drawable.edit_to_check, getContext()));
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) editButton.getBackground();
+            animatedVectorDrawable.start();
+        }
+
+        editModeEnabled = true;
+
+        for(int i = 0; i < dragLinearLayout.getChildCount(); i++)
+        {
+            View watchlistElement = dragLinearLayout.getChildAt(i);
+
+            if(watchlistElement instanceof CurrencyCardview)
+            {
+                watchlistElement.setClickable(false);
+                expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
+                expandW(watchlistElement.findViewById(R.id.dragCardWatchlist));
+            }
+        }
+    }
+
     private void setupEditButton()
     {
-        final ImageButton editButton = view.findViewById(R.id.edit_button);
+        editButton = view.findViewById(R.id.edit_button);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if(editModeEnabled)
                 {
-                    editButton.setBackground(MoodlBox.getDrawable(R.drawable.check_to_edit, getContext()));
-
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                    {
-                        AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) editButton.getBackground();
-                        animatedVectorDrawable.start();
-                    }
-
-                    editModeEnabled = false;
-
-                    for(int i = 0; i < dragLinearLayout.getChildCount(); i++)
-                    {
-                        View watchlistElement = dragLinearLayout.getChildAt(i);
-
-                        if(watchlistElement instanceof CurrencyCardview)
-                        {
-                            watchlistElement.setClickable(true);
-                            collapseW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
-                            collapseW(watchlistElement.findViewById(R.id.dragCardWatchlist));
-                        }
-                    }
+                    disableEdition();
                 }
                 else
                 {
-                    editButton.setBackground(MoodlBox.getDrawable(R.drawable.edit_to_check, getContext()));
-
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                    {
-                        AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) editButton.getBackground();
-                        animatedVectorDrawable.start();
-                    }
-
-                    editModeEnabled = true;
-
-                    for(int i = 0; i < dragLinearLayout.getChildCount(); i++)
-                    {
-                        View watchlistElement = dragLinearLayout.getChildAt(i);
-
-                        if(watchlistElement instanceof CurrencyCardview)
-                        {
-                            watchlistElement.setClickable(false);
-                            expandW(watchlistElement.findViewById(R.id.deleteCardWatchlist));
-                            expandW(watchlistElement.findViewById(R.id.dragCardWatchlist));
-                        }
-                    }
+                    enableEdition();
                 }
             }
         });
@@ -208,6 +219,11 @@ public class Watchlist extends Fragment {
         addWatchlistButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(editModeEnabled)
+                {
+                    disableEdition();
+                }
+
                 Intent selectionIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
                 selectionIntent.putExtra("isWatchList", true);
                 startActivity(selectionIntent);

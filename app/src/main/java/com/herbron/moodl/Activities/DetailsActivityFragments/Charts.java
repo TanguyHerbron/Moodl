@@ -583,6 +583,7 @@ public class Charts extends Fragment {
         dataSet.setHighlightEnabled(true);
         dataSet.setDrawHorizontalHighlightIndicator(false);
         dataSet.setHighLightColor(currency.getChartColor());
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 
         return new LineData(dataSet);
     }

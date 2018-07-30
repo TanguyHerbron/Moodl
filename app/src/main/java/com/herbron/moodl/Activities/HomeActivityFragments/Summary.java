@@ -261,35 +261,44 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         File cacheDir = new File(getContext().getCacheDir().getAbsolutePath());
         File[] cacheFiles = cacheDir.listFiles();
 
-        for(int i = 0; i < 4; i++)
+        if(cacheFiles.length > 4)
         {
-            File cachedIcon = null;
-
-            while(cachedIcon == null || cachedIcon.isDirectory())
+            for(int i = 0; i < 4; i++)
             {
-                cachedIcon = cacheFiles[random.nextInt(cacheFiles.length)];
+                File cachedIcon = null;
+
+                while(cachedIcon == null || cachedIcon.isDirectory())
+                {
+                    cachedIcon = cacheFiles[random.nextInt(cacheFiles.length)];
+                }
+
+                Bitmap icon = BitmapFactory.decodeFile(cachedIcon.getAbsolutePath());
+
+                Bitmap result = Bitmap.createBitmap(150, 150, icon.getConfig());
+
+                Paint paint = new Paint();
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(ContextCompat.getColor(getContext(), R.color.white));
+
+                Canvas canvas = new Canvas(result);
+                canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
+                canvas.drawBitmap(Bitmap.createScaledBitmap(icon, 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
+
+                ((ImageView) animatedLayout.getChildAt(i)).setImageBitmap(result);
+
+                ObjectAnimator animator = ObjectAnimator.ofFloat(animatedLayout.getChildAt(i), "translationY", 0, -100, 0);
+                animator.setInterpolator(new EasingInterpolator(Ease.CIRC_IN_OUT));
+                animator.setStartDelay(i*200);
+                animator.setDuration(1500);
+                animator.setRepeatCount(ValueAnimator.INFINITE);
+                animator.start();
             }
-
-            Bitmap icon = BitmapFactory.decodeFile(cachedIcon.getAbsolutePath());
-
-            Bitmap result = Bitmap.createBitmap(150, 150, icon.getConfig());
-
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.white));
-
-            Canvas canvas = new Canvas(result);
-            canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
-            canvas.drawBitmap(Bitmap.createScaledBitmap(icon, 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
-
-            ((ImageView) animatedLayout.getChildAt(i)).setImageBitmap(result);
-
-            ObjectAnimator animator = ObjectAnimator.ofFloat(animatedLayout.getChildAt(i), "translationY", 0, -100, 0);
-            animator.setInterpolator(new EasingInterpolator(Ease.CIRC_IN_OUT));
-            animator.setStartDelay(i*200);
-            animator.setDuration(1500);
-            animator.setRepeatCount(ValueAnimator.INFINITE);
-            animator.start();
+        }
+        else
+        {
+            TextView appNameTextView = splashLayout.findViewById(R.id.appNameTextView);
+            appNameTextView.setVisibility(View.VISIBLE);
+            animatedLayout.setVisibility(View.GONE);
         }
 
         loadingDialog.setContentView(splashLayout);
