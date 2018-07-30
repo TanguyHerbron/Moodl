@@ -9,13 +9,17 @@ import android.util.Log;
 
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
+import com.herbron.moodl.DataManagers.ExchangeManager.BinanceManager;
+import com.herbron.moodl.DataManagers.ExchangeManager.HitBtcManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -24,7 +28,7 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     private static final String DATABASE_NAME = "Currencies.db";
 
@@ -43,6 +47,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     private static final String KEY_EXCHANGE_ID = "idExchange";
     private static final String KEY_EXCHANGE_NAME = "name";
+    private static final String KEY_EXCHANGE_TYPE = "type";
     private static final String KEY_EXCHANGE_DESCRIPTION = "description";
     private static final String KEY_EXCHANGE_PUBLIC_KEY = "publicKey";
     private static final String KEY_EXCHANGE_SECRET_KEY = "secretKey";
@@ -51,6 +56,9 @@ public class DatabaseManager extends SQLiteOpenHelper{
     private static final String KEY_WATCHLIST_SYMBOL = "symbol";
     private static final String KEY_WATCHLIST_NAME = "name";
     private static final String KEY_WATCHLIST_POSITION = "position";
+
+    private static final int BINANCE_TYPE = 0;
+    private static final int HITBTC_TYPE = 1;
 
     public DatabaseManager(Context context)
     {
@@ -73,6 +81,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
                 + KEY_EXCHANGE_ID + " INTEGER PRIMARY KEY,"
+                + KEY_EXCHANGE_TYPE + " INTEGER,"
                 + KEY_EXCHANGE_NAME + " TEXT,"
                 + KEY_EXCHANGE_DESCRIPTION + " TEXT,"
                 + KEY_EXCHANGE_PUBLIC_KEY + " TEXT,"
@@ -96,7 +105,10 @@ public class DatabaseManager extends SQLiteOpenHelper{
         {
             case 6:
                 db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
-                        + "  ADD " + KEY_EXCHANGE_DESCRIPTION+ " VARCHAR");
+                        + "  ADD " + KEY_EXCHANGE_DESCRIPTION + " TEXT");
+            case 7:
+                db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
+                        + " ADD " + KEY_EXCHANGE_TYPE + " INTEGER");
         }
     }
 
@@ -198,6 +210,9 @@ public class DatabaseManager extends SQLiteOpenHelper{
             backupArray.put(backupObject);
         }
 
+        result.close();
+        db.close();
+
         return backupArray;
     }
 
@@ -205,6 +220,49 @@ public class DatabaseManager extends SQLiteOpenHelper{
     {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM "+ table);
+    }
+
+    public void addRawData(Context context, JSONObject rawValues, String table, boolean decrypt)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        while(rawValues.keys().hasNext())
+        {
+            String key = rawValues.keys().next();
+
+            try {
+                if(decrypt)
+                {
+                    values.put(key, DataCrypter.decrypt(context, rawValues.getString(key)));
+                }
+                else
+                {
+                    values.put(key, rawValues.getString(key));
+                }
+            } catch (JSONException e) {
+                Log.d("moodl", "Error while inserting " + key + " " + e.getMessage());
+            }
+        }
+
+        db.insert(table, null, values);
+        db.close();
+    }
+
+    public void addRowApiKeys(JSONObject rawValues, Context context, boolean decrypt)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        try {
+
+            if(decrypt)
+            {
+                values.put(KEY_EXCHANGE_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_WATCHLIST_SYMBOL)));
+            }
+        } catch (JSONException e) {
+            Log.d("moodl", "Error while inserting api key " + e.getMessage());
+        }
     }
 
     public void addRowWatchlist(JSONObject rawValues, Context context, boolean decrypt)
@@ -226,10 +284,10 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 values.put(KEY_WATCHLIST_POSITION, rawValues.getString(KEY_WATCHLIST_POSITION));
             }
         } catch (JSONException e) {
-            Log.d("moodl", "Error while inserting transaction");
+            Log.d("moodl", "Error while inserting watchlist " + e.getMessage());
         }
 
-        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.insert(TABLE_WATCHLIST, null, values);
         db.close();
     }
 
@@ -260,7 +318,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 values.put(KEY_CURRENCY_FEES, rawValues.getString(KEY_CURRENCY_FEES));
             }
         } catch (JSONException e) {
-            Log.d("moodl", "Error while inserting transaction");
+            Log.d("moodl", "Error while inserting transaction " + e.getMessage());
         }
 
         db.insert(TABLE_MANUAL_CURRENCIES, null, values);
@@ -280,22 +338,48 @@ public class DatabaseManager extends SQLiteOpenHelper{
             currencyList.add(new Currency(resultList.getString(2), resultList.getString(1)));
         }
 
+        resultList.close();
+        db.close();
+
         return currencyList;
     }
 
-    public void addCurrencyToManualCurrency(String symbol, double balance, Date date, double purchasedPrice, double fees)
+    public List<HitBtcManager> getHitBtcAccounts(Context context)
     {
+        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + "='" + HITBTC_TYPE + "'";
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
+        Cursor resultList = db.rawQuery(searchQuerry, null);
 
-        values.put(KEY_CURRENCY_SYMBOL, symbol);
-        values.put(KEY_CURRENCY_BALANCE, balance);
-        values.put(KEY_CURRENCY_DATE, date.getTime());
-        values.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
-        values.put(KEY_CURRENCY_FEES, fees);
+        List<HitBtcManager> accountList = new ArrayList<>();
 
-        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        while(resultList.moveToNext())
+        {
+            accountList.add(new HitBtcManager(context, resultList.getString(4), resultList.getString(5)));
+        }
+
+        resultList.close();
         db.close();
+
+        return accountList;
+    }
+
+    public List<BinanceManager> getBinanceAccounts()
+    {
+        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + "='" + BINANCE_TYPE + "'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor resultList = db.rawQuery(searchQuerry, null);
+
+        List<BinanceManager> accountList = new ArrayList<>();
+
+        while(resultList.moveToNext())
+        {
+            accountList.add(new BinanceManager(resultList.getString(4), resultList.getString(5)));
+        }
+
+        resultList.close();
+        db.close();
+
+        return accountList;
     }
 
     public List<Currency> getAllCurrenciesFromManualCurrency()

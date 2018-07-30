@@ -71,6 +71,11 @@ public class CurrencyDetailsList {
 
     public boolean isUpToDate()
     {
+        if(coinInfosHashmap == null)
+        {
+            upToDate = false;
+        }
+
         return upToDate;
     }
 

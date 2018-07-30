@@ -96,25 +96,13 @@ public class BalanceManager {
 
     public void updateExchangeKeys()
     {
-        String publicKey = preferenceManager.getHitBTCPublicKey();
-        String privateKey = preferenceManager.getHitBTCPrivateKey();
-
         hitBtcManagers.clear();
 
-        if(preferenceManager.isHitBTCActivated() && publicKey != null && privateKey != null)
-        {
-            hitBtcManagers.add(new HitBtcManager(context, publicKey, privateKey));
-        }
-
-        publicKey = preferenceManager.getBinancePublicKey();
-        privateKey = preferenceManager.getBinancePrivateKey();
+        hitBtcManagers = databaseManager.getHitBtcAccounts(context);
 
         binanceManagers.clear();
 
-        if(preferenceManager.isBinanceActivated() && publicKey != null && privateKey != null)
-        {
-            binanceManagers.add(new BinanceManager(publicKey, privateKey));
-        }
+        binanceManagers = databaseManager.getBinanceAccounts();
     }
 
     public List<Currency> getTotalBalance()

@@ -288,57 +288,58 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
             FingerprintDialogFragment newFragment = FingerprintDialogFragment.newInstance();
+            SwitchPreference touchdIdSwitch = (SwitchPreference) findPreference("enable_fingerprint");
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                keyguardManager = (KeyguardManager) this.getActivity().getSystemService(KEYGUARD_SERVICE);
+                fingerprintManager = (FingerprintManager) this.getActivity().getSystemService(FINGERPRINT_SERVICE);
+
+                try {
+                    if(!fingerprintManager.isHardwareDetected())
+                    {
+                        touchdIdSwitch.setEnabled(false);
+                    }
+
+                    if(ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
+                    {
+                        touchdIdSwitch.setEnabled(false);
+                    }
+
+                    if(!fingerprintManager.hasEnrolledFingerprints())
+                    {
+                        touchdIdSwitch.setEnabled(false);
+                    }
+
+                    if(!keyguardManager.isKeyguardSecure())
+                    {
+                        touchdIdSwitch.setEnabled(false);
+                    }
+                    else
+                    {
+                        try {
+                            generateKey();
+                        } catch (FingerprintException e) {
+                            e.printStackTrace();
+                        }
+
+                        if(initCipher())
+                        {
+                            cryptoObject = new FingerprintManager.CryptoObject(cipher);
+
+                            FingerprintHandler helper = new FingerprintHandler(this.getContext(), newFragment);
+                            helper.startAuth(fingerprintManager, cryptoObject);
+                        }
+                    }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
 
             if(preferences.getBoolean("enable_fingerprint", false))
             {
                 newFragment.setCancelable(false);
                 newFragment.show(getFragmentManager(), "dialog");
-
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                {
-                    keyguardManager = (KeyguardManager) this.getActivity().getSystemService(KEYGUARD_SERVICE);
-                    fingerprintManager = (FingerprintManager) this.getActivity().getSystemService(FINGERPRINT_SERVICE);
-
-                    try {
-                        if(!fingerprintManager.isHardwareDetected())
-                        {
-                            this.getActivity().findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-                        }
-
-                        if(ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
-                        {
-                            this.getActivity().findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-                        }
-
-                        if(!fingerprintManager.hasEnrolledFingerprints())
-                        {
-                            this.getActivity().findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-                        }
-
-                        if(!keyguardManager.isKeyguardSecure())
-                        {
-                            this.getActivity().findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-                        }
-                        else
-                        {
-                            try {
-                                generateKey();
-                            } catch (FingerprintException e) {
-                                e.printStackTrace();
-                            }
-
-                            if(initCipher())
-                            {
-                                cryptoObject = new FingerprintManager.CryptoObject(cipher);
-
-                                FingerprintHandler helper = new FingerprintHandler(this.getContext(), newFragment);
-                                helper.startAuth(fingerprintManager, cryptoObject);
-                            }
-                        }
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
 
@@ -720,9 +721,29 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                                                 for(int i = 0; i < watchlistArray.length(); i++)
                                                 {
-                                                    JSONObject transactionObject = watchlistArray.getJSONObject(i);
+                                                    JSONObject watchlistObject = watchlistArray.getJSONObject(i);
 
-                                                    databaseManager.addRowWatchlist(transactionObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                    databaseManager.addRowWatchlist(watchlistObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                }
+                                            }
+                                        }
+
+                                        if(restoreApiKeysCheckbox.isChecked())
+                                        {
+                                            if(wipeApiKeyxCheckbox.isChecked())
+                                            {
+                                                databaseManager.wipeData(DatabaseManager.TABLE_EXCHANGE_KEYS);
+                                            }
+
+                                            if(backupJson.has("apiKeys"))
+                                            {
+                                                JSONArray apiArray = backupJson.getJSONArray("apiKeys");
+
+                                                for(int i = 0; i < apiArray.length(); i++)
+                                                {
+                                                    JSONObject apiKeysObject = apiArray.getJSONObject(i);
+
+                                                    databaseManager.addRowApiKeys(apiKeysObject, getContext(), enterPasswordCheckbox.isChecked());
                                                 }
                                             }
                                         }

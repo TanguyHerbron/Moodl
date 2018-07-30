@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,6 +49,8 @@ public class RecordTransactionActivity extends AppCompatActivity {
     private Currency currency;
     private int transactionId;
 
+    private SearchView mainSearchView;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -54,7 +58,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_record:
@@ -94,7 +98,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
                 break;
         }
         return true;
-    }
+    }*/
 
     private boolean checkPriceText()
     {
@@ -160,14 +164,18 @@ public class RecordTransactionActivity extends AppCompatActivity {
         databaseManager = new DatabaseManager(this);
         preferenceManager = new PreferencesManager(this);
 
-        initializeViewElements();
+        //initializeViewElements();
 
         coin = intent.getStringExtra("coin");
         symbol = intent.getStringExtra("symbol");
 
         transactionId = intent.getIntExtra("transactionId", -1);
 
-        if(transactionId != -1)
+        Toolbar toolbar = findViewById(R.id.searchCurrencyToolbar);
+
+        setSupportActionBar(toolbar);
+
+        /*if(transactionId != -1)
         {
             setTitle(PlaceholderManager.getEditTransactionString(coin, getBaseContext()));
 
@@ -206,17 +214,17 @@ public class RecordTransactionActivity extends AppCompatActivity {
             }
         });
 
-        initializeButtons();
+        //initializeButtons();
 
         currency.getTimestampPrice(this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
             @Override
             public void onSuccess(String price) {
                 purchasedPriceEditText.setText(price);
             }
-        }, calendar.getTimeInMillis() / 1000);
+        }, calendar.getTimeInMillis() / 1000);*/
     }
 
-    private void initializeButtons()
+    /*private void initializeButtons()
     {
         buyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -262,7 +270,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
         buyButton = findViewById(R.id.buyButton);
         sellButton = findViewById(R.id.sellButton);
         transferButton = findViewById(R.id.transfertButton);
-    }
+    }*/
 
     private void createDatePicker()
     {

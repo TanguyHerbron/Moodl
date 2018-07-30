@@ -49,6 +49,11 @@ public class CurrencyTickerList {
 
     public boolean isUpToDate()
     {
+        if(currencyTickerList == null)
+        {
+            upToDate = false;
+        }
+
         return upToDate;
     }
 

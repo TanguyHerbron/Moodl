@@ -40,6 +40,7 @@ import com.daasuu.ei.Ease;
 import com.daasuu.ei.EasingInterpolator;
 import com.herbron.moodl.Activities.CurrencySelectionActivity;
 import com.herbron.moodl.Activities.HomeActivity;
+import com.herbron.moodl.Activities.RecordTransactionActivity;
 import com.herbron.moodl.BalanceUpdateInterface;
 import com.herbron.moodl.DataManagers.BalanceManager;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
@@ -180,6 +181,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     refreshLayout.setRefreshing(false);
 
                     showErrorSnackbar();
+                    Log.d("moodl", "Error > Refresh out of time");
                 }
 
                 if (loadingDialog.isShowing())
@@ -187,6 +189,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     loadingDialog.dismiss();
 
                     showErrorSnackbar();
+                    Log.d("moodl", "Error > Refresh out of time");
                 }
             }
         };
@@ -242,7 +245,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         addCurrencyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent addIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
+                Intent addIntent = new Intent(getActivity(), RecordTransactionActivity.class);
 
                 startActivity(addIntent);
             }
