@@ -338,11 +338,28 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
             if(decrypt)
             {
-                values.put(KEY_EXCHANGE_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_WATCHLIST_SYMBOL)));
+                values.put(KEY_EXCHANGE_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_NAME)));
+                values.put(KEY_EXCHANGE_TYPE, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_TYPE)));
+                values.put(KEY_EXCHANGE_DESCRIPTION, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_DESCRIPTION)));
+                values.put(KEY_EXCHANGE_PUBLIC_KEY, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_PUBLIC_KEY)));
+                values.put(KEY_EXCHANGE_SECRET_KEY, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_SECRET_KEY)));
+                values.put(KEY_EXCHANGE_IS_ENABLED, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_IS_ENABLED)));
+            }
+            else
+            {
+                values.put(KEY_EXCHANGE_NAME, rawValues.getString(KEY_EXCHANGE_NAME));
+                values.put(KEY_EXCHANGE_TYPE, rawValues.getString(KEY_EXCHANGE_TYPE));
+                values.put(KEY_EXCHANGE_DESCRIPTION, rawValues.getString(KEY_EXCHANGE_DESCRIPTION));
+                values.put(KEY_EXCHANGE_PUBLIC_KEY, rawValues.getString(KEY_EXCHANGE_PUBLIC_KEY));
+                values.put(KEY_EXCHANGE_SECRET_KEY, rawValues.getString(KEY_EXCHANGE_SECRET_KEY));
+                values.put(KEY_EXCHANGE_IS_ENABLED, rawValues.getString(KEY_EXCHANGE_IS_ENABLED));
             }
         } catch (JSONException e) {
             Log.d("moodl", "Error while inserting api key " + e.getMessage());
         }
+
+        db.insert(TABLE_EXCHANGE_KEYS, null, values);
+        db.close();
     }
 
     public void addRowWatchlist(JSONObject rawValues, Context context, boolean decrypt)
