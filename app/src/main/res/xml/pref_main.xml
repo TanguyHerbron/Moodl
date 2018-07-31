@@ -27,7 +27,7 @@
     <PreferenceCategory
         android:title="@string/pref_title_category_data_backup">
 
-        <PreferenceScreen android:title="@string/pref_title_export"
+        <Preference android:title="@string/pref_title_export"
             android:key="export"/>
 
         <Preference android:title="@string/pref_title_import"
@@ -54,6 +54,15 @@
 
         <PreferenceScreen android:title="@string/pref_title_version"
             android:key="version"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Developper"
+        android:key="developper_category">
+
+        <Preference android:title="Wipe cache"
+            android:key="wipe_cache"/>
 
     </PreferenceCategory>
 

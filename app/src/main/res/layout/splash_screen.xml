@@ -4,6 +4,14 @@
     android:layout_width="match_parent"
     android:background="@color/colorPrimaryDark">
 
+    <TextView
+        android:id="@+id/appNameTextView"
+        android:text="@string/app_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_gravity="center"/>
+
     <LinearLayout
         android:id="@+id/animatedViewsLayout"
         android:layout_width="match_parent"

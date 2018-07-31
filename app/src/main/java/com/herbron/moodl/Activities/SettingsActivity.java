@@ -17,6 +17,7 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
@@ -414,6 +415,33 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             bindPreferenceSummaryToValue(findPreference("default_currency"));
             bindPreferenceSummaryToValue(findPreference("minimum_value_displayed"));
+
+            PreferenceCategory developperCategory = (PreferenceCategory) findPreference("developper_category");
+
+            if(!BuildConfig.DEBUG)
+            {
+                getPreferenceScreen().removePreference(developperCategory);
+            }
+            else
+            {
+                developperCategory.getPreference(0).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        File cacheDir = getContext().getCacheDir();
+                        File[] cachedFiles = cacheDir.listFiles();
+
+                        for(int i = 0; i < cachedFiles.length; i++)
+                        {
+                            if(cachedFiles[i].isFile())
+                            {
+                                cachedFiles[i].delete();
+                            }
+                        }
+
+                        return false;
+                    }
+                });
+            }
 
             findPreference("export").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override

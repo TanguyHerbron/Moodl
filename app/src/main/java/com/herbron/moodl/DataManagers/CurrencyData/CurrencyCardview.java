@@ -351,6 +351,7 @@ public class CurrencyCardview extends CardView {
         dataSet.setDrawCircles(false);
         dataSet.setDrawValues(false);
         dataSet.setHighlightEnabled(false);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 
         return new LineData(dataSet);
     }
