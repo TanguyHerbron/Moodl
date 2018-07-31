@@ -28,7 +28,6 @@
     <color name="decrease">#FFED143D</color>
     <color name="increase">#FF00E000</color>
     <color name="listBackground">#FFEEEEEE</color>
-    <color name="listBackground2">#FFFFFFFF</color>
     <color name="separationColor">#66999999</color>
     <color name="red">#FFF44336</color>
     <color name="green">#FF4CAF50</color>
@@ -41,4 +40,8 @@
     <color name="blue">#FF689afe</color>
     <color name="transparent_blue">#22689afe</color>
     <color name="default_color">#FFAAAAAA</color>
+    <color name="captionColor">#FF898989</color>
+    <color name="softWhite">#66FFFFFF</color>
+
+    <color name="binance">#FFF5BC00</color>
 </resources>

@@ -26,14 +26,6 @@ import java.util.List;
 
 public class BalanceManager {
 
-    private String publicHitKey;
-    private String publicBinanceKey;
-    private String publicPoloniex;
-    private String privateHitKey;
-    private String privateBinanceKey;
-    private String privatePoloniex;
-    final private String hitBalanceUrl = "https://api.hitbtc.com/api/2/trading/balance";
-    final private String detailUrl = "https://www.cryptocompare.com/api/data/coinlist/";
     private RequestQueue requestQueue;
     private List<Currency> binanceBalance;
     private List<Currency> hitBalance;
@@ -103,6 +95,8 @@ public class BalanceManager {
         binanceManagers.clear();
 
         binanceManagers = databaseManager.getBinanceAccounts();
+
+        Log.d("moodl", "Number of binance accounts " + binanceManagers.size());
     }
 
     public List<Currency> getTotalBalance()
@@ -113,6 +107,8 @@ public class BalanceManager {
     public void updateTotalBalance()
     {
         boolean isUpdated = false;
+
+        updateExchangeKeys();
         
         balanceCounter = 0;
 
@@ -124,6 +120,7 @@ public class BalanceManager {
 
             for(int i = 0; i < binanceManagers.size(); i++)
             {
+                final int index = i;
                 binanceManagers.get(i).updateBalance(new BinanceManager.BinanceCallBack() {
                     @Override
                     public void onSuccess() {
@@ -132,6 +129,7 @@ public class BalanceManager {
 
                     @Override
                     public void onError(String error) {
+                        databaseManager.disableExchangeAccount(binanceManagers.get(index).getId());
                         dataNotifierInterface.onBalanceError(error);
                     }
                 });
@@ -298,6 +296,8 @@ public class BalanceManager {
             currencyName = jsonObject.getString("CoinName");
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (NullPointerException e) {
+            currencyName = symbol;
         }
 
         return currencyName;
@@ -312,6 +312,8 @@ public class BalanceManager {
             id = jsonObject.getInt("Id");
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (NullPointerException e) {
+            id = -1;
         }
 
         return id;

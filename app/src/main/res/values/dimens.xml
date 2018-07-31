@@ -1,6 +1,6 @@
 <resources>
-    <dimen name="cardViewMainText">15sp</dimen>
-    <dimen name="cardViewSecondaryText">12sp</dimen>
+    <dimen name="cardViewTitle">16sp</dimen>
+    <dimen name="cardViewCaption">12sp</dimen>
     <dimen name="cardViewChartSize">150dp</dimen>
 
     <dimen name="app_bar_height">172dp</dimen>
@@ -15,4 +15,5 @@
     <dimen name="cardview_elevation">8dp</dimen>
 
     <dimen name="fragment_padding">15dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

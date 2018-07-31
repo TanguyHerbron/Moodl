@@ -249,5 +249,12 @@
     <string name="wipe_manual_entries">Wipe current entries</string>
     <string name="wipe_watchlist">Wipe current watchlist</string>
     <string name="wipe_api_keys">Wipe current API keys</string>
+    <string name="title_activity_exchange_list">ExchangeList</string>
+    <string name="title_add_exchange">Choose an exchange</string>
+    <string name="account_label">Account label</string>
+    <string name="publicKey">Public key</string>
+    <string name="apiKey">API Key</string>
+    <string name="secretKey">Secret Key</string>
+    <string name="informations">Informations</string>
 
 </resources>

@@ -54,7 +54,7 @@ public class Transactions extends Fragment {
 
         currency = getActivity().getIntent().getParcelableExtra("currency");
         databaseManager = new DatabaseManager(getContext());
-        binanceManager = new BinanceManager(preferencesManager.getBinancePublicKey(), preferencesManager.getBinancePrivateKey());
+        //binanceManager = new BinanceManager(preferencesManager.getBinancePublicKey(), preferencesManager.getBinancePrivateKey());
         tradeLayout = view.findViewById(R.id.listTrades);
         transactionLayout = view.findViewById(R.id.listTransactions);
 
@@ -63,8 +63,8 @@ public class Transactions extends Fragment {
         TransactionUpdater transactionUpdater = new TransactionUpdater();
         transactionUpdater.execute();
 
-        TradeUpdater updater = new TradeUpdater();
-        updater.execute();
+        /*TradeUpdater updater = new TradeUpdater();
+        updater.execute();*/
 
         return view;
     }

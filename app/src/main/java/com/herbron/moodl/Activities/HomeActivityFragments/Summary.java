@@ -585,7 +585,12 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     @Override
     public void onBalanceError(String error)
     {
-        generateSnackBarError(error);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                generateSnackBarError(error);
+            }
+        });
     }
 
     private void generateSnackBarError(String error)

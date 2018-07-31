@@ -1,5 +1,6 @@
 package com.herbron.moodl.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -24,6 +25,7 @@ public class ExchangeListActivity extends AppCompatActivity {
 
     private DatabaseManager databaseManager;
     private ListView exchangeListView;
+    private ExchangeListAdapter exchangeListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +39,7 @@ public class ExchangeListActivity extends AppCompatActivity {
 
         databaseManager = new DatabaseManager(this);
 
-        ArrayList<Exchange> exchangeList = new ArrayList<>();
-        exchangeList.add(new Exchange(0, "Main account", BINANCE_TYPE, "Account with main balance & trading bot", "0000", "0000"));
-        exchangeList.add(new Exchange(1, "Hit account", HITBTC_TYPE, "BCN account and HIT", "0001", "0001"));
-
-        ExchangeListAdapter exchangeListAdapter = new ExchangeListAdapter(getApplicationContext(), exchangeList);
+        exchangeListAdapter = new ExchangeListAdapter(getApplicationContext(), databaseManager.getExchanges());
 
         exchangeListView = findViewById(R.id.exchange_listView);
         exchangeListView.setAdapter(exchangeListAdapter);
@@ -50,10 +48,19 @@ public class ExchangeListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(ExchangeListActivity.this, AddExchangeActivity.class);
+                startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        exchangeListAdapter.clear();
+        exchangeListAdapter.addAll(databaseManager.getExchanges());
+        exchangeListAdapter.notifyDataSetChanged();
     }
 
     @Override

@@ -43,7 +43,7 @@
         <activity
             android:name=".Activities.RecordTransactionActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/RecordTransactionTheme">
+            android:theme="@style/InputActivityTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.herbron.moodl.Activities.HomeActivity" />
@@ -56,6 +56,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.herbron.moodl.Activities.HomeActivity" />
         </activity>
+        <activity
+            android:name=".Activities.ExchangeListActivity"
+            android:label="@string/title_activity_exchange_list"
+            android:theme="@style/InputActivityTheme"/>
+        <activity android:name=".Activities.AddExchangeActivity"
+            android:theme="@style/InputActivityTheme"></activity>
     </application>
 
 </manifest>

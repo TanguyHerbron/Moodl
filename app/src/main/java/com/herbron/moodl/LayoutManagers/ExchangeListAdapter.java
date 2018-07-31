@@ -1,6 +1,7 @@
 package com.herbron.moodl.LayoutManagers;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -12,9 +13,13 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.herbron.moodl.Activities.AddExchangeActivity;
+import com.herbron.moodl.Activities.ExchangeListActivity;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Trade;
+import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
+import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
@@ -28,6 +33,7 @@ public class ExchangeListAdapter extends ArrayAdapter<Exchange> {
     public ExchangeListAdapter(Context context, ArrayList<Exchange> exchanges)
     {
         super(context, android.R.layout.simple_list_item_1, exchanges);
+
         this.context = context;
     }
 
@@ -41,11 +47,37 @@ public class ExchangeListAdapter extends ArrayAdapter<Exchange> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.exchange_cell, parent, false);
         }
 
+        final View finalConvertView = convertView;
+
         TextView exchangeNameTextView = convertView.findViewById(R.id.exchange_name);
         TextView exchangeDescriptionTextView = convertView.findViewById(R.id.exchange_description);
 
         exchangeNameTextView.setText(exchange.getName());
         exchangeDescriptionTextView.setText(exchange.getDescription());
+
+        if(!exchange.isEnabled())
+        {
+            convertView.findViewById(R.id.exchange_account_off_imageView).setVisibility(View.VISIBLE);
+        }
+
+        convertView.findViewById(R.id.editExchangeInfosLayout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent editExchangeAccountIntent = new Intent(context, AddExchangeActivity.class);
+                editExchangeAccountIntent.putExtra("isEdit", true);
+                editExchangeAccountIntent.putExtra("exchangeId", exchange.getId());
+                context.startActivity(editExchangeAccountIntent);
+            }
+        });
+
+        convertView.findViewById(R.id.deleteExchangeInfosLayout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseManager databaseManager = new DatabaseManager(getContext());
+                databaseManager.deleteExchangeAccountFromId(exchange.getId());
+                MoodlBox.collapseH(finalConvertView);
+            }
+        });
 
         return convertView;
     }

@@ -17,19 +17,15 @@ import java.util.List;
  * Created by Guitoune on 26/02/2018.
  */
 
-public class BinanceManager {
-
-    private String publicKey;
-    private String privateKey;
+public class BinanceManager extends Exchange {
 
     private List<Currency> balance;
     private ArrayList<com.herbron.moodl.DataManagers.CurrencyData.Trade> trades;
-    private List<String> pairSymbolList;
+    private static List<String> pairSymbolList;
 
-    public BinanceManager(String publicKey, String privateKey)
+    public BinanceManager(Exchange exchange)
     {
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
+        super(exchange.id, exchange.name, exchange.type, exchange.description, exchange.publicKey, exchange.privateKey, exchange.isEnabled);
 
         createPairSymbolList();
     }

@@ -10,6 +10,7 @@ import android.util.Log;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.ExchangeManager.BinanceManager;
+import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.DataManagers.ExchangeManager.HitBtcManager;
 
 import org.json.JSONArray;
@@ -28,7 +29,7 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 10;
 
     private static final String DATABASE_NAME = "Currencies.db";
 
@@ -51,14 +52,15 @@ public class DatabaseManager extends SQLiteOpenHelper{
     private static final String KEY_EXCHANGE_DESCRIPTION = "description";
     private static final String KEY_EXCHANGE_PUBLIC_KEY = "publicKey";
     private static final String KEY_EXCHANGE_SECRET_KEY = "secretKey";
+    private static final String KEY_EXCHANGE_IS_ENABLED = "enabled";
 
     private static final String KEY_WATCHLIST_ID = "idWatchlist";
     private static final String KEY_WATCHLIST_SYMBOL = "symbol";
     private static final String KEY_WATCHLIST_NAME = "name";
     private static final String KEY_WATCHLIST_POSITION = "position";
 
-    private static final int BINANCE_TYPE = 0;
-    private static final int HITBTC_TYPE = 1;
+    public static final int BINANCE_TYPE = 0;
+    public static final int HITBTC_TYPE = 1;
 
     public DatabaseManager(Context context)
     {
@@ -81,11 +83,12 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
                 + KEY_EXCHANGE_ID + " INTEGER PRIMARY KEY,"
-                + KEY_EXCHANGE_TYPE + " INTEGER,"
                 + KEY_EXCHANGE_NAME + " TEXT,"
+                + KEY_EXCHANGE_TYPE + " INTEGER,"
                 + KEY_EXCHANGE_DESCRIPTION + " TEXT,"
                 + KEY_EXCHANGE_PUBLIC_KEY + " TEXT,"
-                + KEY_EXCHANGE_SECRET_KEY + " TEXT"
+                + KEY_EXCHANGE_SECRET_KEY + " TEXT,"
+                + KEY_EXCHANGE_IS_ENABLED + " INTEGER"
                 + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_WATCHLIST + "("
@@ -109,6 +112,12 @@ public class DatabaseManager extends SQLiteOpenHelper{
             case 7:
                 db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
                         + " ADD " + KEY_EXCHANGE_TYPE + " INTEGER");
+            case 8:
+                db.execSQL("DROP TABLE " + TABLE_EXCHANGE_KEYS);
+                onCreate(db);
+            case 9:
+                db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
+                        + " ADD " + KEY_EXCHANGE_IS_ENABLED + " INTEGER");
         }
     }
 
@@ -151,7 +160,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
         cv.put(KEY_WATCHLIST_POSITION, position);
 
         db.update(TABLE_WATCHLIST, cv, KEY_WATCHLIST_SYMBOL + "='" + symbol + "'", null);
-
     }
 
     private int getWatchlistRowCount(SQLiteDatabase db)
@@ -164,11 +172,83 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return result.getInt(0);
     }
 
+    public void deleteExchangeAccountFromId(int id)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_EXCHANGE_KEYS, KEY_EXCHANGE_ID + " = " + id, null);
+        db.close();
+    }
+
     public void deleteCurrencyFromWatchlist(String symbol)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_WATCHLIST, KEY_WATCHLIST_SYMBOL + " = '" + symbol + "'", null);
+        db.close();
+    }
+
+    public void disableExchangeAccount(int id)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(KEY_EXCHANGE_IS_ENABLED, 0);
+
+        db.update(TABLE_EXCHANGE_KEYS, cv, KEY_EXCHANGE_ID + "='" + id + "'", null);
+    }
+
+    public Exchange getExchangeFromId(int exchangeId)
+    {
+        String selectQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_ID + " = " + exchangeId;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery(selectQuerry, null);
+
+        Exchange selectedExchange = null;
+
+        if(result.moveToFirst())
+        {
+            selectedExchange = new Exchange(result.getInt(0), result.getString(1)
+                    , result.getInt(2), result.getString(3)
+                    , result.getString(4), result.getString(5)
+                    , (result.getInt(6) == 1));
+        }
+
+        return selectedExchange;
+    }
+
+    public ArrayList<Exchange> getExchanges()
+    {
+        String selectQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery(selectQuerry, null);
+
+        ArrayList<Exchange> exchanges = new ArrayList<>();
+
+        while(result.moveToNext())
+        {
+            exchanges.add(new Exchange(result.getInt(0), result.getString(1)
+                    , result.getInt(2), result.getString(3)
+                    , result.getString(4), result.getString(5)
+                    , (result.getInt(6) == 1)));
+        }
+
+        return exchanges;
+    }
+
+    public void addExchange(String name, int type, String description, String publicKey, String privateKey)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_EXCHANGE_NAME, name);
+        values.put(KEY_EXCHANGE_TYPE, type);
+        values.put(KEY_EXCHANGE_DESCRIPTION, description);
+        values.put(KEY_EXCHANGE_PUBLIC_KEY, publicKey);
+        values.put(KEY_EXCHANGE_SECRET_KEY, privateKey);
+        values.put(KEY_EXCHANGE_IS_ENABLED, 1);
+
+        db.insert(TABLE_EXCHANGE_KEYS, null, values);
         db.close();
     }
 
@@ -346,7 +426,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public List<HitBtcManager> getHitBtcAccounts(Context context)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + "='" + HITBTC_TYPE + "'";
+        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + "='" + HITBTC_TYPE + "' AND " + KEY_EXCHANGE_IS_ENABLED + " = '1'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultList = db.rawQuery(searchQuerry, null);
 
@@ -354,7 +434,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultList.moveToNext())
         {
-            accountList.add(new HitBtcManager(context, resultList.getString(4), resultList.getString(5)));
+            Exchange exchange = new Exchange(resultList.getInt(0), resultList.getString(1)
+                    , resultList.getInt(2), resultList.getString(3)
+                    , resultList.getString(4), resultList.getString(5)
+                    , (resultList.getInt(6) == 1));
+            accountList.add(new HitBtcManager(context, exchange));
         }
 
         resultList.close();
@@ -365,7 +449,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public List<BinanceManager> getBinanceAccounts()
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + "='" + BINANCE_TYPE + "'";
+        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + "='" + BINANCE_TYPE + "' AND " + KEY_EXCHANGE_IS_ENABLED + " = '1'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultList = db.rawQuery(searchQuerry, null);
 
@@ -373,7 +457,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultList.moveToNext())
         {
-            accountList.add(new BinanceManager(resultList.getString(4), resultList.getString(5)));
+            Exchange exchange = new Exchange(resultList.getInt(0), resultList.getString(1)
+                    , resultList.getInt(2), resultList.getString(3)
+                    , resultList.getString(4), resultList.getString(5)
+                    , (resultList.getInt(6) == 1));
+            accountList.add(new BinanceManager(exchange));
         }
 
         resultList.close();

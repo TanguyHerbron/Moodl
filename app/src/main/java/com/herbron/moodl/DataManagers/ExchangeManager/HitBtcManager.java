@@ -26,10 +26,8 @@ import java.util.Map;
  * Created by Guitoune on 26/02/2018.
  */
 
-public class HitBtcManager {
+public class HitBtcManager extends Exchange {
 
-    private String publicKey;
-    private String privateKey;
     final private String hitBalanceUrl = "https://api.hitbtc.com/api/2/account/balance";
     final private String hitTradingBalanceUrl = "https://api.hitbtc.com/api/2/trading/balance";
     final private String tradeHistoryUrl = "https://api.hitbtc.com/api/2/history/trades?";
@@ -41,13 +39,12 @@ public class HitBtcManager {
     private List<Currency> balance;
     private android.content.Context context;
 
-    public HitBtcManager(android.content.Context context, String publicKey, String privateKey)
+    public HitBtcManager(android.content.Context context, Exchange exchange)
     {
+        super(exchange.id, exchange.name, exchange.type, exchange.description, exchange.publicKey, exchange.privateKey, exchange.isEnabled);
+
         this.context = context;
         requestQueue = Volley.newRequestQueue(context);
-
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
     }
 
     private void createPairSymbolList()

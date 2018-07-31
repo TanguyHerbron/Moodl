@@ -139,4 +139,5 @@
     <string name="wipe_manual_entries">Supprimer les entrées manuelles actuelles</string>
     <string name="wipe_watchlist">Supprimer la liste suivie actuelle</string>
     <string name="wipe_api_keys">Supprimer les clefs API actuelles</string>
+    <string name="title_add_exchange">Choose an exchange</string>
 </resources>

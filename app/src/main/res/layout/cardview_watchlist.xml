@@ -60,7 +60,7 @@
                     android:layout_gravity="center_vertical"
                     android:gravity="start"
                     android:textColor="@color/mainTextViewColor"
-                    android:textSize="@dimen/cardViewMainText" />
+                    android:textSize="@dimen/cardViewTitle" />
 
                 <TextView
                     android:id="@+id/currencySymbolTextView"
@@ -70,7 +70,7 @@
                     android:layout_marginLeft="2dp"
                     android:gravity="left"
                     android:textColor="@color/secondaryTextViewColor"
-                    android:textSize="@dimen/cardViewSecondaryText" />
+                    android:textSize="@dimen/cardViewCaption" />
 
             </LinearLayout>
 
@@ -86,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:textColor="@color/secondaryTextViewColor"
-                    android:textSize="@dimen/cardViewMainText"
+                    android:textSize="@dimen/cardViewTitle"
                     android:layout_weight="0.5"/>
 
                 <LinearLayout
@@ -101,13 +101,13 @@
                         android:id="@+id/currencyFluctuationPercentageTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/cardViewMainText" />
+                        android:textSize="@dimen/cardViewTitle" />
 
                     <TextView
                         android:id="@+id/currencyFluctuationTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/cardViewSecondaryText" />
+                        android:textSize="@dimen/cardViewCaption" />
 
                 </LinearLayout>
 
@@ -154,7 +154,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/day_history"
-                android:textSize="@dimen/cardViewSecondaryText" />
+                android:textSize="@dimen/cardViewCaption" />
 
             <View
                 android:layout_width="match_parent"

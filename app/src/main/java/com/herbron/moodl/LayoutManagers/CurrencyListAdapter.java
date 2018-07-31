@@ -68,7 +68,7 @@ public class CurrencyListAdapter extends BaseAdapter implements Filterable {
             }
 
             if (position % 2 == 0)
-                convertView.setBackgroundColor(context.getResources().getColor(R.color.listBackground2));
+                convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
             else
                 convertView.setBackgroundColor(context.getResources().getColor(R.color.listBackground));
 
