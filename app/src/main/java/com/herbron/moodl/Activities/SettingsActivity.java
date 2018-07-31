@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -234,7 +235,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
 
-                    return false;
+                    Log.d("moodl", "> " + o + " " + preference);
+
+                    return (boolean) o;
                 }
             });
 
@@ -777,6 +780,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
 
+            findPreference("exchange").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    Intent exchangeListIntent = new Intent(getContext(), ExchangeListActivity.class);
+                    startActivity(exchangeListIntent);
+
+                    return false;
+                }
+            });
+
             EditTextPreference editTextPreference = (EditTextPreference) findPreference("minimum_value_displayed");
             editTextPreference.setPositiveButtonText(getString(R.string.save));
             editTextPreference.setNegativeButtonText(getString(R.string.cancel));
@@ -832,6 +846,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 //startActivity(new Intent(getActivity(), SettingsActivity.class));
                 return true;
             }
+
             return super.onOptionsItemSelected(item);
         }
     }
