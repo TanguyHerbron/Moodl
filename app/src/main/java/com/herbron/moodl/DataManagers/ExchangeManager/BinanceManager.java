@@ -43,6 +43,7 @@ public class BinanceManager extends Exchange {
     public void updateBalance(BinanceCallBack callBack)
     {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
+
         BinanceApiRestClient client = factory.newRestClient();
 
         try {
@@ -55,7 +56,10 @@ public class BinanceManager extends Exchange {
             {
                 if(Double.parseDouble(assets.get(i).getFree()) > 0 || Double.parseDouble(assets.get(i).getLocked()) > 0)
                 {
-                    balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree()) + Double.parseDouble(assets.get(i).getLocked())));
+                    if(!assets.get(i).getAsset().equals("VET"))
+                    {
+                        balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree()) + Double.parseDouble(assets.get(i).getLocked())));
+                    }
                 }
             }
 
@@ -68,7 +72,6 @@ public class BinanceManager extends Exchange {
     public void updateTrades(BinanceCallBack callBack, String symbol)
     {
         trades = new ArrayList<>();
-
 
         for(int i = 0; i < pairSymbolList.size(); i++)
         {

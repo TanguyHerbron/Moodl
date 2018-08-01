@@ -69,23 +69,6 @@ public class BalanceManager {
         this.dataNotifierInterface = dataNotifierInterface;
     }
 
-    public List<String> getBiggestCurrencies()
-    {
-        List<String> currenciesDetails = new ArrayList<>();
-
-        int index = 0;
-        Iterator<String> coinIterator = currencyDetailsList.getCoinInfosHashmap().keySet().iterator();
-
-        while(index < 11)
-        {
-            index++;
-
-            Log.d("moodl", "For " + index + " : " + coinIterator.next());
-        }
-
-        return currenciesDetails;
-    }
-
     public void updateExchangeKeys()
     {
         hitBtcManagers.clear();
@@ -95,8 +78,6 @@ public class BalanceManager {
         binanceManagers.clear();
 
         binanceManagers = databaseManager.getBinanceAccounts();
-
-        Log.d("moodl", "Number of binance accounts " + binanceManagers.size());
     }
 
     public List<Currency> getTotalBalance()
@@ -120,8 +101,8 @@ public class BalanceManager {
 
             for(int i = 0; i < binanceManagers.size(); i++)
             {
-                final int index = i;
-                binanceManagers.get(i).updateBalance(new BinanceManager.BinanceCallBack() {
+                final BinanceManager binanceManager = binanceManagers.get(i);
+                binanceManager.updateBalance(new BinanceManager.BinanceCallBack() {
                     @Override
                     public void onSuccess() {
                         countBalances();
@@ -129,7 +110,7 @@ public class BalanceManager {
 
                     @Override
                     public void onError(String error) {
-                        databaseManager.disableExchangeAccount(binanceManagers.get(index).getId());
+                        databaseManager.disableExchangeAccount(binanceManager.getId());
                         dataNotifierInterface.onBalanceError(error);
                     }
                 });

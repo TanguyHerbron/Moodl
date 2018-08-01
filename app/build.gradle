@@ -64,6 +64,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    implementation files('../libs/binance-api.jar')
+    implementation files('../libs/binance-api-forked.jar')
     implementation files('../libs/commons-codec-1.11.jar')
 }
