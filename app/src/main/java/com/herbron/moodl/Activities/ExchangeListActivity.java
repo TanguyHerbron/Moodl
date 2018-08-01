@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
@@ -38,11 +39,7 @@ public class ExchangeListActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         databaseManager = new DatabaseManager(this);
-
-        exchangeListAdapter = new ExchangeListAdapter(getApplicationContext(), databaseManager.getExchanges());
-
         exchangeListView = findViewById(R.id.exchange_listView);
-        exchangeListView.setAdapter(exchangeListAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -58,8 +55,9 @@ public class ExchangeListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        exchangeListAdapter.clear();
-        exchangeListAdapter.addAll(databaseManager.getExchanges());
+        exchangeListAdapter = new ExchangeListAdapter(getApplicationContext(), databaseManager.getExchanges());
+
+        exchangeListView.setAdapter(exchangeListAdapter);
         exchangeListAdapter.notifyDataSetChanged();
     }
 
