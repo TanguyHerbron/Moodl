@@ -2,8 +2,12 @@ package com.herbron.moodl.LayoutManagers;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +15,8 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.herbron.moodl.Activities.AddExchangeActivity;
@@ -47,17 +53,16 @@ public class ExchangeListAdapter extends ArrayAdapter<Exchange> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.exchange_cell, parent, false);
         }
 
-        final View finalConvertView = convertView;
-
         TextView exchangeNameTextView = convertView.findViewById(R.id.exchange_name);
         TextView exchangeDescriptionTextView = convertView.findViewById(R.id.exchange_description);
+        ImageView accountOffImageView = convertView.findViewById(R.id.exchange_account_off_imageView);
 
         exchangeNameTextView.setText(exchange.getName());
         exchangeDescriptionTextView.setText(exchange.getDescription());
 
         if(!exchange.isEnabled())
         {
-            convertView.findViewById(R.id.exchange_account_off_imageView).setVisibility(View.VISIBLE);
+            accountOffImageView.setVisibility(View.VISIBLE);
         }
 
         convertView.findViewById(R.id.editExchangeInfosLayout).setOnClickListener(new View.OnClickListener() {
@@ -75,7 +80,8 @@ public class ExchangeListAdapter extends ArrayAdapter<Exchange> {
             public void onClick(View v) {
                 DatabaseManager databaseManager = new DatabaseManager(getContext());
                 databaseManager.deleteExchangeAccountFromId(exchange.getId());
-                MoodlBox.collapseH(finalConvertView);
+                remove(exchange);
+                notifyDataSetChanged();
             }
         });
 

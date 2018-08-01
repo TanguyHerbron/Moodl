@@ -336,7 +336,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             }
 
             lastTimestamp = System.currentTimeMillis() / 1000;
-            balanceManager.updateExchangeKeys();
 
             resetCounters();
             DataUpdater updater = new DataUpdater();

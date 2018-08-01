@@ -443,7 +443,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public List<HitBtcManager> getHitBtcAccounts(Context context)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + " = " + HITBTC_TYPE + " AND " + KEY_EXCHANGE_IS_ENABLED + " = '1'";
+        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + " = " + HITBTC_TYPE + " AND " + KEY_EXCHANGE_IS_ENABLED + " = 1";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultList = db.rawQuery(searchQuerry, null);
 
@@ -466,7 +466,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public List<BinanceManager> getBinanceAccounts()
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + " = " + BINANCE_TYPE + " AND " + KEY_EXCHANGE_IS_ENABLED + " = '1'";
+        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + " = " + BINANCE_TYPE + " AND " + KEY_EXCHANGE_IS_ENABLED + " = 1";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultList = db.rawQuery(searchQuerry, null);
 
