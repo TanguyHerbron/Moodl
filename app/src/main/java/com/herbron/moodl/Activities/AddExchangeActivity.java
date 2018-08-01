@@ -80,6 +80,7 @@ public class AddExchangeActivity extends AppCompatActivity {
     private void loadLayoutFor(int exchangeType)
     {
         setupExchangeLayout.removeAllViews();
+        exchangeSpinner.setSelection(exchangeType);
 
         switch (exchangeType)
         {
