@@ -17,6 +17,7 @@ import android.widget.Spinner;
 
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
+import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.R;
 
 public class AddExchangeActivity extends AppCompatActivity {
@@ -115,6 +116,9 @@ public class AddExchangeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(isEditTextFilled(accountLabelEditText) && isEditTextFilled(publicKeyEditText) && isEditTextFilled(secretKeyEditText))
                 {
+                    PreferencesManager preferencesManager = new PreferencesManager(getBaseContext());
+                    preferencesManager.setMustUpdateSummary(true);
+
                     databaseManager.deleteExchangeAccountFromId(exchangeInfos.getId());
                     databaseManager.addExchange(accountLabelEditText.getText().toString(), exchangeSpinner.getSelectedItemPosition()
                             , accountDescriptionEditText.getText().toString(), publicKeyEditText.getText().toString()
@@ -139,6 +143,9 @@ public class AddExchangeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(isEditTextFilled(accountLabelEditText) && isEditTextFilled(publicKeyEditText) && isEditTextFilled(secretKeyEditText))
                 {
+                    PreferencesManager preferencesManager = new PreferencesManager(getBaseContext());
+                    preferencesManager.setMustUpdateSummary(true);
+
                     databaseManager.addExchange(accountLabelEditText.getText().toString(), exchangeSpinner.getSelectedItemPosition()
                             , accountDescriptionEditText.getText().toString(), publicKeyEditText.getText().toString()
                             , secretKeyEditText.getText().toString());

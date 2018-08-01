@@ -123,6 +123,7 @@ public class BalanceManager {
 
             for(int i = 0; i < hitBtcManagers.size(); i++)
             {
+                final HitBtcManager hitBtcManager = hitBtcManagers.get(i);
                 hitBtcManagers.get(i).updateGlobalBalance(new HitBtcManager.HitBtcCallBack() {
                     @Override
                     public void onSuccess() {
@@ -131,6 +132,7 @@ public class BalanceManager {
 
                     @Override
                     public void onError(String error) {
+                        databaseManager.disableExchangeAccount(hitBtcManager.getId());
                         dataNotifierInterface.onBalanceError(error);
                     }
                 });
