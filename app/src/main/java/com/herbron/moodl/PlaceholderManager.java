@@ -34,6 +34,11 @@ public class PlaceholderManager {
         return formattedString;
     }
 
+    public static String getDenomination(String coinName, String coinSymbol, Context context)
+    {
+        return context.getResources().getString(R.string.denomincationPlaceholder, coinName, coinSymbol);
+    }
+
     public static String getEditTransactionString(String coinName, Context context)
     {
         return context.getResources().getString(R.string.edit_transaction, coinName);

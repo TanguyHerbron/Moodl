@@ -178,6 +178,8 @@
     <string name="currencyYenPlaceholder" translatable="false">%1$s¥</string>
     <string name="fluctuationYenPercentagePlaceholder" translatable="false">%1$s¥ (%2$s%%)</string>
 
+    <string name="denomincationPlaceholder" translatable="false">%1$s (%2$s)</string>
+
     <!--DetailsActivity placeholders-->
     <string name="timestampPlaceholder">Date\n%1$s</string>
     <string name="emitedPlaceholder">Percentage of coin emitted : %1$s%%</string>
@@ -256,5 +258,9 @@
     <string name="apiKey">API Key</string>
     <string name="secretKey">Secret Key</string>
     <string name="informations">Informations</string>
+    <string name="title_choose_coin">Choose a coin</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

@@ -21,7 +21,7 @@ import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.LayoutManagers.CurrencyListAdapter;
+import com.herbron.moodl.LayoutManagers.CoinWatchlistAdapter;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.List;
 
 public class CurrencySelectionActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
 
-    private CurrencyListAdapter adapter;
+    private CoinWatchlistAdapter adapter;
     private ListView listView;
     private android.widget.Filter filter;
     private CurrencyDetailsList currencyDetailsList;
@@ -77,7 +77,7 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
             currencyArrayList.add(new Currency(currencyNames.get(i), currencySymbols.get(i)));
         }
 
-        adapter = new CurrencyListAdapter(this, currencyArrayList);
+        adapter = new CoinWatchlistAdapter(this, currencyArrayList);
     }
 
     private void setupList()

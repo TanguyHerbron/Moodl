@@ -19,8 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.herbron.moodl.Activities.CurrencySelectionActivity;
 import com.herbron.moodl.Activities.HomeActivity;
@@ -42,7 +40,6 @@ import org.json.JSONObject;
 import static com.herbron.moodl.MoodlBox.collapseW;
 import static com.herbron.moodl.MoodlBox.expandW;
 import static com.herbron.moodl.MoodlBox.getColor;
-import static java.lang.Math.abs;
 
 /**
  * Created by Tiji on 13/04/2018.

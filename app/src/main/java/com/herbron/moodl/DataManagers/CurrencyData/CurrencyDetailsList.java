@@ -167,6 +167,23 @@ public class CurrencyDetailsList {
         return currenciesName;
     }
 
+    public List<Currency> getCurrenciesDenomination()
+    {
+        List<Currency> currencies = new ArrayList<>();
+
+        for(String symbol : coinInfosHashmap.keySet())
+        {
+            try {
+                JSONObject jsonObject = new JSONObject(coinInfosHashmap.get(symbol));
+                currencies.add(new Currency(jsonObject.getString("CoinName"), symbol));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return currencies;
+    }
+
     public Currency getCurrencyDetailsFromSymbol(String symbol)
     {
         //Currency currency = new Currency();

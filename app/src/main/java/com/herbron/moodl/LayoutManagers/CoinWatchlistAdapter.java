@@ -19,13 +19,13 @@ import java.util.ArrayList;
  * Created by Guitoune on 17/01/2018.
  */
 
-public class CurrencyListAdapter extends BaseAdapter implements Filterable {
+public class CoinWatchlistAdapter extends BaseAdapter implements Filterable {
 
         private ArrayList<Currency> currencies, suggestions;
         private Context context;
         private CustomFilter filter;
 
-        public CurrencyListAdapter(Context context, ArrayList<Currency> currencies) {
+        public CoinWatchlistAdapter(Context context, ArrayList<Currency> currencies) {
             this.context = context;
             this.currencies = currencies;
             this.suggestions = currencies;
@@ -53,7 +53,7 @@ public class CurrencyListAdapter extends BaseAdapter implements Filterable {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.custom_currency_row, parent, false);
+                convertView = inflater.inflate(R.layout.custom_watchlist_coin_row, parent, false);
             }
 
             TextView currencyName = convertView.findViewById(R.id.currencyName);

@@ -56,7 +56,8 @@ public class BinanceManager extends Exchange {
             {
                 if(Double.parseDouble(assets.get(i).getFree()) > 0 || Double.parseDouble(assets.get(i).getLocked()) > 0)
                 {
-                    if(!assets.get(i).getAsset().equals("VET"))
+                    //balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree()) + Double.parseDouble(assets.get(i).getLocked())));
+                    if(!assets.get(i).getAsset().equals("VEN"))
                     {
                         balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree()) + Double.parseDouble(assets.get(i).getLocked())));
                     }
