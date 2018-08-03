@@ -1,5 +1,9 @@
 package com.herbron.moodl.DataManagers.ExchangeManager;
 
+import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
+
+import java.util.List;
+
 public class Exchange {
 
     protected int id;
@@ -9,6 +13,7 @@ public class Exchange {
     protected String publicKey;
     protected String privateKey;
     protected boolean isEnabled;
+    private List<Pair> pairs;
 
     public Exchange(int id, String name, int type, String description, String publicKey, String privateKey, boolean isEnabled)
     {
@@ -19,6 +24,12 @@ public class Exchange {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.isEnabled = isEnabled;
+    }
+
+    public Exchange(String name, List<Pair> pairs)
+    {
+        this.name = name;
+        this.pairs = pairs;
     }
 
     public boolean isEnabled()

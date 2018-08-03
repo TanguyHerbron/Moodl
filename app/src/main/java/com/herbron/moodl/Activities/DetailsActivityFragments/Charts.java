@@ -33,6 +33,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDataChart;
 import com.herbron.moodl.DataManagers.PreferencesManager;
@@ -51,7 +52,7 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
  * Created by Tiji on 13/05/2018.
  */
 
-public class Charts extends Fragment {
+public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterface {
 
     private final static int HOUR = 0;
     private final static int DAY = 1;
@@ -72,6 +73,8 @@ public class Charts extends Fragment {
     private Button lineChartButton;
     private Button candleStickChartButton;
 
+    private Spinner timeIntervalSpinner;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -79,6 +82,8 @@ public class Charts extends Fragment {
         view = inflater.inflate(R.layout.fragment_charts_detailsactivity, container, false);
 
         currency = getActivity().getIntent().getParcelableExtra("currency");
+
+        currency.setListener(this);
 
         lineChart = view.findViewById(R.id.chartPriceView);
         candleStickChart = view.findViewById(R.id.chartCandleStickView);
@@ -125,17 +130,17 @@ public class Charts extends Fragment {
 
     private void initializeSpinners()
     {
-        Spinner spinner = view.findViewById(R.id.timeIntervalSinner);
+        timeIntervalSpinner = view.findViewById(R.id.timeIntervalSinner);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.time_interval_string_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        spinner.setAdapter(adapter);
+        timeIntervalSpinner.setAdapter(adapter);
 
-        spinner.setSelection(2);
+        timeIntervalSpinner.setSelection(2);
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        timeIntervalSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 updateCharts(i);
@@ -158,121 +163,31 @@ public class Charts extends Fragment {
         switch (index)
         {
             case 0:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.HOUR, 1);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 1:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.HOUR, 3);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 2:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.DAY, 1);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 3:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.DAY, 3);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 4:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.WEEK, 11);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 5:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.MONTH, 1);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 6:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.MONTH, 3);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 7:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.MONTH, 6);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 8:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.YEAR, 1);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency());
                 break;
         }
     }
@@ -684,4 +599,52 @@ public class Charts extends Fragment {
         }
     }
 
+    @Override
+    public void onTimestampPriveUpdated(String price) {
+
+    }
+
+    @Override
+    public void onHistoryDataUpdated() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                switch (timeIntervalSpinner.getSelectedItemPosition())
+                {
+                    case 0:
+                        updateChartTab(Charts.HOUR, 1);
+                        break;
+                    case 1:
+                        updateChartTab(Charts.HOUR, 3);
+                        break;
+                    case 2:
+                        updateChartTab(Charts.DAY, 1);
+                        break;
+                    case 3:
+                        updateChartTab(Charts.DAY, 3);
+                        break;
+                    case 4:
+                        updateChartTab(Charts.WEEK, 11);
+                        break;
+                    case 5:
+                        updateChartTab(Charts.MONTH, 1);
+                        break;
+                    case 6:
+                        updateChartTab(Charts.MONTH, 3);
+                        break;
+                    case 7:
+                        updateChartTab(Charts.MONTH, 6);
+                        break;
+                    case 8:
+                        updateChartTab(Charts.YEAR, 1);
+                        break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onPriceUpdated(Currency currency) {
+
+    }
 }

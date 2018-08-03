@@ -25,6 +25,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.herbron.moodl.Activities.CurrencyDetailsActivity;
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.MoodlBox;
@@ -43,7 +44,7 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
  * Created by Tiji on 12/05/2018.
  */
 
-public class CurrencyCardview extends CardView {
+public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNotifierInterface {
 
     private Currency currency;
 
@@ -54,6 +55,8 @@ public class CurrencyCardview extends CardView {
     public CurrencyCardview(@NonNull final Context context, final Currency currency, final Activity activity)
     {
         super (context);
+
+        currency.setListener(this);
 
         this.currency = currency;
 
@@ -76,23 +79,7 @@ public class CurrencyCardview extends CardView {
                     expandH(view.findViewById(R.id.collapsableLayout));
 
                     if (currency.getHistoryMinutes() == null) {
-                        currency.updateHistoryMinutes(context, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                            @Override
-                            public void onSuccess(Currency currency) {
-                                if(currency.getHistoryMinutes() != null)
-                                {
-                                    setupLineChart(currency);
-                                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
-                                }
-                                else
-                                {
-                                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).findViewById(R.id.detailsArrow).setVisibility(View.GONE);
-                                }
-                            }
-                        });
+                        currency.updateHistoryMinutes(context, preferencesManager.getDefaultCurrency());
                     }
                     else
                     {
@@ -142,6 +129,8 @@ public class CurrencyCardview extends CardView {
     {
         super(context);
 
+        currency.setListener(this);
+
         this.currency = currency;
 
         LayoutInflater.from(context).inflate(R.layout.cardview_currency, this, true);
@@ -163,23 +152,7 @@ public class CurrencyCardview extends CardView {
                     expandH(view.findViewById(R.id.collapsableLayout));
 
                     if (currency.getHistoryMinutes() == null) {
-                        currency.updateHistoryMinutes(context, preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                            @Override
-                            public void onSuccess(Currency currency) {
-                                if(currency.getHistoryMinutes() != null)
-                                {
-                                    setupLineChart(currency);
-                                    view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
-                                }
-                                else
-                                {
-                                    view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
-                                    view.findViewById(R.id.linearLayoutSubLayout).findViewById(R.id.detailsArrow).setVisibility(View.GONE);
-                                }
-                            }
-                        });
+                        currency.updateHistoryMinutes(context, preferencesManager.getDefaultCurrency());
                     }
                     else
                     {
@@ -385,5 +358,40 @@ public class CurrencyCardview extends CardView {
         transColor = Color.argb(alpha, r, g, b);
 
         return transColor ;
+    }
+
+    @Override
+    public void onTimestampPriveUpdated(String price) {
+
+    }
+
+    @Override
+    public void onHistoryDataUpdated() {
+        setupLineChart(currency);
+
+        View progressWatchlistView = findViewById(R.id.progressBarLinechartWatchlist);
+        View progressSummaryView = findViewById(R.id.progressBarLinechartSummary);
+
+        if(progressWatchlistView != null)
+        {
+            progressWatchlistView.setVisibility(View.GONE);
+        }
+
+        if(progressSummaryView != null)
+        {
+            progressSummaryView.setVisibility(View.GONE);
+        }
+
+        findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
+
+        if(currency.getHistoryMinutes() == null)
+        {
+            findViewById(R.id.linearLayoutSubLayout).findViewById(R.id.detailsArrow).setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onPriceUpdated(Currency currency) {
+
     }
 }

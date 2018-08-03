@@ -1,41 +1,31 @@
 package com.herbron.moodl.DataManagers;
 
-import android.util.Log;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.herbron.moodl.Activities.HomeActivity;
+import com.herbron.moodl.DataNotifiers.BinanceUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.BinanceManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.HitBtcManager;
-import com.herbron.moodl.DataNotifierInterface;
-import com.herbron.moodl.R;
+import com.herbron.moodl.DataNotifiers.BalanceUpdateNotifierInterface;
+import com.herbron.moodl.DataNotifiers.HitBTCUpdateNotifierInterface;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
  * Created by Tiji on 25/12/2017.
  */
 
-public class BalanceManager {
+public class BalanceManager implements BinanceUpdateNotifierInterface, HitBTCUpdateNotifierInterface {
 
-    private RequestQueue requestQueue;
-    private List<Currency> binanceBalance;
-    private List<Currency> hitBalance;
     private List<Currency> manualBalances;
     private List<Currency> totalBalance;
     private android.content.Context context;
-    private LinkedHashMap<String, String> coinInfosHashmap;
-    private PreferencesManager preferenceManager;
     private DatabaseManager databaseManager;
-    private CurrencyDetailsList currencyDetailsList;
+    private CryptocompareApiManager cryptocompareApiManager;
 
     private int balanceCounter;
 
@@ -43,30 +33,26 @@ public class BalanceManager {
     private List<HitBtcManager> hitBtcManagers;
     private List<BinanceManager> binanceManagers;
 
-    private DataNotifierInterface dataNotifierInterface;
+    private BalanceUpdateNotifierInterface balanceUpdateNotifierInterface;
 
     public BalanceManager(android.content.Context context)
     {
         this.context = context;
 
-        preferenceManager = new PreferencesManager(context);
-        requestQueue = Volley.newRequestQueue(context);
-        binanceBalance = new ArrayList<Currency>();
-        hitBalance = new ArrayList<Currency>();
         manualBalances = new ArrayList<Currency>();
         databaseManager = new DatabaseManager(context);
         hitBtcManagers = new ArrayList<>();
         binanceManagers = new ArrayList<>();
-        currencyDetailsList = CurrencyDetailsList.getInstance(context);
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(context);
 
         balanceCounter = 0;
 
-        setListener((DataNotifierInterface) ((HomeActivity) context).getHoldingsFragment());
+        setListener((BalanceUpdateNotifierInterface) ((HomeActivity) context).getHoldingsFragment());
     }
 
-    public void setListener(DataNotifierInterface dataNotifierInterface)
+    public void setListener(BalanceUpdateNotifierInterface balanceUpdateNotifierInterface)
     {
-        this.dataNotifierInterface = dataNotifierInterface;
+        this.balanceUpdateNotifierInterface = balanceUpdateNotifierInterface;
     }
 
     public void updateExchangeKeys()
@@ -102,18 +88,8 @@ public class BalanceManager {
             for(int i = 0; i < binanceManagers.size(); i++)
             {
                 final BinanceManager binanceManager = binanceManagers.get(i);
-                binanceManager.updateBalance(new BinanceManager.BinanceCallBack() {
-                    @Override
-                    public void onSuccess() {
-                        countBalances();
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        databaseManager.disableExchangeAccount(binanceManager.getId());
-                        dataNotifierInterface.onBalanceError(error);
-                    }
-                });
+                binanceManager.addListener(this);
+                binanceManager.updateBalance();
             }
         }
 
@@ -124,18 +100,8 @@ public class BalanceManager {
             for(int i = 0; i < hitBtcManagers.size(); i++)
             {
                 final HitBtcManager hitBtcManager = hitBtcManagers.get(i);
-                hitBtcManagers.get(i).updateGlobalBalance(new HitBtcManager.HitBtcCallBack() {
-                    @Override
-                    public void onSuccess() {
-                        countBalances();
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        databaseManager.disableExchangeAccount(hitBtcManager.getId());
-                        dataNotifierInterface.onBalanceError(error);
-                    }
-                });
+                hitBtcManager.addListener(this);
+                hitBtcManager.updateGlobalBalance();
             }
         }
 
@@ -173,7 +139,7 @@ public class BalanceManager {
 
         mergeBalanceTotal(manualBalances);
 
-        dataNotifierInterface.onBalanceDataUpdated();
+        balanceUpdateNotifierInterface.onBalanceDataUpdated();
     }
 
     private void mergeBalanceTotal(List<Currency> balance)
@@ -202,13 +168,31 @@ public class BalanceManager {
         }
     }
 
-    public interface VolleyCallBack {
-        void onSuccess();
-        void onError(String error);
+    @Override
+    public void onBinanceTradesUpdated() {
+
     }
 
-    public interface IconCallBack {
-        void onSuccess();
+    @Override
+    public void onBinanceBalanceUpdateSuccess() {
+        countBalances();
+    }
+
+    @Override
+    public void onBinanceBalanceUpdateError(int accountId, String error) {
+        databaseManager.disableExchangeAccount(accountId);
+        balanceUpdateNotifierInterface.onBalanceError(error);
+    }
+
+    @Override
+    public void onHitBTCBalanceUpdateSuccess() {
+        countBalances();
+    }
+
+    @Override
+    public void onHitBTCBalanceUpdateError(int accountId, String error) {
+        databaseManager.disableExchangeAccount(accountId);
+        balanceUpdateNotifierInterface.onBalanceError(error);
     }
 
     public void sortCoins()
@@ -227,47 +211,9 @@ public class BalanceManager {
         }
     }
 
-    public void updateDetails(final IconCallBack callBack)
+    public CryptocompareApiManager getCryptocompareApiManager()
     {
-        if(!currencyDetailsList.isUpToDate())
-        {
-            currencyDetailsList.update(callBack);
-        }
-        else
-        {
-            callBack.onSuccess();
-        }
-    }
-
-    public String getIconUrl(String symbol)
-    {
-        String url;
-
-        try {
-            switch (symbol)
-            {
-                case "IOTA":
-                    url = "https://www.cryptocompare.com/media/1383540/iota_logo.png?width=50";
-                    break;
-                default:
-                    JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
-                    url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
-                    break;
-            }
-        } catch (NullPointerException e) {
-            Log.d(context.getResources().getString(R.string.debug), symbol + " has no icon URL");
-            url = null;
-        } catch (JSONException e) {
-            Log.d(context.getResources().getString(R.string.debug), "Url parsing error for " + symbol);
-            url = null;
-        }
-
-        return url;
-    }
-
-    public CurrencyDetailsList getCurrencyDetailList()
-    {
-        return currencyDetailsList;
+        return cryptocompareApiManager;
     }
 
     public String getCurrencyName(String symbol)
@@ -275,7 +221,7 @@ public class BalanceManager {
         String currencyName = null;
 
         try {
-            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
+            JSONObject jsonObject = new JSONObject(cryptocompareApiManager.getCoinInfosHashmap().get(symbol));
             currencyName = jsonObject.getString("CoinName");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -291,7 +237,7 @@ public class BalanceManager {
         int id = 0;
 
         try {
-            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
+            JSONObject jsonObject = new JSONObject(cryptocompareApiManager.getCoinInfosHashmap().get(symbol));
             id = jsonObject.getInt("Id");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -300,33 +246,5 @@ public class BalanceManager {
         }
 
         return id;
-    }
-
-    private void sortDetails()
-    {
-        LinkedHashMap<String, String> sortedHashmap = new LinkedHashMap<>();
-        List<String> listInfos = new ArrayList<>(coinInfosHashmap.values());
-        List<String> listSymbols = new ArrayList<>(coinInfosHashmap.keySet());
-
-        for(int i = 0; i < coinInfosHashmap.keySet().size(); i++)
-        {
-
-            try {
-                JSONObject jsonObject = new JSONObject(listInfos.get(i));
-                int index = jsonObject.getInt("SortOrder");
-
-                listInfos.add(index, listInfos.get(i));
-                listSymbols.add(index, listSymbols.get(i));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        for(int i = 0; i < listInfos.size(); i++)
-        {
-            sortedHashmap.put(listSymbols.get(i), listInfos.get(i));
-        }
-
-        coinInfosHashmap = sortedHashmap;
     }
 }

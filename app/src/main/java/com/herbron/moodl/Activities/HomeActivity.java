@@ -216,9 +216,4 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
             drawerBalanceTextView.setText(PlaceholderManager.getValueString(numberConformer(value), getApplicationContext()));
         }
     }
-
-    public interface IconCallBack
-    {
-        void onSuccess(Bitmap bitmap);
-    }
 }

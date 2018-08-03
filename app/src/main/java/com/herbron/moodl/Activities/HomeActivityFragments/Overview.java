@@ -1,7 +1,6 @@
 package com.herbron.moodl.Activities.HomeActivityFragments;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -18,13 +17,14 @@ import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import com.herbron.moodl.Activities.HomeActivity;
+import com.herbron.moodl.DataNotifiers.CoinmarketcapNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyTickerList;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CoinmarketCapAPIManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.LayoutManagers.OverviewListAdapter;
 import com.herbron.moodl.MoodlBox;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.R;
 
 import java.util.List;
@@ -35,10 +35,10 @@ import static com.herbron.moodl.MoodlBox.getDrawable;
  * Created by Administrator on 27/05/2018.
  */
 
-public class Overview extends Fragment {
+public class Overview extends Fragment implements CoinmarketcapNotifierInterface {
 
-    private CurrencyTickerList currencyTickerList;
-    private CurrencyDetailsList currencyDetailsList;
+    private CoinmarketCapAPIManager coinmarketCapAPIManager;
+    private CryptocompareApiManager cryptocompareApiManager;
     private PreferencesManager preferenceManager;
     private OverviewListAdapter overviewListAdapter;
 
@@ -54,8 +54,10 @@ public class Overview extends Fragment {
     {
         View fragmentView = inflater.inflate(R.layout.fragment_overview_homeactivity, container, false);
 
-        currencyTickerList = CurrencyTickerList.getInstance(getContext());
-        currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
+        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getContext());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getContext());
+
+        coinmarketCapAPIManager.addListener(this);
 
         fragmentView.findViewById(R.id.toolbar).bringToFront();
 
@@ -91,6 +93,7 @@ public class Overview extends Fragment {
 
         return fragmentView;
     }
+
 
     private void setupDrawerButton(View view)
     {
@@ -132,16 +135,32 @@ public class Overview extends Fragment {
         }
     }
 
-    public interface UpdateCallBack
-    {
-        void onSuccess(List<Currency> currencyList);
-    }
-
     private void loadingIndicatorGenerator()
     {
         loadingFooter = LayoutInflater.from(getContext()).inflate(R.layout.listview_loading_indicator, null, false);
 
         listLayout.addFooterView(loadingFooter);
+    }
+
+    @Override
+    public void onCurrenciesRetrieved(List<Currency> currencyList) {
+            IconDownloader iconDownloader = new IconDownloader();
+            iconDownloader.execute(currencyList);
+    }
+
+    @Override
+    public void onTopCurrenciesUpdated() {
+
+    }
+
+    @Override
+    public void onMarketCapUpdated() {
+
+    }
+
+    @Override
+    public void onListingUpdated() {
+
     }
 
     private class CurrencyLoader extends AsyncTask<Void, Void, Void>
@@ -155,14 +174,7 @@ public class Overview extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            currencyTickerList.getCurrenciesFrom(listLayout.getCount(), preferenceManager.getDefaultCurrency(), new UpdateCallBack() {
-                @Override
-                public void onSuccess(List<Currency> currencyList)
-                {
-                    IconDownloader iconDownloader = new IconDownloader();
-                    iconDownloader.execute(currencyList);
-                }
-            });
+            coinmarketCapAPIManager.getCurrenciesFrom(listLayout.getCount(), preferenceManager.getDefaultCurrency());
             return null;
         }
     }
@@ -176,13 +188,13 @@ public class Overview extends Fragment {
 
             for(Currency currency : currencies[0])
             {
-                String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), currencyDetailsList);
+                String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), cryptocompareApiManager);
 
                 if(iconUrl != null)
                 {
-                    MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
+                    MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getContext(), new MoodlboxNotifierInterface() {
                         @Override
-                        public void onSuccess(Bitmap bitmap) {
+                        public void onBitmapDownloaded(Bitmap bitmap) {
                             currency.setIcon(bitmap);
                             updateChartColor(currency);
                             countIcons(currencies[0]);

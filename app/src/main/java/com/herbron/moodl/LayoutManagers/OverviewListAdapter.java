@@ -11,7 +11,7 @@ import android.widget.LinearLayout;
 
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyCardview;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 
 import java.util.List;
 
@@ -22,14 +22,14 @@ import java.util.List;
 public class OverviewListAdapter extends ArrayAdapter<Currency> {
 
     private Activity activity;
-    private CurrencyDetailsList currencyDetailsList;
+    private CryptocompareApiManager cryptocompareApiManager;
 
     public OverviewListAdapter(Context context, List<Currency> currencies, Activity activity)
     {
         super(context, android.R.layout.simple_expandable_list_item_1, currencies);
         this.activity = activity;
 
-        currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getContext());
     }
 
     @NonNull
@@ -38,7 +38,7 @@ public class OverviewListAdapter extends ArrayAdapter<Currency> {
     {
         Currency currency = getItem(position);
 
-        currencyDetailsList.getCurrencyDetailsFromSymbol(currency.getSymbol());
+        cryptocompareApiManager.getCurrencyDetailsFromSymbol(currency.getSymbol());
 
         CurrencyCardview currencyCardview = new CurrencyCardview(getContext(), currency, activity);
         LinearLayout linearLayout = new LinearLayout(getContext());

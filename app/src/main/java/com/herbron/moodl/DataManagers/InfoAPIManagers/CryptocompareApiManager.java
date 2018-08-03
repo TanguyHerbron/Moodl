@@ -1,4 +1,4 @@
-package com.herbron.moodl.DataManagers.CurrencyData;
+package com.herbron.moodl.DataManagers.InfoAPIManagers;
 
 import android.content.Context;
 import android.os.StrictMode;
@@ -10,12 +10,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.herbron.moodl.DataManagers.BalanceManager;
+import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
+import com.herbron.moodl.DataManagers.CurrencyData.Currency;
+import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -24,30 +28,64 @@ import java.util.regex.Pattern;
  * Created by Tiji on 11/04/2018.
  */
 
-public class CurrencyDetailsList {
+public class CryptocompareApiManager {
 
     final private static String DETAILURL = "https://min-api.cryptocompare.com/data/all/coinlist";
+    final private static String EXCHANGEURL = "https://min-api.cryptocompare.com/data/all/exchanges";
     private RequestQueue requestQueue;
     private LinkedHashMap<String, String> coinInfosHashmap;
-    private static CurrencyDetailsList INSTANCE;
-    private boolean upToDate;
+    private List<Exchange> exchangeList;
+    private static CryptocompareApiManager INSTANCE;
+    private boolean exchangesUpToDate;
+    private boolean detailsUpToDate;
 
-    private CurrencyDetailsList(Context context)
+    private List<CryptocompareNotifierInterface> cryptocompareNotifierInterfaceList;
+
+    private CryptocompareApiManager(Context context)
     {
         requestQueue = Volley.newRequestQueue(context);
     }
 
-    public static synchronized CurrencyDetailsList getInstance(Context context)
+    public static synchronized CryptocompareApiManager getInstance(Context context)
     {
         if(INSTANCE == null)
         {
-            INSTANCE = new CurrencyDetailsList(context);
+            INSTANCE = new CryptocompareApiManager(context);
         }
 
         return INSTANCE;
     }
 
-    public void update(final BalanceManager.IconCallBack callBack)
+    public void addListener(CryptocompareNotifierInterface cryptocompareNotifierInterface)
+    {
+        if(cryptocompareNotifierInterfaceList == null)
+        {
+            cryptocompareNotifierInterfaceList = new ArrayList<>();
+        }
+
+        cryptocompareNotifierInterfaceList.add(cryptocompareNotifierInterface);
+    }
+
+    public void updateExchangeList()
+    {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, EXCHANGEURL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        processExchangeResult(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+    }
+
+    public void updateDetails()
     {
         StringRequest strRequest = new StringRequest(Request.Method.GET, DETAILURL,
                 new Response.Listener<String>() {
@@ -55,7 +93,7 @@ public class CurrencyDetailsList {
                     public void onResponse(String response) {
 
                         if (response.length() > 0) {
-                            processDetailResult(response, callBack);
+                            processDetailResult(response);
                         }
                     }
                 },
@@ -69,17 +107,72 @@ public class CurrencyDetailsList {
         requestQueue.add(strRequest);
     }
 
-    public boolean isUpToDate()
+    public boolean isExchangesUpToDate()
+    {
+        if(exchangeList == null)
+        {
+            exchangesUpToDate = false;
+        }
+
+        return exchangesUpToDate;
+    }
+
+    public boolean isDetailsUpToDate()
     {
         if(coinInfosHashmap == null)
         {
-            upToDate = false;
+            detailsUpToDate = false;
         }
 
-        return upToDate;
+        return detailsUpToDate;
     }
 
-    private void processDetailResult(String response, final BalanceManager.IconCallBack callBack)
+    private void processExchangeResult(String response)
+    {
+        exchangeList = new ArrayList<>();
+
+        try {
+            JSONObject mainJsonObject = new JSONObject(response);
+            Iterator<String> exchangeIterator = mainJsonObject.keys();
+
+            while(exchangeIterator.hasNext())
+            {
+                String exchangeKey = exchangeIterator.next();
+                JSONObject exchangeJsonObject = mainJsonObject.getJSONObject(exchangeKey);
+                Iterator<String> pairIterator = exchangeJsonObject.keys();
+
+                while(pairIterator.hasNext())
+                {
+                    String pairKey = pairIterator.next();
+                    JSONArray pairJsonArray = exchangeJsonObject.getJSONArray(pairKey);
+
+                    List<Pair> pairList = new ArrayList<>();
+
+                    for(int i = 0; i < pairJsonArray.length(); i++)
+                    {
+                        pairList.add(new Pair(pairKey, pairJsonArray.get(i).toString()));
+                    }
+
+                    exchangeList.add(new Exchange(exchangeKey, pairList));
+                }
+            }
+
+            for(CryptocompareNotifierInterface cryptocompareNotifierInterface : cryptocompareNotifierInterfaceList)
+            {
+                cryptocompareNotifierInterface.onExchangesUpdated();
+            }
+
+        } catch (JSONException e) {
+            Log.d("moodl", "Error while processing exchange result");
+        }
+    }
+
+    public List<Exchange> getExchangeList()
+    {
+        return exchangeList;
+    }
+
+    private void processDetailResult(String response)
     {
         response = response.substring(response.indexOf("\"Data\"") + 7, response.lastIndexOf("},\"BaseImageUrl\""));
         String[] tab = response.split(Pattern.quote("},"));
@@ -113,9 +206,12 @@ public class CurrencyDetailsList {
 
         sortDetails();
 
-        upToDate = true;
+        detailsUpToDate = true;
 
-        callBack.onSuccess();
+        for(CryptocompareNotifierInterface cryptocompareNotifierInterface : cryptocompareNotifierInterfaceList)
+        {
+            cryptocompareNotifierInterface.onDetailsUpdated();
+        }
     }
 
     private void sortDetails()

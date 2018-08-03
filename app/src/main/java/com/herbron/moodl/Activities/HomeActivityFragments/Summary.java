@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -33,23 +32,25 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.daasuu.ei.Ease;
 import com.daasuu.ei.EasingInterpolator;
-import com.herbron.moodl.Activities.CurrencySelectionActivity;
-import com.herbron.moodl.Activities.HomeActivity;
 import com.herbron.moodl.Activities.RecordTransactionActivity;
 import com.herbron.moodl.BalanceUpdateInterface;
+import com.herbron.moodl.DataNotifiers.CoinmarketcapNotifierInterface;
+import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.BalanceManager;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyCardview;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyTickerList;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CoinmarketCapAPIManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.BalanceSwitchManagerInterface;
-import com.herbron.moodl.DataNotifierInterface;
+import com.herbron.moodl.DataNotifiers.BalanceUpdateNotifierInterface;
 import com.herbron.moodl.MoodlBox;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
 
@@ -67,7 +68,7 @@ import static java.lang.Math.abs;
  * Created by Tiji on 13/04/2018.
  */
 
-public class Summary extends Fragment implements BalanceSwitchManagerInterface, DataNotifierInterface {
+public class Summary extends Fragment implements BalanceSwitchManagerInterface, BalanceUpdateNotifierInterface, CryptocompareNotifierInterface, CoinmarketcapNotifierInterface {
 
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
@@ -75,7 +76,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
     private String defaultCurrency;
-    private CurrencyTickerList currencyTickerList;
+    private CoinmarketCapAPIManager coinmarketCapAPIManager;
 
     private TextView toolbarSubtitle;
     private CollapsingToolbarLayout toolbarLayout;
@@ -93,6 +94,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     private long lastTimestamp;
 
     private BalanceUpdateInterface balanceUpdateInterface;
+    private CryptocompareApiManager cryptocompareApiManager;
 
     @NonNull
     @Override
@@ -102,7 +104,8 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
         preferencesManager = new PreferencesManager(getActivity());
         balanceManager = new BalanceManager(getContext());
-        currencyTickerList = CurrencyTickerList.getInstance(getActivity());
+        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getActivity());
 
         currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
         refreshLayout = fragmentView.findViewById(R.id.swiperefreshsummary);
@@ -113,6 +116,9 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         setListener((BalanceUpdateInterface) getActivity());
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
+
+        cryptocompareApiManager.addListener(this);
+        coinmarketCapAPIManager.addListener(this);
 
         handler = new Handler();
 
@@ -545,16 +551,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     }
 
     @Override
-    public void onTickerListUpdated() {
-
-    }
-
-    @Override
-    public void onDetailsUpdated() {
-
-    }
-
-    @Override
     public void onBalanceDataUpdated() {
         final List<Currency> balance = balanceManager.getTotalBalance();
 
@@ -562,10 +558,21 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         {
             for(int i = 0; i < balance.size(); i++)
             {
-                balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
+                balance.get(i).updatePrice(getActivity(), defaultCurrency, new CurrencyInfoUpdateNotifierInterface() {
                     @Override
-                    public void onSuccess(Currency currency) {
+                    public void onTimestampPriveUpdated(String price) {
+
+                    }
+
+                    @Override
+                    public void onHistoryDataUpdated() {
+
+                    }
+
+                    @Override
+                    public void onPriceUpdated(Currency currency) {
                         countCoins(true, false, false);
+
                     }
                 });
             }
@@ -630,6 +637,36 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             }
     }
 
+    @Override
+    public void onDetailsUpdated() {
+        countCoins(false, true, false);
+    }
+
+    @Override
+    public void onExchangesUpdated() {
+
+    }
+
+    @Override
+    public void onCurrenciesRetrieved(List<Currency> currencyList) {
+
+    }
+
+    @Override
+    public void onTopCurrenciesUpdated() {
+
+    }
+
+    @Override
+    public void onMarketCapUpdated() {
+
+    }
+
+    @Override
+    public void onListingUpdated() {
+        countCoins(false, false, true);
+    }
+
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
     {
 
@@ -687,7 +724,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                localCurrency.setTickerId(currencyTickerList.getTickerIdForSymbol(localCurrency.getSymbol()));
+                localCurrency.setTickerId(coinmarketCapAPIManager.getTickerIdForSymbol(localCurrency.getSymbol()));
 
                 updateChartColor(localCurrency);
 
@@ -771,13 +808,13 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                String iconUrl = MoodlBox.getIconUrl(localCurrency.getSymbol(), balanceManager.getCurrencyDetailList());
+                String iconUrl = MoodlBox.getIconUrl(localCurrency.getSymbol(), balanceManager.getCryptocompareApiManager());
 
                 if(iconUrl != null)
                 {
-                    MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
+                    MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new MoodlboxNotifierInterface() {
                         @Override
-                        public void onSuccess(Bitmap bitmapIcon) {
+                        public void onBitmapDownloaded(Bitmap bitmapIcon) {
                             localCurrency.setIcon(bitmapIcon);
                             countIcons();
                         }
@@ -810,27 +847,23 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         @Override
         protected Void doInBackground(Void... params)
         {
-            if(!currencyTickerList.isUpToDate())
+            if(!coinmarketCapAPIManager.isUpToDate())
             {
-                currencyTickerList.updateListing(new com.herbron.moodl.DataManagers.BalanceManager.IconCallBack() {
-                    @Override
-                    public void onSuccess() {
-                        countCoins(false, false, true);
-                    }
-                });
+                coinmarketCapAPIManager.updateListing();
             }
             else
             {
                 countCoins(false, false, true);
             }
 
-            balanceManager.updateDetails(new com.herbron.moodl.DataManagers.BalanceManager.IconCallBack() {
-                @Override
-                public void onSuccess()
-                {
-                    countCoins(false, true, false);
-                }
-            });
+            if(!cryptocompareApiManager.isDetailsUpToDate())
+            {
+                cryptocompareApiManager.updateDetails();
+            }
+            else
+            {
+                countCoins(false, true, false);
+            }
 
             balanceManager.updateTotalBalance();
 

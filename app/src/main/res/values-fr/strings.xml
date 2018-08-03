@@ -16,8 +16,8 @@
     <string name="pref_title_gdax_publickey">Clé public</string>
     <string name="pref_title_gdax_privatekey">Clé privée</string>
     <string name="activity_add_amount">Montant</string>
-    <string name="activity_purchased_price">Prix d\'achat</string>
-    <string name="activity_purchased_date">Date d\'achat</string>
+    <string name="activity_purchase_price">Prix d\'achat</string>
+    <string name="activity_purchase_date">Date d\'achat</string>
     <string name="activity_fees">Frais</string>
     <string name="title_history">Historique</string>
     <string name="title_infos">Informations</string>

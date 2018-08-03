@@ -13,7 +13,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,21 +20,25 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import com.herbron.moodl.Activities.CurrencySelectionActivity;
-import com.herbron.moodl.Activities.HomeActivity;
-import com.herbron.moodl.DataManagers.BalanceManager;
+import com.herbron.moodl.DataNotifiers.CoinmarketcapNotifierInterface;
+import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyCardview;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyTickerList;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CoinmarketCapAPIManager;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.DataManagers.WatchlistManager;
 import com.herbron.moodl.MoodlBox;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.R;
 import com.jmedeisis.draglinearlayout.DragLinearLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.collapseW;
 import static com.herbron.moodl.MoodlBox.expandW;
@@ -45,18 +48,18 @@ import static com.herbron.moodl.MoodlBox.getColor;
  * Created by Tiji on 13/04/2018.
  */
 
-public class Watchlist extends Fragment {
+public class Watchlist extends Fragment implements CryptocompareNotifierInterface {
 
     private WatchlistManager watchlistManager;
     private View view;
     private int watchlistCounter;
-    private CurrencyDetailsList currencyDetailsList;
+    private CryptocompareApiManager cryptocompareApiManager;
     private SwipeRefreshLayout refreshLayout;
     private DragLinearLayout dragLinearLayout;
     private long lastTimestamp;
     private PreferencesManager preferencesManager;
     private String defaultCurrency;
-    private CurrencyTickerList currencyTickerList;
+    private CoinmarketCapAPIManager coinmarketCapAPIManager;
     private boolean tickerUpdated;
     private boolean detailsUpdated;
     private boolean editModeEnabled;
@@ -70,14 +73,15 @@ public class Watchlist extends Fragment {
 
         refreshLayout = view.findViewById(R.id.swiperefreshwatchlist);
         dragLinearLayout = view.findViewById(R.id.linearLayoutWatchlist);
-        currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getContext());
         preferencesManager = new PreferencesManager(getContext());
         databaseManager = new DatabaseManager(getContext());
 
         lastTimestamp = 0;
         defaultCurrency = preferencesManager.getDefaultCurrency();
-        currencyTickerList = CurrencyTickerList.getInstance(getActivity());
+        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity());
         tickerUpdated = false;
+        cryptocompareApiManager.addListener(this);
         updateTickerList();
 
         dragLinearLayout.setOnViewSwapListener(new DragLinearLayout.OnViewSwapListener() {
@@ -115,30 +119,54 @@ public class Watchlist extends Fragment {
 
     private void updateTickerList()
     {
-        AsyncTask<Void, Integer, Void> updater = new AsyncTask<Void, Integer, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                if(!currencyTickerList.isUpToDate())
-                {
-                    currencyTickerList.updateListing(new BalanceManager.IconCallBack() {
-                        @Override
-                        public void onSuccess() {
-                            tickerUpdated = true;
-                            checkUpdatedData();
-                        }
-                    });
-                }
-                else
-                {
-                    tickerUpdated = true;
-                    checkUpdatedData();
-                }
+        ListingUpdater listingUpdater = new ListingUpdater();
+        listingUpdater.execute();
+    }
 
-                return null;
+    private class ListingUpdater extends AsyncTask<Void, Integer, Void> implements CoinmarketcapNotifierInterface {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            coinmarketCapAPIManager.addListener(this);
+
+            if(!coinmarketCapAPIManager.isUpToDate())
+            {
+                coinmarketCapAPIManager.updateListing();
             }
-        };
+            else
+            {
+                tickerUpdated = true;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        checkUpdatedData();
+                    }
+                });
+            }
+            return null;
+        }
 
-        updater.execute();
+        @Override
+        public void onCurrenciesRetrieved(List<Currency> currencyList) {
+
+        }
+
+        @Override
+        public void onTopCurrenciesUpdated() {
+
+        }
+
+        @Override
+        public void onMarketCapUpdated() {
+
+        }
+
+        @Override
+        public void onListingUpdated() {
+            tickerUpdated = true;
+            checkUpdatedData();
+        }
     }
 
     private void disableEdition()
@@ -281,15 +309,9 @@ public class Watchlist extends Fragment {
                 protected Void doInBackground(Void... voids) {
                     watchlistManager.updateWatchlist();
 
-                    if(!currencyDetailsList.isUpToDate())
+                    if(!cryptocompareApiManager.isDetailsUpToDate())
                     {
-                        currencyDetailsList.update(new BalanceManager.IconCallBack() {
-                            @Override
-                            public void onSuccess() {
-                                detailsUpdated = true;
-                                checkUpdatedData();
-                            }
-                        });
+                        cryptocompareApiManager.updateDetails();
                     }
                     else
                     {
@@ -358,24 +380,6 @@ public class Watchlist extends Fragment {
         }
     }
 
-    private String getIconUrl(String symbol)
-    {
-        String url;
-
-        try {
-            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
-            url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=50";
-        } catch (NullPointerException e) {
-            Log.d(getContext().getResources().getString(R.string.debug), symbol + " has no icon URL");
-            url = null;
-        } catch (JSONException e) {
-            Log.d(getContext().getResources().getString(R.string.debug), "Url parsing error for " + symbol);
-            url = null;
-        }
-
-        return url;
-    }
-
     private void updateChartColor(Currency currency)
     {
         if(currency.getIcon() != null)
@@ -395,13 +399,24 @@ public class Watchlist extends Fragment {
         int id = 0;
 
         try {
-            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
+            JSONObject jsonObject = new JSONObject(cryptocompareApiManager.getCoinInfosHashmap().get(symbol));
             id = jsonObject.getInt("Id");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return id;
+    }
+
+    @Override
+    public void onDetailsUpdated() {
+        detailsUpdated = true;
+        checkUpdatedData();
+    }
+
+    @Override
+    public void onExchangesUpdated() {
+
     }
 
     private class WatchlistUpdater extends AsyncTask<Void, Integer, Void>
@@ -416,22 +431,32 @@ public class Watchlist extends Fragment {
         protected Void doInBackground(Void... voids) {
             for(final Currency currency : watchlistManager.getWatchlist())
             {
-                currency.setTickerId(currencyTickerList.getTickerIdForSymbol(currency.getSymbol()));
+                currency.setTickerId(coinmarketCapAPIManager.getTickerIdForSymbol(currency.getSymbol()));
                 currency.setId(getCurrencyId(currency.getSymbol()));
-                currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+                currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new CurrencyInfoUpdateNotifierInterface() {
                     @Override
-                    public void onSuccess(final Currency sucessCurrency) {
+                    public void onTimestampPriveUpdated(String price) {
 
-                        String iconUrl = MoodlBox.getIconUrl(sucessCurrency.getSymbol(), currencyDetailsList);
+                    }
+
+                    @Override
+                    public void onHistoryDataUpdated() {
+
+                    }
+
+                    @Override
+                    public void onPriceUpdated(Currency successCurrency) {
+                        String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), cryptocompareApiManager);
 
                         if(iconUrl != null)
                         {
-                            MoodlBox.getBitmapFromURL(iconUrl, sucessCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
+                            MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getContext(), new MoodlboxNotifierInterface() {
                                 @Override
-                                public void onSuccess(Bitmap bitmapIcon) {
-                                    sucessCurrency.setIcon(bitmapIcon);
+                                public void onBitmapDownloaded(Bitmap bitmapIcon) {
+                                    currency.setIcon(bitmapIcon);
                                     updateChartColor(currency);
                                     countWatchlist();
+
                                 }
                             });
                         }
@@ -440,7 +465,7 @@ public class Watchlist extends Fragment {
                             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_moodl);
                             icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
 
-                            sucessCurrency.setIcon(icon);
+                            currency.setIcon(icon);
                             updateChartColor(currency);
                             countWatchlist();
                         }

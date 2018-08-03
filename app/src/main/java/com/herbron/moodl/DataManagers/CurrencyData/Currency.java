@@ -6,6 +6,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,6 +50,8 @@ public class Currency implements Parcelable {
     private List<String> socialMediaLinks;
     //private String proofType
 
+    private CurrencyInfoUpdateNotifierInterface currencyInfoUpdateNotifierInterface;
+
     public Currency() {}
 
     public Currency(String symbol, double balance)
@@ -76,9 +80,14 @@ public class Currency implements Parcelable {
         this.tickerId = tickerId;
     }
 
+    public void setListener(CurrencyInfoUpdateNotifierInterface currencyInfoUpdateNotifierInterface)
+    {
+        this.currencyInfoUpdateNotifierInterface = currencyInfoUpdateNotifierInterface;
+    }
+
     //public Currency(int id, String symbol, String name, String algorithm, String proofType, )
 
-    public void getTimestampPrice(android.content.Context context, String toSymbol, final PriceCallBack callBack, long timestamp)
+    public void getTimestampPrice(android.content.Context context, String toSymbol, long timestamp)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
@@ -88,12 +97,12 @@ public class Currency implements Parcelable {
 
             @Override
             public void onSuccess(String price) {
-                callBack.onSuccess(price);
+                currencyInfoUpdateNotifierInterface.onTimestampPriveUpdated(price);
             }
         }, timestamp);
     }
 
-    public void updatePrice(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    public void updatePrice(android.content.Context context, String toSymbol, final CurrencyInfoUpdateNotifierInterface callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
@@ -107,12 +116,12 @@ public class Currency implements Parcelable {
                     setDayFluctuationPercentage(currencyInfo.getDayFluctuationPercentage());
                 }
 
-                callBack.onSuccess(Currency.this);
+                callBack.onPriceUpdated(currencyInfo);
             }
         });
     }
 
-    public void updateHistoryMinutes(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    public void updateHistoryMinutes(android.content.Context context, String toSymbol)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
@@ -121,7 +130,7 @@ public class Currency implements Parcelable {
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryMinutes(dataChart);
 
-                callBack.onSuccess(Currency.this);
+                currencyInfoUpdateNotifierInterface.onHistoryDataUpdated();
             }
 
             @Override
@@ -178,7 +187,7 @@ public class Currency implements Parcelable {
         });
     }
 
-    public void updateHistoryHours(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    public void updateHistoryHours(android.content.Context context, String toSymbol)
     {
         dataRetriver = new CurrencyDataRetriever(context);
         dataRetriver.updateHistory(symbol, toSymbol, new CurrencyDataRetriever.DataChartCallBack() {
@@ -186,7 +195,7 @@ public class Currency implements Parcelable {
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryHours(dataChart);
 
-                callBack.onSuccess(Currency.this);
+                currencyInfoUpdateNotifierInterface.onHistoryDataUpdated();
             }
 
             @Override
@@ -194,7 +203,7 @@ public class Currency implements Parcelable {
         }, CurrencyDataRetriever.HOURS);
     }
 
-    public void updateHistoryDays(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    public void updateHistoryDays(android.content.Context context, String toSymbol)
     {
         dataRetriver = new CurrencyDataRetriever(context);
         dataRetriver.updateHistory(symbol, toSymbol, new CurrencyDataRetriever.DataChartCallBack() {
@@ -202,7 +211,7 @@ public class Currency implements Parcelable {
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryDays(dataChart);
 
-                callBack.onSuccess(Currency.this);
+                currencyInfoUpdateNotifierInterface.onHistoryDataUpdated();
             }
 
             @Override

@@ -127,8 +127,8 @@
 
     <!--Add transaction activity-->
     <string name="activity_add_amount">Amount</string>
-    <string name="activity_purchased_price">Purchased price</string>
-    <string name="activity_purchased_date">Purchased date</string>
+    <string name="activity_purchase_price">Purchase price</string>
+    <string name="activity_purchase_date">Purchase date</string>
     <string name="activity_fees">Fees</string>
     <string name="title_activity_currency_details" translatable="false">CurrencyDetailsActivity</string>
     <string name="title_history">History charts</string>
@@ -261,6 +261,9 @@
     <string name="title_choose_coin">Choose a coin</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="exchange">Exchange</string>
+    <string name="pair">Pair</string>
+    <string name="total_value">Total value</string>
+    <string name="notes">Notes</string>
 
 </resources>

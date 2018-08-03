@@ -16,6 +16,7 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.herbron.moodl.DataNotifiers.BinanceUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Trade;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
@@ -209,7 +210,7 @@ public class Transactions extends Fragment {
         }
     }
 
-    private class TradeUpdater extends AsyncTask<Void, Integer, Void>
+    private class TradeUpdater extends AsyncTask<Void, Integer, Void> implements BinanceUpdateNotifierInterface
     {
         @Override
         protected void onPreExecute()
@@ -226,41 +227,8 @@ public class Transactions extends Fragment {
         @Override
         protected Void doInBackground(Void... params)
         {
-            binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
-                @Override
-                public void onSuccess() {
-                    ArrayList<Trade> trades = binanceManager.getTrades();
-                    returnedTrades = new ArrayList<>();
 
-                    for(int i = trades.size() - 1; i >= 0 ; i--)
-                    {
-                        returnedTrades.add(trades.get(i));
-                    }
-
-                    try {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ArrayList<Trade> trades = new ArrayList<>();
-
-                                for(int i = 0; i < 20 && i < returnedTrades.size(); i++)
-                                {
-                                    trades.add(returnedTrades.get(i));
-                                }
-
-                                drawTradeList(trades);
-                            }
-                        });
-                    } catch (NullPointerException e) {
-                        Log.d("moodl", "Transactions do not need to be updated anymore");
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-
-                }
-            }, currency.getSymbol());
+            binanceManager.updateTrades(currency.getSymbol());
 
             return null;
         }
@@ -268,6 +236,45 @@ public class Transactions extends Fragment {
         @Override
         protected void onPostExecute(Void result)
         {
+
+        }
+
+        @Override
+        public void onBinanceTradesUpdated() {
+            ArrayList<Trade> trades = binanceManager.getTrades();
+            returnedTrades = new ArrayList<>();
+
+            for(int i = trades.size() - 1; i >= 0 ; i--)
+            {
+                returnedTrades.add(trades.get(i));
+            }
+
+            try {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ArrayList<Trade> trades = new ArrayList<>();
+
+                        for(int i = 0; i < 20 && i < returnedTrades.size(); i++)
+                        {
+                            trades.add(returnedTrades.get(i));
+                        }
+
+                        drawTradeList(trades);
+                    }
+                });
+            } catch (NullPointerException e) {
+                Log.d("moodl", "Transactions do not need to be updated anymore");
+            }
+        }
+
+        @Override
+        public void onBinanceBalanceUpdateSuccess() {
+
+        }
+
+        @Override
+        public void onBinanceBalanceUpdateError(int accountId, String error) {
 
         }
     }

@@ -16,9 +16,9 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import com.herbron.moodl.DataManagers.BalanceManager;
+import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.LayoutManagers.CoinWatchlistAdapter;
@@ -27,12 +27,12 @@ import com.herbron.moodl.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CurrencySelectionActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
+public class CurrencySelectionActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, CryptocompareNotifierInterface {
 
     private CoinWatchlistAdapter adapter;
     private ListView listView;
     private android.widget.Filter filter;
-    private CurrencyDetailsList currencyDetailsList;
+    private CryptocompareApiManager cryptocompareApiManager;
     private boolean isWatchList;
 
     @Override
@@ -44,7 +44,8 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
         setContentView(R.layout.activity_add_currency);
 
-        currencyDetailsList = CurrencyDetailsList.getInstance(this);
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(this);
+        cryptocompareApiManager.addListener(this);
 
         setTitle(getString(R.string.select_coin));
 
@@ -67,8 +68,8 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
 
     private void setupAdapter()
     {
-        List<String> currencyNames = currencyDetailsList.getCurrenciesName();
-        List<String> currencySymbols = currencyDetailsList.getCurrenciesSymbol();
+        List<String> currencyNames = cryptocompareApiManager.getCurrenciesName();
+        List<String> currencySymbols = cryptocompareApiManager.getCurrenciesSymbol();
 
         ArrayList<Currency> currencyArrayList = new ArrayList<>();
 
@@ -178,6 +179,16 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
         });
     }
 
+    @Override
+    public void onDetailsUpdated() {
+        detailsEvent();
+    }
+
+    @Override
+    public void onExchangesUpdated() {
+
+    }
+
     private class ListLoader extends AsyncTask<Void, Integer, Void>
     {
         @Override
@@ -200,14 +211,9 @@ public class CurrencySelectionActivity extends AppCompatActivity implements Sear
                 Looper.prepare();
             }
 
-            if(!currencyDetailsList.isUpToDate())
+            if(!cryptocompareApiManager.isDetailsUpToDate())
             {
-                currencyDetailsList.update(new BalanceManager.IconCallBack() {
-                    @Override
-                    public void onSuccess() {
-                        detailsEvent();
-                    }
-                });
+                cryptocompareApiManager.updateDetails();
             }
             else
             {

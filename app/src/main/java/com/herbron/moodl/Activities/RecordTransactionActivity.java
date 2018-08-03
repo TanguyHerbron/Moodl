@@ -3,59 +3,47 @@ package com.herbron.moodl.Activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.graphics.Palette;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
-import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.LayoutManagers.CoinSummaryListAdapter;
 import com.herbron.moodl.LayoutManagers.CustomTabLayout;
 import com.herbron.moodl.LayoutManagers.RecordTransactionPageAdapter;
 import com.herbron.moodl.MoodlBox;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-import static com.herbron.moodl.MoodlBox.getColor;
-
-public class RecordTransactionActivity extends AppCompatActivity {
+public class RecordTransactionActivity extends AppCompatActivity implements CurrencyInfoUpdateNotifierInterface {
 
     private String coin;
     private String symbol;
@@ -78,7 +66,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ImageView currencyIconImageView;
 
-    private CurrencyDetailsList currencyDetailsList;
+    private CryptocompareApiManager cryptocompareApiManager;
 
     private SearchView mainSearchView;
 
@@ -231,13 +219,15 @@ public class RecordTransactionActivity extends AppCompatActivity {
 
             }
         });
+
+        cryptocompareApiManager.updateExchangeList();
     }
 
     private void setupAutoCompleteTextView()
     {
-        currencyDetailsList = CurrencyDetailsList.getInstance(this);
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(this);
 
-        CoinSummaryListAdapter adapter = new CoinSummaryListAdapter(this, R.layout.custom_summary_coin_row, new ArrayList<>(currencyDetailsList.getCurrenciesDenomination()));
+        CoinSummaryListAdapter adapter = new CoinSummaryListAdapter(this, R.layout.custom_summary_coin_row, new ArrayList<>(cryptocompareApiManager.getCurrenciesDenomination()));
 
         AutoCompleteTextView coin_autoCompleteTextView = findViewById(R.id.coin_autoCompleteTextView);
         coin_autoCompleteTextView.setThreshold(0);
@@ -282,6 +272,8 @@ public class RecordTransactionActivity extends AppCompatActivity {
                 toolbar.requestFocus();
                 hideSoftKeyboard(RecordTransactionActivity.this);
 
+                currency.setListener(RecordTransactionActivity.this);
+
                 RecordTransactionActivity.this.currency = currency;
 
                 IconDownloaderTask iconDownloaderTask = new IconDownloaderTask();
@@ -290,23 +282,39 @@ public class RecordTransactionActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onTimestampPriveUpdated(String price) {
+        purchasedPriceEditText.setText(price);
+    }
+
+    @Override
+    public void onHistoryDataUpdated() {
+
+    }
+
+    @Override
+    public void onPriceUpdated(Currency currency) {
+
+    }
+
     private class IconDownloaderTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), 500, currencyDetailsList);
+            String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), 500, cryptocompareApiManager);
 
             if(iconUrl != null)
             {
-                MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getBaseContext(), new HomeActivity.IconCallBack() {
+                MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getBaseContext(), new MoodlboxNotifierInterface() {
                     @Override
-                    public void onSuccess(Bitmap bitmapIcon) {
+                    public void onBitmapDownloaded(Bitmap bitmapIcon) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 currencyIconImageView.setImageBitmap(bitmapIcon);
                             }
                         });
+
                     }
                 });
             }
@@ -469,12 +477,7 @@ public class RecordTransactionActivity extends AppCompatActivity {
                         calendar.set(Calendar.MINUTE, minute);
                         purchaseDate.setText(sdf.format(calendar.getTime()));
 
-                        currency.getTimestampPrice(RecordTransactionActivity.this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
-                            @Override
-                            public void onSuccess(String price) {
-                                purchasedPriceEditText.setText(price);
-                            }
-                        }, calendar.getTimeInMillis() / 1000);
+                        currency.getTimestampPrice(RecordTransactionActivity.this, preferenceManager.getDefaultCurrency(),calendar.getTimeInMillis() / 1000);
                     }
                 },
                 calendar.get(Calendar.HOUR_OF_DAY),

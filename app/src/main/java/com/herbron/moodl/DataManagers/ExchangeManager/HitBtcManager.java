@@ -11,6 +11,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
+import com.herbron.moodl.DataNotifiers.HitBTCUpdateNotifierInterface;
 import com.herbron.moodl.R;
 
 import org.json.JSONArray;
@@ -39,12 +40,24 @@ public class HitBtcManager extends Exchange {
     private List<Currency> balance;
     private android.content.Context context;
 
+    private List<HitBTCUpdateNotifierInterface> hitBTCUpdateNotifierInterfaceList;
+
     public HitBtcManager(android.content.Context context, Exchange exchange)
     {
         super(exchange.id, exchange.name, exchange.type, exchange.description, exchange.publicKey, exchange.privateKey, exchange.isEnabled);
 
         this.context = context;
         requestQueue = Volley.newRequestQueue(context);
+    }
+
+    public void addListener(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface)
+    {
+        if(hitBTCUpdateNotifierInterfaceList == null)
+        {
+            hitBTCUpdateNotifierInterfaceList = new ArrayList<>();
+        }
+
+        hitBTCUpdateNotifierInterfaceList.add(hitBTCUpdateNotifierInterface);
     }
 
     private void createPairSymbolList()
@@ -55,11 +68,6 @@ public class HitBtcManager extends Exchange {
         pairSymbolList.add("ETH");
         pairSymbolList.add("BNB");
         pairSymbolList.add("USDT");
-    }
-
-    public void updateTrades(final HitBtcCallBack callBack, String symbol, String pairSymbol)
-    {
-
     }
 
     private void mergeBalanceSymbols()
@@ -88,7 +96,7 @@ public class HitBtcManager extends Exchange {
         balance = mergedBalance;
     }
 
-    public void updateGlobalBalance(final HitBtcCallBack masterCallBack)
+    public void updateGlobalBalance()
     {
         isTradingBalanceUpdated = false;
         isBalanceUpdated = false;
@@ -103,13 +111,20 @@ public class HitBtcManager extends Exchange {
                 if(isTradingBalanceUpdated)
                 {
                     mergeBalanceSymbols();
-                    masterCallBack.onSuccess();
+
+                    for(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface : hitBTCUpdateNotifierInterfaceList)
+                    {
+                        hitBTCUpdateNotifierInterface.onHitBTCBalanceUpdateSuccess();
+                    }
                 }
             }
 
             @Override
             public void onError(String error) {
-                masterCallBack.onError(error);
+                for(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface : hitBTCUpdateNotifierInterfaceList)
+                {
+                    hitBTCUpdateNotifierInterface.onHitBTCBalanceUpdateError(id, error);
+                }
             }
         });
 
@@ -121,13 +136,20 @@ public class HitBtcManager extends Exchange {
                 if(isBalanceUpdated)
                 {
                     mergeBalanceSymbols();
-                    masterCallBack.onSuccess();
+
+                    for(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface : hitBTCUpdateNotifierInterfaceList)
+                    {
+                        hitBTCUpdateNotifierInterface.onHitBTCBalanceUpdateSuccess();
+                    }
                 }
             }
 
             @Override
             public void onError(String error) {
-                masterCallBack.onError(error);
+                for(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface : hitBTCUpdateNotifierInterfaceList)
+                {
+                    hitBTCUpdateNotifierInterface.onHitBTCBalanceUpdateError(id, error);
+                }
             }
         });
     }
