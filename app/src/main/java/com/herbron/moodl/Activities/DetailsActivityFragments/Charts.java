@@ -220,13 +220,20 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
         lineChart.getLegend().setEnabled(false);
         lineChart.getXAxis().setEnabled(false);
         lineChart.setViewPortOffsets(0, 0, 0, 0);
+        lineChart.setNoDataTextColor(currency.getChartColor());
     }
 
     private void updateChartTab(int timeUnit, int amount)
     {
         updateChartsData(timeUnit, amount);
-        drawPriceLineChart();
-        drawPriceCandleStickChart();
+
+        if(currency.getHistoryMinutes() != null)
+        {
+            drawPriceLineChart();
+            drawPriceCandleStickChart();
+            drawVolumeChart();
+            updateGeneralData(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
+        }
 
         if(displayLineChart)
         {
@@ -238,9 +245,6 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
             view.findViewById(R.id.chartCandleStickView).setVisibility(View.VISIBLE);
             view.findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
         }
-
-        drawVolumeChart();
-        updateGeneralData(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
     }
 
     private void updateGeneralData(float start, float end)
@@ -559,12 +563,15 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
 
     private void updateChartsData(int timeUnit, int amount)
     {
-        dataChartList = new ArrayList<>();
+        dataChartList = null;
 
         switch (timeUnit)
         {
             case HOUR:
-                dataChartList = currency.getHistoryMinutes().subList(currency.getHistoryMinutes().size()-(60*amount), currency.getHistoryMinutes().size());
+                if(currency.getHistoryMinutes() != null)
+                {
+                    dataChartList = currency.getHistoryMinutes().subList(currency.getHistoryMinutes().size()-(60*amount), currency.getHistoryMinutes().size());
+                }
                 break;
             case DAY:
                 if(amount == 1)
@@ -573,11 +580,17 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
                 }
                 else
                 {
-                    dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-(24*amount), currency.getHistoryHours().size());
+                    if(currency.getHistoryHours() != null)
+                    {
+                        dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-(24*amount), currency.getHistoryHours().size());
+                    }
                 }
                 break;
             case WEEK:
-                dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-168, currency.getHistoryHours().size());
+                if(currency.getHistoryHours() != null)
+                {
+                    dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-168, currency.getHistoryHours().size());
+                }
                 break;
             case MONTH:
                 switch (amount)
@@ -586,10 +599,16 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
                         dataChartList = currency.getHistoryHours();
                         break;
                     case 3:
-                        dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-93, currency.getHistoryDays().size());
+                        if(currency.getHistoryDays() != null)
+                        {
+                            dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-93, currency.getHistoryDays().size());
+                        }
                         break;
                     case 6:
-                        dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-186, currency.getHistoryDays().size());
+                        if(currency.getHistoryDays() != null)
+                        {
+                            dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-186, currency.getHistoryDays().size());
+                        }
                         break;
                 }
                 break;

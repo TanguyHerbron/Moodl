@@ -229,7 +229,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                         for(int i = 0; i < renderedCurrencies.size(); i++)
                         {
                             //currencyLayout.addView(currencyView.get(i));
-                            currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), totalValue, preferencesManager.isBalanceHidden()));
+                            currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), getActivity(), totalValue, preferencesManager.isBalanceHidden()));
                         }
 
                         if(loadingDialog.isShowing())

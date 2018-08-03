@@ -10,6 +10,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.herbron.moodl.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -267,35 +268,25 @@ public class CurrencyDataRetriever {
     {
         List<CurrencyDataChart> dataChart = new ArrayList<>();
 
-        if(response.length() > 250)
-        {
-            response = response.substring(response.indexOf("Data\":[{") + 7, response.lastIndexOf("}],\"TimeTo"));
-            String[] tab = response.split(Pattern.quote("},{"));
-            for(int i = 0; i < tab.length; i++)
+        try {
+            JSONObject mainJsonObject = new JSONObject(response);
+
+            if(mainJsonObject.getString("Response").equals("Success"))
             {
+                JSONArray dataJsonArray = mainJsonObject.getJSONArray("Data");
 
-                if(i == 0)
+                for(int i = 0; i < dataJsonArray.length(); i++)
                 {
-                    tab[i] = tab[i] + "}";
-                }
-                else
-                {
-                    tab[i] = "{" + tab[i] + "}";
-                }
-
-                try {
-                    JSONObject jsonObject = new JSONObject(tab[i]);
-
-                    dataChart.add(parseJSON(jsonObject));
-
-                } catch (JSONException e) {
-                    Log.d(context.getResources().getString(R.string.debug_volley), "API Request error: " + e + " index: " + i);
+                    JSONObject timeJsonObject = dataJsonArray.getJSONObject(i);
+                    dataChart.add(parseJSON(timeJsonObject));
                 }
             }
-        }
-        else
-        {
-            dataChart = null;
+            else
+            {
+                dataChart = null;
+            }
+        } catch (JSONException e) {
+            Log.d("moodl", "API Request error : " + e);
         }
 
         return dataChart;

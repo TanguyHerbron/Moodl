@@ -12,7 +12,6 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +36,6 @@ import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.collapseH;
 import static com.herbron.moodl.MoodlBox.expandH;
-import static com.herbron.moodl.MoodlBox.getColor;
 import static com.herbron.moodl.MoodlBox.numberConformer;
 
 /**
@@ -47,6 +45,25 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
 public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNotifierInterface {
 
     private Currency currency;
+    private Activity parentActivity;
+
+    private OnClickListener detailsClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(parentActivity, CurrencyDetailsActivity.class);
+            intent.putExtra(getContext().getString(R.string.currency), currency);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                ActivityOptions activityOptions = ActivityOptions.makeSceneTransitionAnimation(parentActivity, findViewById(R.id.LineChartView), "chart");
+                parentActivity.startActivity(intent, activityOptions.toBundle());
+            }
+            else {
+                parentActivity.startActivity(intent);
+            }
+        }
+    };
 
     public CurrencyCardview(@NonNull Context context) {
         super(context);
@@ -59,6 +76,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         currency.setListener(this);
 
         this.currency = currency;
+        this.parentActivity = activity;
 
         LayoutInflater.from(context).inflate(R.layout.cardview_watchlist, this, true);
 
@@ -74,7 +92,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
                 if (view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE) {
                     collapseH(view.findViewById(R.id.collapsableLayout));
                 } else {
-                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.GONE);
+                    view.findViewById(R.id.linearLayoutSubCharts).setVisibility(View.GONE);
                     view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.VISIBLE);
                     expandH(view.findViewById(R.id.collapsableLayout));
 
@@ -85,7 +103,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
                     {
                         expandH(view.findViewById(R.id.collapsableLayout));
                         view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
-                        view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
+                        view.findViewById(R.id.linearLayoutSubCharts).setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -102,36 +120,20 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
             }
         });
 
-        findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(activity, CurrencyDetailsActivity.class);
-                intent.putExtra("currency", currency);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                {
-                    ActivityOptions activityOptions = ActivityOptions.makeSceneTransitionAnimation(activity, findViewById(R.id.LineChartView), "chart");
-                    activity.startActivity(intent, activityOptions.toBundle());
-                }
-                else
-                {
-                    activity.startActivity(intent);
-                }
-            }
-        });
+        findViewById(R.id.linearLayoutSubCharts).setOnClickListener(detailsClickListener);
+        findViewById(R.id.LineChartView).setOnClickListener(detailsClickListener);
 
         updateColor(currency);
     }
 
-    public CurrencyCardview(@NonNull final Context context, final Currency currency, float totalValue, boolean isBalanceHidden)
+    public CurrencyCardview(@NonNull final Context context, final Currency currency, Activity activity, float totalValue, boolean isBalanceHidden)
     {
         super(context);
 
         currency.setListener(this);
 
         this.currency = currency;
+        this.parentActivity = activity;
 
         LayoutInflater.from(context).inflate(R.layout.cardview_currency, this, true);
 
@@ -147,7 +149,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
                 if (view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE) {
                     collapseH(view.findViewById(R.id.collapsableLayout));
                 } else {
-                    view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.GONE);
+                    view.findViewById(R.id.linearLayoutSubCharts).setVisibility(View.GONE);
                     view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.VISIBLE);
                     expandH(view.findViewById(R.id.collapsableLayout));
 
@@ -158,7 +160,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
                     {
                         expandH(view.findViewById(R.id.collapsableLayout));
                         view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
-                        view.findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
+                        view.findViewById(R.id.linearLayoutSubCharts).setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -166,15 +168,8 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
         updateCardViewInfos(currency, totalValue, isBalanceHidden);
 
-        findViewById(R.id.LineChartView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context.getApplicationContext(), CurrencyDetailsActivity.class);
-                intent.putExtra(getContext().getString(R.string.currency), currency);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.getApplicationContext().startActivity(intent);
-            }
-        });
+        findViewById(R.id.linearLayoutSubCharts).setOnClickListener(detailsClickListener);
+        findViewById(R.id.LineChartView).setOnClickListener(detailsClickListener);
 
         updateColor(currency);
     }
@@ -367,7 +362,6 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
     @Override
     public void onHistoryDataUpdated() {
-        setupLineChart(currency);
 
         View progressWatchlistView = findViewById(R.id.progressBarLinechartWatchlist);
         View progressSummaryView = findViewById(R.id.progressBarLinechartSummary);
@@ -382,11 +376,11 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
             progressSummaryView.setVisibility(View.GONE);
         }
 
-        findViewById(R.id.linearLayoutSubLayout).setVisibility(View.VISIBLE);
+        findViewById(R.id.linearLayoutSubCharts).setVisibility(View.VISIBLE);
 
-        if(currency.getHistoryMinutes() == null)
+        if(currency.getHistoryMinutes() != null)
         {
-            findViewById(R.id.linearLayoutSubLayout).findViewById(R.id.detailsArrow).setVisibility(View.GONE);
+            setupLineChart(currency);
         }
     }
 
