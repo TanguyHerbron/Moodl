@@ -61,6 +61,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Target;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
@@ -253,7 +254,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     boolean isChecked = ((SwitchPreference) findPreference("enable_hitbtc")).isChecked();
 
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getBaseContext());
 
                     SharedPreferences.Editor editor = preferences.edit();
 
@@ -269,7 +270,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     boolean isChecked = ((SwitchPreference) findPreference("enable_binance")).isChecked();
 
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getBaseContext());
 
                     SharedPreferences.Editor editor = preferences.edit();
 
@@ -296,7 +297,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         private void startFingerprintProtocol()
         {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity().getBaseContext());
             FingerprintDialogFragment newFragment = FingerprintDialogFragment.newInstance();
             SwitchPreference touchdIdSwitch = (SwitchPreference) findPreference("enable_fingerprint");
 
@@ -311,7 +312,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         touchdIdSwitch.setEnabled(false);
                     }
 
-                    if(ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
+                    if(ActivityCompat.checkSelfPermission(this.getActivity().getBaseContext(), Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
                     {
                         touchdIdSwitch.setEnabled(false);
                     }
@@ -337,7 +338,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         {
                             cryptoObject = new FingerprintManager.CryptoObject(cipher);
 
-                            FingerprintHandler helper = new FingerprintHandler(this.getContext(), newFragment);
+                            FingerprintHandler helper = new FingerprintHandler(this.getActivity().getBaseContext(), newFragment);
                             helper.startAuth(fingerprintManager, cryptoObject);
                         }
                     }
@@ -353,6 +354,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
         }
 
+        @TargetApi(23)
         private void generateKey() throws FingerprintException
         {
             try {
@@ -378,6 +380,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
         }
 
+        @TargetApi(23)
         public boolean initCipher()
         {
             try {
@@ -436,7 +439,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 developperCategory.getPreference(0).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
-                        File cacheDir = getContext().getCacheDir();
+                        File cacheDir = getActivity().getBaseContext().getCacheDir();
                         File[] cachedFiles = cacheDir.listFiles();
 
                         for(int i = 0; i < cachedFiles.length; i++)
@@ -456,8 +459,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
-                    Context context = getContext();
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                    Context context = getActivity().getBaseContext();
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainPreferenceFragment.this.getActivity());
                     View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_export_data, null, true);
                     dialogBuilder.setView(dialogView);
 
@@ -512,7 +515,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                             Date currentDate = new Date();
                             String fileName = "Bakup_" + formatter.format(currentDate) + ".moodl";
-                            DatabaseManager databaseManager = new DatabaseManager(getContext());
+                            DatabaseManager databaseManager = new DatabaseManager(getActivity().getBaseContext());
 
                             if(enterPasswordCheckbox.isChecked())
                             {
@@ -538,7 +541,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     if(backupManualEntriesCheckbox.isChecked())
                                     {
                                         backupJson.put("transactions",
-                                                databaseManager.getDatabaseBackup(getContext(),
+                                                databaseManager.getDatabaseBackup(getActivity().getBaseContext(),
                                                         DatabaseManager.TABLE_MANUAL_CURRENCIES,
                                                         enterPasswordCheckbox.isChecked()));
                                     }
@@ -546,7 +549,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     if(backupWatchlistCheckbox.isChecked())
                                     {
                                         backupJson.put("watchlist",
-                                                databaseManager.getDatabaseBackup(getContext(),
+                                                databaseManager.getDatabaseBackup(getActivity().getBaseContext(),
                                                         DatabaseManager.TABLE_WATCHLIST,
                                                         enterPasswordCheckbox.isChecked()));
                                     }
@@ -554,7 +557,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     if(backupKeysCheckbox.isChecked())
                                     {
                                         backupJson.put("apiKeys",
-                                                databaseManager.getDatabaseBackup(getContext(),
+                                                databaseManager.getDatabaseBackup(getActivity().getBaseContext(),
                                                         DatabaseManager.TABLE_EXCHANGE_KEYS,
                                                         enterPasswordCheckbox.isChecked()));
                                     }
@@ -590,8 +593,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
-                    Context context = getContext();
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                    Context context = getActivity().getBaseContext();
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainPreferenceFragment.this.getActivity());
                     View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
                     dialogBuilder.setView(dialogView);
 
@@ -716,7 +719,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                                     if(enterPasswordCheckbox.isChecked())
                                     {
-                                        checker = DataCrypter.decrypt(getContext(), backupJson.getString("encodeChecker"));
+                                        checker = DataCrypter.decrypt(getActivity().getBaseContext(), backupJson.getString("encodeChecker"));
                                     }
                                     else
                                     {
@@ -740,7 +743,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                                 {
                                                     JSONObject transactionObject = transactionsArray.getJSONObject(i);
 
-                                                    databaseManager.addRowTransaction(transactionObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                    databaseManager.addRowTransaction(transactionObject, getActivity().getBaseContext(), enterPasswordCheckbox.isChecked());
                                                 }
                                             }
                                         }
@@ -760,7 +763,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                                 {
                                                     JSONObject watchlistObject = watchlistArray.getJSONObject(i);
 
-                                                    databaseManager.addRowWatchlist(watchlistObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                    databaseManager.addRowWatchlist(watchlistObject, getActivity().getBaseContext(), enterPasswordCheckbox.isChecked());
                                                 }
                                             }
                                         }
@@ -780,7 +783,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                                 {
                                                     JSONObject apiKeysObject = apiArray.getJSONObject(i);
 
-                                                    databaseManager.addRowApiKeys(apiKeysObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                    databaseManager.addRowApiKeys(apiKeysObject, getActivity().getBaseContext(), enterPasswordCheckbox.isChecked());
                                                 }
                                             }
                                         }
@@ -818,7 +821,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
-                    Intent exchangeListIntent = new Intent(getContext(), ExchangeListActivity.class);
+                    Intent exchangeListIntent = new Intent(getActivity().getBaseContext(), ExchangeListActivity.class);
                     startActivity(exchangeListIntent);
 
                     return false;
@@ -834,7 +837,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         {
             if(mustEncrypt)
             {
-                backupJson.put("encodeChecker", DataCrypter.encrypt(getContext(), "NaukVerification"));
+                backupJson.put("encodeChecker", DataCrypter.encrypt(getActivity().getBaseContext(), "NaukVerification"));
             }
             else
             {
@@ -861,7 +864,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             int result;
             List<String> listPermissionsNeeded = new ArrayList<>();
             for (String p : permissions) {
-                result = ContextCompat.checkSelfPermission(getContext(), p);
+                result = ContextCompat.checkSelfPermission(getActivity().getBaseContext(), p);
                 if (result != PackageManager.PERMISSION_GRANTED) {
                     listPermissionsNeeded.add(p);
                 }

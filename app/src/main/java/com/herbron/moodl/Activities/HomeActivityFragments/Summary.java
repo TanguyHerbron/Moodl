@@ -103,7 +103,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         View fragmentView = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
 
         preferencesManager = new PreferencesManager(getActivity());
-        balanceManager = new BalanceManager(getContext());
+        balanceManager = new BalanceManager(getActivity());
         coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity());
         cryptocompareApiManager = CryptocompareApiManager.getInstance(getActivity());
 
@@ -264,10 +264,10 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
         Random random = new Random();
 
-        LinearLayout splashLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.splash_screen, null, true);
+        LinearLayout splashLayout = (LinearLayout) LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.splash_screen, null, true);
         LinearLayout animatedLayout = splashLayout.findViewById(R.id.animatedViewsLayout);
 
-        File cacheDir = new File(getContext().getCacheDir().getAbsolutePath());
+        File cacheDir = new File(getActivity().getBaseContext().getCacheDir().getAbsolutePath());
         File[] cacheFiles = cacheDir.listFiles();
 
         if(cacheFiles.length > 4)
@@ -287,7 +287,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
                 Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
-                paint.setColor(ContextCompat.getColor(getContext(), R.color.white));
+                paint.setColor(ContextCompat.getColor(getActivity().getBaseContext(), R.color.white));
 
                 Canvas canvas = new Canvas(result);
                 canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
@@ -691,11 +691,11 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 Palette.Builder builder = Palette.from(currency.getIcon());
 
-                currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
+                currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
             }
             else
             {
-                currency.setChartColor(getColor(R.color.default_color, getContext()));
+                currency.setChartColor(getColor(R.color.default_color, getActivity().getBaseContext()));
             }
         }
 
@@ -812,7 +812,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
                 if(iconUrl != null)
                 {
-                    MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new MoodlboxNotifierInterface() {
+                    MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
                         @Override
                         public void onBitmapDownloaded(Bitmap bitmapIcon) {
                             localCurrency.setIcon(bitmapIcon);
@@ -822,7 +822,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                 }
                 else
                 {
-                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getContext());
+                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getActivity().getBaseContext());
 
                     Bitmap icon = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
 

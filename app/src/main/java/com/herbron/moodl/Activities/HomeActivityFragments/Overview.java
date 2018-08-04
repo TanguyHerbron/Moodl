@@ -54,14 +54,14 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
     {
         View fragmentView = inflater.inflate(R.layout.fragment_overview_homeactivity, container, false);
 
-        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getContext());
-        cryptocompareApiManager = CryptocompareApiManager.getInstance(getContext());
+        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity().getBaseContext());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getActivity().getBaseContext());
 
         coinmarketCapAPIManager.addListener(this);
 
         fragmentView.findViewById(R.id.toolbar).bringToFront();
 
-        preferenceManager = new PreferencesManager(getContext());
+        preferenceManager = new PreferencesManager(getActivity().getBaseContext());
 
         listLayout = fragmentView.findViewById(R.id.linearLayoutOverview);
 
@@ -137,7 +137,7 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
 
     private void loadingIndicatorGenerator()
     {
-        loadingFooter = LayoutInflater.from(getContext()).inflate(R.layout.listview_loading_indicator, null, false);
+        loadingFooter = LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.listview_loading_indicator, null, false);
 
         listLayout.addFooterView(loadingFooter);
     }
@@ -192,7 +192,7 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
 
                 if(iconUrl != null)
                 {
-                    MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getContext(), new MoodlboxNotifierInterface() {
+                    MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
                         @Override
                         public void onBitmapDownloaded(Bitmap bitmap) {
                             currency.setIcon(bitmap);
@@ -203,7 +203,7 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
                 }
                 else
                 {
-                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getContext());
+                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getActivity().getBaseContext());
 
                     Bitmap icon = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
 
@@ -233,7 +233,7 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
                     public void run() {
                         if(overviewListAdapter == null)
                         {
-                            overviewListAdapter = new OverviewListAdapter(getContext(), currencyList, getActivity());
+                            overviewListAdapter = new OverviewListAdapter(getActivity().getBaseContext(), currencyList, getActivity());
 
                             listLayout.setAdapter(overviewListAdapter);
                             listLayout.setTextFilterEnabled(false);

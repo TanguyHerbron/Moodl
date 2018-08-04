@@ -51,10 +51,10 @@ public class Transactions extends Fragment {
     {
         view = inflater.inflate(R.layout.fragment_transactions_detailsactivity, container, false);
 
-        PreferencesManager preferencesManager = new PreferencesManager(getContext());
+        PreferencesManager preferencesManager = new PreferencesManager(getActivity().getBaseContext());
 
         currency = getActivity().getIntent().getParcelableExtra("currency");
-        databaseManager = new DatabaseManager(getContext());
+        databaseManager = new DatabaseManager(getActivity().getBaseContext());
         //binanceManager = new BinanceManager(preferencesManager.getBinancePublicKey(), preferencesManager.getBinancePrivateKey());
         tradeLayout = view.findViewById(R.id.listTrades);
         transactionLayout = view.findViewById(R.id.listTransactions);
@@ -72,7 +72,7 @@ public class Transactions extends Fragment {
 
     private void loadingIndicatorGenerator()
     {
-        loadingFooter = LayoutInflater.from(getContext()).inflate(R.layout.listview_loading_indicator, null, false);
+        loadingFooter = LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.listview_loading_indicator, null, false);
 
         Drawable drawable = ((ProgressBar) loadingFooter.findViewById(R.id.progressIndicator)).getIndeterminateDrawable();
         drawable.mutate();
@@ -108,7 +108,7 @@ public class Transactions extends Fragment {
             });
         }
 
-        tradeListAdapter = new TradeListAdapter(getContext(), trades);
+        tradeListAdapter = new TradeListAdapter(getActivity().getBaseContext(), trades);
 
         tradeLayout.setAdapter(tradeListAdapter);
         tradeLayout.setTextFilterEnabled(false);
@@ -180,7 +180,7 @@ public class Transactions extends Fragment {
 
     private void drawTransactionList(ArrayList<Transaction> transactions)
     {
-        TransactionListAdapter transactionListAdapter = new TransactionListAdapter(getContext(), transactions);
+        TransactionListAdapter transactionListAdapter = new TransactionListAdapter(getActivity().getBaseContext(), transactions);
 
         transactionLayout.setAdapter(transactionListAdapter);
         transactionLayout.setTextFilterEnabled(false);

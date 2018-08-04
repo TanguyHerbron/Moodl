@@ -73,9 +73,9 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
 
         refreshLayout = view.findViewById(R.id.swiperefreshwatchlist);
         dragLinearLayout = view.findViewById(R.id.linearLayoutWatchlist);
-        cryptocompareApiManager = CryptocompareApiManager.getInstance(getContext());
-        preferencesManager = new PreferencesManager(getContext());
-        databaseManager = new DatabaseManager(getContext());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getActivity().getBaseContext());
+        preferencesManager = new PreferencesManager(getActivity().getBaseContext());
+        databaseManager = new DatabaseManager(getActivity().getBaseContext());
 
         lastTimestamp = 0;
         defaultCurrency = preferencesManager.getDefaultCurrency();
@@ -97,7 +97,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
 
         editModeEnabled = false;
 
-        watchlistManager = new WatchlistManager(getContext());
+        watchlistManager = new WatchlistManager(getActivity().getBaseContext());
 
         updateWatchlist(true);
 
@@ -171,7 +171,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
 
     private void disableEdition()
     {
-        editButton.setBackground(MoodlBox.getDrawable(R.drawable.check_to_edit, getContext()));
+        editButton.setBackground(MoodlBox.getDrawable(R.drawable.check_to_edit, getActivity().getBaseContext()));
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
@@ -196,7 +196,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
 
     private void enableEdition()
     {
-        editButton.setBackground(MoodlBox.getDrawable(R.drawable.edit_to_check, getContext()));
+        editButton.setBackground(MoodlBox.getDrawable(R.drawable.edit_to_check, getActivity().getBaseContext()));
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
@@ -357,7 +357,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
 
                 for(Currency currency : watchlistManager.getWatchlist())
                 {
-                    View addedView = new CurrencyCardview(getContext(), currency, getActivity());
+                    View addedView = new CurrencyCardview(getActivity().getBaseContext(), currency, getActivity());
 
                     dragLinearLayout.addDragView(addedView, addedView.findViewById(R.id.dragCardWatchlist));
                 }
@@ -386,11 +386,11 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
         {
             Palette.Builder builder = Palette.from(currency.getIcon());
 
-            currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
+            currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
         }
         else
         {
-            currency.setChartColor(getColor(R.color.default_color, getContext()));
+            currency.setChartColor(getColor(R.color.default_color, getActivity().getBaseContext()));
         }
     }
 
@@ -450,7 +450,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
 
                         if(iconUrl != null)
                         {
-                            MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getContext(), new MoodlboxNotifierInterface() {
+                            MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
                                 @Override
                                 public void onBitmapDownloaded(Bitmap bitmapIcon) {
                                     currency.setIcon(bitmapIcon);

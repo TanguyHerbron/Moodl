@@ -69,11 +69,11 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
     {
         view = inflater.inflate(R.layout.fragment_marketcap_homeactivity, container, false);
 
-        preferencesManager = new PreferencesManager(getContext());
-        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getContext());
+        preferencesManager = new PreferencesManager(getActivity().getBaseContext());
+        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity().getBaseContext());
         coinmarketCapAPIManager.addListener(this);
 
-        cryptocompareApiManager = CryptocompareApiManager.getInstance(getContext());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getActivity().getBaseContext());
         cryptocompareApiManager.addListener(this);
 
         if(!cryptocompareApiManager.isDetailsUpToDate())
@@ -258,13 +258,13 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
 
             if(iconUrl != null)
             {
-                MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new MoodlboxNotifierInterface() {
+                MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
                     @Override
                     public void onBitmapDownloaded(Bitmap bitmapIcon) {
                         Palette.Builder builder = Palette.from(bitmapIcon);
 
                         coinmarketCapAPIManager.getTopCurrencies().get(index).setIcon(bitmapIcon);
-                        coinmarketCapAPIManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
+                        coinmarketCapAPIManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
 
                         countIcons();
 
@@ -387,13 +387,13 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
     private void updateDetails(double marketCap, double volume, String title, double percentage)
     {
         ((TextView) view.findViewById(R.id.textViewMarketCap))
-                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(marketCap), getContext()));
+                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(marketCap), getActivity().getBaseContext()));
         ((TextView) view.findViewById(R.id.textViewVolume))
-                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(volume), getContext()));
+                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(volume), getActivity().getBaseContext()));
         ((TextView) view.findViewById(R.id.textViewTitle))
                 .setText(title);
         ((TextView) view.findViewById(R.id.textViewDominancePercentage))
-                .setText(PlaceholderManager.getPercentageString(MoodlBox.numberConformer(percentage), getContext()));
+                .setText(PlaceholderManager.getPercentageString(MoodlBox.numberConformer(percentage), getActivity().getBaseContext()));
     }
 
     private SpannableString generateCenterSpannableText() {

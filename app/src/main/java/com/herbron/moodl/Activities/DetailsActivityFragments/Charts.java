@@ -87,7 +87,7 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
         lineChartButton = view.findViewById(R.id.lineChartButton);
         candleStickChartButton = view.findViewById(R.id.candleStickChartButton);
         barChart = view.findViewById(R.id.chartVolumeView);
-        preferencesManager = new PreferencesManager(getContext());
+        preferencesManager = new PreferencesManager(getActivity().getBaseContext());
 
         displayLineChart = true;
 
@@ -129,7 +129,7 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
     {
         timeIntervalSpinner = view.findViewById(R.id.timeIntervalSinner);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity().getBaseContext(),
                 R.array.time_interval_string_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -160,31 +160,31 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
         switch (index)
         {
             case 0:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryMinutes(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 1:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryMinutes(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 2:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryMinutes(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 3:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryHours(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 4:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryHours(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 5:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryHours(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 6:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryDays(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 7:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryDays(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 8:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency());
+                currency.updateHistoryDays(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
         }
     }
@@ -252,8 +252,8 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
 
         updateFluctuation(start, end);
 
-        ((TextView) view.findViewById(R.id.txtViewPriceStart)).setText(PlaceholderManager.getValueString(numberConformer(start), getContext()));
-        ((TextView) view.findViewById(R.id.txtViewPriceNow)).setText(PlaceholderManager.getValueString(numberConformer(end), getContext()));
+        ((TextView) view.findViewById(R.id.txtViewPriceStart)).setText(PlaceholderManager.getValueString(numberConformer(start), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.txtViewPriceNow)).setText(PlaceholderManager.getValueString(numberConformer(end), getActivity().getBaseContext()));
 
         for(int i = 1; i < dataChartList.size(); i++)
         {
@@ -270,9 +270,9 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
             }
         }
 
-        ((TextView) view.findViewById(R.id.totalVolume)).setText(PlaceholderManager.getValueString(numberConformer(totalVolume), getContext()));
-        ((TextView) view.findViewById(R.id.highestPrice)).setText(PlaceholderManager.getValueString(numberConformer(highestPrice), getContext()));
-        ((TextView) view.findViewById(R.id.lowestPrice)).setText(PlaceholderManager.getValueString(numberConformer(lowestPrice), getContext()));
+        ((TextView) view.findViewById(R.id.totalVolume)).setText(PlaceholderManager.getValueString(numberConformer(totalVolume), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.highestPrice)).setText(PlaceholderManager.getValueString(numberConformer(highestPrice), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.lowestPrice)).setText(PlaceholderManager.getValueString(numberConformer(lowestPrice), getActivity().getBaseContext()));
     }
 
     private void updateFluctuation(float start, float end)
@@ -457,9 +457,9 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
             date = getDateFromTimestamp(dataChartList.get(index).getTimestamp() * 1000);
         }
 
-        volumePlaceholder = PlaceholderManager.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), getContext());
-        pricePlaceholder = PlaceholderManager.getPriceString(numberConformer((lineChart.getHighlighted())[0].getY()), getContext());
-        timestampPlaceholder = PlaceholderManager.getTimestampString(date, getContext());
+        volumePlaceholder = PlaceholderManager.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), getActivity().getBaseContext());
+        pricePlaceholder = PlaceholderManager.getPriceString(numberConformer((lineChart.getHighlighted())[0].getY()), getActivity().getBaseContext());
+        timestampPlaceholder = PlaceholderManager.getTimestampString(date, getActivity().getBaseContext());
 
         ((TextView) view.findViewById(R.id.volumeHightlight)).setText(volumePlaceholder);
         view.findViewById(R.id.volumeHightlight).setVisibility(View.VISIBLE);
@@ -545,14 +545,14 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
         dataSet = new CandleDataSet(values, "");
         dataSet.setDrawIcons(false);
         dataSet.setDrawValues(false);
-        dataSet.setDecreasingColor(MoodlBox.getColor(R.color.decreaseCandle, getContext()));
+        dataSet.setDecreasingColor(MoodlBox.getColor(R.color.decreaseCandle, getActivity().getBaseContext()));
         dataSet.setShowCandleBar(true);
         dataSet.setShadowColorSameAsCandle(true);
         dataSet.setDecreasingPaintStyle(Paint.Style.FILL);
-        dataSet.setIncreasingColor(MoodlBox.getColor(R.color.increaseCandle, getContext()));
+        dataSet.setIncreasingColor(MoodlBox.getColor(R.color.increaseCandle, getActivity().getBaseContext()));
         dataSet.setIncreasingPaintStyle(Paint.Style.STROKE);
-        dataSet.setNeutralColor(MoodlBox.getColor(R.color.increaseCandle, getContext()));
-        dataSet.setHighLightColor(MoodlBox.getColor(R.color.colorAccent, getContext()));
+        dataSet.setNeutralColor(MoodlBox.getColor(R.color.increaseCandle, getActivity().getBaseContext()));
+        dataSet.setHighLightColor(MoodlBox.getColor(R.color.colorAccent, getActivity().getBaseContext()));
         dataSet.setDrawHorizontalHighlightIndicator(false);
 
         return new CandleData(dataSet);
