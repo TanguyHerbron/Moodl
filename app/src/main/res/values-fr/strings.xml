@@ -140,4 +140,17 @@
     <string name="wipe_watchlist">Supprimer la liste suivie actuelle</string>
     <string name="wipe_api_keys">Supprimer les clefs API actuelles</string>
     <string name="title_add_exchange">Choose an exchange</string>
+    <string name="title_activity_exchange_list">Comptes synchronisés</string>
+    <string name="account_label">Nom du compte</string>
+    <string name="publicKey">Clé publique</string>
+    <string name="apiKey">Clé API</string>
+    <string name="secretKey">Clé secrète</string>
+    <string name="informations">Informations</string>
+    <string name="title_choose_coin">Choisir une monnaie</string>
+    <string name="exchange">Échange</string>
+    <string name="pair">Paire</string>
+    <string name="total_value">Valeur totale</string>
+    <string name="notes">Notes</string>
+    <string name="select_exchange">Sélectionner un échange</string>
+    <string name="select_pair">Paire</string>
 </resources>

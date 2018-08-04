@@ -225,7 +225,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         CustomTabLayout tabLayout = findViewById(R.id.transactionsTabLayout);
         tabLayout.addTab(0, "Buy");
         tabLayout.addTab(1, "Sell");
-        tabLayout.addTab(2, "Transfer");
+        //tabLayout.addTab(2, "Transfer");
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = findViewById(R.id.transactionsViewPager);

@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -186,6 +187,8 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
         @Override
         protected Void doInBackground(List<Currency>... currencies) {
 
+            iconCounter = 0;
+
             for(Currency currency : currencies[0])
             {
                 String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), cryptocompareApiManager);
@@ -231,9 +234,10 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
                         if(overviewListAdapter == null)
                         {
-                            overviewListAdapter = new OverviewListAdapter(getActivity().getBaseContext(), currencyList, getActivity());
+                            overviewListAdapter = new OverviewListAdapter(Overview.this.getContext(), currencyList, getActivity());
 
                             listLayout.setAdapter(overviewListAdapter);
                             listLayout.setTextFilterEnabled(false);
