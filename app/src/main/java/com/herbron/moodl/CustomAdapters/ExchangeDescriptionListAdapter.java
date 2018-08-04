@@ -57,6 +57,7 @@ public class ExchangeDescriptionListAdapter extends ArrayAdapter<Exchange> {
                 Intent editExchangeAccountIntent = new Intent(context, AddExchangeActivity.class);
                 editExchangeAccountIntent.putExtra("isEdit", true);
                 editExchangeAccountIntent.putExtra("exchangeId", exchange.getId());
+                editExchangeAccountIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(editExchangeAccountIntent);
             }
         });

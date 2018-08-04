@@ -44,5 +44,7 @@
     <color name="softWhite">#66FFFFFF</color>
     <color name="hardWhite">#88FFFFFF</color>
 
+    <color name="error">#FFB00020</color>
+
     <color name="binance">#FFF5BC00</color>
 </resources>

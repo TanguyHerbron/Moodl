@@ -34,8 +34,8 @@ public class AddExchangeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_exchange);
         getApplicationContext().setTheme(R.style.InputActivityTheme);
+        setContentView(R.layout.activity_add_exchange);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -85,12 +85,12 @@ public class AddExchangeActivity extends AppCompatActivity {
         switch (exchangeType)
         {
             case DatabaseManager.BINANCE_TYPE:
-                setupExchangeLayout = (LinearLayout) LayoutInflater.from(getApplicationContext()).inflate(R.layout.binance_exchange_setup_layout, setupExchangeLayout, true);
+                setupExchangeLayout = (LinearLayout) LayoutInflater.from(getBaseContext()).inflate(R.layout.binance_exchange_setup_layout, setupExchangeLayout, true);
 
                 bindSetupViews();
                 break;
             case DatabaseManager.HITBTC_TYPE:
-                setupExchangeLayout = (LinearLayout) LayoutInflater.from(getApplicationContext()).inflate(R.layout.hitbtc_exchange_setup_layout, setupExchangeLayout, true);
+                setupExchangeLayout = (LinearLayout) LayoutInflater.from(getBaseContext()).inflate(R.layout.hitbtc_exchange_setup_layout, setupExchangeLayout, true);
 
                 bindSetupViews();
                 break;
