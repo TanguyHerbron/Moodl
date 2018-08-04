@@ -42,6 +42,7 @@
     <color name="default_color">#FFAAAAAA</color>
     <color name="captionColor">#FF898989</color>
     <color name="softWhite">#66FFFFFF</color>
+    <color name="hardWhite">#88FFFFFF</color>
 
     <color name="binance">#FFF5BC00</color>
 </resources>

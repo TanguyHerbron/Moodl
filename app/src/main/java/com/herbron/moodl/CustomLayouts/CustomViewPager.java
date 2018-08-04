@@ -1,4 +1,4 @@
-package com.herbron.moodl.LayoutManagers;
+package com.herbron.moodl.CustomLayouts;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;

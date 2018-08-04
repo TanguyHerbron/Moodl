@@ -1,4 +1,4 @@
-package com.herbron.moodl.LayoutManagers;
+package com.herbron.moodl.CustomAdapters;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

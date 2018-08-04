@@ -12,7 +12,7 @@
         <shape>
             <corners android:topRightRadius="5dp"
                 android:topLeftRadius="5dp"/>
-            <solid android:color="@color/captionColor"/>
+            <solid android:color="@color/hardWhite"/>
         </shape>
     </item>
 </selector>

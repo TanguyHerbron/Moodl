@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.herbron.moodl.Activities.CurrencyDetailsActivity">
 
-    <com.herbron.moodl.LayoutManagers.CustomViewPager
+    <com.herbron.moodl.CustomLayouts.CustomViewPager
         android:id="@+id/vfCurrencyDetails"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -34,6 +34,11 @@ public class PlaceholderManager {
         return formattedString;
     }
 
+    public static String getPairString(String pair1, String pair2, Context context)
+    {
+        return context.getResources().getString(R.string.pairPlaceholder, pair1, pair2);
+    }
+
     public static String getDenomination(String coinName, String coinSymbol, Context context)
     {
         return context.getResources().getString(R.string.denomincationPlaceholder, coinName, coinSymbol);

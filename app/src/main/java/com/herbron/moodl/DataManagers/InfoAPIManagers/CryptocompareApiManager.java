@@ -141,20 +141,20 @@ public class CryptocompareApiManager {
                 JSONObject exchangeJsonObject = mainJsonObject.getJSONObject(exchangeKey);
                 Iterator<String> pairIterator = exchangeJsonObject.keys();
 
+                List<Pair> pairList = new ArrayList<>();
+
                 while(pairIterator.hasNext())
                 {
                     String pairKey = pairIterator.next();
                     JSONArray pairJsonArray = exchangeJsonObject.getJSONArray(pairKey);
 
-                    List<Pair> pairList = new ArrayList<>();
-
                     for(int i = 0; i < pairJsonArray.length(); i++)
                     {
                         pairList.add(new Pair(pairKey, pairJsonArray.get(i).toString()));
                     }
-
-                    exchangeList.add(new Exchange(exchangeKey, pairList));
                 }
+
+                exchangeList.add(new Exchange(exchangeKey, pairList));
             }
 
             for(CryptocompareNotifierInterface cryptocompareNotifierInterface : cryptocompareNotifierInterfaceList)
@@ -167,9 +167,28 @@ public class CryptocompareApiManager {
         }
     }
 
-    public List<Exchange> getExchangeList()
+    public List<Exchange> getExchangeList(String symbol)
     {
-        return exchangeList;
+        List<Exchange> compatibleExchanges = new ArrayList<>();
+
+        for(Exchange exchange : exchangeList)
+        {
+            int i = 0;
+            boolean isSymbolTraded = false;
+
+            while(i < exchange.getPairs().size() && !isSymbolTraded)
+            {
+                if(exchange.getPairs().get(i).contains(symbol))
+                {
+                    compatibleExchanges.add(exchange);
+                    isSymbolTraded = true;
+                }
+
+                i++;
+            }
+        }
+
+        return compatibleExchanges;
     }
 
     private void processDetailResult(String response)

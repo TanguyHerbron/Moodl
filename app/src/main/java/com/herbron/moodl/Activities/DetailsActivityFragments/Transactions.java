@@ -23,8 +23,8 @@ import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.BinanceManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.LayoutManagers.TradeListAdapter;
-import com.herbron.moodl.LayoutManagers.TransactionListAdapter;
+import com.herbron.moodl.CustomAdapters.TradeListAdapter;
+import com.herbron.moodl.CustomAdapters.TransactionListAdapter;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;

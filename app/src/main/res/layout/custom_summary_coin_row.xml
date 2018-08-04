@@ -23,7 +23,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:gravity="center_vertical|center_horizontal"
-            android:text=""
             android:textColor="@color/captionColor"
             android:textSize="12sp" />
     </LinearLayout>

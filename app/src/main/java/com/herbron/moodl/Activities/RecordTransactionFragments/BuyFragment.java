@@ -22,12 +22,6 @@ public class BuyFragment extends Fragment implements CryptocompareNotifierInterf
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_buy, container, false);
 
-        cryptocompareApiManager = CryptocompareApiManager.getInstance(getContext());
-
-        cryptocompareApiManager.addListener(this);
-
-        cryptocompareApiManager.updateExchangeList();
-
         return view;
     }
 
@@ -38,6 +32,6 @@ public class BuyFragment extends Fragment implements CryptocompareNotifierInterf
 
     @Override
     public void onExchangesUpdated() {
-        Log.d("moodl", "Received ! " + cryptocompareApiManager.getExchangeList().get(0).getName());
+
     }
 }

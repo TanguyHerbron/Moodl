@@ -3,30 +3,21 @@ package com.herbron.moodl.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
 import com.herbron.moodl.DataManagers.DatabaseManager;
-import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
-import com.herbron.moodl.LayoutManagers.ExchangeListAdapter;
+import com.herbron.moodl.CustomAdapters.ExchangeDescriptionListAdapter;
 import com.herbron.moodl.R;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.herbron.moodl.DataManagers.DatabaseManager.BINANCE_TYPE;
-import static com.herbron.moodl.DataManagers.DatabaseManager.HITBTC_TYPE;
 
 public class ExchangeListActivity extends AppCompatActivity {
 
     private DatabaseManager databaseManager;
     private ListView exchangeListView;
-    private ExchangeListAdapter exchangeListAdapter;
+    private ExchangeDescriptionListAdapter exchangeDescriptionListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +46,10 @@ public class ExchangeListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        exchangeListAdapter = new ExchangeListAdapter(getApplicationContext(), databaseManager.getExchanges());
+        exchangeDescriptionListAdapter = new ExchangeDescriptionListAdapter(getApplicationContext(), databaseManager.getExchanges());
 
-        exchangeListView.setAdapter(exchangeListAdapter);
-        exchangeListAdapter.notifyDataSetChanged();
+        exchangeListView.setAdapter(exchangeDescriptionListAdapter);
+        exchangeDescriptionListAdapter.notifyDataSetChanged();
     }
 
     @Override

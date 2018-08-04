@@ -33,7 +33,7 @@ import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.CoinmarketCapAPIManager;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.LayoutManagers.CustomPieChart;
+import com.herbron.moodl.CustomLayouts.CustomPieChart;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.PlaceholderManager;

@@ -2,7 +2,6 @@ package com.herbron.moodl.Activities;
 
 import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
@@ -46,7 +45,7 @@ public class AddExchangeActivity extends AppCompatActivity {
         exchangeSpinner = findViewById(R.id.exchange_spinner);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.supported_exchanges, R.layout.exchange_spinner_item);
+                R.array.supported_exchanges, R.layout.simple_spinner_item);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 

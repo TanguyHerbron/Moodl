@@ -13,6 +13,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -26,13 +27,18 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
+import com.herbron.moodl.CustomAdapters.PairRecordListAdapter;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
+import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.DatabaseManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.LayoutManagers.CoinSummaryListAdapter;
-import com.herbron.moodl.LayoutManagers.CustomTabLayout;
-import com.herbron.moodl.LayoutManagers.RecordTransactionPageAdapter;
+import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
+import com.herbron.moodl.CustomAdapters.CoinRecordListAdapter;
+import com.herbron.moodl.CustomLayouts.CustomTabLayout;
+import com.herbron.moodl.CustomAdapters.ExchangeRecordListAdapter;
+import com.herbron.moodl.CustomAdapters.RecordTransactionPageAdapter;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.PlaceholderManager;
@@ -43,7 +49,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class RecordTransactionActivity extends AppCompatActivity implements CurrencyInfoUpdateNotifierInterface {
+public class RecordTransactionActivity extends AppCompatActivity implements CurrencyInfoUpdateNotifierInterface, CryptocompareNotifierInterface {
 
     private String coin;
     private String symbol;
@@ -60,13 +66,20 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
     private SimpleDateFormat sdf;
     private PreferencesManager preferenceManager;
     private EditText purchasedPriceEditText;
-    private Currency currency;
     private int transactionId;
 
     private Toolbar toolbar;
     private ImageView currencyIconImageView;
 
+    private Currency currency;
+    private Exchange exchange;
+    private Pair pair;
+
     private CryptocompareApiManager cryptocompareApiManager;
+
+    private AutoCompleteTextView coin_autoCompleteTextView;
+    private AutoCompleteTextView exchange_autoCompleteTextView;
+    private AutoCompleteTextView pair_autoCompleteTextView;
 
     private SearchView mainSearchView;
 
@@ -176,8 +189,6 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         databaseManager = new DatabaseManager(this);
         preferenceManager = new PreferencesManager(this);
 
-        //initializeViewElements();
-
         coin = intent.getStringExtra("coin");
         symbol = intent.getStringExtra("symbol");
 
@@ -186,13 +197,31 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         toolbar = findViewById(R.id.toolbar);
 
         currencyIconImageView = findViewById(R.id.currencyIconImageView);
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(this);
+
+        cryptocompareApiManager.addListener(this);
+
+        cryptocompareApiManager.updateExchangeList();
+
+        coin_autoCompleteTextView = findViewById(R.id.coin_autoCompleteTextView);
+        exchange_autoCompleteTextView = findViewById(R.id.exchange_autoCompleteTextView);
+        pair_autoCompleteTextView = findViewById(R.id.pair_autoCompleteTextView);
 
         setSupportActionBar(toolbar);
 
-        setupAutoCompleteTextView();
+        setupTabLayout();
+
+        setupCoinAutoCompleteTextView();
+
+        setupExchangeAutoCompleteTextView();
+
+        setupPairAutoCompleteTextView();
 
         setupBackButton();
+    }
 
+    private void setupTabLayout()
+    {
         CustomTabLayout tabLayout = findViewById(R.id.transactionsTabLayout);
         tabLayout.addTab(0, "Buy");
         tabLayout.addTab(1, "Sell");
@@ -219,17 +248,123 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
             }
         });
-
-        cryptocompareApiManager.updateExchangeList();
     }
 
-    private void setupAutoCompleteTextView()
+    private void setupPairAutoCompleteTextView()
     {
-        cryptocompareApiManager = CryptocompareApiManager.getInstance(this);
+        pair_autoCompleteTextView.setThreshold(0);
+        pair_autoCompleteTextView.setTextColor(getResources().getColor(R.color.white));
 
-        CoinSummaryListAdapter adapter = new CoinSummaryListAdapter(this, R.layout.custom_summary_coin_row, new ArrayList<>(cryptocompareApiManager.getCurrenciesDenomination()));
+        pair_autoCompleteTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pair_autoCompleteTextView.showDropDown();
+            }
+        });
 
-        AutoCompleteTextView coin_autoCompleteTextView = findViewById(R.id.coin_autoCompleteTextView);
+        pair_autoCompleteTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    pair_autoCompleteTextView.showDropDown();
+                }
+                else
+                {
+                    pair_autoCompleteTextView.dismissDropDown();
+                }
+            }
+        });
+
+        pair_autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                pair = (Pair) pair_autoCompleteTextView.getAdapter().getItem(position);
+
+                pair_autoCompleteTextView.setText(PlaceholderManager.getPairString(pair.getFrom(), pair.getTo(), getBaseContext()));
+                toolbar.requestFocus();
+                hideSoftKeyboard(RecordTransactionActivity.this);
+            }
+        });
+    }
+
+    private void setupExchangeAutoCompleteTextView()
+    {
+        exchange_autoCompleteTextView.setThreshold(0);
+        exchange_autoCompleteTextView.setTextColor(getResources().getColor(R.color.white));
+
+        exchange_autoCompleteTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                pair_autoCompleteTextView.setEnabled(false);
+                pair_autoCompleteTextView.setText("");
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        exchange_autoCompleteTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exchange_autoCompleteTextView.showDropDown();
+            }
+        });
+
+        exchange_autoCompleteTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    exchange_autoCompleteTextView.showDropDown();
+                }
+                else
+                {
+                    exchange_autoCompleteTextView.dismissDropDown();
+                }
+            }
+        });
+
+        exchange_autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                exchange = (Exchange) exchange_autoCompleteTextView.getAdapter().getItem(position);
+
+                exchange_autoCompleteTextView.setText(exchange.getName());
+                toolbar.requestFocus();
+                hideSoftKeyboard(RecordTransactionActivity.this);
+
+                updatePairAdapter();
+                pair_autoCompleteTextView.setEnabled(true);
+            }
+        });
+    }
+
+    private void updatePairAdapter()
+    {
+        PairRecordListAdapter pairAdapter = new PairRecordListAdapter(this, android.R.layout.simple_list_item_1, new ArrayList<>(exchange.getPairsFor(currency.getSymbol())));
+
+        pair_autoCompleteTextView.setAdapter(pairAdapter);
+    }
+
+    private void updateExchangeAdapter(String symbol)
+    {
+        ExchangeRecordListAdapter exchangeAdapter = new ExchangeRecordListAdapter(this, android.R.layout.simple_list_item_1, new ArrayList<>(cryptocompareApiManager.getExchangeList(symbol)));
+
+        exchange_autoCompleteTextView.setAdapter(exchangeAdapter);
+    }
+
+    private void setupCoinAutoCompleteTextView()
+    {
+        CoinRecordListAdapter adapter = new CoinRecordListAdapter(this, R.layout.custom_summary_coin_row, new ArrayList<>(cryptocompareApiManager.getCurrenciesDenomination()));
+
         coin_autoCompleteTextView.setThreshold(0);
         coin_autoCompleteTextView.setAdapter(adapter);
         coin_autoCompleteTextView.setTextColor(getResources().getColor(R.color.white));
@@ -242,6 +377,8 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 currencyIconImageView.setImageBitmap(null);
+                exchange_autoCompleteTextView.setEnabled(false);
+                exchange_autoCompleteTextView.setText("");
             }
 
             @Override
@@ -249,6 +386,14 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
             }
         });
+
+        coin_autoCompleteTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                coin_autoCompleteTextView.showDropDown();
+            }
+        });
+
         coin_autoCompleteTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -266,7 +411,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         coin_autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Currency currency = (Currency) coin_autoCompleteTextView.getAdapter().getItem(position);
+                currency = (Currency) coin_autoCompleteTextView.getAdapter().getItem(position);
 
                 coin_autoCompleteTextView.setText(PlaceholderManager.getDenomination(currency.getName(), currency.getSymbol(), getBaseContext()));
                 toolbar.requestFocus();
@@ -274,7 +419,8 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
                 currency.setListener(RecordTransactionActivity.this);
 
-                RecordTransactionActivity.this.currency = currency;
+                updateExchangeAdapter(currency.getSymbol());
+                exchange_autoCompleteTextView.setEnabled(true);
 
                 IconDownloaderTask iconDownloaderTask = new IconDownloaderTask();
                 iconDownloaderTask.execute();
@@ -294,6 +440,16 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
     @Override
     public void onPriceUpdated(Currency currency) {
+
+    }
+
+    @Override
+    public void onDetailsUpdated() {
+
+    }
+
+    @Override
+    public void onExchangesUpdated() {
 
     }
 

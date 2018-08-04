@@ -179,6 +179,7 @@
     <string name="fluctuationYenPercentagePlaceholder" translatable="false">%1$s¥ (%2$s%%)</string>
 
     <string name="denomincationPlaceholder" translatable="false">%1$s (%2$s)</string>
+    <string name="pairPlaceholder" translatable="false">%1$s/%2$s</string>
 
     <!--DetailsActivity placeholders-->
     <string name="timestampPlaceholder">Date\n%1$s</string>
@@ -265,5 +266,7 @@
     <string name="pair">Pair</string>
     <string name="total_value">Total value</string>
     <string name="notes">Notes</string>
+    <string name="select_exchange">Select an exchange</string>
+    <string name="select_pair">Pair</string>
 
 </resources>

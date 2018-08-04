@@ -22,7 +22,7 @@ import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.CoinmarketCapAPIManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.LayoutManagers.OverviewListAdapter;
+import com.herbron.moodl.CustomAdapters.OverviewListAdapter;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.R;

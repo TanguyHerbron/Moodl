@@ -1,4 +1,4 @@
-package com.herbron.moodl.LayoutManagers;
+package com.herbron.moodl.CustomAdapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -15,12 +15,12 @@ import com.herbron.moodl.R;
 
 import java.util.ArrayList;
 
-public class CoinSummaryListAdapter extends ArrayAdapter<Currency> {
+public class CoinRecordListAdapter extends ArrayAdapter<Currency> {
 
     private CustomFilter filter;
     private ArrayList<Currency> currencies, suggestions;
 
-    public CoinSummaryListAdapter(@NonNull Context context, int resource, @NonNull ArrayList<Currency> currencies) {
+    public CoinRecordListAdapter(@NonNull Context context, int resource, @NonNull ArrayList<Currency> currencies) {
         super(context, resource, currencies);
 
         this.currencies = currencies;
@@ -72,7 +72,7 @@ public class CoinSummaryListAdapter extends ArrayAdapter<Currency> {
         return filter;
     }
 
-    class CustomFilter extends Filter
+    private class CustomFilter extends Filter
     {
 
         @Override

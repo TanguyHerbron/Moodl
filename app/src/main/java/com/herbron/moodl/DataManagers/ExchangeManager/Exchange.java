@@ -2,6 +2,7 @@ package com.herbron.moodl.DataManagers.ExchangeManager;
 
 import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Exchange {
@@ -30,6 +31,17 @@ public class Exchange {
     {
         this.name = name;
         this.pairs = pairs;
+    }
+
+    public Exchange(Exchange exchange)
+    {
+        this.name = exchange.name;
+        this.pairs = exchange.pairs;
+    }
+
+    public List<Pair> getPairs()
+    {
+        return pairs;
     }
 
     public boolean isEnabled()
@@ -65,5 +77,20 @@ public class Exchange {
     public int getId()
     {
         return id;
+    }
+
+    public List<Pair> getPairsFor(String symbol)
+    {
+        List<Pair> compatiblePairs = new ArrayList<>();
+
+        for(Pair pair : pairs)
+        {
+            if(pair.contains(symbol))
+            {
+                compatiblePairs.add(pair);
+            }
+        }
+
+        return compatiblePairs;
     }
 }

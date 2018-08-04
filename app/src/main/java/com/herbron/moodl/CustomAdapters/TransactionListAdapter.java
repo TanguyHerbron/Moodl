@@ -1,4 +1,4 @@
-package com.herbron.moodl.LayoutManagers;
+package com.herbron.moodl.CustomAdapters;
 
 import android.app.Activity;
 import android.content.Context;

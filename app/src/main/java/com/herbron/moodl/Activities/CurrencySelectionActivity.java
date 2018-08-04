@@ -21,7 +21,7 @@ import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.LayoutManagers.CoinWatchlistAdapter;
+import com.herbron.moodl.CustomAdapters.CoinWatchlistAdapter;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;

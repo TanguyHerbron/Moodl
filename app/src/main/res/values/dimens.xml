@@ -16,4 +16,9 @@
 
     <dimen name="fragment_padding">15dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="simple_toolbarSpinner_size">125dp</dimen>
+    <dimen name="double_toolbarSpinner_size">180dp</dimen>
+
+    <dimen name="spinner_toolbar_height">50dp</dimen>
 </resources>

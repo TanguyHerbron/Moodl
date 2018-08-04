@@ -9,7 +9,7 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="125dp"
+        android:layout_height="@dimen/double_toolbarSpinner_size"
         app:layout_collapseMode="pin"
         app:elevation="0dp"
         app:contentInsetLeft="0dp"
@@ -49,8 +49,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="22dp"
+                android:layout_height="@dimen/spinner_toolbar_height"
                 android:layout_marginEnd="12dp"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="12dp">
@@ -63,7 +62,6 @@
                     android:textSize="18sp"
                     android:hint="@string/select_coin"
                     android:inputType="textNoSuggestions"
-                    android:layout_gravity="center"
                     android:gravity="center"/>
 
                 <ImageView
@@ -75,6 +73,39 @@
 
             </FrameLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/spinner_toolbar_height"
+                android:layout_marginEnd="12dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/exchange_autoCompleteTextView"
+                    android:layout_width="0dp"
+                    android:layout_weight="1.7"
+                    android:layout_marginEnd="12dp"
+                    android:layout_height="@dimen/spinner_toolbar_height"
+                    android:background="@drawable/spinner_background"
+                    android:hint="@string/select_exchange"
+                    android:inputType="textNoSuggestions"
+                    android:gravity="center"
+                    android:enabled="false"/>
+
+                <AutoCompleteTextView
+                    android:id="@+id/pair_autoCompleteTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/spinner_toolbar_height"
+                    android:layout_weight="1.2"
+                    android:background="@drawable/spinner_background"
+                    android:hint="@string/select_pair"
+                    android:inputType="textNoSuggestions"
+                    android:gravity="center"
+                    android:enabled="false"/>
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </android.support.v7.widget.Toolbar>
@@ -82,16 +113,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="125dp"
+        android:layout_marginTop="@dimen/double_toolbarSpinner_size"
         android:paddingTop="5dp"
         android:orientation="vertical">
 
-        <com.herbron.moodl.LayoutManagers.CustomTabLayout
+        <com.herbron.moodl.CustomLayouts.CustomTabLayout
             android:id="@+id/transactionsTabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabMode="fixed"
-            app:tabBackground="@drawable/record_transaction_tab_background_buy"
             app:tabIndicatorColor="@color/transparent"/>
 
         <android.support.v4.view.ViewPager

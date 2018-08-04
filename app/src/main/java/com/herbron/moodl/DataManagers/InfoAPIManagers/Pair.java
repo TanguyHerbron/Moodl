@@ -11,8 +11,26 @@ public class Pair {
         this.to = to;
     }
 
+    public Pair(Pair pair)
+    {
+        this.from = pair.from;
+        this.to = pair.to;
+    }
+
     public boolean contains(String symbol)
     {
+        symbol = symbol.toUpperCase();
+
         return symbol.equals(from) || symbol.equals(to);
+    }
+
+    public String getFrom()
+    {
+        return from;
+    }
+
+    public String getTo()
+    {
+        return to;
     }
 }
