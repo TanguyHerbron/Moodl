@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
@@ -37,9 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.applandeo.FilePicker;
 import com.applandeo.listeners.OnSelectFileListener;
@@ -61,7 +58,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.annotation.Target;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
@@ -72,9 +68,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -542,7 +536,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     {
                                         backupJson.put("transactions",
                                                 databaseManager.getDatabaseBackup(getActivity().getBaseContext(),
-                                                        DatabaseManager.TABLE_MANUAL_CURRENCIES,
+                                                        DatabaseManager.TABLE_MANUAL_TRANSACTIONS,
                                                         enterPasswordCheckbox.isChecked()));
                                     }
 
@@ -732,7 +726,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                         {
                                             if(wipeManualEntriesCheckbox.isChecked())
                                             {
-                                                databaseManager.wipeData(DatabaseManager.TABLE_MANUAL_CURRENCIES);
+                                                databaseManager.wipeData(DatabaseManager.TABLE_MANUAL_TRANSACTIONS);
                                             }
 
                                             if(backupJson.has("transactions"))

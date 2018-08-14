@@ -18,10 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -30,23 +27,25 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 14;
 
-    private static final String DATABASE_NAME = "Currencies.db";
+    private static final String DATABASE_NAME = "mdn.db";
 
-    public static final String TABLE_MANUAL_CURRENCIES = "ManualCurrencies";
+    public static final String TABLE_MANUAL_TRANSACTIONS = "ManualTransactions";
     public static final String TABLE_EXCHANGE_KEYS = "ExchangeKeys";
     public static final String TABLE_WATCHLIST = "Watchlist";
 
-    private static final String KEY_CURRENCY_ID = "idCurrency";
-    private static final String KEY_CURRENCY_SYMBOL = "symbol";
-    private static final String KEY_CURRENCY_NOTES = "notes";
-    private static final String KEY_CURRENCY_BALANCE = "balance";
-    private static final String KEY_CURRENCY_FROM = "symFrom";
-    private static final String KEY_CURRENCY_DATE = "addDate";
-    private static final String KEY_CURRENCY_PURCHASED_PRICE = "purchasedPrice";
-    private static final String KEY_CURRENCY_IS_MINED = "isMined";
-    private static final String KEY_CURRENCY_FEES = "fees";
+    private static final String KEY_TRANSACTION_ID = "transactionId";
+    private static final String KEY_TRANSACTION_SYMBOL = "symbol";
+    private static final String KEY_TRANSACTION_AMOUNT = "amount";
+    private static final String KEY_TRANSACTION_PAIR = "symPair";
+    private static final String KEY_TRANSACTION_DATE = "transactionDate";
+    private static final String KEY_TRANSACTION_PURCHASE_PRICE = "purchasePrice";
+    private static final String KEY_TRANSACTION_SOURCE = "source";
+    private static final String KEY_TRANSACTION_DESTINATION = "destination";
+    private static final String KEY_TRANSACTION_FEES = "fees";
+    private static final String KEY_TRANSACTION_FEE_CURRENCY = "feeCurrency";
+    private static final String KEY_TRANSACTION_NOTES = "notes";
 
     private static final String KEY_EXCHANGE_ID = "idExchange";
     private static final String KEY_EXCHANGE_NAME = "name";
@@ -72,16 +71,18 @@ public class DatabaseManager extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MANUAL_CURRENCIES + "("
-                + KEY_CURRENCY_ID + " INTEGER PRIMARY KEY,"
-                + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
-                + KEY_CURRENCY_BALANCE + " TEXT,"
-                + KEY_CURRENCY_DATE + " TEXT,"
-                + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
-                + KEY_CURRENCY_IS_MINED + " INTEGER,"
-                + KEY_CURRENCY_FEES + " REAL,"
-                + KEY_CURRENCY_NOTES + " TEXT,"
-                + KEY_CURRENCY_FROM + " VARCHAR(4)"
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MANUAL_TRANSACTIONS + "("
+                + KEY_TRANSACTION_ID + " INTEGER PRIMARY KEY,"
+                + KEY_TRANSACTION_SYMBOL + " VARCHAR(4),"
+                + KEY_TRANSACTION_AMOUNT + " TEXT,"
+                + KEY_TRANSACTION_DATE + " TEXT,"
+                + KEY_TRANSACTION_PURCHASE_PRICE + " REAL,"
+                + KEY_TRANSACTION_FEES + " REAL,"
+                + KEY_TRANSACTION_NOTES + " TEXT,"
+                + KEY_TRANSACTION_PAIR + " VARCHAR(4),"
+                + KEY_TRANSACTION_FEE_CURRENCY + " VARCHAR(4),"
+                + KEY_TRANSACTION_SOURCE + " TEXT,"
+                + KEY_TRANSACTION_DESTINATION + " TEXT"
                 + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
@@ -107,59 +108,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
-        switch (oldVersion)
-        {
-            case 6:
-                db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
-                        + "  ADD " + KEY_EXCHANGE_DESCRIPTION + " TEXT");
-            case 7:
-                db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
-                        + " ADD " + KEY_EXCHANGE_TYPE + " INTEGER");
-            case 8:
-                db.execSQL("DROP TABLE " + TABLE_EXCHANGE_KEYS);
-                onCreate(db);
-            case 9:
-                db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
-                        + " ADD " + KEY_EXCHANGE_IS_ENABLED + " INTEGER");
-            case 10:
-                db.execSQL("CREATE TEMPORARY TABLE " + TABLE_MANUAL_CURRENCIES + "_back("
-                        + KEY_CURRENCY_ID + " INTEGER PRIMARY KEY,"
-                        + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
-                        + KEY_CURRENCY_BALANCE + " TEXT,"
-                        + KEY_CURRENCY_DATE + " TEXT,"
-                        + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
-                        + KEY_CURRENCY_IS_MINED + " INTEGER,"
-                        + KEY_CURRENCY_FEES + " REAL"
-                        + ");");
-                db.execSQL("INSERT INTO " + TABLE_MANUAL_CURRENCIES + "_back SELECT "
-                        + KEY_CURRENCY_ID + ","
-                        + KEY_CURRENCY_SYMBOL + ","
-                        + KEY_CURRENCY_BALANCE + ","
-                        + KEY_CURRENCY_DATE + ","
-                        + KEY_CURRENCY_PURCHASED_PRICE + ","
-                        + KEY_CURRENCY_IS_MINED + ","
-                        + KEY_CURRENCY_FEES + " FROM " + TABLE_MANUAL_CURRENCIES);
-                db.execSQL("DROP TABLE " + TABLE_MANUAL_CURRENCIES);
-                db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MANUAL_CURRENCIES + "("
-                        + KEY_CURRENCY_ID + " INTEGER PRIMARY KEY,"
-                        + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
-                        + KEY_CURRENCY_BALANCE + " TEXT,"
-                        + KEY_CURRENCY_DATE + " TEXT,"
-                        + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
-                        + KEY_CURRENCY_IS_MINED + " INTEGER,"
-                        + KEY_CURRENCY_FEES + " REAL"
-                        + ");");
-                db.execSQL("INSERT INTO " + TABLE_MANUAL_CURRENCIES + " SELECT * FROM " + TABLE_MANUAL_CURRENCIES + "_back");
-                db.execSQL("DROP TABLE " + TABLE_MANUAL_CURRENCIES + "_back");
-            case 11:
-                db.execSQL("ALTER TABLE " + TABLE_MANUAL_CURRENCIES
-                        + " ADD " + KEY_CURRENCY_NOTES + " TEXT");
-            case 12:
-                db.execSQL("ALTER TABLE " + TABLE_MANUAL_CURRENCIES
-                        + " ADD " + KEY_CURRENCY_FROM + " VARCHAR(4)");
-                db.execSQL("UPDATE " + TABLE_MANUAL_CURRENCIES
-                        + " SET " + KEY_CURRENCY_FROM + "= 'USD'");
-        }
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANUAL_TRANSACTIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXCHANGE_KEYS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_WATCHLIST);
+
+        onCreate(db);
     }
 
     private boolean isCurrencyInWatchlist(String symbol)
@@ -193,20 +146,22 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return false;
     }
 
-    public void addTransaction(String symbol, Double amount, Date date, Double purchasedPrice, Double fees, String note, String symbolFrom)
+    public void addTransaction(String symbol, Double amount, Date date, Double purchasedPrice, Double fees, String note, String symbolFrom, String feeCurrency, String exchange)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(KEY_CURRENCY_SYMBOL, symbol);
-        values.put(KEY_CURRENCY_BALANCE, amount);
-        values.put(KEY_CURRENCY_DATE, date.getTime());
-        values.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
-        values.put(KEY_CURRENCY_FEES, fees);
-        values.put(KEY_CURRENCY_NOTES, note);
-        values.put(KEY_CURRENCY_FROM, symbolFrom);
+        values.put(KEY_TRANSACTION_SYMBOL, symbol);
+        values.put(KEY_TRANSACTION_AMOUNT, amount);
+        values.put(KEY_TRANSACTION_DATE, date.getTime());
+        values.put(KEY_TRANSACTION_PURCHASE_PRICE, purchasedPrice);
+        values.put(KEY_TRANSACTION_FEES, fees);
+        values.put(KEY_TRANSACTION_NOTES, note);
+        values.put(KEY_TRANSACTION_PAIR, symbolFrom);
+        values.put(KEY_TRANSACTION_FEE_CURRENCY, feeCurrency);
+        values.put(KEY_TRANSACTION_SOURCE, exchange);
 
-        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
         db.close();
     }
 
@@ -227,7 +182,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         result.moveToFirst();
 
-        return result.getInt(0);
+        return result.getInt(result.getColumnIndex(KEY_WATCHLIST_ID));
     }
 
     public void deleteExchangeAccountFromId(int id)
@@ -266,10 +221,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         if(result.moveToFirst())
         {
-            selectedExchange = new Exchange(result.getInt(0), result.getString(1)
-                    , result.getInt(2), result.getString(3)
-                    , result.getString(4), result.getString(5)
-                    , (result.getInt(6) == 1));
+            selectedExchange = new Exchange(result.getInt(result.getColumnIndex(KEY_EXCHANGE_ID))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_NAME))
+                    , result.getInt(result.getColumnIndex(KEY_EXCHANGE_TYPE))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_DESCRIPTION))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_PUBLIC_KEY))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_SECRET_KEY))
+                    , (result.getInt(result.getColumnIndex(KEY_EXCHANGE_IS_ENABLED)) == 1));
         }
 
         return selectedExchange;
@@ -285,10 +243,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(result.moveToNext())
         {
-            exchanges.add(new Exchange(result.getInt(0), result.getString(1)
-                    , result.getInt(2), result.getString(3)
-                    , result.getString(4), result.getString(5)
-                    , (result.getInt(6) == 1)));
+            exchanges.add(new Exchange(result.getInt(result.getColumnIndex(KEY_EXCHANGE_ID))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_NAME))
+                    , result.getInt(result.getColumnIndex(KEY_EXCHANGE_TYPE))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_DESCRIPTION))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_PUBLIC_KEY))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_SECRET_KEY))
+                    , (result.getInt(result.getColumnIndex(KEY_EXCHANGE_IS_ENABLED)) == 1)));
         }
 
         return exchanges;
@@ -454,27 +415,25 @@ public class DatabaseManager extends SQLiteOpenHelper{
         try {
             if(decrypt)
             {
-                values.put(KEY_CURRENCY_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_SYMBOL)));
-                values.put(KEY_CURRENCY_BALANCE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_BALANCE)));
-                values.put(KEY_CURRENCY_DATE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_DATE)));
-                values.put(KEY_CURRENCY_PURCHASED_PRICE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE)));
-                values.put(KEY_CURRENCY_IS_MINED, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_IS_MINED)));
-                values.put(KEY_CURRENCY_FEES, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_FEES)));
+                values.put(KEY_TRANSACTION_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_SYMBOL)));
+                values.put(KEY_TRANSACTION_AMOUNT, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_AMOUNT)));
+                values.put(KEY_TRANSACTION_DATE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_DATE)));
+                values.put(KEY_TRANSACTION_PURCHASE_PRICE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_PURCHASE_PRICE)));
+                values.put(KEY_TRANSACTION_FEES, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_FEES)));
             }
             else
             {
-                values.put(KEY_CURRENCY_SYMBOL, rawValues.getString(KEY_CURRENCY_SYMBOL));
-                values.put(KEY_CURRENCY_BALANCE, rawValues.getString(KEY_CURRENCY_BALANCE));
-                values.put(KEY_CURRENCY_DATE, rawValues.getString(KEY_CURRENCY_DATE));
-                values.put(KEY_CURRENCY_PURCHASED_PRICE, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE));
-                values.put(KEY_CURRENCY_IS_MINED, rawValues.getString(KEY_CURRENCY_IS_MINED));
-                values.put(KEY_CURRENCY_FEES, rawValues.getString(KEY_CURRENCY_FEES));
+                values.put(KEY_TRANSACTION_SYMBOL, rawValues.getString(KEY_TRANSACTION_SYMBOL));
+                values.put(KEY_TRANSACTION_AMOUNT, rawValues.getString(KEY_TRANSACTION_AMOUNT));
+                values.put(KEY_TRANSACTION_DATE, rawValues.getString(KEY_TRANSACTION_DATE));
+                values.put(KEY_TRANSACTION_PURCHASE_PRICE, rawValues.getString(KEY_TRANSACTION_PURCHASE_PRICE));
+                values.put(KEY_TRANSACTION_FEES, rawValues.getString(KEY_TRANSACTION_FEES));
             }
         } catch (JSONException e) {
             Log.d("moodl", "Error while inserting transaction " + e.getMessage());
         }
 
-        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
         db.close();
     }
 
@@ -488,7 +447,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultList.moveToNext())
         {
-            currencyList.add(new Currency(resultList.getString(2), resultList.getString(1)));
+            currencyList.add(new Currency(resultList.getString(resultList.getColumnIndex(KEY_WATCHLIST_NAME)), resultList.getString(resultList.getColumnIndex(KEY_WATCHLIST_SYMBOL))));
         }
 
         resultList.close();
@@ -507,10 +466,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultList.moveToNext())
         {
-            Exchange exchange = new Exchange(resultList.getInt(0), resultList.getString(1)
-                    , resultList.getInt(2), resultList.getString(3)
-                    , resultList.getString(4), resultList.getString(5)
-                    , (resultList.getInt(6) == 1));
+            Exchange exchange = new Exchange(resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_ID))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_NAME))
+                    , resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_TYPE))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_DESCRIPTION))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_PUBLIC_KEY))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_SECRET_KEY))
+                    , (resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_IS_ENABLED)) == 1));
             accountList.add(new HitBtcManager(context, exchange));
         }
 
@@ -530,10 +492,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultList.moveToNext())
         {
-            Exchange exchange = new Exchange(resultList.getInt(0), resultList.getString(1)
-                    , resultList.getInt(2), resultList.getString(3)
-                    , resultList.getString(4), resultList.getString(5)
-                    , (resultList.getInt(6) == 1));
+            Exchange exchange = new Exchange(resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_ID))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_NAME))
+                    , resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_TYPE))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_DESCRIPTION))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_PUBLIC_KEY))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_SECRET_KEY))
+                    , (resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_IS_ENABLED)) == 1));
             accountList.add(new BinanceManager(exchange));
         }
 
@@ -545,7 +510,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public List<Currency> getAllCurrenciesFromManualCurrency()
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES;
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -553,7 +518,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(2) - resultatList.getDouble(6)));
+            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
         }
 
         resultatList.close();
@@ -568,18 +534,18 @@ public class DatabaseManager extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
-        cv.put(KEY_CURRENCY_BALANCE, amount);
-        cv.put(KEY_CURRENCY_DATE, time.getTime());
-        cv.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
-        cv.put(KEY_CURRENCY_FEES, fees);
+        cv.put(KEY_TRANSACTION_AMOUNT, amount);
+        cv.put(KEY_TRANSACTION_DATE, time.getTime());
+        cv.put(KEY_TRANSACTION_PURCHASE_PRICE, purchasedPrice);
+        cv.put(KEY_TRANSACTION_FEES, fees);
 
-        db.update(TABLE_MANUAL_CURRENCIES, cv, KEY_CURRENCY_ID + "=" + transactionId, null);
+        db.update(TABLE_MANUAL_TRANSACTIONS, cv, KEY_TRANSACTION_ID + "=" + transactionId, null);
 
     }
 
     public Transaction getCurrencyTransactionById(int id)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE " + KEY_CURRENCY_ID + "='" + id + "'";
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_ID + "='" + id + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -587,7 +553,12 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         if(resultatList.moveToFirst())
         {
-            transaction = new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5), resultatList.getDouble(7));
+            transaction = new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))
+                    , resultatList.getLong(resultatList.getColumnIndex(KEY_TRANSACTION_DATE))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_PURCHASE_PRICE))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES)));
         }
 
         resultatList.close();
@@ -599,7 +570,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public ArrayList<Transaction> getCurrencyTransactionsForSymbol(String symbol)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE " + KEY_CURRENCY_SYMBOL + "='" + symbol.toUpperCase() + "'";
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_SYMBOL + "='" + symbol.toUpperCase() + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -607,7 +578,12 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while (resultatList.moveToNext())
         {
-            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(2), resultatList.getLong(3), resultatList.getLong(4), resultatList.getDouble(6)));
+            transactionList.add(new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))
+                    , resultatList.getLong(resultatList.getColumnIndex(KEY_TRANSACTION_DATE))
+                    , resultatList.getLong(resultatList.getColumnIndex(KEY_TRANSACTION_PURCHASE_PRICE))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
         }
 
         resultatList.close();
@@ -621,7 +597,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.delete(TABLE_MANUAL_CURRENCIES, KEY_CURRENCY_ID + "=" + id, null);
+        db.delete(TABLE_MANUAL_TRANSACTIONS, KEY_TRANSACTION_ID + "=" + id, null);
 
         db.close();
     }
