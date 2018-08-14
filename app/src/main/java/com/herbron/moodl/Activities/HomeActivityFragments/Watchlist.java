@@ -435,7 +435,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
                 currency.setId(getCurrencyId(currency.getSymbol()));
                 currency.updatePrice(getActivity(), preferencesManager.getDefaultCurrency(), new CurrencyInfoUpdateNotifierInterface() {
                     @Override
-                    public void onTimestampPriveUpdated(String price) {
+                    public void onTimestampPriceUpdated(String price) {
 
                     }
 

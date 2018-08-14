@@ -27,39 +27,44 @@ public class CustomTabLayout extends TabLayout {
     private StateListDrawable getSellStateListDrawable() {
         StateListDrawable sld = new StateListDrawable();
         sld.addState(new int[] {android.R.attr.state_pressed},
-                ContextCompat.getDrawable(context, R.drawable.record_transaction_tab_background_sell));
+                ContextCompat.getDrawable(context, R.drawable.unselected_tab_background));
         sld.addState(new int[] {android.R.attr.state_selected},
                 ContextCompat.getDrawable(context, R.drawable.record_transaction_tab_background_sell));
-        sld.addState(new int[] { },
+        sld.addState(new int[] {android.R.attr.state_enabled },
                 ContextCompat.getDrawable(context, R.drawable.unselected_tab_background));
+        sld.addState(new int[] { },
+                ContextCompat.getDrawable(context, R.drawable.disabled_tab_background));
         return sld;
     }
 
     private StateListDrawable getBuyStateListDrawable() {
         StateListDrawable sld = new StateListDrawable();
         sld.addState(new int[] {android.R.attr.state_pressed},
-                ContextCompat.getDrawable(context, R.drawable.record_transaction_tab_background_buy));
+                ContextCompat.getDrawable(context, R.drawable.unselected_tab_background));
         sld.addState(new int[] {android.R.attr.state_selected},
                 ContextCompat.getDrawable(context, R.drawable.record_transaction_tab_background_buy));
-        sld.addState(new int[] { },
+        sld.addState(new int[] {android.R.attr.state_enabled },
                 ContextCompat.getDrawable(context, R.drawable.unselected_tab_background));
+        sld.addState(new int[] { },
+                ContextCompat.getDrawable(context, R.drawable.disabled_tab_background));
         return sld;
     }
 
     private StateListDrawable getTransferStateListDrawable() {
         StateListDrawable sld = new StateListDrawable();
         sld.addState(new int[] {android.R.attr.state_pressed},
-                ContextCompat.getDrawable(context, R.drawable.record_transaction_tab_background_transfer));
+                ContextCompat.getDrawable(context, R.drawable.unselected_tab_background));
         sld.addState(new int[] {android.R.attr.state_selected},
                 ContextCompat.getDrawable(context, R.drawable.record_transaction_tab_background_transfer));
-        sld.addState(new int[] { },
+        sld.addState(new int[] {android.R.attr.state_enabled },
                 ContextCompat.getDrawable(context, R.drawable.unselected_tab_background));
+        sld.addState(new int[] { },
+                ContextCompat.getDrawable(context, R.drawable.disabled_tab_background));
         return sld;
     }
 
     public void addTab(int index, String label) {
         TextView textView = new TextView(context);
-        textView.setTextColor(getResources().getColor(R.color.white));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setText(label);
         textView.setGravity(GRAVITY_CENTER);

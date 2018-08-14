@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 13;
 
     private static final String DATABASE_NAME = "Currencies.db";
 
@@ -39,8 +40,9 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     private static final String KEY_CURRENCY_ID = "idCurrency";
     private static final String KEY_CURRENCY_SYMBOL = "symbol";
-    private static final String KEY_CURRENCY_NAME = "name";
+    private static final String KEY_CURRENCY_NOTES = "notes";
     private static final String KEY_CURRENCY_BALANCE = "balance";
+    private static final String KEY_CURRENCY_FROM = "symFrom";
     private static final String KEY_CURRENCY_DATE = "addDate";
     private static final String KEY_CURRENCY_PURCHASED_PRICE = "purchasedPrice";
     private static final String KEY_CURRENCY_IS_MINED = "isMined";
@@ -73,12 +75,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MANUAL_CURRENCIES + "("
                 + KEY_CURRENCY_ID + " INTEGER PRIMARY KEY,"
                 + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
-                + KEY_CURRENCY_NAME + " VARCHAR(45),"
                 + KEY_CURRENCY_BALANCE + " TEXT,"
                 + KEY_CURRENCY_DATE + " TEXT,"
                 + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
                 + KEY_CURRENCY_IS_MINED + " INTEGER,"
-                + KEY_CURRENCY_FEES + " REAL"
+                + KEY_CURRENCY_FEES + " REAL,"
+                + KEY_CURRENCY_NOTES + " TEXT,"
+                + KEY_CURRENCY_FROM + " VARCHAR(4)"
                 + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
@@ -118,6 +121,44 @@ public class DatabaseManager extends SQLiteOpenHelper{
             case 9:
                 db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
                         + " ADD " + KEY_EXCHANGE_IS_ENABLED + " INTEGER");
+            case 10:
+                db.execSQL("CREATE TEMPORARY TABLE " + TABLE_MANUAL_CURRENCIES + "_back("
+                        + KEY_CURRENCY_ID + " INTEGER PRIMARY KEY,"
+                        + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
+                        + KEY_CURRENCY_BALANCE + " TEXT,"
+                        + KEY_CURRENCY_DATE + " TEXT,"
+                        + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
+                        + KEY_CURRENCY_IS_MINED + " INTEGER,"
+                        + KEY_CURRENCY_FEES + " REAL"
+                        + ");");
+                db.execSQL("INSERT INTO " + TABLE_MANUAL_CURRENCIES + "_back SELECT "
+                        + KEY_CURRENCY_ID + ","
+                        + KEY_CURRENCY_SYMBOL + ","
+                        + KEY_CURRENCY_BALANCE + ","
+                        + KEY_CURRENCY_DATE + ","
+                        + KEY_CURRENCY_PURCHASED_PRICE + ","
+                        + KEY_CURRENCY_IS_MINED + ","
+                        + KEY_CURRENCY_FEES + " FROM " + TABLE_MANUAL_CURRENCIES);
+                db.execSQL("DROP TABLE " + TABLE_MANUAL_CURRENCIES);
+                db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MANUAL_CURRENCIES + "("
+                        + KEY_CURRENCY_ID + " INTEGER PRIMARY KEY,"
+                        + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
+                        + KEY_CURRENCY_BALANCE + " TEXT,"
+                        + KEY_CURRENCY_DATE + " TEXT,"
+                        + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
+                        + KEY_CURRENCY_IS_MINED + " INTEGER,"
+                        + KEY_CURRENCY_FEES + " REAL"
+                        + ");");
+                db.execSQL("INSERT INTO " + TABLE_MANUAL_CURRENCIES + " SELECT * FROM " + TABLE_MANUAL_CURRENCIES + "_back");
+                db.execSQL("DROP TABLE " + TABLE_MANUAL_CURRENCIES + "_back");
+            case 11:
+                db.execSQL("ALTER TABLE " + TABLE_MANUAL_CURRENCIES
+                        + " ADD " + KEY_CURRENCY_NOTES + " TEXT");
+            case 12:
+                db.execSQL("ALTER TABLE " + TABLE_MANUAL_CURRENCIES
+                        + " ADD " + KEY_CURRENCY_FROM + " VARCHAR(4)");
+                db.execSQL("UPDATE " + TABLE_MANUAL_CURRENCIES
+                        + " SET " + KEY_CURRENCY_FROM + "= 'USD'");
         }
     }
 
@@ -150,6 +191,23 @@ public class DatabaseManager extends SQLiteOpenHelper{
         }
 
         return false;
+    }
+
+    public void addTransaction(String symbol, Double amount, Date date, Double purchasedPrice, Double fees, String note, String symbolFrom)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_CURRENCY_SYMBOL, symbol);
+        values.put(KEY_CURRENCY_BALANCE, amount);
+        values.put(KEY_CURRENCY_DATE, date.getTime());
+        values.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
+        values.put(KEY_CURRENCY_FEES, fees);
+        values.put(KEY_CURRENCY_NOTES, note);
+        values.put(KEY_CURRENCY_FROM, symbolFrom);
+
+        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.close();
     }
 
     public void updateWatchlistPosition(String symbol, int position)
@@ -397,7 +455,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
             if(decrypt)
             {
                 values.put(KEY_CURRENCY_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_SYMBOL)));
-                values.put(KEY_CURRENCY_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_NAME)));
                 values.put(KEY_CURRENCY_BALANCE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_BALANCE)));
                 values.put(KEY_CURRENCY_DATE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_DATE)));
                 values.put(KEY_CURRENCY_PURCHASED_PRICE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE)));
@@ -407,7 +464,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
             else
             {
                 values.put(KEY_CURRENCY_SYMBOL, rawValues.getString(KEY_CURRENCY_SYMBOL));
-                values.put(KEY_CURRENCY_NAME, rawValues.getString(KEY_CURRENCY_NAME));
                 values.put(KEY_CURRENCY_BALANCE, rawValues.getString(KEY_CURRENCY_BALANCE));
                 values.put(KEY_CURRENCY_DATE, rawValues.getString(KEY_CURRENCY_DATE));
                 values.put(KEY_CURRENCY_PURCHASED_PRICE, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE));
@@ -497,7 +553,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(3) - resultatList.getDouble(7)));
+            currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(2) - resultatList.getDouble(6)));
         }
 
         resultatList.close();
@@ -551,7 +607,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while (resultatList.moveToNext())
         {
-            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5), resultatList.getDouble(7)));
+            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(2), resultatList.getLong(3), resultatList.getLong(4), resultatList.getDouble(6)));
         }
 
         resultatList.close();

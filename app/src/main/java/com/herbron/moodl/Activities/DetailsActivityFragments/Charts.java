@@ -616,7 +616,7 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
     }
 
     @Override
-    public void onTimestampPriveUpdated(String price) {
+    public void onTimestampPriceUpdated(String price) {
 
     }
 

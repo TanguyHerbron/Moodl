@@ -4,12 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -48,6 +44,7 @@ public class Currency implements Parcelable {
     private int rank;
     private String startDate;
     private List<String> socialMediaLinks;
+    private OnTimestampPriceUpdatedListener onTimestampPriceUpdatedListener;
     //private String proofType
 
     private CurrencyInfoUpdateNotifierInterface currencyInfoUpdateNotifierInterface;
@@ -97,7 +94,12 @@ public class Currency implements Parcelable {
 
             @Override
             public void onSuccess(String price) {
-                currencyInfoUpdateNotifierInterface.onTimestampPriveUpdated(price);
+                currencyInfoUpdateNotifierInterface.onTimestampPriceUpdated(price);
+
+                if(onTimestampPriceUpdatedListener != null)
+                {
+                    onTimestampPriceUpdatedListener.onTimeStampPriceUpdated(price);
+                }
             }
         }, timestamp);
     }
@@ -534,4 +536,14 @@ public class Currency implements Parcelable {
             return new Currency[size];
         }
     };
+
+    public interface OnTimestampPriceUpdatedListener
+    {
+        void onTimeStampPriceUpdated(String price);
+    }
+
+    public void setOnTimestampPriceUpdatedListener(OnTimestampPriceUpdatedListener onTimestampPriceUpdatedListener)
+    {
+        this.onTimestampPriceUpdatedListener = onTimestampPriceUpdatedListener;
+    }
 }

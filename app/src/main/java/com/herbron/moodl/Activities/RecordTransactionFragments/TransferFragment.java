@@ -8,14 +8,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
 import com.herbron.moodl.R;
 
-public class TransferFragment extends Fragment {
+public class TransferFragment extends CustomRecordFragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_transfer, container, false);
         return view;
+    }
+
+    @Override
+    public void onCurrencyUpdated() {
+
+    }
+
+    @Override
+    public void onExchangeUpdated() {
+
+    }
+
+    @Override
+    public void onPairUpdated() {
+
     }
 }

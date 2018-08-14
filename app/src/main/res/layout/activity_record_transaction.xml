@@ -111,11 +111,13 @@
     </android.support.v7.widget.Toolbar>
 
     <LinearLayout
+        android:id="@+id/globalTabLayouts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/double_toolbarSpinner_size"
         android:paddingTop="5dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="invisible">
 
         <com.herbron.moodl.CustomLayouts.CustomTabLayout
             android:id="@+id/transactionsTabLayout"

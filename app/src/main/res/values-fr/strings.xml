@@ -153,4 +153,8 @@
     <string name="notes">Notes</string>
     <string name="select_exchange">Sélectionner un échange</string>
     <string name="select_pair">Paire</string>
+    <string name="total_portfolio_value">Valeur totale :</string>
+
+    <string name="fixedFee">Pourcentage de %1$s</string>
+    <string name="percentageFee">%1$s fixe</string>
 </resources>

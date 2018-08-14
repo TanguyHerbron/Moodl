@@ -357,7 +357,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
     }
 
     @Override
-    public void onTimestampPriveUpdated(String price) {
+    public void onTimestampPriceUpdated(String price) {
 
     }
 

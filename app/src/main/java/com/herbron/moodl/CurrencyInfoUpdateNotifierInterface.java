@@ -4,7 +4,7 @@ import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 
 public interface CurrencyInfoUpdateNotifierInterface {
 
-    void onTimestampPriveUpdated(String price);
+    void onTimestampPriceUpdated(String price);
 
     void onHistoryDataUpdated();
 

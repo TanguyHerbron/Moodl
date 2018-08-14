@@ -560,7 +560,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 balance.get(i).updatePrice(getActivity(), defaultCurrency, new CurrencyInfoUpdateNotifierInterface() {
                     @Override
-                    public void onTimestampPriveUpdated(String price) {
+                    public void onTimestampPriceUpdated(String price) {
 
                     }
 

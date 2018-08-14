@@ -56,7 +56,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.6'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
     implementation 'com.mattprecious.swirl:swirl:1.1.0'
-    implementation 'com.wdullaer:materialdatetimepicker:3.5.2'
+    implementation 'com.wdullaer:materialdatetimepicker:3.6.3'
     implementation 'com.jmedeisis:draglinearlayout:1.1.0'
     implementation 'com.applandeo:material-file-picker:1.0.0'
     implementation 'com.daasuu:EasingInterpolator:1.0.0'

@@ -19,6 +19,7 @@
                 android:id="@+id/amount_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
                 android:hint="@string/activity_add_amount"/>
 
         </android.support.design.widget.TextInputLayout>
@@ -26,7 +27,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/input_buyPrice"
@@ -38,6 +40,7 @@
                     android:id="@+id/buyPrice_editText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
                     android:hint="@string/activity_purchase_price"/>
 
             </android.support.design.widget.TextInputLayout>
@@ -68,6 +71,7 @@
                 android:id="@+id/totalValue_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
                 android:hint="@string/total_value"/>
 
         </android.support.design.widget.TextInputLayout>
@@ -81,21 +85,22 @@
                 android:id="@+id/input_fees"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.15">
+                android:layout_weight="0.7">
 
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/fees_editText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
                     android:hint="@string/activity_fees"/>
 
             </android.support.design.widget.TextInputLayout>
 
             <Spinner
-                android:id="@+id/feesUnit_Spinner"
+                android:id="@+id/feesCurrency_editText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.85"/>
+                android:layout_weight="1"/>
 
         </LinearLayout>
 
@@ -116,7 +121,7 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
-            android:id="@+id/saveExchangeButton"
+            android:id="@+id/saveBuyButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
