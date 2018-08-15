@@ -23,8 +23,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/action_settings"
-                app:srcCompat="@drawable/ic_drawer_white_24dp"
-                android:background="@color/transparent"
+                android:background="@drawable/ic_drawer_white_24dp"
                 android:visibility="visible"
                 android:layout_gravity="start|center_vertical"
                 android:contentDescription="@string/drawer"/>
@@ -44,8 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/action_edit_mode"
-                app:srcCompat="@drawable/ic_mode_edit_white_24dp"
-                android:background="@color/transparent"
+                android:background="@drawable/ic_mode_edit_white_24dp"
                 android:visibility="visible"
                 android:layout_gravity="end|center_vertical"
                 android:contentDescription="@string/edit_mode"/>

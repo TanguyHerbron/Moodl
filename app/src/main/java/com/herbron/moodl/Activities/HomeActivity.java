@@ -17,6 +17,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,6 +49,10 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
 //
 
 public class HomeActivity extends AppCompatActivity implements BalanceUpdateInterface {
+
+    static {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
 
     private DrawerLayout drawerLayout;
     private Fragment watchlistFragment;
