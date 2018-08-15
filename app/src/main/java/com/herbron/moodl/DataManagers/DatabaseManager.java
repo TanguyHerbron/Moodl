@@ -27,7 +27,7 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     private static final String DATABASE_NAME = "mdn.db";
 
@@ -45,6 +45,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
     private static final String KEY_TRANSACTION_DESTINATION = "destination";
     private static final String KEY_TRANSACTION_FEES = "fees";
     private static final String KEY_TRANSACTION_FEE_CURRENCY = "feeCurrency";
+    private static final String KEY_TRANSACTION_FEE_FORMAT = "feeFormat";
     private static final String KEY_TRANSACTION_NOTES = "notes";
     private static final String KEY_TRANSACTION_TYPE = "transactionType";
 
@@ -78,10 +79,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 + KEY_TRANSACTION_AMOUNT + " TEXT,"
                 + KEY_TRANSACTION_DATE + " TEXT,"
                 + KEY_TRANSACTION_PURCHASE_PRICE + " REAL,"
-                + KEY_TRANSACTION_FEES + " REAL,"
                 + KEY_TRANSACTION_NOTES + " TEXT,"
                 + KEY_TRANSACTION_PAIR + " VARCHAR(4),"
                 + KEY_TRANSACTION_FEE_CURRENCY + " VARCHAR(4),"
+                + KEY_TRANSACTION_FEES + " REAL,"
+                + KEY_TRANSACTION_FEE_FORMAT + " VARCHAT(1),"
                 + KEY_TRANSACTION_SOURCE + " TEXT,"
                 + KEY_TRANSACTION_DESTINATION + " TEXT,"
                 + KEY_TRANSACTION_TYPE + " VARCHAR(1)"
@@ -148,7 +150,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return false;
     }
 
-    public void updateTransactionWithId(int transactionId, double amount, Date date, double purchasedPrice, double fees, String note, String symbolFrom, String feeCurrency, String exchange, String type)
+    public void updateTransactionWithId(int transactionId, double amount, Date date, double purchasedPrice, double fees, String note, String symbolFrom, String feeCurrency, String exchange, String type, String feeFormat)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -162,12 +164,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
         cv.put(KEY_TRANSACTION_FEE_CURRENCY, feeCurrency);
         cv.put(KEY_TRANSACTION_SOURCE, exchange);
         cv.put(KEY_TRANSACTION_TYPE, type);
+        cv.put(KEY_TRANSACTION_FEE_FORMAT, feeFormat);
 
         db.update(TABLE_MANUAL_TRANSACTIONS, cv, KEY_TRANSACTION_ID + "=" + transactionId, null);
 
     }
 
-    public void addTransaction(String symbol, Double amount, Date date, Double purchasePrice, double fees, String note, String symbolFrom, String feeCurrency, String exchange, String type)
+    public void addTransaction(String symbol, Double amount, Date date, Double purchasePrice, double fees, String note, String symbolFrom, String feeCurrency, String exchange, String type, String feeFormat)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -182,6 +185,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         values.put(KEY_TRANSACTION_FEE_CURRENCY, feeCurrency);
         values.put(KEY_TRANSACTION_SOURCE, exchange);
         values.put(KEY_TRANSACTION_TYPE, type);
+        values.put(KEY_TRANSACTION_FEE_FORMAT, feeFormat);
 
         db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
         db.close();
@@ -572,7 +576,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)));
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT)));
         }
 
         resultatList.close();
@@ -603,7 +608,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))));
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))));
         }
 
         resultatList.close();

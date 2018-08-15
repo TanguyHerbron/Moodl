@@ -33,4 +33,9 @@ public class Pair {
     {
         return to;
     }
+
+    @Override
+    public String toString() {
+        return from + "/" + to;
+    }
 }

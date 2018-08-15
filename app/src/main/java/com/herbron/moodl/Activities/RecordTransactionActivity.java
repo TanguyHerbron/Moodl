@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.herbron.moodl.Activities.RecordTransactionFragments.BuyFragment;
 import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.CustomAdapters.PairRecordListAdapter;
 import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
@@ -226,6 +227,8 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
                             pair_autoCompleteTextView.setText(PlaceholderManager.getPairString(pair.getFrom(), pair.getTo(), getBaseContext()));
                             pair_autoCompleteTextView.setEnabled(true);
+
+                            ((BuyFragment) pageAdapter.getItem(0)).updatePair(pair);
 
                             updatePairData();
 

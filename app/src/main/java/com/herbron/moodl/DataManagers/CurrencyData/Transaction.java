@@ -12,14 +12,15 @@ public class Transaction {
     private long timestamp;
     private double purchasePrice;
     private double fees;
+    private String feeCurrency;
+    private String feeFormat;
     private String note;
     private String symPair;
-    private String feeCurrency;
     private String source;
     private String destination;
     private String type;
 
-    public Transaction(int transactionId, String symbol, String symPair, double amount, long timestamp, double purchasedPrice, double fees, String note, String feeCurrency, String source, String destination, String type)
+    public Transaction(int transactionId, String symbol, String symPair, double amount, long timestamp, double purchasedPrice, double fees, String note, String feeCurrency, String source, String destination, String type, String feeFormat)
     {
         this.transactionId = transactionId;
         this.symbol = symbol;
@@ -33,6 +34,7 @@ public class Transaction {
         this.source = source;
         this.destination = destination;
         this.type = type;
+        this.feeFormat = feeFormat;
     }
 
     public int getTransactionId() {
@@ -132,5 +134,13 @@ public class Transaction {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getFeeFormat() {
+        return feeFormat;
+    }
+
+    public void setFeeFormat(String feeFormat) {
+        this.feeFormat = feeFormat;
     }
 }

@@ -63,6 +63,7 @@ public class BuyFragment extends CustomRecordFragment {
     private List<String> symbolStrings;
 
     private int transactionId;
+    private Transaction transaction;
 
     @Nullable
     @Override
@@ -78,8 +79,6 @@ public class BuyFragment extends CustomRecordFragment {
 
         initializeViewElements();
 
-        checkCallingIntent();
-
         return view;
     }
 
@@ -91,16 +90,16 @@ public class BuyFragment extends CustomRecordFragment {
         if(transactionId != -1)
         {
             DatabaseManager databaseManager = new DatabaseManager(context);
-            Transaction transaction = databaseManager.getCurrencyTransactionById(transactionId);
+            transaction = databaseManager.getCurrencyTransactionById(transactionId);
 
             if(transaction.getType().equals("b"))
             {
-                fillFields(transaction);
+                fillFields();
             }
         }
     }
 
-    private void fillFields(Transaction transaction)
+    private void fillFields()
     {
         amoutEditText.setText(String.valueOf(transaction.getAmount()));
         buyPriceEditText.setText(String.valueOf(transaction.getPurchasePrice()));
@@ -109,6 +108,31 @@ public class BuyFragment extends CustomRecordFragment {
         totalValueEditText.setText(String.valueOf(transaction.getAmount() * transaction.getPurchasePrice()));
         fees_editText.setText(String.valueOf(transaction.getFees()));
         note_editText.setText(transaction.getNote());
+
+        Log.d("moodl", "> " + fragmentPair);
+
+        /*if(transaction.getSymbol().equals(fragmentPair.getFrom()))
+        {
+            if(transaction.getFeeFormat().equals("p"))
+            {
+                feesCurrencySpinner.setSelection(0);
+            }
+            else
+            {
+                feesCurrencySpinner.setSelection(1);
+            }
+        }
+        else
+        {
+            if(transaction.getFeeFormat().equals("p"))
+            {
+                feesCurrencySpinner.setSelection(2);
+            }
+            else
+            {
+                feesCurrencySpinner.setSelection(3);
+            }
+        }*/
     }
 
     private void initializeViewElements()
@@ -208,7 +232,8 @@ public class BuyFragment extends CustomRecordFragment {
                                 , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom()
                                 , feeCurrency
                                 , fragmentExchange.getName()
-                                , "b");
+                                , "b"
+                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
 
                         Intent intent = new Intent(getActivity(), HomeActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -225,7 +250,8 @@ public class BuyFragment extends CustomRecordFragment {
                                 , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom()
                                 , feeCurrency
                                 , fragmentExchange.getName()
-                                , "b");
+                                , "b"
+                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
                     }
 
                     getActivity().finish();
@@ -235,6 +261,8 @@ public class BuyFragment extends CustomRecordFragment {
 
         fees_editText = view.findViewById(R.id.fees_editText);
         note_editText = view.findViewById(R.id.note_editText);
+
+        checkCallingIntent();
     }
 
     private double getFees(String feeCurrency, double amount, double purchasedPrice)
@@ -367,6 +395,19 @@ public class BuyFragment extends CustomRecordFragment {
         fragmentExchange = exchange;
     }
 
+    public void updatePair(Pair pair)
+    {
+        currencyAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
+        currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        feesCurrencySpinner.setAdapter(currencyAdapter);
+
+        symbolStrings = new ArrayList<>();
+        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
+        currencyAdapter.addAll(symbolStrings);
+        currencyAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public void onPairUpdated() {
         fragmentPair = pair;
@@ -393,7 +434,7 @@ public class BuyFragment extends CustomRecordFragment {
             calendar = Calendar.getInstance();
         }
 
-        fragmentCurrency.getTimestampPrice(getSecureContext(), preferenceManager.getDefaultCurrency(), calendar.getTimeInMillis() / 1000);
+        fragmentCurrency.getTimestampPrice(getSecureContext(), fragmentCurrency.getSymbol().equals(fragmentPair.getFrom()) ? fragmentPair.getTo() : fragmentPair.getFrom(), calendar.getTimeInMillis() / 1000);
     }
 
 }
