@@ -55,7 +55,7 @@ public class TransactionListAdapter extends ArrayAdapter<Transaction> {
         TextView dateTxtView = convertView.findViewById(R.id.purchaseDate);
 
         amountTxtView.setText(String.valueOf(transaction.getAmount()));
-        valueTxtView.setText(numberConformer(transaction.getPurchasedPrice() * transaction.getAmount()));
+        valueTxtView.setText(numberConformer(transaction.getPurchasePrice() * transaction.getAmount()));
         dateTxtView.setText(getDateFromTimestamp(transaction.getTimestamp()));
 
         LinearLayout deleteLayout = convertView.findViewById(R.id.deleteTransactionLayout);

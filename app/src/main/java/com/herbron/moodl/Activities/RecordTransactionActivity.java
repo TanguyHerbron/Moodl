@@ -36,6 +36,7 @@ import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.CustomAdapters.PairRecordListAdapter;
 import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
+import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.DatabaseManager;
@@ -84,55 +85,31 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
     private boolean isGlobalLayoutVisible;
 
-    /*private boolean checkPriceText()
-    {
-        String purchasedPriceText = purchasedPriceEditText.getText().toString();
-        double purchasedPrice;
+    private TextWatcher coinTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-        try {
-            purchasedPrice = Double.parseDouble(purchasedPriceText);
+        }
 
-            if(purchasedPrice < 0)
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            currencyIconImageView.setImageBitmap(null);
+            exchange_autoCompleteTextView.setEnabled(false);
+            exchange_autoCompleteTextView.setText("");
+
+            ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(2).setEnabled(false);
+
+            if(isGlobalLayoutVisible && globalTabLayouts.getAnimation().hasEnded())
             {
-                purchasedPriceEditText.setError(getResources().getString(R.string.field_negative));
+                globalTabLayouts.startAnimation(dismissAnimation);
             }
-        } catch (NumberFormatException e) {
-            purchasedPriceEditText.setError(getResources().getString(R.string.field_nan));
-
-            return false;
         }
 
-        if(purchasedPriceText.equals(""))
-        {
-            purchasedPriceEditText.setError(getResources().getString(R.string.field_empty));
+        @Override
+        public void afterTextChanged(Editable s) {
 
-            return false;
         }
-
-        return true;
-    }
-
-    private boolean checkAmountText()
-    {
-        String amountText = amountTxtView.getText().toString();
-
-        try {
-            Double.parseDouble(amountText);
-        } catch (NumberFormatException e) {
-            amountTxtView.setError(getResources().getString(R.string.field_nan));
-
-            return false;
-        }
-
-        if(amountText.equals(""))
-        {
-            amountTxtView.setError(getResources().getString(R.string.field_empty));
-
-            return false;
-        }
-
-        return true;
-    }*/
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,6 +140,112 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         setupPairAutoCompleteTextView();
 
         setupBackButton();
+    }
+
+    private void checkCallingIntent()
+    {
+        Intent intent = getIntent();
+        int transactionId = intent.getIntExtra("transactionId", -1);
+
+        if(transactionId != -1)
+        {
+            DatabaseManager databaseManager = new DatabaseManager(getBaseContext());
+            Transaction transaction = databaseManager.getCurrencyTransactionById(transactionId);
+            List<Currency> denominationList = cryptocompareApiManager.getCurrenciesDenomination();
+
+            boolean found = false;
+            int index = 0;
+
+            while(index < denominationList.size() && !found)
+            {
+                if(denominationList.get(index).getSymbol().equals(transaction.getSymbol()))
+                {
+                    currency = denominationList.get(index);
+                    found = true;
+
+                    currency.setListener(RecordTransactionActivity.this);
+                    updateExchangeAdapter(currency.getSymbol());
+                    exchange_autoCompleteTextView.setEnabled(true);
+                    IconDownloaderTask iconDownloaderTask = new IconDownloaderTask();
+                    iconDownloaderTask.execute();
+                    coin_autoCompleteTextView.removeTextChangedListener(coinTextWatcher);
+                    coin_autoCompleteTextView.setText(PlaceholderManager.getDenomination(currency.getName(), currency.getSymbol(), getBaseContext()));
+                    coin_autoCompleteTextView.setEnabled(false);
+
+                    if(globalTabLayouts.getVisibility() == View.GONE)
+                    {
+                        globalTabLayouts.setVisibility(View.VISIBLE);
+                    }
+
+                    globalTabLayouts.startAnimation(revealAnimation);
+
+                    isGlobalLayoutVisible = true;
+
+                    updateCurrencyData();
+                }
+
+                index++;
+            }
+
+            found = false;
+            index = 0;
+
+            switch (transaction.getType())
+            {
+                case "b":
+                    List<Exchange> exchangeList = cryptocompareApiManager.getExchangeList(currency.getSymbol());
+
+                    while(index < exchangeList.size() && !found)
+                    {
+                        if(exchangeList.get(index).getName().equals(transaction.getSource()))
+                        {
+                            exchange = exchangeList.get(index);
+
+                            exchange_autoCompleteTextView.setText(exchange.getName());
+                            exchange_autoCompleteTextView.setEnabled(true);
+
+                            updateExchangeData();
+
+                            updatePairAdapter();
+                            found = true;
+                        }
+
+                        index++;
+                    }
+
+                    List<Pair> pairList = exchange.getPairsFor(currency.getSymbol());
+
+                    found = false;
+                    index = 0;
+
+                    while(index < pairList.size() && !found)
+                    {
+                        if(pairList.get(index).contains(currency.getSymbol()) && pairList.get(index).contains(transaction.getSymPair()))
+                        {
+                            pair = pairList.get(index);
+
+                            pair_autoCompleteTextView.setText(PlaceholderManager.getPairString(pair.getFrom(), pair.getTo(), getBaseContext()));
+                            pair_autoCompleteTextView.setEnabled(true);
+
+                            updatePairData();
+
+                            found = true;
+                        }
+
+                        index++;
+                    }
+
+                    tabLayout.getTabAt(0).select();
+
+                    break;
+                case "s":
+                    tabLayout.getTabAt(1).select();
+                    break;
+                case "t":
+                    tabLayout.getTabAt(2).select();
+                    break;
+            }
+        }
     }
 
     public Currency getCurrency()
@@ -380,31 +463,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         coin_autoCompleteTextView.setThreshold(0);
         coin_autoCompleteTextView.setAdapter(adapter);
         coin_autoCompleteTextView.setTextColor(getResources().getColor(R.color.white));
-        coin_autoCompleteTextView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                currencyIconImageView.setImageBitmap(null);
-                exchange_autoCompleteTextView.setEnabled(false);
-                exchange_autoCompleteTextView.setText("");
-
-                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(2).setEnabled(false);
-
-                if(isGlobalLayoutVisible && globalTabLayouts.getAnimation().hasEnded())
-                {
-                    globalTabLayouts.startAnimation(dismissAnimation);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
+        coin_autoCompleteTextView.addTextChangedListener(coinTextWatcher);
 
         coin_autoCompleteTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -509,7 +568,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
     @Override
     public void onExchangesUpdated() {
-
+        checkCallingIntent();
     }
 
     private class IconDownloaderTask extends AsyncTask<Void, Void, Void> {

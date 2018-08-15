@@ -180,7 +180,7 @@ public class Transactions extends Fragment {
 
     private void drawTransactionList(ArrayList<Transaction> transactions)
     {
-        TransactionListAdapter transactionListAdapter = new TransactionListAdapter(getActivity().getBaseContext(), transactions);
+        TransactionListAdapter transactionListAdapter = new TransactionListAdapter(getActivity(), transactions);
 
         transactionLayout.setAdapter(transactionListAdapter);
         transactionLayout.setTextFilterEnabled(false);

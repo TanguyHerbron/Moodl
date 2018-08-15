@@ -20,8 +20,10 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 
 import com.herbron.moodl.Activities.HomeActivity;
+import com.herbron.moodl.Activities.RecordTransactionActivity;
 import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
+import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
@@ -58,6 +60,9 @@ public class BuyFragment extends CustomRecordFragment {
     private static Currency fragmentCurrency;
     private static Exchange fragmentExchange;
     private static Pair fragmentPair;
+    private List<String> symbolStrings;
+
+    private int transactionId;
 
     @Nullable
     @Override
@@ -73,7 +78,37 @@ public class BuyFragment extends CustomRecordFragment {
 
         initializeViewElements();
 
+        checkCallingIntent();
+
         return view;
+    }
+
+    private void checkCallingIntent()
+    {
+        Intent intent = getActivity().getIntent();
+        transactionId = intent.getIntExtra("transactionId", -1);
+
+        if(transactionId != -1)
+        {
+            DatabaseManager databaseManager = new DatabaseManager(context);
+            Transaction transaction = databaseManager.getCurrencyTransactionById(transactionId);
+
+            if(transaction.getType().equals("b"))
+            {
+                fillFields(transaction);
+            }
+        }
+    }
+
+    private void fillFields(Transaction transaction)
+    {
+        amoutEditText.setText(String.valueOf(transaction.getAmount()));
+        buyPriceEditText.setText(String.valueOf(transaction.getPurchasePrice()));
+        calendar.setTimeInMillis(transaction.getTimestamp());
+        buyDateEditText.setText(sdf.format(calendar.getTime()));
+        totalValueEditText.setText(String.valueOf(transaction.getAmount() * transaction.getPurchasePrice()));
+        fees_editText.setText(String.valueOf(transaction.getFees()));
+        note_editText.setText(transaction.getNote());
     }
 
     private void initializeViewElements()
@@ -141,34 +176,58 @@ public class BuyFragment extends CustomRecordFragment {
                 if(isFieldCorrectlyFilled(amoutEditText, true) && isFieldCorrectlyFilled(buyPriceEditText, true) && isFieldCorrectlyFilled(totalValueEditText, true))
                 {
                     double amount = Double.parseDouble(amoutEditText.getText().toString());
-                    double purchasedPrice = Double.parseDouble(buyPriceEditText.getText().toString());
+                    double purchasePrice = Double.parseDouble(buyPriceEditText.getText().toString());
                     double fees;
+                    String feeCurrency;
 
-                    if(fees_editText.getText().toString().equals(""))
+                    if(feesCurrencySpinner.getSelectedItemPosition() < 1)
                     {
-                        fees = 0;
+                        feeCurrency = fragmentPair.getFrom();
                     }
                     else
                     {
-                         fees = Double.parseDouble(fees_editText.getText().toString());
+                        feeCurrency = fragmentPair.getTo();
                     }
+
+                    fees = getFees(feeCurrency, amount, purchasePrice);
 
                     String note = note_editText.getText().toString();
 
                     DatabaseManager databaseManager = new DatabaseManager(getContext());
 
-                    databaseManager.addTransaction(fragmentCurrency.getSymbol()
-                            , amount
-                            , calendar.getTime()
-                            , purchasedPrice
-                            , fees
-                            , note
-                            , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom());
-
                     preferenceManager.setMustUpdateSummary(true);
-                    Intent intent = new Intent(getActivity(), HomeActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
+
+                    if(transactionId == -1)
+                    {
+                        databaseManager.addTransaction(fragmentCurrency.getSymbol()
+                                , amount
+                                , calendar.getTime()
+                                , purchasePrice
+                                , fees
+                                , note
+                                , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom()
+                                , feeCurrency
+                                , fragmentExchange.getName()
+                                , "b");
+
+                        Intent intent = new Intent(getActivity(), HomeActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                    }
+                    else
+                    {
+                        databaseManager.updateTransactionWithId(transactionId
+                                , amount
+                                , calendar.getTime()
+                                , purchasePrice
+                                , fees
+                                , note
+                                , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom()
+                                , feeCurrency
+                                , fragmentExchange.getName()
+                                , "b");
+                    }
+
                     getActivity().finish();
                 }
             }
@@ -176,6 +235,34 @@ public class BuyFragment extends CustomRecordFragment {
 
         fees_editText = view.findViewById(R.id.fees_editText);
         note_editText = view.findViewById(R.id.note_editText);
+    }
+
+    private double getFees(String feeCurrency, double amount, double purchasedPrice)
+    {
+        double fees;
+
+        if(fees_editText.getText().toString().equals(""))
+        {
+            fees = 0;
+        }
+        else
+        {
+            fees = Double.parseDouble(fees_editText.getText().toString());
+
+            if(feesCurrencySpinner.getSelectedItemPosition() % 2 == 0)
+            {
+                if(fragmentCurrency.getSymbol().equals(feeCurrency))
+                {
+                    fees = amount * fees / 100;
+                }
+                else
+                {
+                    fees = purchasedPrice * fees / 100;
+                }
+            }
+        }
+
+        return fees;
     }
 
     private boolean isFieldCorrectlyFilled(TextInputEditText editText, boolean displayError)
@@ -210,7 +297,7 @@ public class BuyFragment extends CustomRecordFragment {
 
     private void updateAdapter()
     {
-        List<String> symbolStrings = new ArrayList<>();
+        symbolStrings = new ArrayList<>();
         symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
         symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
 
