@@ -233,14 +233,22 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
                 .setText(PlaceholderManager.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getContext()));
 
         Drawable arrowDrawable = ((ImageView) findViewById(R.id.detailsArrow)).getDrawable();
-        arrowDrawable.mutate();
-        arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-        arrowDrawable.invalidateSelf();
+
+        if(arrowDrawable != null)
+        {
+            arrowDrawable.mutate();
+            arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+            arrowDrawable.invalidateSelf();
+        }
 
         Drawable progressDrawable = ((ProgressBar) findViewById(R.id.progressBarLinechartWatchlist)).getIndeterminateDrawable();
-        progressDrawable.mutate();
-        progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-        progressDrawable.invalidateSelf();
+
+        if(progressDrawable != null)
+        {
+            progressDrawable.mutate();
+            progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+            progressDrawable.invalidateSelf();
+        }
     }
 
     private void updateCardViewInfos(Currency currency, float totalValue, boolean isBalanceHidden)

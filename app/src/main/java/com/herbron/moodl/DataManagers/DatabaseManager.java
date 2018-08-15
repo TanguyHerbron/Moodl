@@ -204,7 +204,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         result.moveToFirst();
 
-        return result.getInt(result.getColumnIndex(KEY_WATCHLIST_ID));
+        return result.getInt(0);
     }
 
     public void deleteExchangeAccountFromId(int id)
