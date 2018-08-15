@@ -207,7 +207,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         layoutRefresherRunnable = new Runnable() {
             @Override
             public void run() {
-                final List<View> currencyView = new ArrayList<>();
                 final List<Currency> renderedCurrencies = new ArrayList<>();
 
                 if (balanceManager.getTotalBalance() != null)
@@ -215,7 +214,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
                         final Currency currency = balanceManager.getTotalBalance().get(i);
 
-                        if (!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
+                        if (!currency.getSymbol().equals("USD") && (Math.abs(currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
                             //currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
                             renderedCurrencies.add(currency);
                         }
