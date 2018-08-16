@@ -544,8 +544,16 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+            if(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL)).equals(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY))))
+            {
+                currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                        , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+            }
+            else
+            {
+                currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                        , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
+            }
         }
 
         resultatList.close();
