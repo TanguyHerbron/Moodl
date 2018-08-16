@@ -211,6 +211,17 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return result.getInt(0);
     }
 
+    public int getDisabledExchangeAccountsNumber()
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String countQuerry = "SELECT COUNT() FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_IS_ENABLED + "=0";
+        Cursor result = db.rawQuery(countQuerry, null);
+
+        result.moveToFirst();
+
+        return result.getInt(0);
+    }
+
     public void deleteExchangeAccountFromId(int id)
     {
         SQLiteDatabase db = this.getWritableDatabase();

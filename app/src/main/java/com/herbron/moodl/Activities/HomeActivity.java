@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,11 +20,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -61,6 +64,8 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
     private Fragment overviewFragment;
     private Fragment currentFragment;
 
+    private DatabaseManager databaseManager;
+    private TextView alertTextView;
 
     private BalanceSwitchManagerInterface switchInterface;
 
@@ -81,6 +86,7 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
 
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        databaseManager = new DatabaseManager(this);
 
         setListener((BalanceSwitchManagerInterface) holdingsFragment);
 
@@ -123,7 +129,33 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
             }
         });
 
+        setupSettingsAlert(navigationView);
+
         setupBalanceSwitch();
+    }
+
+    private void setupSettingsAlert(NavigationView navigationView)
+    {
+        alertTextView = (TextView) navigationView.getMenu().findItem(R.id.navigation_settings).getActionView();
+        alertTextView.setTextColor(getResources().getColor(R.color.decreaseCandle));
+        alertTextView.setGravity(Gravity.CENTER);
+        alertTextView.setTypeface(null, Typeface.BOLD);
+
+        updateSettingsAlertNumber();
+    }
+
+    private void updateSettingsAlertNumber()
+    {
+        int disabledNumber = databaseManager.getDisabledExchangeAccountsNumber();
+
+        if(disabledNumber > 0)
+        {
+            alertTextView.setText(String.valueOf(disabledNumber));
+        }
+        else
+        {
+            alertTextView.setText("");
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -197,6 +229,7 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
     protected void onResume() {
         super.onResume();
 
+        updateSettingsAlertNumber();
     }
 
     @Override

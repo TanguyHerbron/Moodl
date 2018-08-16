@@ -22,6 +22,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
@@ -811,7 +812,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
 
-            findPreference("exchange").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            DatabaseManager databaseManager = new DatabaseManager(getActivity().getBaseContext());
+            int disabledAcount = databaseManager.getDisabledExchangeAccountsNumber();
+            PreferenceScreen preferenceScreen = (PreferenceScreen) findPreference("exchange");
+
+            if(disabledAcount > 0)
+            {
+                preferenceScreen.setWidgetLayoutResource(R.layout.alert_layout);
+            }
+
+            preferenceScreen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
