@@ -381,7 +381,7 @@ public class BuyFragment extends CustomRecordFragment {
 
                         if(fragmentCurrency != null)
                         {
-                            fragmentCurrency.getTimestampPrice(getContext(), preferenceManager.getDefaultCurrency(),calendar.getTimeInMillis() / 1000);
+                            fragmentCurrency.getTimestampPrice(getContext(), fragmentCurrency.getSymbol().equals(fragmentPair.getFrom()) ? fragmentPair.getTo() : fragmentPair.getFrom(),calendar.getTimeInMillis() / 1000);
                         }
                     }
                 },
