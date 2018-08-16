@@ -64,6 +64,8 @@ public class BuyFragment extends CustomRecordFragment {
     private int transactionId;
     private Transaction transaction;
 
+    private boolean isAmountLastUpdated;
+
     private TextWatcher amountTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -93,6 +95,7 @@ public class BuyFragment extends CustomRecordFragment {
         @Override
         public void afterTextChanged(Editable s) {
             totalValueEditText.addTextChangedListener(totalValueTextWatcher);
+            isAmountLastUpdated = true;
         }
     };
 
@@ -125,6 +128,7 @@ public class BuyFragment extends CustomRecordFragment {
         @Override
         public void afterTextChanged(Editable s) {
             amoutEditText.addTextChangedListener(amountTextWatcher);
+            isAmountLastUpdated = false;
         }
     };
 
@@ -269,6 +273,77 @@ public class BuyFragment extends CustomRecordFragment {
         });
 
         fees_editText = view.findViewById(R.id.fees_editText);
+        fees_editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                totalValueEditText.removeTextChangedListener(totalValueTextWatcher);
+                amoutEditText.removeTextChangedListener(amountTextWatcher);
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(isFieldCorrectlyFilled(amoutEditText, false) && isFieldCorrectlyFilled(buyPriceEditText, false) && isFieldCorrectlyFilled(totalValueEditText, false))
+                {
+                    double amount = Double.parseDouble(amoutEditText.getText().toString());
+                    double purchasePrice = Double.parseDouble(buyPriceEditText.getText().toString());
+                    double fees;
+                    double totalValue = Double.parseDouble(totalValueEditText.getText().toString());
+                    String feeCurrency;
+
+                    if(isAmountLastUpdated)
+                    {
+                        totalValue = amount * purchasePrice;
+                    }
+                    else
+                    {
+                        amount = totalValue / purchasePrice;
+                    }
+
+                    if(fees_editText.getText().toString().equals("") || fees_editText.getText().toString().equals("0"))
+                    {
+                        if(isAmountLastUpdated)
+                        {
+                            totalValueEditText.setText(String.valueOf(amount * purchasePrice));
+                        }
+                        else
+                        {
+                            amoutEditText.setText(String.valueOf(totalValue / purchasePrice));
+                        }
+                    }
+                    else
+                    {
+
+                        if(feesCurrencySpinner.getSelectedItemPosition() < 1)
+                        {
+                            feeCurrency = fragmentPair.getFrom();
+                        }
+                        else
+                        {
+                            feeCurrency = fragmentPair.getTo();
+                        }
+
+                        fees = getFees(feeCurrency, amount, purchasePrice);
+
+                        if(isAmountLastUpdated)
+                        {
+                            totalValueEditText.setText(String.valueOf(totalValue + fees));
+                        }
+                        else
+                        {
+                            amoutEditText.setText(String.valueOf(amount - (fees / purchasePrice )));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                totalValueEditText.addTextChangedListener(totalValueTextWatcher);
+                amoutEditText.addTextChangedListener(amountTextWatcher);
+            }
+        });
+
         note_editText = view.findViewById(R.id.note_editText);
 
         checkCallingIntent();
