@@ -10,7 +10,7 @@ public class Transaction {
     private String symbol;
     private double amount;
     private long timestamp;
-    private double purchasePrice;
+    private double price;
     private double fees;
     private String feeCurrency;
     private String feeFormat;
@@ -27,7 +27,7 @@ public class Transaction {
         this.symPair = symPair;
         this.amount = amount;
         this.timestamp = timestamp;
-        this.purchasePrice = purchasedPrice;
+        this.price = purchasedPrice;
         this.fees = fees;
         this.note = note;
         this.feeCurrency = feeCurrency;
@@ -66,14 +66,14 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public void setPurchasePrice(double purchasedPrice)
+    public void setPrice(double purchasedPrice)
     {
-        this.purchasePrice = purchasedPrice;
+        this.price = purchasedPrice;
     }
 
-    public double getPurchasePrice()
+    public double getPrice()
     {
-        return purchasePrice;
+        return price;
     }
 
     public double getFees() {

@@ -20,7 +20,6 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 
 import com.herbron.moodl.Activities.HomeActivity;
-import com.herbron.moodl.Activities.RecordTransactionActivity;
 import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
@@ -65,6 +64,70 @@ public class BuyFragment extends CustomRecordFragment {
     private int transactionId;
     private Transaction transaction;
 
+    private TextWatcher amountTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            totalValueEditText.removeTextChangedListener(totalValueTextWatcher);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if(isFieldCorrectlyFilled(buyPriceEditText, false) && isFieldCorrectlyFilled(amoutEditText, false))
+            {
+                if(Double.parseDouble(amoutEditText.getText().toString()) > 0)
+                {
+                    Double totalValue = Double.parseDouble(buyPriceEditText.getText().toString()) * Double.parseDouble(s.toString());
+                    totalValueEditText.setText(String.format("%f", totalValue));
+                }
+                else
+                {
+                    totalValueEditText.setText("0");
+                }
+            }
+            else
+            {
+                totalValueEditText.setText("");
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            totalValueEditText.addTextChangedListener(totalValueTextWatcher);
+        }
+    };
+
+    private TextWatcher totalValueTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            amoutEditText.removeTextChangedListener(amountTextWatcher);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if(isFieldCorrectlyFilled(buyPriceEditText, false) && isFieldCorrectlyFilled(totalValueEditText, false))
+            {
+                if(Double.parseDouble(totalValueEditText.getText().toString()) > 0)
+                {
+                    Double amount = Double.parseDouble(s.toString()) / Double.parseDouble(buyPriceEditText.getText().toString());
+                    amoutEditText.setText(String.format("%f", amount));
+                }
+                else
+                {
+                    amoutEditText.setText("0");
+                }
+            }
+            else
+            {
+                amoutEditText.setText("");
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            amoutEditText.addTextChangedListener(amountTextWatcher);
+        }
+    };
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -102,75 +165,21 @@ public class BuyFragment extends CustomRecordFragment {
     private void fillFields()
     {
         amoutEditText.setText(String.valueOf(transaction.getAmount()));
-        buyPriceEditText.setText(String.valueOf(transaction.getPurchasePrice()));
+        buyPriceEditText.setText(String.valueOf(transaction.getPrice()));
         calendar.setTimeInMillis(transaction.getTimestamp());
         buyDateEditText.setText(sdf.format(calendar.getTime()));
-        totalValueEditText.setText(String.valueOf(transaction.getAmount() * transaction.getPurchasePrice()));
+        totalValueEditText.setText(String.valueOf(transaction.getAmount() * transaction.getPrice()));
         fees_editText.setText(String.valueOf(transaction.getFees()));
         note_editText.setText(transaction.getNote());
-
-        Log.d("moodl", "> " + fragmentPair);
-
-        /*if(transaction.getSymbol().equals(fragmentPair.getFrom()))
-        {
-            if(transaction.getFeeFormat().equals("p"))
-            {
-                feesCurrencySpinner.setSelection(0);
-            }
-            else
-            {
-                feesCurrencySpinner.setSelection(1);
-            }
-        }
-        else
-        {
-            if(transaction.getFeeFormat().equals("p"))
-            {
-                feesCurrencySpinner.setSelection(2);
-            }
-            else
-            {
-                feesCurrencySpinner.setSelection(3);
-            }
-        }*/
     }
 
     private void initializeViewElements()
     {
         totalValueEditText = view.findViewById(R.id.totalValue_editText);
+        totalValueEditText.addTextChangedListener(totalValueTextWatcher);
+
         amoutEditText = view.findViewById(R.id.amount_editText);
-        amoutEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                if(isFieldCorrectlyFilled(buyPriceEditText, false) && isFieldCorrectlyFilled(amoutEditText, false))
-                {
-                    if(Double.parseDouble(amoutEditText.getText().toString()) > 0)
-                    {
-                        Double totalValue = Double.parseDouble(buyPriceEditText.getText().toString()) * Double.parseDouble(s.toString());
-                        totalValueEditText.setText(String.format("%f", totalValue));
-                    }
-                    else
-                    {
-                        totalValueEditText.setText("0");
-                    }
-                }
-                else
-                {
-                    totalValueEditText.setText("");
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
+        amoutEditText.addTextChangedListener(amountTextWatcher);
 
         buyPriceEditText = view.findViewById(R.id.buyPrice_editText);
         buyDateEditText = view.findViewById(R.id.buyDate_editText);
@@ -281,11 +290,13 @@ public class BuyFragment extends CustomRecordFragment {
             {
                 if(fragmentCurrency.getSymbol().equals(feeCurrency))
                 {
-                    fees = amount * fees / 100;
+                    fees = (100 * amount) / (100 + fees);
                 }
                 else
                 {
-                    fees = purchasedPrice * fees / 100;
+                    double base = (100 * purchasedPrice * amount) / (100 + fees);
+
+                    fees = purchasedPrice * amount - base;
                 }
             }
         }
