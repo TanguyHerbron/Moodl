@@ -157,4 +157,6 @@
 
     <string name="fixedFee">Pourcentage de %1$s</string>
     <string name="percentageFee">%1$s fixe</string>
+    <string name="activity_sell_price">Prix de vente</string>
+    <string name="activity_sell_date">Date de vente</string>
 </resources>

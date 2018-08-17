@@ -261,7 +261,6 @@
     <string name="informations">Informations</string>
     <string name="title_choose_coin">Choose a coin</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="exchange">Exchange</string>
     <string name="pair">Pair</string>
     <string name="total_value">Total value</string>
@@ -272,5 +271,7 @@
 
     <string name="fixedFee">%1$s percentage</string>
     <string name="percentageFee">%1$s fixed</string>
+    <string name="activity_sell_price">Sell price</string>
+    <string name="activity_sell_date">Sell date</string>
 
 </resources>
