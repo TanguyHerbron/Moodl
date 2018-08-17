@@ -301,11 +301,11 @@ public class SellFragment extends CustomRecordFragment {
                         {
                             if(isAmountLastUpdated)
                             {
-                                totalValueEditText.setText(String.valueOf(totalValue + fees));
+                                totalValueEditText.setText(String.valueOf(totalValue - fees));
                             }
                             else
                             {
-                                amoutEditText.setText(String.valueOf(amount - (fees / purchasePrice)));
+                                amoutEditText.setText(String.valueOf(amount + (fees / purchasePrice)));
                             }
                         }
                         else
@@ -314,22 +314,22 @@ public class SellFragment extends CustomRecordFragment {
                             {
                                 if(isAmountLastUpdated)
                                 {
-                                    totalValueEditText.setText(String.valueOf(totalValue + (fees * purchasePrice)));
+                                    totalValueEditText.setText(String.valueOf(totalValue - (fees * purchasePrice)));
                                 }
                                 else
                                 {
-                                    amoutEditText.setText(String.valueOf((totalValue / purchasePrice) - fees));
+                                    amoutEditText.setText(String.valueOf((totalValue / purchasePrice) + fees));
                                 }
                             }
                             else
                             {
                                 if(isAmountLastUpdated)
                                 {
-                                    totalValueEditText.setText(String.valueOf(totalValue + fees));
+                                    totalValueEditText.setText(String.valueOf(totalValue - fees));
                                 }
                                 else
                                 {
-                                    amoutEditText.setText(String.valueOf((totalValue - fees) / purchasePrice));
+                                    amoutEditText.setText(String.valueOf((totalValue + fees) / purchasePrice));
                                 }
                             }
                         }
