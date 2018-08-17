@@ -555,15 +555,54 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            if(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL)).equals(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY))))
+            String symbol = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL));
+            String feeSym = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY));
+            String type = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE));
+
+            if(type != null)
             {
-                currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                        , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                switch (type)
+                {
+                    case "b":
+                        if(symbol.equals(feeSym))
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                        }
+                        else
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
+                        }
+                        break;
+                    case "s":
+                        if(symbol.equals(feeSym))
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                    , - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) + resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                        }
+                        else
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                    , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
+                        }
+                        break;
+                    case "t":
+                        break;
+                }
             }
             else
             {
-                currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                        , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
+                if(symbol.equals(feeSym))
+                {
+                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                }
+                else
+                {
+                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
+                }
             }
         }
 
