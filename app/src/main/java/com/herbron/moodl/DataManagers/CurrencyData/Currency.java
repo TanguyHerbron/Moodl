@@ -44,7 +44,7 @@ public class Currency implements Parcelable {
     private int rank;
     private String startDate;
     private List<String> socialMediaLinks;
-    private OnTimestampPriceUpdatedListener onTimestampPriceUpdatedListener;
+    private List<OnTimestampPriceUpdatedListener> onTimestampPriceUpdatedListenerList;
     //private String proofType
 
     private CurrencyInfoUpdateNotifierInterface currencyInfoUpdateNotifierInterface;
@@ -82,8 +82,6 @@ public class Currency implements Parcelable {
         this.currencyInfoUpdateNotifierInterface = currencyInfoUpdateNotifierInterface;
     }
 
-    //public Currency(int id, String symbol, String name, String algorithm, String proofType, )
-
     public void getTimestampPrice(android.content.Context context, String toSymbol, long timestamp)
     {
         dataRetriver = new CurrencyDataRetriever(context);
@@ -96,9 +94,12 @@ public class Currency implements Parcelable {
             public void onSuccess(String price) {
                 currencyInfoUpdateNotifierInterface.onTimestampPriceUpdated(price);
 
-                if(onTimestampPriceUpdatedListener != null)
+                if(onTimestampPriceUpdatedListenerList != null)
                 {
-                    onTimestampPriceUpdatedListener.onTimeStampPriceUpdated(price);
+                    for(int i = 0; i < onTimestampPriceUpdatedListenerList.size(); i++)
+                    {
+                        onTimestampPriceUpdatedListenerList.get(i).onTimeStampPriceUpdated(price);
+                    }
                 }
             }
         }, timestamp);
@@ -219,12 +220,6 @@ public class Currency implements Parcelable {
             @Override
             public void onSuccess(String price) {}
         }, CurrencyDataRetriever.DAYS);
-    }
-
-    public void updateDetails(android.content.Context context, final CurrencyCallBack callBack)
-    {
-            dataRetriver = new CurrencyDataRetriever(context);
-
     }
 
     private int getDarkenColor(int color)
@@ -542,8 +537,13 @@ public class Currency implements Parcelable {
         void onTimeStampPriceUpdated(String price);
     }
 
-    public void setOnTimestampPriceUpdatedListener(OnTimestampPriceUpdatedListener onTimestampPriceUpdatedListener)
+    public void addOnTimestampPriceUpdatedListener(OnTimestampPriceUpdatedListener onTimestampPriceUpdatedListener)
     {
-        this.onTimestampPriceUpdatedListener = onTimestampPriceUpdatedListener;
+        if(onTimestampPriceUpdatedListenerList == null)
+        {
+            onTimestampPriceUpdatedListenerList = new ArrayList<>();
+        }
+
+        onTimestampPriceUpdatedListenerList.add(onTimestampPriceUpdatedListener);
     }
 }

@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.herbron.moodl.Activities.RecordTransactionFragments.BuyFragment;
+import com.herbron.moodl.Activities.RecordTransactionFragments.SellFragment;
 import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.CustomAdapters.PairRecordListAdapter;
 import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
@@ -150,6 +151,8 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
         if(transactionId != -1)
         {
+            List<Exchange> exchangeList;
+            List<Pair> pairList;
             DatabaseManager databaseManager = new DatabaseManager(getBaseContext());
             Transaction transaction = databaseManager.getCurrencyTransactionById(transactionId);
             List<Currency> denominationList = cryptocompareApiManager.getCurrenciesDenomination();
@@ -194,7 +197,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
             switch (transaction.getType())
             {
                 case "b":
-                    List<Exchange> exchangeList = cryptocompareApiManager.getExchangeList(currency.getSymbol());
+                    exchangeList = cryptocompareApiManager.getExchangeList(currency.getSymbol());
 
                     while(index < exchangeList.size() && !found)
                     {
@@ -214,7 +217,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
                         index++;
                     }
 
-                    List<Pair> pairList = exchange.getPairsFor(currency.getSymbol());
+                    pairList = exchange.getPairsFor(currency.getSymbol());
 
                     found = false;
                     index = 0;
@@ -242,6 +245,50 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
                     break;
                 case "s":
+                    exchangeList = cryptocompareApiManager.getExchangeList(currency.getSymbol());
+
+                    while(index < exchangeList.size() && !found)
+                    {
+                        if(exchangeList.get(index).getName().equals(transaction.getSource()))
+                        {
+                            exchange = exchangeList.get(index);
+
+                            exchange_autoCompleteTextView.setText(exchange.getName());
+                            exchange_autoCompleteTextView.setEnabled(true);
+
+                            updateExchangeData();
+
+                            updatePairAdapter();
+                            found = true;
+                        }
+
+                        index++;
+                    }
+
+                    pairList = exchange.getPairsFor(currency.getSymbol());
+
+                    found = false;
+                    index = 0;
+
+                    while(index < pairList.size() && !found)
+                    {
+                        if(pairList.get(index).contains(currency.getSymbol()) && pairList.get(index).contains(transaction.getSymPair()))
+                        {
+                            pair = pairList.get(index);
+
+                            pair_autoCompleteTextView.setText(PlaceholderManager.getPairString(pair.getFrom(), pair.getTo(), getBaseContext()));
+                            pair_autoCompleteTextView.setEnabled(true);
+
+                            ((SellFragment) pageAdapter.getItem(1)).updatePair(pair);
+
+                            updatePairData();
+
+                            found = true;
+                        }
+
+                        index++;
+                    }
+
                     tabLayout.getTabAt(1).select();
                     break;
                 case "t":

@@ -11,12 +11,12 @@
         android:orientation="vertical">
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/input_amount"
+            android:id="@+id/input_amount_buy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/amount_editText"
+                android:id="@+id/amount_editText_buy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
@@ -63,12 +63,12 @@
         </LinearLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/input_totalValue"
+            android:id="@+id/input_totalValue_buy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/totalValue_editText"
+                android:id="@+id/totalValue_editText_buy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
@@ -82,13 +82,13 @@
             android:orientation="horizontal">
 
             <android.support.design.widget.TextInputLayout
-                android:id="@+id/input_fees"
+                android:id="@+id/input_fees_buy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.7">
 
                 <android.support.design.widget.TextInputEditText
-                    android:id="@+id/fees_editText"
+                    android:id="@+id/fees_editText_buy"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
@@ -97,7 +97,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <Spinner
-                android:id="@+id/feesCurrency_editText"
+                android:id="@+id/feesCurrency_editText_buy"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
@@ -105,12 +105,12 @@
         </LinearLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/input_note"
+            android:id="@+id/input_note_buy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/note_editText"
+                android:id="@+id/note_editText_buy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/notes"

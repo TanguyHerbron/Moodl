@@ -10,7 +10,6 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +47,7 @@ public class BuyFragment extends CustomRecordFragment {
     private static Spinner feesCurrencySpinner;
     private static View view;
 
-    private ArrayAdapter<String> currencyAdapter;
+    private ArrayAdapter<String> currencyFeeAdapter;
 
     private SimpleDateFormat sdf;
     private Calendar calendar;
@@ -179,10 +178,10 @@ public class BuyFragment extends CustomRecordFragment {
 
     private void initializeViewElements()
     {
-        totalValueEditText = view.findViewById(R.id.totalValue_editText);
+        totalValueEditText = view.findViewById(R.id.totalValue_editText_buy);
         totalValueEditText.addTextChangedListener(totalValueTextWatcher);
 
-        amoutEditText = view.findViewById(R.id.amount_editText);
+        amoutEditText = view.findViewById(R.id.amount_editText_buy);
         amoutEditText.addTextChangedListener(amountTextWatcher);
 
         buyPriceEditText = view.findViewById(R.id.buyPrice_editText);
@@ -195,11 +194,11 @@ public class BuyFragment extends CustomRecordFragment {
                 createDatePicker();
             }
         });
-        feesCurrencySpinner = view.findViewById(R.id.feesCurrency_editText);
+        feesCurrencySpinner = view.findViewById(R.id.feesCurrency_editText_buy);
 
-        currencyAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
-        currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        feesCurrencySpinner.setAdapter(currencyAdapter);
+        currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
+        currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         if(fragmentPair != null)
         {
@@ -272,7 +271,7 @@ public class BuyFragment extends CustomRecordFragment {
             }
         });
 
-        fees_editText = view.findViewById(R.id.fees_editText);
+        fees_editText = view.findViewById(R.id.fees_editText_buy);
         fees_editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -372,7 +371,7 @@ public class BuyFragment extends CustomRecordFragment {
             }
         });
 
-        note_editText = view.findViewById(R.id.note_editText);
+        note_editText = view.findViewById(R.id.note_editText_buy);
 
         checkCallingIntent();
     }
@@ -443,9 +442,9 @@ public class BuyFragment extends CustomRecordFragment {
         symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
         symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
 
-        currencyAdapter.clear();
-        currencyAdapter.addAll(symbolStrings);
-        currencyAdapter.notifyDataSetChanged();
+        currencyFeeAdapter.clear();
+        currencyFeeAdapter.addAll(symbolStrings);
+        currencyFeeAdapter.notifyDataSetChanged();
     }
 
     private void createDatePicker()
@@ -511,30 +510,27 @@ public class BuyFragment extends CustomRecordFragment {
 
     public void updatePair(Pair pair)
     {
-        currencyAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
-        currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        feesCurrencySpinner.setAdapter(currencyAdapter);
+        currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
+        currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         symbolStrings = new ArrayList<>();
         symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
         symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
-        currencyAdapter.addAll(symbolStrings);
-        currencyAdapter.notifyDataSetChanged();
+        currencyFeeAdapter.addAll(symbolStrings);
+        currencyFeeAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onPairUpdated() {
         fragmentPair = pair;
 
-        fragmentCurrency.setOnTimestampPriceUpdatedListener(new Currency.OnTimestampPriceUpdatedListener() {
+        fragmentCurrency.addOnTimestampPriceUpdatedListener(new Currency.OnTimestampPriceUpdatedListener() {
             @Override
             public void onTimeStampPriceUpdated(String price) {
                 ((TextInputEditText) view.findViewById(R.id.buyPrice_editText)).setText(price);
 
-                if(currencyAdapter != null)
-                {
-                    updateAdapter();
-                }
+                updatePair(fragmentPair);
             }
         });
 
