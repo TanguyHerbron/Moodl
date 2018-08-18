@@ -76,7 +76,7 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        view = inflater.inflate(R.layout.fragment_charts_detailsactivity, container, false);
+        view = inflater.inflate(R.layout.detailsactivity_fragment_charts, container, false);
 
         currency = getActivity().getIntent().getParcelableExtra("currency");
 

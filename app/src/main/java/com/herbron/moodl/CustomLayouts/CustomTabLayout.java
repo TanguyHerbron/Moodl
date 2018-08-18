@@ -68,6 +68,7 @@ public class CustomTabLayout extends TabLayout {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setText(label);
         textView.setGravity(GRAVITY_CENTER);
+        textView.setTextColor(getResources().getColor(R.color.separationColor));
         addTab(newTab().setCustomView(textView));
 
         View tabView = linearLayout.getChildAt(linearLayout.getChildCount() - 1);

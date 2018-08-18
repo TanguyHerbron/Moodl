@@ -134,7 +134,7 @@ public class BuyFragment extends CustomRecordFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_buy, container, false);
+        view = inflater.inflate(R.layout.record_transaction_fragment_buy, container, false);
 
         context = getActivity().getApplicationContext();
 

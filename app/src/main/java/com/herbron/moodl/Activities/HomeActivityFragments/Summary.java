@@ -22,7 +22,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.Gravity;
@@ -101,7 +100,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        View fragmentView = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
+        View fragmentView = inflater.inflate(R.layout.homeactivity_fragment_summary, container, false);
 
         preferencesManager = new PreferencesManager(getActivity());
         balanceManager = new BalanceManager(getActivity());

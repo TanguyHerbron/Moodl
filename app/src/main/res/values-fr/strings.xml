@@ -15,7 +15,7 @@
     <string name="pref_title_enable_synchronization_gdax">Activer la synchronisation</string>
     <string name="pref_title_gdax_publickey">Clé public</string>
     <string name="pref_title_gdax_privatekey">Clé privée</string>
-    <string name="activity_add_amount">Montant</string>
+    <string name="activity_amount">Montant</string>
     <string name="activity_purchase_price">Prix d\'achat</string>
     <string name="activity_purchase_date">Date d\'achat</string>
     <string name="activity_fees">Frais</string>
@@ -116,6 +116,24 @@
         <item>6 mois</item>
         <item>1 année</item>
     </string-array>
+
+    <string-array name="from_transfer_options_string_array">
+        <item>Site d'échange</item>
+        <item>Mon portefeuille</item>
+        <item>Minage</item>
+        <item>Le portefeuille de quelqu'un d'autre</item>
+        <item>Airdrop</item>
+        <item>Autre / Inconnu</item>
+        <item>Fork</item>
+    </string-array>
+
+    <string-array name="to_transfer_options_string_array">
+        <item>Site d'échange</item>
+        <item>Mon portefeuille</item>
+        <item>Le portefeuille de quelqu'un d'autre</item>
+        <item>Autre / Inconnu</item>
+    </string-array>
+
     <string name="emitedPlaceholder">Pourcentage de coin émis : %1$s%%</string>
     <string name="edit_transaction">Edition d\'une transaction de %1$s</string>
     <string name="new_transaction">Nouvelle transaction</string>

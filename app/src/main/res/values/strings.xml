@@ -126,7 +126,7 @@
     <string name="pref_title_exchange_kraken" translatable="false">Kraken</string>
 
     <!--Add transaction activity-->
-    <string name="activity_add_amount">Amount</string>
+    <string name="activity_amount">Amount</string>
     <string name="activity_purchase_price">Purchase price</string>
     <string name="activity_purchase_date">Purchase date</string>
     <string name="activity_fees">Fees</string>
@@ -155,6 +155,23 @@
         <item>Manual entries</item>
         <item>Watchlist</item>
         <item>API keys</item>
+    </string-array>
+
+    <string-array name="from_transfer_options_string_array">
+        <item>Exchange</item>
+        <item>My wallet</item>
+        <item>Mining</item>
+        <item>Someone else\'s wallet</item>
+        <item>Airdrop</item>
+        <item>Other / Unknown</item>
+        <item>Fork</item>
+    </string-array>
+
+    <string-array name="to_transfer_options_string_array">
+        <item>Exchange</item>
+        <item>My wallet</item>
+        <item>Someone else\'s wallet</item>
+        <item>Other / Unknown</item>
     </string-array>
 
     <!--Cardview placeholders-->
@@ -273,5 +290,6 @@
     <string name="percentageFee">%1$s fixed</string>
     <string name="activity_sell_price">Sell price</string>
     <string name="activity_sell_date">Sell date</string>
+    <string name="activity_transfert_date">Date of transfert</string>
 
 </resources>

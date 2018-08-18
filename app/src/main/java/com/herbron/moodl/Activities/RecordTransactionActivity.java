@@ -100,6 +100,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
             exchange_autoCompleteTextView.setText("");
 
             ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(2).setEnabled(false);
+            ((TextView) tabLayout.getTabAt(2).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
 
             if(isGlobalLayoutVisible && globalTabLayouts.getAnimation().hasEnded())
             {
@@ -308,9 +309,9 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         globalTabLayouts = findViewById(R.id.globalTabLayouts);
 
         tabLayout = findViewById(R.id.transactionsTabLayout);
-        tabLayout.addTab(0, "Buy");
-        tabLayout.addTab(1, "Sell");
-        tabLayout.addTab(2, "Transfer");
+        tabLayout.addTab(0, getResources().getString(R.string.buyText));
+        tabLayout.addTab(1, getResources().getString(R.string.sellText));
+        tabLayout.addTab(2, getResources().getString(R.string.transferText));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         viewPager = findViewById(R.id.transactionsViewPager);
@@ -339,6 +340,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         for(int i = 0; i < tabLayoutChildren.getChildCount(); i++)
         {
             tabLayoutChildren.getChildAt(i).setEnabled(false);
+            ((TextView) tabLayout.getTabAt(i).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
         }
 
         revealAnimation = AnimationUtils.loadAnimation(this, R.anim.reveal);
@@ -377,7 +379,9 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(0).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(1).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
                 tabLayout.getTabAt(2).select();
 
             }
@@ -421,7 +425,9 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
                 updatePairData();
 
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(0).setEnabled(true);
+                ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.white));
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(1).setEnabled(true);
+                ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.white));
                 tabLayout.getTabAt(0).select();
             }
         });
@@ -444,7 +450,9 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
                 pair_autoCompleteTextView.setText("");
 
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(0).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(1).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
                 tabLayout.getTabAt(2).select();
             }
 
@@ -554,8 +562,11 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
                 iconDownloaderTask.execute();
 
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(0).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(1).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
                 ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(2).setEnabled(true);
+                ((TextView) tabLayout.getTabAt(2).getCustomView()).setTextColor(getResources().getColor(R.color.white));
                 tabLayout.getTabAt(2).select();
 
                 updateCurrencyData();

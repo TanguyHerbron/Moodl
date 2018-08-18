@@ -20,7 +20,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
-                android:hint="@string/activity_add_amount"/>
+                android:hint="@string/activity_amount"/>
 
         </android.support.design.widget.TextInputLayout>
 

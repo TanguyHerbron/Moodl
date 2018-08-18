@@ -67,7 +67,7 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        view = inflater.inflate(R.layout.fragment_marketcap_homeactivity, container, false);
+        view = inflater.inflate(R.layout.homeactivity_fragment_marketcap, container, false);
 
         preferencesManager = new PreferencesManager(getActivity().getBaseContext());
         coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity().getBaseContext());

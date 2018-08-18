@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,7 +52,7 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        View fragmentView = inflater.inflate(R.layout.fragment_overview_homeactivity, container, false);
+        View fragmentView = inflater.inflate(R.layout.homeactivity_fragment_overview, container, false);
 
         coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity().getBaseContext());
         cryptocompareApiManager = CryptocompareApiManager.getInstance(getActivity().getBaseContext());
