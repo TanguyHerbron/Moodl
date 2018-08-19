@@ -174,6 +174,11 @@
         <item>Other / Unknown</item>
     </string-array>
 
+    <string-array name="fees_options">
+        <item>Percentage</item>
+        <item>Fixed</item>
+    </string-array>
+
     <!--Cardview placeholders-->
     <string name="currencySymbolPlaceholder" translatable="false">(%1$s)</string>
     <string name="currencyBalancePlaceholder" translatable="false">%1$s%2$s</string>
@@ -291,5 +296,6 @@
     <string name="activity_sell_price">Sell price</string>
     <string name="activity_sell_date">Sell date</string>
     <string name="activity_transfert_date">Date of transfert</string>
+    <string name="error_no_valid_from_to">This transaction is not valid</string>
 
 </resources>

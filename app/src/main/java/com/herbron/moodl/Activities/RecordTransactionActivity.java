@@ -87,6 +87,8 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
     private boolean isGlobalLayoutVisible;
 
+    private Intent callingIntent;
+
     private TextWatcher coinTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -145,10 +147,20 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         setupBackButton();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if(callingIntent != null)
+        {
+            callingIntent.removeExtra("transactionId");
+        }
+    }
+
     private void checkCallingIntent()
     {
-        Intent intent = getIntent();
-        int transactionId = intent.getIntExtra("transactionId", -1);
+        callingIntent = getIntent();
+        int transactionId = callingIntent.getIntExtra("transactionId", -1);
 
         if(transactionId != -1)
         {
