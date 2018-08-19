@@ -1,38 +1,113 @@
 package com.herbron.moodl.Activities.RecordTransactionFragments;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 
 import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
+import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
+import com.herbron.moodl.DataManagers.DatabaseManager;
+import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.R;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class TransferFragment extends CustomRecordFragment {
 
     private static Currency fragmentCurrency;
+    private static Exchange fragmentExchange;
 
     private Spinner fromSpinner;
     private Spinner toSpinner;
+    private Spinner feeSpinner;
+
+    private Button saveButton;
+    private int transactionId;
+    private Transaction transaction;
 
     private TextInputEditText transferDateEditText;
+    private TextInputEditText amountEditText;
+    private TextInputEditText feesEditText;
+    private TextInputEditText noteEditText;
+
     private SimpleDateFormat sdf;
     private Calendar calendar;
 
     private View view;
+
+    public static final String EXCHANGE_CODE = "stra:e";
+    public static final String WALLET_CODE = "stra:mw";
+    public static final String MINING_CODE = "stra:m";
+    public static final String ELSE_WALLET_CODE = "stra:smew";
+    public static final String AIRDROP_CODE = "stra:a";
+    public static final String UNKNOWN_CODE = "stra:unk";
+    public static final String FORK_CODE = "stra:fo";
+
+    private View.OnClickListener saveButtonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(isFieldCorrectlyFilled(amountEditText, true))
+            {
+                if(isTransactionPossible())
+                {
+                    DatabaseManager databaseManager = new DatabaseManager(getContext());
+                    double amount = Double.valueOf(amountEditText.getText().toString());
+                    double fees = getFees();
+
+                    databaseManager.addTransaction(fragmentCurrency.getSymbol()
+                            , amount
+                            , calendar.getTime()
+                            , 0
+                            , fees
+                            , noteEditText.getText().toString()
+                            , ""
+                            , fragmentCurrency.getSymbol()
+                            , getDestination()
+                            , getSource()
+                            , "t"
+                            , feeSpinner.getSelectedItemPosition() == 0 ? "p" : "f");
+
+                    getActivity().finish();
+                }
+                else
+                {
+                    Drawable backgroundDrawableTo = toSpinner.getBackground();
+                    backgroundDrawableTo.mutate();
+                    backgroundDrawableTo.setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.error), PorterDuff.Mode.SRC_ATOP));
+                    backgroundDrawableTo.invalidateSelf();
+
+                    Drawable backgroundDrawableFrom = fromSpinner.getBackground();
+                    backgroundDrawableFrom.mutate();
+                    backgroundDrawableFrom.setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.error), PorterDuff.Mode.SRC_ATOP));
+                    backgroundDrawableFrom.invalidateSelf();
+
+                    view.findViewById(R.id.errorLayouts).setVisibility(View.VISIBLE);
+                }
+            }
+        }
+    };
 
     @Nullable
     @Override
@@ -40,19 +115,24 @@ public class TransferFragment extends CustomRecordFragment {
         view = inflater.inflate(R.layout.record_transaction_fragment_transfer, container, false);
 
         calendar = Calendar.getInstance();
-        sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.UK);
+        sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.UK);
 
+        initializeViewElements();
+
+        return view;
+    }
+
+    private void initializeViewElements()
+    {
         fromSpinner = view.findViewById(R.id.from_transfer_spinner);
         toSpinner = view.findViewById(R.id.to_transfer_spinner);
+        feeSpinner = view.findViewById(R.id.feesFormat_editText_transfer);
 
-        ArrayAdapter<String> fromAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.from_transfer_options_string_array));
-        fromAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        ArrayAdapter<String> toAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.to_transfer_options_string_array));
-        toAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        setupSpinnesr();
 
-        fromSpinner.setAdapter(fromAdapter);
-        toSpinner.setAdapter(toAdapter);
-
+        feesEditText = view.findViewById(R.id.fees_editText_transfer);
+        noteEditText = view.findViewById(R.id.note_editText_transfer);
+        amountEditText = view.findViewById(R.id.amount_editText_transfer);
         transferDateEditText = view.findViewById(R.id.transfertDate_editText);
         transferDateEditText.setText(sdf.format(calendar.getTime()));
 
@@ -63,7 +143,187 @@ public class TransferFragment extends CustomRecordFragment {
             }
         });
 
-        return view;
+        saveButton = view.findViewById(R.id.saveTransferButton);
+        saveButton.setOnClickListener(saveButtonClickListener);
+
+        checkCallingIntent();
+    }
+
+    private void checkCallingIntent()
+    {
+        Intent intent = getActivity().getIntent();
+        transactionId = intent.getIntExtra("transactionId", -1);
+
+        if(transactionId != -1)
+        {
+            DatabaseManager databaseManager = new DatabaseManager(getContext());
+            transaction = databaseManager.getCurrencyTransactionById(transactionId);
+
+            if(transaction.getType().equals("t"))
+            {
+                fillFields();
+            }
+        }
+    }
+
+    private void fillFields()
+    {
+        amountEditText.setText(String.valueOf(transaction.getAmount()));
+        //Fill other fields
+    }
+
+    private void setupSpinnesr()
+    {
+        ArrayAdapter<String> fromAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.from_transfer_options_string_array));
+        fromAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        fromSpinner.setAdapter(fromAdapter);
+
+        ArrayAdapter<String> toAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.to_transfer_options_string_array));
+        toAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        toSpinner.setAdapter(toAdapter);
+
+        ArrayAdapter<String> feeAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.fees_options));
+        feeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        feeSpinner.setAdapter(feeAdapter);
+
+        fromSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                Drawable backgroundDrawableFrom = fromSpinner.getBackground();
+                backgroundDrawableFrom.mutate();
+                backgroundDrawableFrom.setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.separationColor), PorterDuff.Mode.SRC_ATOP));
+                backgroundDrawableFrom.invalidateSelf();
+
+                view.findViewById(R.id.errorLayouts).setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        toSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                Drawable backgroundDrawableTo = toSpinner.getBackground();
+                backgroundDrawableTo.mutate();
+                backgroundDrawableTo.setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.separationColor), PorterDuff.Mode.SRC_ATOP));
+                backgroundDrawableTo.invalidateSelf();
+
+                view.findViewById(R.id.errorLayouts).setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    private double getFees()
+    {
+        double fees = 0;
+
+        if(!feesEditText.getText().toString().equals(""))
+        {
+            fees = Double.parseDouble(feesEditText.getText().toString());
+        }
+
+        return fees;
+    }
+
+    private boolean isTransactionPossible()
+    {
+        Set<Integer> conflictFrom = new HashSet<>(Arrays.asList(2, 3, 4, 5, 6));
+        Set<Integer> conflictTo = new HashSet<>(Arrays.asList(2, 3));
+
+        return !(conflictFrom.contains(fromSpinner.getSelectedItemPosition()) && conflictTo.contains(toSpinner.getSelectedItemPosition()));
+    }
+
+    private String getDestination()
+    {
+        String destination = "";
+
+        switch (toSpinner.getSelectedItemPosition())
+        {
+            case 0:
+                destination = EXCHANGE_CODE;
+                break;
+            case 1:
+                destination = WALLET_CODE;
+                break;
+            case 2:
+                destination = ELSE_WALLET_CODE;
+                break;
+            case 3:
+                destination = UNKNOWN_CODE;
+                break;
+        }
+
+        return destination;
+    }
+
+    private String getSource()
+    {
+        String source = "";
+
+        switch (fromSpinner.getSelectedItemPosition())
+        {
+            case 0:
+                source = EXCHANGE_CODE;
+                break;
+            case 1:
+                source = WALLET_CODE;
+                break;
+            case 2:
+                source = MINING_CODE;
+                break;
+            case 3:
+                source = ELSE_WALLET_CODE;
+                break;
+            case 4:
+                source = AIRDROP_CODE;
+                break;
+            case 5:
+                source = UNKNOWN_CODE;
+                break;
+            case 6:
+                source = FORK_CODE;
+                break;
+        }
+
+        return source;
+    }
+
+    private boolean isFieldCorrectlyFilled(TextInputEditText editText, boolean displayError)
+    {
+        String purchasedPriceText = editText.getText().toString();
+        double purchasedPrice;
+
+        try {
+            purchasedPrice = Double.parseDouble(purchasedPriceText);
+
+            if(purchasedPrice < 0)
+            {
+                if(displayError) editText.setError(getResources().getString(R.string.field_negative));
+
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            if(displayError) editText.setError(getResources().getString(R.string.field_nan));
+
+            return false;
+        }
+
+        if(purchasedPriceText.equals(""))
+        {
+            if(displayError) editText.setError(getResources().getString(R.string.field_empty));
+
+            return false;
+        }
+
+        return true;
     }
 
     private void createDatePicker()
@@ -114,7 +374,7 @@ public class TransferFragment extends CustomRecordFragment {
 
     @Override
     public void onExchangeUpdated() {
-
+        fragmentExchange = exchange;
     }
 
     @Override
