@@ -69,7 +69,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        view = inflater.inflate(R.layout.fragment_watchlist_homeactivity, container, false);
+        view = inflater.inflate(R.layout.homeactivity_fragment_watchlist, container, false);
 
         refreshLayout = view.findViewById(R.id.swiperefreshwatchlist);
         dragLinearLayout = view.findViewById(R.id.linearLayoutWatchlist);

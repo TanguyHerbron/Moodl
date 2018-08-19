@@ -79,7 +79,7 @@ public class BalanceManager implements BinanceUpdateNotifierInterface, HitBTCUpd
         
         balanceCounter = 0;
 
-        manualBalances = databaseManager.getAllCurrenciesFromManualCurrency();
+        manualBalances = databaseManager.getAllCurrenciesFromTransactions();
 
         if(binanceManagers.size() > 0)
         {

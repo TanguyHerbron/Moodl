@@ -139,7 +139,7 @@ public class BuyFragment extends CustomRecordFragment {
         context = getActivity().getApplicationContext();
 
         calendar = Calendar.getInstance();
-        sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.UK);
+        sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.UK);
 
         preferenceManager = new PreferencesManager(getContext());
 
@@ -243,6 +243,7 @@ public class BuyFragment extends CustomRecordFragment {
                                 , note
                                 , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom()
                                 , feeCurrency
+                                , ""
                                 , fragmentExchange.getName()
                                 , "b"
                                 , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
@@ -261,8 +262,9 @@ public class BuyFragment extends CustomRecordFragment {
                                 , note
                                 , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom()
                                 , feeCurrency
+                                , ""
                                 , fragmentExchange.getName()
-                                , "b"
+                                ,"b"
                                 , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
                     }
 
@@ -378,13 +380,9 @@ public class BuyFragment extends CustomRecordFragment {
 
     private double getFees(String feeCurrency, double amount, double purchasedPrice)
     {
-        double fees;
+        double fees = 0;
 
-        if(fees_editText.getText().toString().equals(""))
-        {
-            fees = 0;
-        }
-        else
+        if(!fees_editText.getText().toString().equals(""))
         {
             fees = Double.parseDouble(fees_editText.getText().toString());
 
@@ -533,11 +531,6 @@ public class BuyFragment extends CustomRecordFragment {
                 updatePair(fragmentPair);
             }
         });
-
-        if(preferenceManager == null)
-        {
-            preferenceManager = new PreferencesManager(getSecureContext());
-        }
 
         if(calendar == null)
         {

@@ -139,7 +139,7 @@ public class SellFragment extends CustomRecordFragment {
         context = getActivity().getApplicationContext();
 
         calendar = Calendar.getInstance();
-        sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.UK);
+        sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.UK);
 
         preferenceManager = new PreferencesManager(getContext());
 
@@ -215,6 +215,7 @@ public class SellFragment extends CustomRecordFragment {
                                 , note
                                 , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom()
                                 , feeCurrency
+                                , ""
                                 , fragmentExchange.getName()
                                 , "s"
                                 , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
@@ -233,8 +234,9 @@ public class SellFragment extends CustomRecordFragment {
                                 , note
                                 , fragmentPair.getFrom().equals(fragmentCurrency.getSymbol()) ? fragmentPair.getTo() : fragmentPair.getFrom()
                                 , feeCurrency
+                                , ""
                                 , fragmentExchange.getName()
-                                , "s"
+                                ,"s"
                                 , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
                     }
 
@@ -350,13 +352,9 @@ public class SellFragment extends CustomRecordFragment {
 
     private double getFees(String feeCurrency, double amount, double purchasedPrice)
     {
-        double fees;
+        double fees = 0;
 
-        if(fees_editText.getText().toString().equals(""))
-        {
-            fees = 0;
-        }
-        else
+        if(!fees_editText.getText().toString().equals(""))
         {
             fees = Double.parseDouble(fees_editText.getText().toString());
 

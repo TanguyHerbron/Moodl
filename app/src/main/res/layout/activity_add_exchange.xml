@@ -55,7 +55,7 @@
                 android:layout_marginEnd="12dp"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="12dp"
-                android:background="@drawable/spinner_background"
+                android:background="@drawable/spinner_background_header"
                 android:gravity="center"
                 android:textSize="18sp" />
 
