@@ -15,9 +15,9 @@
     <string name="pref_title_enable_synchronization_gdax">Activer la synchronisation</string>
     <string name="pref_title_gdax_publickey">Clé public</string>
     <string name="pref_title_gdax_privatekey">Clé privée</string>
-    <string name="activity_add_amount">Montant</string>
-    <string name="activity_purchased_price">Prix d\'achat</string>
-    <string name="activity_purchased_date">Date d\'achat</string>
+    <string name="activity_amount">Montant</string>
+    <string name="activity_purchase_price">Prix d\'achat</string>
+    <string name="activity_purchase_date">Date d\'achat</string>
     <string name="activity_fees">Frais</string>
     <string name="title_history">Historique</string>
     <string name="title_infos">Informations</string>
@@ -116,6 +116,29 @@
         <item>6 mois</item>
         <item>1 année</item>
     </string-array>
+
+    <string-array name="from_transfer_options_string_array">
+        <item>Site d'échange</item>
+        <item>Mon portefeuille</item>
+        <item>Minage</item>
+        <item>Le portefeuille de quelqu'un d'autre</item>
+        <item>Airdrop</item>
+        <item>Autre / Inconnu</item>
+        <item>Fork</item>
+    </string-array>
+
+    <string-array name="to_transfer_options_string_array">
+        <item>Site d'échange</item>
+        <item>Mon portefeuille</item>
+        <item>Le portefeuille de quelqu'un d'autre</item>
+        <item>Autre / Inconnu</item>
+    </string-array>
+
+    <string-array name="fees_options">
+        <item>Pourcentage</item>
+        <item>Fixe</item>
+    </string-array>
+
     <string name="emitedPlaceholder">Pourcentage de coin émis : %1$s%%</string>
     <string name="edit_transaction">Edition d\'une transaction de %1$s</string>
     <string name="new_transaction">Nouvelle transaction</string>
@@ -139,4 +162,28 @@
     <string name="wipe_manual_entries">Supprimer les entrées manuelles actuelles</string>
     <string name="wipe_watchlist">Supprimer la liste suivie actuelle</string>
     <string name="wipe_api_keys">Supprimer les clefs API actuelles</string>
+    <string name="title_add_exchange">Choose an exchange</string>
+    <string name="title_activity_exchange_list">Comptes synchronisés</string>
+    <string name="account_label">Nom du compte</string>
+    <string name="publicKey">Clé publique</string>
+    <string name="apiKey">Clé API</string>
+    <string name="secretKey">Clé secrète</string>
+    <string name="informations">Informations</string>
+    <string name="title_choose_coin">Choisir une monnaie</string>
+    <string name="exchange">Échange</string>
+    <string name="pair">Paire</string>
+    <string name="total_value">Valeur totale</string>
+    <string name="notes">Notes</string>
+    <string name="select_exchange">Sélectionner un échange</string>
+    <string name="select_pair">Paire</string>
+    <string name="total_portfolio_value">Valeur totale :</string>
+
+    <string name="fixedFee">Pourcentage de %1$s</string>
+    <string name="percentageFee">%1$s fixe</string>
+    <string name="activity_sell_price">Prix de vente</string>
+    <string name="activity_sell_date">Date de vente</string>
+    <string name="activity_transfert_date">Date de transfert</string>
+    <string name="error_no_valid_from_to">Cette transaction n\'est pas valide</string>
+    <string name="deductFromHoldings">Déduire des avoirs</string>
+    <string name="addToHoldings">Ajouter aux avoirs</string>
 </resources>

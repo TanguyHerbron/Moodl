@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mainLinear"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,7 +27,8 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ic_drag_handle_24dp"
+                app:srcCompat="@drawable/ic_drag_handle_24dp"
+                android:background="@color/transparent"
                 android:clickable="false"
                 android:focusable="false"/>
 
@@ -60,7 +62,7 @@
                     android:layout_gravity="center_vertical"
                     android:gravity="start"
                     android:textColor="@color/mainTextViewColor"
-                    android:textSize="@dimen/cardViewMainText" />
+                    android:textSize="@dimen/cardViewTitle" />
 
                 <TextView
                     android:id="@+id/currencySymbolTextView"
@@ -70,7 +72,7 @@
                     android:layout_marginLeft="2dp"
                     android:gravity="left"
                     android:textColor="@color/secondaryTextViewColor"
-                    android:textSize="@dimen/cardViewSecondaryText" />
+                    android:textSize="@dimen/cardViewCaption" />
 
             </LinearLayout>
 
@@ -86,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:textColor="@color/secondaryTextViewColor"
-                    android:textSize="@dimen/cardViewMainText"
+                    android:textSize="@dimen/cardViewTitle"
                     android:layout_weight="0.5"/>
 
                 <LinearLayout
@@ -101,13 +103,13 @@
                         android:id="@+id/currencyFluctuationPercentageTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/cardViewMainText" />
+                        android:textSize="@dimen/cardViewTitle" />
 
                     <TextView
                         android:id="@+id/currencyFluctuationTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/cardViewSecondaryText" />
+                        android:textSize="@dimen/cardViewCaption" />
 
                 </LinearLayout>
 
@@ -129,7 +131,8 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ic_delete_white_24dp"
+                app:srcCompat="@drawable/ic_delete_white_24dp"
+                android:background="@color/transparent"
                 android:clickable="false"
                 android:focusable="false"/>
 
@@ -154,7 +157,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/day_history"
-                android:textSize="@dimen/cardViewSecondaryText" />
+                android:textSize="@dimen/cardViewCaption" />
 
             <View
                 android:layout_width="match_parent"
@@ -186,7 +189,7 @@
                 android:visibility="visible"/>
 
             <FrameLayout
-                android:id="@+id/linearLayoutSubLayout"
+                android:id="@+id/linearLayoutSubCharts"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clickable="true"
@@ -202,7 +205,8 @@
                     android:id="@+id/detailsArrow"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_keyboard_arrow_right_grey_48dp"
+                    app:srcCompat="@drawable/ic_keyboard_arrow_right_grey_48dp"
+                    android:background="@color/transparent"
                     android:layout_gravity="center_vertical|end"/>
 
             </FrameLayout>

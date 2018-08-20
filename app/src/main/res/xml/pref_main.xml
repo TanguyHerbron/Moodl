@@ -39,7 +39,6 @@
         android:title="@string/pref_title_category_synchronization">
 
         <PreferenceScreen
-            android:fragment="com.herbron.moodl.Activities.SettingsActivity$ExchangePreferenceFragment"
             android:title="@string/pref_header_exchange"
             android:key="exchange"/>
 

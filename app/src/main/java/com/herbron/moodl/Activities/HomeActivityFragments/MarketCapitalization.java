@@ -27,19 +27,19 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.herbron.moodl.Activities.HomeActivity;
-import com.herbron.moodl.DataManagers.BalanceManager;
+import com.herbron.moodl.DataNotifiers.CoinmarketcapNotifierInterface;
+import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
-import com.herbron.moodl.DataManagers.MarketCapManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CoinmarketCapAPIManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.LayoutManagers.CustomPieChart;
+import com.herbron.moodl.CustomLayouts.CustomPieChart;
 import com.herbron.moodl.MoodlBox;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.getColor;
@@ -49,15 +49,14 @@ import static java.lang.Math.abs;
  * Created by Tiji on 13/04/2018.
  */
 
-public class MarketCapitalization extends Fragment {
+public class MarketCapitalization extends Fragment implements CryptocompareNotifierInterface, CoinmarketcapNotifierInterface {
 
     private PreferencesManager preferencesManager;
-    private MarketCapManager marketCapManager;
-    private HashMap<String, Integer> dominantCurrenciesColors;
+    private CoinmarketCapAPIManager coinmarketCapAPIManager;
     private SwipeRefreshLayout refreshLayout;
     private long lastTimestamp;
     private String defaultCurrency;
-    private CurrencyDetailsList currencyDetailsList;
+    private CryptocompareApiManager cryptocompareApiManager;
     private boolean isDetailsUpdated;
     private boolean isTopCurrenciesUpdated;
     private boolean isMarketpCapUpdated;
@@ -68,22 +67,18 @@ public class MarketCapitalization extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        view = inflater.inflate(R.layout.fragment_marketcap_homeactivity, container, false);
+        view = inflater.inflate(R.layout.homeactivity_fragment_marketcap, container, false);
 
-        preferencesManager = new PreferencesManager(getContext());
-        marketCapManager = new MarketCapManager(getContext());
+        preferencesManager = new PreferencesManager(getActivity().getBaseContext());
+        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity().getBaseContext());
+        coinmarketCapAPIManager.addListener(this);
 
-        currencyDetailsList = CurrencyDetailsList.getInstance(getContext());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getActivity().getBaseContext());
+        cryptocompareApiManager.addListener(this);
 
-        if(!currencyDetailsList.isUpToDate())
+        if(!cryptocompareApiManager.isDetailsUpToDate())
         {
-            currencyDetailsList.update(new BalanceManager.IconCallBack() {
-                @Override
-                public void onSuccess() {
-                    isDetailsUpdated = true;
-                    countCompletedMarketCapRequest();
-                }
-            });
+            cryptocompareApiManager.updateDetails();
         }
         else
         {
@@ -152,7 +147,6 @@ public class MarketCapitalization extends Fragment {
         {
             updateMarketCap(false);
         }
-
     }
 
     private void updateMarketCap(boolean mustUpdate)
@@ -171,22 +165,9 @@ public class MarketCapitalization extends Fragment {
 
             lastTimestamp = System.currentTimeMillis() / 1000;
 
-            marketCapManager.updateTopCurrencies(new MarketCapManager.VolleyCallBack() {
-                @Override
-                public void onSuccess()
-                {
-                    isTopCurrenciesUpdated = true;
-                    countCompletedMarketCapRequest();
-                }
-            }, preferencesManager.getDefaultCurrency());
+            coinmarketCapAPIManager.updateTopCurrencies(preferencesManager.getDefaultCurrency());
 
-            marketCapManager.updateMarketCap(new MarketCapManager.VolleyCallBack() {
-                @Override
-                public void onSuccess() {
-                    isMarketpCapUpdated = true;
-                    countCompletedMarketCapRequest();
-                }
-            }, preferencesManager.getDefaultCurrency());
+            coinmarketCapAPIManager.updateMarketCap(preferencesManager.getDefaultCurrency());
         }
         else
         {
@@ -217,14 +198,14 @@ public class MarketCapitalization extends Fragment {
     private PieDataSet getMarketDominanceDataSet()
     {
         List<PieEntry> entries = new ArrayList<>();
-        List<Currency> topCurrencies = marketCapManager.getTopCurrencies();
+        List<Currency> topCurrencies = coinmarketCapAPIManager.getTopCurrencies();
         ArrayList<Integer> colors = new ArrayList<>();
 
         float topCurrenciesDominance = 0;
 
         for(int i = 0; i < topCurrencies.size(); i++)
         {
-            PieEntry pieEntry = new PieEntry(topCurrencies.get(i).getDominance(marketCapManager.getMarketCap()), topCurrencies.get(i).getSymbol(), topCurrencies.get(i).getSymbol());
+            PieEntry pieEntry = new PieEntry(topCurrencies.get(i).getDominance(coinmarketCapAPIManager.getMarketCap()), topCurrencies.get(i).getSymbol(), topCurrencies.get(i).getSymbol());
 
             if(pieEntry.getValue() < 3)
             {
@@ -232,7 +213,7 @@ public class MarketCapitalization extends Fragment {
             }
 
             entries.add(pieEntry);
-            topCurrenciesDominance += topCurrencies.get(i).getDominance(marketCapManager.getMarketCap());
+            topCurrenciesDominance += topCurrencies.get(i).getDominance(coinmarketCapAPIManager.getMarketCap());
             colors.add(topCurrencies.get(i).getChartColor());
         }
 
@@ -260,7 +241,7 @@ public class MarketCapitalization extends Fragment {
     {
         iconCounter++;
 
-        if(iconCounter >= marketCapManager.getTopCurrencies().size())
+        if(iconCounter >= coinmarketCapAPIManager.getTopCurrencies().size())
         {
             refreshDisplayedData();
         }
@@ -268,24 +249,25 @@ public class MarketCapitalization extends Fragment {
 
     private void updateIcons()
     {
-        for(int i = 0; i < marketCapManager.getTopCurrencies().size(); i++)
+        for(int i = 0; i < coinmarketCapAPIManager.getTopCurrencies().size(); i++)
         {
-            final Currency localCurrency = marketCapManager.getTopCurrencies().get(i);
+            final Currency localCurrency = coinmarketCapAPIManager.getTopCurrencies().get(i);
             final int index = i;
 
-            String iconUrl = MoodlBox.getIconUrl(marketCapManager.getTopCurrencies().get(i).getSymbol(), 500, currencyDetailsList);
+            String iconUrl = MoodlBox.getIconUrl(coinmarketCapAPIManager.getTopCurrencies().get(i).getSymbol(), 500, cryptocompareApiManager);
 
             if(iconUrl != null)
             {
-                MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
+                MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
                     @Override
-                    public void onSuccess(Bitmap bitmapIcon) {
+                    public void onBitmapDownloaded(Bitmap bitmapIcon) {
                         Palette.Builder builder = Palette.from(bitmapIcon);
 
-                        marketCapManager.getTopCurrencies().get(index).setIcon(bitmapIcon);
-                        marketCapManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
+                        coinmarketCapAPIManager.getTopCurrencies().get(index).setIcon(bitmapIcon);
+                        coinmarketCapAPIManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
 
                         countIcons();
+
                     }
                 });
             }
@@ -310,11 +292,11 @@ public class MarketCapitalization extends Fragment {
         pieChart.setTouchEnabled(true);
         pieChart.setEntryLabelColor(Color.WHITE);
 
-        updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), getString(R.string.global), 0);
+        updateDetails(coinmarketCapAPIManager.getMarketCap(), coinmarketCapAPIManager.getDayVolume(), getString(R.string.global), 0);
         ((TextView) view.findViewById(R.id.textViewActiveCrypto))
-                .setText(marketCapManager.getActive_crypto());
+                .setText(coinmarketCapAPIManager.getActive_crypto());
         ((TextView) view.findViewById(R.id.textViewActiveMarkets))
-                .setText(marketCapManager.getActive_markets());
+                .setText(coinmarketCapAPIManager.getActive_markets());
 
         pieChart.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -349,7 +331,7 @@ public class MarketCapitalization extends Fragment {
 
                         if(!e.getData().equals("others"))
                         {
-                            Currency currency = marketCapManager.getCurrencyFromSymbol((String) e.getData());
+                            Currency currency = coinmarketCapAPIManager.getCurrencyFromSymbol((String) e.getData());
                             view.findViewById(R.id.currencyIcon).setVisibility(View.VISIBLE);
                             view.findViewById(R.id.layoutPercentageDominance).setVisibility(View.VISIBLE);
 
@@ -362,13 +344,13 @@ public class MarketCapitalization extends Fragment {
                         }
                         else
                         {
-                            double othersMarketCap = marketCapManager.getMarketCap();
-                            double othersVolume = marketCapManager.getDayVolume();
+                            double othersMarketCap = coinmarketCapAPIManager.getMarketCap();
+                            double othersVolume = coinmarketCapAPIManager.getDayVolume();
 
-                            for(int i = 0; i < marketCapManager.getTopCurrencies().size(); i++)
+                            for(int i = 0; i < coinmarketCapAPIManager.getTopCurrencies().size(); i++)
                             {
-                                othersMarketCap -= marketCapManager.getTopCurrencies().get(i).getMarketCapitalization();
-                                othersVolume -= marketCapManager.getTopCurrencies().get(i).getVolume24h();
+                                othersMarketCap -= coinmarketCapAPIManager.getTopCurrencies().get(i).getMarketCapitalization();
+                                othersVolume -= coinmarketCapAPIManager.getTopCurrencies().get(i).getVolume24h();
                             }
 
                             view.findViewById(R.id.currencyIcon).setVisibility(View.GONE);
@@ -390,7 +372,7 @@ public class MarketCapitalization extends Fragment {
                 view.findViewById(R.id.layoutActiveCrypto).setVisibility(View.VISIBLE);
                 view.findViewById(R.id.layoutActiveMarkets).setVisibility(View.VISIBLE);
 
-                updateDetails(marketCapManager.getMarketCap(), marketCapManager.getDayVolume(), getString(R.string.global), 0);
+                updateDetails(coinmarketCapAPIManager.getMarketCap(), coinmarketCapAPIManager.getDayVolume(), getString(R.string.global), 0);
 
                 pieChart.setDrawCenterText(true);
             }
@@ -405,18 +387,51 @@ public class MarketCapitalization extends Fragment {
     private void updateDetails(double marketCap, double volume, String title, double percentage)
     {
         ((TextView) view.findViewById(R.id.textViewMarketCap))
-                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(marketCap), getContext()));
+                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(marketCap), getActivity().getBaseContext()));
         ((TextView) view.findViewById(R.id.textViewVolume))
-                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(volume), getContext()));
+                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(volume), getActivity().getBaseContext()));
         ((TextView) view.findViewById(R.id.textViewTitle))
                 .setText(title);
         ((TextView) view.findViewById(R.id.textViewDominancePercentage))
-                .setText(PlaceholderManager.getPercentageString(MoodlBox.numberConformer(percentage), getContext()));
+                .setText(PlaceholderManager.getPercentageString(MoodlBox.numberConformer(percentage), getActivity().getBaseContext()));
     }
 
     private SpannableString generateCenterSpannableText() {
 
         SpannableString spannableString = new SpannableString(getString(R.string.market_dominance));
         return spannableString;
+    }
+
+    @Override
+    public void onDetailsUpdated() {
+        isDetailsUpdated = true;
+        countCompletedMarketCapRequest();
+    }
+
+    @Override
+    public void onExchangesUpdated() {
+
+    }
+
+    @Override
+    public void onCurrenciesRetrieved(List<Currency> currencyList) {
+
+    }
+
+    @Override
+    public void onTopCurrenciesUpdated() {
+        isTopCurrenciesUpdated = true;
+        countCompletedMarketCapRequest();
+    }
+
+    @Override
+    public void onMarketCapUpdated() {
+        isMarketpCapUpdated = true;
+        countCompletedMarketCapRequest();
+    }
+
+    @Override
+    public void onListingUpdated() {
+
     }
 }

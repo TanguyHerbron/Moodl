@@ -126,9 +126,9 @@
     <string name="pref_title_exchange_kraken" translatable="false">Kraken</string>
 
     <!--Add transaction activity-->
-    <string name="activity_add_amount">Amount</string>
-    <string name="activity_purchased_price">Purchased price</string>
-    <string name="activity_purchased_date">Purchased date</string>
+    <string name="activity_amount">Amount</string>
+    <string name="activity_purchase_price">Purchase price</string>
+    <string name="activity_purchase_date">Purchase date</string>
     <string name="activity_fees">Fees</string>
     <string name="title_activity_currency_details" translatable="false">CurrencyDetailsActivity</string>
     <string name="title_history">History charts</string>
@@ -157,6 +157,28 @@
         <item>API keys</item>
     </string-array>
 
+    <string-array name="from_transfer_options_string_array">
+        <item>Exchange</item>
+        <item>My wallet</item>
+        <item>Mining</item>
+        <item>Someone else\'s wallet</item>
+        <item>Airdrop</item>
+        <item>Other / Unknown</item>
+        <item>Fork</item>
+    </string-array>
+
+    <string-array name="to_transfer_options_string_array">
+        <item>Exchange</item>
+        <item>My wallet</item>
+        <item>Someone else\'s wallet</item>
+        <item>Other / Unknown</item>
+    </string-array>
+
+    <string-array name="fees_options">
+        <item>Percentage</item>
+        <item>Fixed</item>
+    </string-array>
+
     <!--Cardview placeholders-->
     <string name="currencySymbolPlaceholder" translatable="false">(%1$s)</string>
     <string name="currencyBalancePlaceholder" translatable="false">%1$s%2$s</string>
@@ -177,6 +199,9 @@
     <string name="currencyYenParenthesisPlaceholder" translatable="false">(%1$s¥)</string>
     <string name="currencyYenPlaceholder" translatable="false">%1$s¥</string>
     <string name="fluctuationYenPercentagePlaceholder" translatable="false">%1$s¥ (%2$s%%)</string>
+
+    <string name="denomincationPlaceholder" translatable="false">%1$s (%2$s)</string>
+    <string name="pairPlaceholder" translatable="false">%1$s/%2$s</string>
 
     <!--DetailsActivity placeholders-->
     <string name="timestampPlaceholder">Date\n%1$s</string>
@@ -249,5 +274,30 @@
     <string name="wipe_manual_entries">Wipe current entries</string>
     <string name="wipe_watchlist">Wipe current watchlist</string>
     <string name="wipe_api_keys">Wipe current API keys</string>
+    <string name="title_activity_exchange_list">Synced accounts</string>
+    <string name="title_add_exchange">Choose an exchange</string>
+    <string name="account_label">Account label</string>
+    <string name="publicKey">Public key</string>
+    <string name="apiKey">API Key</string>
+    <string name="secretKey">Secret Key</string>
+    <string name="informations">Informations</string>
+    <string name="title_choose_coin">Choose a coin</string>
+
+    <string name="exchange">Exchange</string>
+    <string name="pair">Pair</string>
+    <string name="total_value">Total value</string>
+    <string name="notes">Notes</string>
+    <string name="select_exchange">Select an exchange</string>
+    <string name="select_pair">Pair</string>
+    <string name="total_portfolio_value">Total portfolio value :</string>
+
+    <string name="fixedFee">%1$s percentage</string>
+    <string name="percentageFee">%1$s fixed</string>
+    <string name="activity_sell_price">Sell price</string>
+    <string name="activity_sell_date">Sell date</string>
+    <string name="activity_transfert_date">Date of transfer</string>
+    <string name="error_no_valid_from_to">This transaction is not valid</string>
+    <string name="deductFromHoldings">Deduct from holdings</string>
+    <string name="addToHoldings">Add to holdings</string>
 
 </resources>

@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -33,22 +32,25 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.daasuu.ei.Ease;
 import com.daasuu.ei.EasingInterpolator;
-import com.herbron.moodl.Activities.CurrencySelectionActivity;
-import com.herbron.moodl.Activities.HomeActivity;
+import com.herbron.moodl.Activities.RecordTransactionActivity;
 import com.herbron.moodl.BalanceUpdateInterface;
+import com.herbron.moodl.DataNotifiers.CoinmarketcapNotifierInterface;
+import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.BalanceManager;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyCardview;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyTickerList;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CoinmarketCapAPIManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.BalanceSwitchManagerInterface;
-import com.herbron.moodl.DataNotifierInterface;
+import com.herbron.moodl.DataNotifiers.BalanceUpdateNotifierInterface;
 import com.herbron.moodl.MoodlBox;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
 
@@ -66,7 +68,7 @@ import static java.lang.Math.abs;
  * Created by Tiji on 13/04/2018.
  */
 
-public class Summary extends Fragment implements BalanceSwitchManagerInterface, DataNotifierInterface {
+public class Summary extends Fragment implements BalanceSwitchManagerInterface, BalanceUpdateNotifierInterface, CryptocompareNotifierInterface, CoinmarketcapNotifierInterface {
 
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
@@ -74,7 +76,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
     private String defaultCurrency;
-    private CurrencyTickerList currencyTickerList;
+    private CoinmarketCapAPIManager coinmarketCapAPIManager;
 
     private TextView toolbarSubtitle;
     private CollapsingToolbarLayout toolbarLayout;
@@ -92,16 +94,18 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     private long lastTimestamp;
 
     private BalanceUpdateInterface balanceUpdateInterface;
+    private CryptocompareApiManager cryptocompareApiManager;
 
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        View fragmentView = inflater.inflate(R.layout.fragment_summary_homeactivity, container, false);
+        View fragmentView = inflater.inflate(R.layout.homeactivity_fragment_summary, container, false);
 
         preferencesManager = new PreferencesManager(getActivity());
-        balanceManager = new BalanceManager(getContext());
-        currencyTickerList = CurrencyTickerList.getInstance(getActivity());
+        balanceManager = new BalanceManager(getActivity());
+        coinmarketCapAPIManager = CoinmarketCapAPIManager.getInstance(getActivity());
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(getActivity());
 
         currencyLayout = fragmentView.findViewById(R.id.currencyListLayout);
         refreshLayout = fragmentView.findViewById(R.id.swiperefreshsummary);
@@ -112,6 +116,9 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         setListener((BalanceUpdateInterface) getActivity());
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
+
+        cryptocompareApiManager.addListener(this);
+        coinmarketCapAPIManager.addListener(this);
 
         handler = new Handler();
 
@@ -180,6 +187,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     refreshLayout.setRefreshing(false);
 
                     showErrorSnackbar();
+                    Log.d("moodl", "Error > Refresh out of time");
                 }
 
                 if (loadingDialog.isShowing())
@@ -187,6 +195,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     loadingDialog.dismiss();
 
                     showErrorSnackbar();
+                    Log.d("moodl", "Error > Refresh out of time");
                 }
             }
         };
@@ -197,7 +206,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         layoutRefresherRunnable = new Runnable() {
             @Override
             public void run() {
-                final List<View> currencyView = new ArrayList<>();
                 final List<Currency> renderedCurrencies = new ArrayList<>();
 
                 if (balanceManager.getTotalBalance() != null)
@@ -205,7 +213,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
                         final Currency currency = balanceManager.getTotalBalance().get(i);
 
-                        if (!currency.getSymbol().equals("USD") && ((currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
+                        if (!currency.getSymbol().equals("USD") && (Math.abs(currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
                             //currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
                             renderedCurrencies.add(currency);
                         }
@@ -220,7 +228,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                         for(int i = 0; i < renderedCurrencies.size(); i++)
                         {
                             //currencyLayout.addView(currencyView.get(i));
-                            currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), totalValue, preferencesManager.isBalanceHidden()));
+                            currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), getActivity(), totalValue, preferencesManager.isBalanceHidden()));
                         }
 
                         if(loadingDialog.isShowing())
@@ -242,7 +250,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         addCurrencyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent addIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
+                Intent addIntent = new Intent(getActivity(), RecordTransactionActivity.class);
 
                 startActivity(addIntent);
             }
@@ -255,10 +263,10 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
         Random random = new Random();
 
-        LinearLayout splashLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.splash_screen, null, true);
+        LinearLayout splashLayout = (LinearLayout) LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.splash_screen, null, true);
         LinearLayout animatedLayout = splashLayout.findViewById(R.id.animatedViewsLayout);
 
-        File cacheDir = new File(getContext().getCacheDir().getAbsolutePath());
+        File cacheDir = new File(getActivity().getBaseContext().getCacheDir().getAbsolutePath());
         File[] cacheFiles = cacheDir.listFiles();
 
         if(cacheFiles.length > 4)
@@ -278,7 +286,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
                 Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
-                paint.setColor(ContextCompat.getColor(getContext(), R.color.white));
+                paint.setColor(ContextCompat.getColor(getActivity().getBaseContext(), R.color.white));
 
                 Canvas canvas = new Canvas(result);
                 canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
@@ -333,7 +341,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             }
 
             lastTimestamp = System.currentTimeMillis() / 1000;
-            balanceManager.updateExchangeKeys();
 
             resetCounters();
             DataUpdater updater = new DataUpdater();
@@ -543,16 +550,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     }
 
     @Override
-    public void onTickerListUpdated() {
-
-    }
-
-    @Override
-    public void onDetailsUpdated() {
-
-    }
-
-    @Override
     public void onBalanceDataUpdated() {
         final List<Currency> balance = balanceManager.getTotalBalance();
 
@@ -560,10 +557,21 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         {
             for(int i = 0; i < balance.size(); i++)
             {
-                balance.get(i).updatePrice(getActivity(), defaultCurrency, new Currency.CurrencyCallBack() {
+                balance.get(i).updatePrice(getActivity(), defaultCurrency, new CurrencyInfoUpdateNotifierInterface() {
                     @Override
-                    public void onSuccess(Currency currency) {
+                    public void onTimestampPriceUpdated(String price) {
+
+                    }
+
+                    @Override
+                    public void onHistoryDataUpdated() {
+
+                    }
+
+                    @Override
+                    public void onPriceUpdated(Currency currency) {
                         countCoins(true, false, false);
+
                     }
                 });
             }
@@ -582,7 +590,12 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     @Override
     public void onBalanceError(String error)
     {
-        generateSnackBarError(error);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                generateSnackBarError(error);
+            }
+        });
     }
 
     private void generateSnackBarError(String error)
@@ -623,6 +636,36 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             }
     }
 
+    @Override
+    public void onDetailsUpdated() {
+        countCoins(false, true, false);
+    }
+
+    @Override
+    public void onExchangesUpdated() {
+
+    }
+
+    @Override
+    public void onCurrenciesRetrieved(List<Currency> currencyList) {
+
+    }
+
+    @Override
+    public void onTopCurrenciesUpdated() {
+
+    }
+
+    @Override
+    public void onMarketCapUpdated() {
+
+    }
+
+    @Override
+    public void onListingUpdated() {
+        countCoins(false, false, true);
+    }
+
     private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
     {
 
@@ -647,11 +690,11 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 Palette.Builder builder = Palette.from(currency.getIcon());
 
-                currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getContext())));
+                currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
             }
             else
             {
-                currency.setChartColor(getColor(R.color.default_color, getContext()));
+                currency.setChartColor(getColor(R.color.default_color, getActivity().getBaseContext()));
             }
         }
 
@@ -680,7 +723,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                localCurrency.setTickerId(currencyTickerList.getTickerIdForSymbol(localCurrency.getSymbol()));
+                localCurrency.setTickerId(coinmarketCapAPIManager.getTickerIdForSymbol(localCurrency.getSymbol()));
 
                 updateChartColor(localCurrency);
 
@@ -764,13 +807,13 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 final Currency localCurrency = balanceManager.getTotalBalance().get(i);
 
-                String iconUrl = MoodlBox.getIconUrl(localCurrency.getSymbol(), balanceManager.getCurrencyDetailList());
+                String iconUrl = MoodlBox.getIconUrl(localCurrency.getSymbol(), balanceManager.getCryptocompareApiManager());
 
                 if(iconUrl != null)
                 {
-                    MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getContext(), new HomeActivity.IconCallBack() {
+                    MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
                         @Override
-                        public void onSuccess(Bitmap bitmapIcon) {
+                        public void onBitmapDownloaded(Bitmap bitmapIcon) {
                             localCurrency.setIcon(bitmapIcon);
                             countIcons();
                         }
@@ -778,7 +821,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                 }
                 else
                 {
-                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getContext());
+                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getActivity().getBaseContext());
 
                     Bitmap icon = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
 
@@ -803,27 +846,23 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         @Override
         protected Void doInBackground(Void... params)
         {
-            if(!currencyTickerList.isUpToDate())
+            if(!coinmarketCapAPIManager.isUpToDate())
             {
-                currencyTickerList.updateListing(new com.herbron.moodl.DataManagers.BalanceManager.IconCallBack() {
-                    @Override
-                    public void onSuccess() {
-                        countCoins(false, false, true);
-                    }
-                });
+                coinmarketCapAPIManager.updateListing();
             }
             else
             {
                 countCoins(false, false, true);
             }
 
-            balanceManager.updateDetails(new com.herbron.moodl.DataManagers.BalanceManager.IconCallBack() {
-                @Override
-                public void onSuccess()
-                {
-                    countCoins(false, true, false);
-                }
-            });
+            if(!cryptocompareApiManager.isDetailsUpToDate())
+            {
+                cryptocompareApiManager.updateDetails();
+            }
+            else
+            {
+                countCoins(false, true, false);
+            }
 
             balanceManager.updateTotalBalance();
 

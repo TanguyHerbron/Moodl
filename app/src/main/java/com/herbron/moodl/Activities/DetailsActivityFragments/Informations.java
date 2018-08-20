@@ -38,13 +38,13 @@ public class Informations extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        view = inflater.inflate(R.layout.fragment_informations_detailsactivity, container, false);
+        view = inflater.inflate(R.layout.detailsactivity_fragment_informations, container, false);
 
         isSnapshotUpdated = false;
         isTickerUpdated = false;
 
         currency = getActivity().getIntent().getParcelableExtra("currency");
-        preferencesManager = new PreferencesManager(getContext());
+        preferencesManager = new PreferencesManager(getActivity().getBaseContext());
 
         updateInfoTab();
 
@@ -53,7 +53,7 @@ public class Informations extends Fragment {
 
     private void updateInfoTab()
     {
-        currency.updateSnapshot(getContext(), new Currency.CurrencyCallBack() {
+        currency.updateSnapshot(getActivity().getBaseContext(), new Currency.CurrencyCallBack() {
             @Override
             public void onSuccess(final Currency currency) {
                 isSnapshotUpdated = true;
@@ -61,7 +61,7 @@ public class Informations extends Fragment {
             }
         });
 
-        currency.updateTicker(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
+        currency.updateTicker(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
             @Override
             public void onSuccess(Currency currency) {
                 isTickerUpdated = true;
@@ -120,12 +120,12 @@ public class Informations extends Fragment {
         ((TextView) view.findViewById(R.id.txtViewDescription))
                 .setMovementMethod(LinkMovementMethod.getInstance());
         ((TextView) view.findViewById(R.id.txtViewPercentageCoinEmited))
-                .setText(PlaceholderManager.getEmitedPercentageString(numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100), getContext()));
+                .setText(PlaceholderManager.getEmitedPercentageString(numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100), getActivity().getBaseContext()));
 
         if(currency.getMarketCapitalization() != 0)
         {
             ((TextView) view.findViewById(R.id.txtViewMarketCapitalization))
-                    .setText(PlaceholderManager.getValueString(numberConformer(currency.getMarketCapitalization()), getContext()));
+                    .setText(PlaceholderManager.getValueString(numberConformer(currency.getMarketCapitalization()), getActivity().getBaseContext()));
             view.findViewById(R.id.linearMarketCap).setVisibility(View.VISIBLE);
         }
 

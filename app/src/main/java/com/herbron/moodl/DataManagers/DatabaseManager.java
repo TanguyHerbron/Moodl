@@ -3,20 +3,28 @@ package com.herbron.moodl.DataManagers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.herbron.moodl.Activities.RecordTransactionFragments.TransferFragment;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
+import com.herbron.moodl.DataManagers.ExchangeManager.BinanceManager;
+import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
+import com.herbron.moodl.DataManagers.ExchangeManager.HitBtcManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Guitoune on 14/01/2018.
@@ -24,33 +32,44 @@ import java.util.List;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 17;
 
-    private static final String DATABASE_NAME = "Currencies.db";
+    private static final String DATABASE_NAME = "mdn.db";
 
-    public static final String TABLE_MANUAL_CURRENCIES = "ManualCurrencies";
+    public static final String TABLE_MANUAL_TRANSACTIONS = "ManualTransactions";
     public static final String TABLE_EXCHANGE_KEYS = "ExchangeKeys";
     public static final String TABLE_WATCHLIST = "Watchlist";
 
-    private static final String KEY_CURRENCY_ID = "idCurrency";
-    private static final String KEY_CURRENCY_SYMBOL = "symbol";
-    private static final String KEY_CURRENCY_NAME = "name";
-    private static final String KEY_CURRENCY_BALANCE = "balance";
-    private static final String KEY_CURRENCY_DATE = "addDate";
-    private static final String KEY_CURRENCY_PURCHASED_PRICE = "purchasedPrice";
-    private static final String KEY_CURRENCY_IS_MINED = "isMined";
-    private static final String KEY_CURRENCY_FEES = "fees";
+    private static final String KEY_TRANSACTION_ID = "transactionId";
+    private static final String KEY_TRANSACTION_SYMBOL = "symbol";
+    private static final String KEY_TRANSACTION_AMOUNT = "amount";
+    private static final String KEY_TRANSACTION_PAIR = "symPair";
+    private static final String KEY_TRANSACTION_DATE = "transactionDate";
+    private static final String KEY_TRANSACTION_PURCHASE_PRICE = "purchasePrice";
+    private static final String KEY_TRANSACTION_SOURCE = "source";
+    private static final String KEY_TRANSACTION_DESTINATION = "destination";
+    private static final String KEY_TRANSACTION_FEES = "fees";
+    private static final String KEY_TRANSACTION_FEE_CURRENCY = "feeCurrency";
+    private static final String KEY_TRANSACTION_FEE_FORMAT = "feeFormat";
+    private static final String KEY_TRANSACTION_NOTES = "notes";
+    private static final String KEY_TRANSACTION_TYPE = "transactionType";
+    private static final String KEY_TRANSACTION_DEDUCT = "deductHoldings";
 
     private static final String KEY_EXCHANGE_ID = "idExchange";
     private static final String KEY_EXCHANGE_NAME = "name";
+    private static final String KEY_EXCHANGE_TYPE = "type";
     private static final String KEY_EXCHANGE_DESCRIPTION = "description";
     private static final String KEY_EXCHANGE_PUBLIC_KEY = "publicKey";
     private static final String KEY_EXCHANGE_SECRET_KEY = "secretKey";
+    private static final String KEY_EXCHANGE_IS_ENABLED = "enabled";
 
     private static final String KEY_WATCHLIST_ID = "idWatchlist";
     private static final String KEY_WATCHLIST_SYMBOL = "symbol";
     private static final String KEY_WATCHLIST_NAME = "name";
     private static final String KEY_WATCHLIST_POSITION = "position";
+
+    public static final int BINANCE_TYPE = 0;
+    public static final int HITBTC_TYPE = 1;
 
     public DatabaseManager(Context context)
     {
@@ -60,23 +79,31 @@ public class DatabaseManager extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MANUAL_CURRENCIES + "("
-                + KEY_CURRENCY_ID + " INTEGER PRIMARY KEY,"
-                + KEY_CURRENCY_SYMBOL + " VARCHAR(4),"
-                + KEY_CURRENCY_NAME + " VARCHAR(45),"
-                + KEY_CURRENCY_BALANCE + " TEXT,"
-                + KEY_CURRENCY_DATE + " TEXT,"
-                + KEY_CURRENCY_PURCHASED_PRICE + " REAL,"
-                + KEY_CURRENCY_IS_MINED + " INTEGER,"
-                + KEY_CURRENCY_FEES + " REAL"
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MANUAL_TRANSACTIONS + "("
+                + KEY_TRANSACTION_ID + " INTEGER PRIMARY KEY,"
+                + KEY_TRANSACTION_SYMBOL + " VARCHAR(4),"
+                + KEY_TRANSACTION_AMOUNT + " TEXT,"
+                + KEY_TRANSACTION_DATE + " TEXT,"
+                + KEY_TRANSACTION_PURCHASE_PRICE + " REAL,"
+                + KEY_TRANSACTION_NOTES + " TEXT,"
+                + KEY_TRANSACTION_PAIR + " VARCHAR(4),"
+                + KEY_TRANSACTION_FEE_CURRENCY + " VARCHAR(4),"
+                + KEY_TRANSACTION_FEES + " REAL,"
+                + KEY_TRANSACTION_FEE_FORMAT + " VARCHAR(1),"
+                + KEY_TRANSACTION_SOURCE + " TEXT,"
+                + KEY_TRANSACTION_DESTINATION + " TEXT,"
+                + KEY_TRANSACTION_TYPE + " VARCHAR(1),"
+                + KEY_TRANSACTION_DEDUCT + " INTEGER"
                 + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
                 + KEY_EXCHANGE_ID + " INTEGER PRIMARY KEY,"
                 + KEY_EXCHANGE_NAME + " TEXT,"
+                + KEY_EXCHANGE_TYPE + " INTEGER,"
                 + KEY_EXCHANGE_DESCRIPTION + " TEXT,"
                 + KEY_EXCHANGE_PUBLIC_KEY + " TEXT,"
-                + KEY_EXCHANGE_SECRET_KEY + " TEXT"
+                + KEY_EXCHANGE_SECRET_KEY + " TEXT,"
+                + KEY_EXCHANGE_IS_ENABLED + " INTEGER"
                 + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_WATCHLIST + "("
@@ -92,12 +119,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
-        switch (oldVersion)
-        {
-            case 6:
-                db.execSQL("ALTER TABLE " + TABLE_EXCHANGE_KEYS
-                        + "  ADD " + KEY_EXCHANGE_DESCRIPTION+ " VARCHAR");
-        }
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANUAL_TRANSACTIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXCHANGE_KEYS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_WATCHLIST);
+
+        onCreate(db);
     }
 
     private boolean isCurrencyInWatchlist(String symbol)
@@ -131,6 +157,51 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return false;
     }
 
+    public void updateTransactionWithId(int transactionId, double amount, Date date, double purchasedPrice, double fees, String note, String symbolFrom, String feeCurrency, String destination, String source, String type, String feeFormat, boolean deductFromHoldings)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(KEY_TRANSACTION_AMOUNT, amount);
+        cv.put(KEY_TRANSACTION_DATE, date.getTime());
+        cv.put(KEY_TRANSACTION_PURCHASE_PRICE, purchasedPrice);
+        cv.put(KEY_TRANSACTION_FEES, fees);
+        cv.put(KEY_TRANSACTION_NOTES, note);
+        cv.put(KEY_TRANSACTION_PAIR, symbolFrom);
+        cv.put(KEY_TRANSACTION_FEE_CURRENCY, feeCurrency);
+        cv.put(KEY_TRANSACTION_SOURCE, source);
+        cv.put(KEY_TRANSACTION_DESTINATION, destination);
+        cv.put(KEY_TRANSACTION_TYPE, type);
+        cv.put(KEY_TRANSACTION_FEE_FORMAT, feeFormat);
+        cv.put(KEY_TRANSACTION_DEDUCT, deductFromHoldings ? 1 : 0);
+
+        db.update(TABLE_MANUAL_TRANSACTIONS, cv, KEY_TRANSACTION_ID + "=" + transactionId, null);
+
+    }
+
+    public void addTransaction(String symbol, Double amount, Date date, double purchasePrice, double fees, String note, String symbolFrom, String feeCurrency, String destination, String source, String type, String feeFormat, boolean deductFromHoldings)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_TRANSACTION_SYMBOL, symbol);
+        values.put(KEY_TRANSACTION_AMOUNT, amount);
+        values.put(KEY_TRANSACTION_DATE, date.getTime());
+        values.put(KEY_TRANSACTION_PURCHASE_PRICE, purchasePrice);
+        values.put(KEY_TRANSACTION_FEES, fees);
+        values.put(KEY_TRANSACTION_NOTES, note);
+        values.put(KEY_TRANSACTION_PAIR, symbolFrom);
+        values.put(KEY_TRANSACTION_FEE_CURRENCY, feeCurrency);
+        values.put(KEY_TRANSACTION_SOURCE, source);
+        values.put(KEY_TRANSACTION_DESTINATION, destination);
+        values.put(KEY_TRANSACTION_TYPE, type);
+        values.put(KEY_TRANSACTION_FEE_FORMAT, feeFormat);
+        values.put(KEY_TRANSACTION_DEDUCT, deductFromHoldings ? 1 : 0);
+
+        db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
+        db.close();
+    }
+
     public void updateWatchlistPosition(String symbol, int position)
     {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -139,7 +210,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
         cv.put(KEY_WATCHLIST_POSITION, position);
 
         db.update(TABLE_WATCHLIST, cv, KEY_WATCHLIST_SYMBOL + "='" + symbol + "'", null);
-
     }
 
     private int getWatchlistRowCount(SQLiteDatabase db)
@@ -152,11 +222,100 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return result.getInt(0);
     }
 
+    public int getDisabledExchangeAccountsNumber()
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String countQuerry = "SELECT COUNT() FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_IS_ENABLED + "=0";
+        Cursor result = db.rawQuery(countQuerry, null);
+
+        result.moveToFirst();
+
+        return result.getInt(0);
+    }
+
+    public void deleteExchangeAccountFromId(int id)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_EXCHANGE_KEYS, KEY_EXCHANGE_ID + " = " + id, null);
+        db.close();
+    }
+
     public void deleteCurrencyFromWatchlist(String symbol)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_WATCHLIST, KEY_WATCHLIST_SYMBOL + " = '" + symbol + "'", null);
+        db.close();
+    }
+
+    public void disableExchangeAccount(int id)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(KEY_EXCHANGE_IS_ENABLED, 0);
+
+        db.update(TABLE_EXCHANGE_KEYS, cv, KEY_EXCHANGE_ID + "='" + id + "'", null);
+    }
+
+    public Exchange getExchangeFromId(int exchangeId)
+    {
+        String selectQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_ID + " = " + exchangeId;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery(selectQuerry, null);
+
+        Exchange selectedExchange = null;
+
+        if(result.moveToFirst())
+        {
+            selectedExchange = new Exchange(result.getInt(result.getColumnIndex(KEY_EXCHANGE_ID))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_NAME))
+                    , result.getInt(result.getColumnIndex(KEY_EXCHANGE_TYPE))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_DESCRIPTION))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_PUBLIC_KEY))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_SECRET_KEY))
+                    , (result.getInt(result.getColumnIndex(KEY_EXCHANGE_IS_ENABLED)) == 1));
+        }
+
+        return selectedExchange;
+    }
+
+    public ArrayList<Exchange> getExchanges()
+    {
+        String selectQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery(selectQuerry, null);
+
+        ArrayList<Exchange> exchanges = new ArrayList<>();
+
+        while(result.moveToNext())
+        {
+            exchanges.add(new Exchange(result.getInt(result.getColumnIndex(KEY_EXCHANGE_ID))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_NAME))
+                    , result.getInt(result.getColumnIndex(KEY_EXCHANGE_TYPE))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_DESCRIPTION))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_PUBLIC_KEY))
+                    , result.getString(result.getColumnIndex(KEY_EXCHANGE_SECRET_KEY))
+                    , (result.getInt(result.getColumnIndex(KEY_EXCHANGE_IS_ENABLED)) == 1)));
+        }
+
+        return exchanges;
+    }
+
+    public void addExchange(String name, int type, String description, String publicKey, String privateKey)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_EXCHANGE_NAME, name);
+        values.put(KEY_EXCHANGE_TYPE, type);
+        values.put(KEY_EXCHANGE_DESCRIPTION, description);
+        values.put(KEY_EXCHANGE_PUBLIC_KEY, publicKey);
+        values.put(KEY_EXCHANGE_SECRET_KEY, privateKey);
+        values.put(KEY_EXCHANGE_IS_ENABLED, 1);
+
+        db.insert(TABLE_EXCHANGE_KEYS, null, values);
         db.close();
     }
 
@@ -198,6 +357,9 @@ public class DatabaseManager extends SQLiteOpenHelper{
             backupArray.put(backupObject);
         }
 
+        result.close();
+        db.close();
+
         return backupArray;
     }
 
@@ -205,6 +367,66 @@ public class DatabaseManager extends SQLiteOpenHelper{
     {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM "+ table);
+    }
+
+    public void addRawData(Context context, JSONObject rawValues, String table, boolean decrypt)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        while(rawValues.keys().hasNext())
+        {
+            String key = rawValues.keys().next();
+
+            try {
+                if(decrypt)
+                {
+                    values.put(key, DataCrypter.decrypt(context, rawValues.getString(key)));
+                }
+                else
+                {
+                    values.put(key, rawValues.getString(key));
+                }
+            } catch (JSONException e) {
+                Log.d("moodl", "Error while inserting " + key + " " + e.getMessage());
+            }
+        }
+
+        db.insert(table, null, values);
+        db.close();
+    }
+
+    public void addRowApiKeys(JSONObject rawValues, Context context, boolean decrypt)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        try {
+
+            if(decrypt)
+            {
+                values.put(KEY_EXCHANGE_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_NAME)));
+                values.put(KEY_EXCHANGE_TYPE, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_TYPE)));
+                values.put(KEY_EXCHANGE_DESCRIPTION, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_DESCRIPTION)));
+                values.put(KEY_EXCHANGE_PUBLIC_KEY, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_PUBLIC_KEY)));
+                values.put(KEY_EXCHANGE_SECRET_KEY, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_SECRET_KEY)));
+                values.put(KEY_EXCHANGE_IS_ENABLED, DataCrypter.decrypt(context, rawValues.getString(KEY_EXCHANGE_IS_ENABLED)));
+            }
+            else
+            {
+                values.put(KEY_EXCHANGE_NAME, rawValues.getString(KEY_EXCHANGE_NAME));
+                values.put(KEY_EXCHANGE_TYPE, rawValues.getString(KEY_EXCHANGE_TYPE));
+                values.put(KEY_EXCHANGE_DESCRIPTION, rawValues.getString(KEY_EXCHANGE_DESCRIPTION));
+                values.put(KEY_EXCHANGE_PUBLIC_KEY, rawValues.getString(KEY_EXCHANGE_PUBLIC_KEY));
+                values.put(KEY_EXCHANGE_SECRET_KEY, rawValues.getString(KEY_EXCHANGE_SECRET_KEY));
+                values.put(KEY_EXCHANGE_IS_ENABLED, rawValues.getString(KEY_EXCHANGE_IS_ENABLED));
+            }
+        } catch (JSONException e) {
+            Log.d("moodl", "Error while inserting api key " + e.getMessage());
+        }
+
+        db.insert(TABLE_EXCHANGE_KEYS, null, values);
+        db.close();
     }
 
     public void addRowWatchlist(JSONObject rawValues, Context context, boolean decrypt)
@@ -226,10 +448,10 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 values.put(KEY_WATCHLIST_POSITION, rawValues.getString(KEY_WATCHLIST_POSITION));
             }
         } catch (JSONException e) {
-            Log.d("moodl", "Error while inserting transaction");
+            Log.d("moodl", "Error while inserting watchlist " + e.getMessage());
         }
 
-        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        db.insert(TABLE_WATCHLIST, null, values);
         db.close();
     }
 
@@ -241,29 +463,43 @@ public class DatabaseManager extends SQLiteOpenHelper{
         try {
             if(decrypt)
             {
-                values.put(KEY_CURRENCY_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_SYMBOL)));
-                values.put(KEY_CURRENCY_NAME, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_NAME)));
-                values.put(KEY_CURRENCY_BALANCE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_BALANCE)));
-                values.put(KEY_CURRENCY_DATE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_DATE)));
-                values.put(KEY_CURRENCY_PURCHASED_PRICE, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE)));
-                values.put(KEY_CURRENCY_IS_MINED, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_IS_MINED)));
-                values.put(KEY_CURRENCY_FEES, DataCrypter.decrypt(context, rawValues.getString(KEY_CURRENCY_FEES)));
+                values.put(KEY_TRANSACTION_SYMBOL, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_SYMBOL)));
+                values.put(KEY_TRANSACTION_AMOUNT, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_AMOUNT)));
+                values.put(KEY_TRANSACTION_DATE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_DATE)));
+                values.put(KEY_TRANSACTION_PURCHASE_PRICE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_PURCHASE_PRICE)));
+                values.put(KEY_TRANSACTION_FEES, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_FEES)));
+                values.put(KEY_TRANSACTION_NOTES, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_NOTES)));
+                values.put(KEY_TRANSACTION_PAIR, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_PAIR)));
+                values.put(KEY_TRANSACTION_FEE_CURRENCY, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_FEE_CURRENCY)));
+                values.put(KEY_TRANSACTION_SOURCE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_SOURCE)));
+                values.put(KEY_TRANSACTION_DESTINATION, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_DESTINATION)));
+                values.put(KEY_TRANSACTION_TYPE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_TYPE)));
+                values.put(KEY_TRANSACTION_FEE_FORMAT, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_FEE_FORMAT)));
+                values.put(KEY_TRANSACTION_DEDUCT, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_DEDUCT)));
             }
             else
             {
-                values.put(KEY_CURRENCY_SYMBOL, rawValues.getString(KEY_CURRENCY_SYMBOL));
-                values.put(KEY_CURRENCY_NAME, rawValues.getString(KEY_CURRENCY_NAME));
-                values.put(KEY_CURRENCY_BALANCE, rawValues.getString(KEY_CURRENCY_BALANCE));
-                values.put(KEY_CURRENCY_DATE, rawValues.getString(KEY_CURRENCY_DATE));
-                values.put(KEY_CURRENCY_PURCHASED_PRICE, rawValues.getString(KEY_CURRENCY_PURCHASED_PRICE));
-                values.put(KEY_CURRENCY_IS_MINED, rawValues.getString(KEY_CURRENCY_IS_MINED));
-                values.put(KEY_CURRENCY_FEES, rawValues.getString(KEY_CURRENCY_FEES));
+                values.put(KEY_TRANSACTION_SYMBOL, rawValues.getString(KEY_TRANSACTION_SYMBOL));
+                values.put(KEY_TRANSACTION_AMOUNT, rawValues.getString(KEY_TRANSACTION_AMOUNT));
+                values.put(KEY_TRANSACTION_DATE, rawValues.getString(KEY_TRANSACTION_DATE));
+                values.put(KEY_TRANSACTION_PURCHASE_PRICE, rawValues.getDouble(KEY_TRANSACTION_PURCHASE_PRICE));
+                values.put(KEY_TRANSACTION_FEES, rawValues.getDouble(KEY_TRANSACTION_FEES));
+                values.put(KEY_TRANSACTION_NOTES, rawValues.getString(KEY_TRANSACTION_NOTES));
+                values.put(KEY_TRANSACTION_PAIR, rawValues.getString(KEY_TRANSACTION_PAIR));
+                values.put(KEY_TRANSACTION_FEE_CURRENCY, rawValues.getString(KEY_TRANSACTION_FEE_CURRENCY));
+                values.put(KEY_TRANSACTION_SOURCE, rawValues.getString(KEY_TRANSACTION_SOURCE));
+                values.put(KEY_TRANSACTION_DESTINATION, rawValues.getString(KEY_TRANSACTION_DESTINATION));
+                values.put(KEY_TRANSACTION_TYPE, rawValues.getString(KEY_TRANSACTION_TYPE));
+                values.put(KEY_TRANSACTION_FEE_FORMAT, rawValues.getString(KEY_TRANSACTION_FEE_FORMAT));
+                values.put(KEY_TRANSACTION_DEDUCT, rawValues.getInt(KEY_TRANSACTION_DEDUCT));
             }
         } catch (JSONException e) {
-            Log.d("moodl", "Error while inserting transaction");
+            Log.d("moodl", "Error while inserting transaction " + e.getMessage());
         }
 
-        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        Log.d("mood", "Raw " + rawValues.toString());
+
+        db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
         db.close();
     }
 
@@ -277,30 +513,70 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultList.moveToNext())
         {
-            currencyList.add(new Currency(resultList.getString(2), resultList.getString(1)));
+            currencyList.add(new Currency(resultList.getString(resultList.getColumnIndex(KEY_WATCHLIST_NAME)), resultList.getString(resultList.getColumnIndex(KEY_WATCHLIST_SYMBOL))));
         }
+
+        resultList.close();
+        db.close();
 
         return currencyList;
     }
 
-    public void addCurrencyToManualCurrency(String symbol, double balance, Date date, double purchasedPrice, double fees)
+    public List<HitBtcManager> getHitBtcAccounts(Context context)
     {
+        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + " = " + HITBTC_TYPE + " AND " + KEY_EXCHANGE_IS_ENABLED + " = 1";
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
+        Cursor resultList = db.rawQuery(searchQuerry, null);
 
-        values.put(KEY_CURRENCY_SYMBOL, symbol);
-        values.put(KEY_CURRENCY_BALANCE, balance);
-        values.put(KEY_CURRENCY_DATE, date.getTime());
-        values.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
-        values.put(KEY_CURRENCY_FEES, fees);
+        List<HitBtcManager> accountList = new ArrayList<>();
 
-        db.insert(TABLE_MANUAL_CURRENCIES, null, values);
+        while(resultList.moveToNext())
+        {
+            Exchange exchange = new Exchange(resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_ID))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_NAME))
+                    , resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_TYPE))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_DESCRIPTION))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_PUBLIC_KEY))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_SECRET_KEY))
+                    , (resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_IS_ENABLED)) == 1));
+            accountList.add(new HitBtcManager(context, exchange));
+        }
+
+        resultList.close();
         db.close();
+
+        return accountList;
     }
 
-    public List<Currency> getAllCurrenciesFromManualCurrency()
+    public List<BinanceManager> getBinanceAccounts()
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES;
+        String searchQuerry = "SELECT * FROM " + TABLE_EXCHANGE_KEYS + " WHERE " + KEY_EXCHANGE_TYPE + " = " + BINANCE_TYPE + " AND " + KEY_EXCHANGE_IS_ENABLED + " = 1";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor resultList = db.rawQuery(searchQuerry, null);
+
+        List<BinanceManager> accountList = new ArrayList<>();
+
+        while(resultList.moveToNext())
+        {
+            Exchange exchange = new Exchange(resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_ID))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_NAME))
+                    , resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_TYPE))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_DESCRIPTION))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_PUBLIC_KEY))
+                    , resultList.getString(resultList.getColumnIndex(KEY_EXCHANGE_SECRET_KEY))
+                    , (resultList.getInt(resultList.getColumnIndex(KEY_EXCHANGE_IS_ENABLED)) == 1));
+            accountList.add(new BinanceManager(exchange));
+        }
+
+        resultList.close();
+        db.close();
+
+        return accountList;
+    }
+
+    public List<Currency> getAllCurrenciesFromTransactions()
+    {
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -308,7 +584,87 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while(resultatList.moveToNext())
         {
-            currencyList.add(new Currency(resultatList.getString(1), resultatList.getDouble(3) - resultatList.getDouble(7)));
+            String symbol = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL));
+            String feeSym = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY));
+            String type = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE));
+
+            if(type != null && !type.equals(""))
+            {
+                switch (type)
+                {
+                    case "b":
+                        if(symbol.equals(feeSym))
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                        }
+                        else
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
+                        }
+                        break;
+                    case "s":
+                        if(symbol.equals(feeSym))
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                    , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                        }
+                        else
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                    , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
+                        }
+                        break;
+                    case "t":
+                        if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))) && isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))))
+                        {
+                            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
+                            {
+                                if(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1)
+                                {
+                                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                            , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                }
+                                else
+                                {
+                                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                            , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))))
+                            {
+                                currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                        , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                            }
+                            else
+                            {
+                                if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))))
+                                {
+                                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                if(symbol.equals(feeSym))
+                {
+                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                }
+                else
+                {
+                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
+                }
+            }
         }
 
         resultatList.close();
@@ -318,23 +674,15 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return currencyList;
     }
 
-    public void updateTransactionWithId(int transactionId, double amount, Date time, double purchasedPrice, double fees)
+    private boolean isBalanceRelated(String str)
     {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-
-        cv.put(KEY_CURRENCY_BALANCE, amount);
-        cv.put(KEY_CURRENCY_DATE, time.getTime());
-        cv.put(KEY_CURRENCY_PURCHASED_PRICE, purchasedPrice);
-        cv.put(KEY_CURRENCY_FEES, fees);
-
-        db.update(TABLE_MANUAL_CURRENCIES, cv, KEY_CURRENCY_ID + "=" + transactionId, null);
-
+        Set<String> set = new HashSet<>(Arrays.asList(TransferFragment.EXCHANGE_CODE, TransferFragment.WALLET_CODE));
+        return set.contains(str);
     }
 
     public Transaction getCurrencyTransactionById(int id)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE " + KEY_CURRENCY_ID + "='" + id + "'";
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_ID + "='" + id + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -342,8 +690,32 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         if(resultatList.moveToFirst())
         {
-            transaction = new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5), resultatList.getDouble(7));
+            boolean deduct = false;
+
+            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
+            {
+                deduct = resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1;
+            }
+
+            Log.d("moodl", "> " + resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)));
+
+            transaction = new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))
+                    , resultatList.getLong(resultatList.getColumnIndex(KEY_TRANSACTION_DATE))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_PURCHASE_PRICE))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_NOTES))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))
+                    , deduct);
         }
+
+        Log.d("moodl", "> " + DatabaseUtils.dumpCurrentRowToString(resultatList));
 
         resultatList.close();
 
@@ -354,7 +726,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public ArrayList<Transaction> getCurrencyTransactionsForSymbol(String symbol)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_CURRENCIES + " WHERE " + KEY_CURRENCY_SYMBOL + "='" + symbol.toUpperCase() + "'";
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_SYMBOL + "='" + symbol.toUpperCase() + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -362,7 +734,27 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while (resultatList.moveToNext())
         {
-            transactionList.add(new Transaction(resultatList.getInt(0), resultatList.getString(1), resultatList.getDouble(3), resultatList.getLong(4), resultatList.getLong(5), resultatList.getDouble(7)));
+            boolean deduct = false;
+
+            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
+            {
+                deduct = resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1;
+            }
+
+            transactionList.add(new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))
+                    , resultatList.getLong(resultatList.getColumnIndex(KEY_TRANSACTION_DATE))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_PURCHASE_PRICE))
+                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_NOTES))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))
+                    , deduct));
         }
 
         resultatList.close();
@@ -376,7 +768,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.delete(TABLE_MANUAL_CURRENCIES, KEY_CURRENCY_ID + "=" + id, null);
+        db.delete(TABLE_MANUAL_TRANSACTIONS, KEY_TRANSACTION_ID + "=" + id, null);
 
         db.close();
     }

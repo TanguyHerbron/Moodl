@@ -38,21 +38,6 @@ public class PreferencesManager {
         return settingPreferences.getString("default_currency", "USD");
     }
 
-    public String getHitBTCPublicKey()
-    {
-        return settingPreferences.getString("hitbtc_publickey", null);
-    }
-
-    public String getHitBTCPrivateKey()
-    {
-        return settingPreferences.getString("hitbtc_privatekey", null);
-    }
-
-    public boolean isHitBTCActivated()
-    {
-        return settingPreferences.getBoolean("enable_hitbtc", false);
-    }
-
     public boolean switchBalanceHiddenState()
     {
         SharedPreferences.Editor editor = settingPreferences.edit();
@@ -72,16 +57,6 @@ public class PreferencesManager {
         SharedPreferences.Editor editor = settingPreferences.edit();
         editor.putBoolean("enable_hitbtc", false);
         editor.apply();
-    }
-
-    public String getBinancePublicKey()
-    {
-        return settingPreferences.getString("binance_publickey", null);
-    }
-
-    public String getBinancePrivateKey()
-    {
-        return settingPreferences.getString("binance_privatekey", null);
     }
 
     public boolean isBinanceActivated()

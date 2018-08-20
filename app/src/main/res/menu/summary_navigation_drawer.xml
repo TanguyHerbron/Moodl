@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <group android:checkableBehavior="single">
 
         <item
@@ -31,6 +32,7 @@
                 <item
                     android:id="@+id/navigation_settings"
                     android:icon="@drawable/ic_settings_black_24dp"
+                    app:actionViewClass="android.widget.TextView"
                     android:title="@string/title_activity_settings" />
 
             </group>

@@ -1,13 +1,12 @@
 package com.herbron.moodl.DataManagers.ExchangeManager;
 
-import android.util.Log;
-
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.account.Account;
 import com.binance.api.client.domain.account.AssetBalance;
 import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.exception.BinanceApiException;
+import com.herbron.moodl.DataNotifiers.BinanceUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 
 import java.util.ArrayList;
@@ -17,21 +16,29 @@ import java.util.List;
  * Created by Guitoune on 26/02/2018.
  */
 
-public class BinanceManager {
-
-    private String publicKey;
-    private String privateKey;
+public class BinanceManager extends Exchange {
 
     private List<Currency> balance;
     private ArrayList<com.herbron.moodl.DataManagers.CurrencyData.Trade> trades;
-    private List<String> pairSymbolList;
+    private static List<String> pairSymbolList;
 
-    public BinanceManager(String publicKey, String privateKey)
+    private List<BinanceUpdateNotifierInterface> binanceUpdateNotifierInterfaceList;
+
+    public BinanceManager(Exchange exchange)
     {
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
+        super(exchange.id, exchange.name, exchange.type, exchange.description, exchange.publicKey, exchange.privateKey, exchange.isEnabled);
 
         createPairSymbolList();
+    }
+
+    public void addListener(BinanceUpdateNotifierInterface binanceUpdateNotifierInterface)
+    {
+        if(binanceUpdateNotifierInterfaceList == null)
+        {
+            binanceUpdateNotifierInterfaceList = new ArrayList<>();
+        }
+
+        binanceUpdateNotifierInterfaceList.add(binanceUpdateNotifierInterface);
     }
 
     private void createPairSymbolList()
@@ -44,9 +51,10 @@ public class BinanceManager {
         pairSymbolList.add("USDT");
     }
 
-    public void updateBalance(BinanceCallBack callBack)
+    public void updateBalance()
     {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(publicKey, privateKey);
+
         BinanceApiRestClient client = factory.newRestClient();
 
         try {
@@ -59,20 +67,29 @@ public class BinanceManager {
             {
                 if(Double.parseDouble(assets.get(i).getFree()) > 0 || Double.parseDouble(assets.get(i).getLocked()) > 0)
                 {
-                    balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree()) + Double.parseDouble(assets.get(i).getLocked())));
+                    //balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree()) + Double.parseDouble(assets.get(i).getLocked())));
+                    if(!assets.get(i).getAsset().equals("VEN"))
+                    {
+                        balance.add(new Currency(assets.get(i).getAsset(), Double.parseDouble(assets.get(i).getFree()) + Double.parseDouble(assets.get(i).getLocked())));
+                    }
                 }
             }
 
-            callBack.onSuccess();
+            for(BinanceUpdateNotifierInterface binanceUpdateNotifierInterface : binanceUpdateNotifierInterfaceList)
+            {
+                binanceUpdateNotifierInterface.onBinanceBalanceUpdateSuccess();
+            }
         } catch (BinanceApiException e) {
-            callBack.onError(e.getMessage());
+            for(BinanceUpdateNotifierInterface binanceUpdateNotifierInterface : binanceUpdateNotifierInterfaceList)
+            {
+                binanceUpdateNotifierInterface.onBinanceBalanceUpdateError(id, e.getMessage());
+            }
         }
     }
 
-    public void updateTrades(BinanceCallBack callBack, String symbol)
+    public void updateTrades(String symbol)
     {
         trades = new ArrayList<>();
-
 
         for(int i = 0; i < pairSymbolList.size(); i++)
         {
@@ -82,7 +99,10 @@ public class BinanceManager {
             }
         }
 
-        callBack.onSuccess();
+        for(BinanceUpdateNotifierInterface binanceUpdateNotifierInterface : binanceUpdateNotifierInterfaceList)
+        {
+            binanceUpdateNotifierInterface.onBinanceTradesUpdated();
+        }
     }
 
     public void updateTrades(BinanceCallBack callBack, String symbol, long fromId)

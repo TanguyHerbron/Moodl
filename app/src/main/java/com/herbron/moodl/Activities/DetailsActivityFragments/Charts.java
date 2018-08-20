@@ -2,12 +2,10 @@ package com.herbron.moodl.Activities.DetailsActivityFragments;
 
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -33,10 +30,11 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDataChart;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.LayoutManagers.CustomViewPager;
+import com.herbron.moodl.CustomLayouts.CustomViewPager;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
@@ -51,7 +49,7 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
  * Created by Tiji on 13/05/2018.
  */
 
-public class Charts extends Fragment {
+public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterface {
 
     private final static int HOUR = 0;
     private final static int DAY = 1;
@@ -72,20 +70,24 @@ public class Charts extends Fragment {
     private Button lineChartButton;
     private Button candleStickChartButton;
 
+    private Spinner timeIntervalSpinner;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        view = inflater.inflate(R.layout.fragment_charts_detailsactivity, container, false);
+        view = inflater.inflate(R.layout.detailsactivity_fragment_charts, container, false);
 
         currency = getActivity().getIntent().getParcelableExtra("currency");
+
+        currency.setListener(this);
 
         lineChart = view.findViewById(R.id.chartPriceView);
         candleStickChart = view.findViewById(R.id.chartCandleStickView);
         lineChartButton = view.findViewById(R.id.lineChartButton);
         candleStickChartButton = view.findViewById(R.id.candleStickChartButton);
         barChart = view.findViewById(R.id.chartVolumeView);
-        preferencesManager = new PreferencesManager(getContext());
+        preferencesManager = new PreferencesManager(getActivity().getBaseContext());
 
         displayLineChart = true;
 
@@ -125,17 +127,17 @@ public class Charts extends Fragment {
 
     private void initializeSpinners()
     {
-        Spinner spinner = view.findViewById(R.id.timeIntervalSinner);
+        timeIntervalSpinner = view.findViewById(R.id.timeIntervalSinner);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity().getBaseContext(),
                 R.array.time_interval_string_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        spinner.setAdapter(adapter);
+        timeIntervalSpinner.setAdapter(adapter);
 
-        spinner.setSelection(2);
+        timeIntervalSpinner.setSelection(2);
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        timeIntervalSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 updateCharts(i);
@@ -158,121 +160,31 @@ public class Charts extends Fragment {
         switch (index)
         {
             case 0:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.HOUR, 1);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryMinutes(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 1:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.HOUR, 3);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryMinutes(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 2:
-                currency.updateHistoryMinutes(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.DAY, 1);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryMinutes(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 3:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.DAY, 3);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryHours(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 4:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.WEEK, 11);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryHours(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 5:
-                currency.updateHistoryHours(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.MONTH, 1);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryHours(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 6:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.MONTH, 3);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryDays(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 7:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.MONTH, 6);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryDays(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
             case 8:
-                currency.updateHistoryDays(getContext(), preferencesManager.getDefaultCurrency(), new Currency.CurrencyCallBack() {
-                    @Override
-                    public void onSuccess(Currency currency) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateChartTab(Charts.YEAR, 1);
-                            }
-                        });
-                    }
-                });
+                currency.updateHistoryDays(getActivity().getBaseContext(), preferencesManager.getDefaultCurrency());
                 break;
         }
     }
@@ -305,13 +217,20 @@ public class Charts extends Fragment {
         lineChart.getLegend().setEnabled(false);
         lineChart.getXAxis().setEnabled(false);
         lineChart.setViewPortOffsets(0, 0, 0, 0);
+        lineChart.setNoDataTextColor(currency.getChartColor());
     }
 
     private void updateChartTab(int timeUnit, int amount)
     {
         updateChartsData(timeUnit, amount);
-        drawPriceLineChart();
-        drawPriceCandleStickChart();
+
+        if(currency.getHistoryMinutes() != null)
+        {
+            drawPriceLineChart();
+            drawPriceCandleStickChart();
+            drawVolumeChart();
+            updateGeneralData(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
+        }
 
         if(displayLineChart)
         {
@@ -323,9 +242,6 @@ public class Charts extends Fragment {
             view.findViewById(R.id.chartCandleStickView).setVisibility(View.VISIBLE);
             view.findViewById(R.id.progressLayoutChart).setVisibility(View.GONE);
         }
-
-        drawVolumeChart();
-        updateGeneralData(lineChart.getData().getDataSets().get(0).getEntryForIndex(0).getY(), lineChart.getData().getDataSets().get(0).getEntryForIndex(lineChart.getData().getDataSets().get(0).getEntryCount() - 1).getY());
     }
 
     private void updateGeneralData(float start, float end)
@@ -336,8 +252,8 @@ public class Charts extends Fragment {
 
         updateFluctuation(start, end);
 
-        ((TextView) view.findViewById(R.id.txtViewPriceStart)).setText(PlaceholderManager.getValueString(numberConformer(start), getContext()));
-        ((TextView) view.findViewById(R.id.txtViewPriceNow)).setText(PlaceholderManager.getValueString(numberConformer(end), getContext()));
+        ((TextView) view.findViewById(R.id.txtViewPriceStart)).setText(PlaceholderManager.getValueString(numberConformer(start), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.txtViewPriceNow)).setText(PlaceholderManager.getValueString(numberConformer(end), getActivity().getBaseContext()));
 
         for(int i = 1; i < dataChartList.size(); i++)
         {
@@ -354,9 +270,9 @@ public class Charts extends Fragment {
             }
         }
 
-        ((TextView) view.findViewById(R.id.totalVolume)).setText(PlaceholderManager.getValueString(numberConformer(totalVolume), getContext()));
-        ((TextView) view.findViewById(R.id.highestPrice)).setText(PlaceholderManager.getValueString(numberConformer(highestPrice), getContext()));
-        ((TextView) view.findViewById(R.id.lowestPrice)).setText(PlaceholderManager.getValueString(numberConformer(lowestPrice), getContext()));
+        ((TextView) view.findViewById(R.id.totalVolume)).setText(PlaceholderManager.getValueString(numberConformer(totalVolume), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.highestPrice)).setText(PlaceholderManager.getValueString(numberConformer(highestPrice), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.lowestPrice)).setText(PlaceholderManager.getValueString(numberConformer(lowestPrice), getActivity().getBaseContext()));
     }
 
     private void updateFluctuation(float start, float end)
@@ -541,9 +457,9 @@ public class Charts extends Fragment {
             date = getDateFromTimestamp(dataChartList.get(index).getTimestamp() * 1000);
         }
 
-        volumePlaceholder = PlaceholderManager.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), getContext());
-        pricePlaceholder = PlaceholderManager.getPriceString(numberConformer((lineChart.getHighlighted())[0].getY()), getContext());
-        timestampPlaceholder = PlaceholderManager.getTimestampString(date, getContext());
+        volumePlaceholder = PlaceholderManager.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), getActivity().getBaseContext());
+        pricePlaceholder = PlaceholderManager.getPriceString(numberConformer((lineChart.getHighlighted())[0].getY()), getActivity().getBaseContext());
+        timestampPlaceholder = PlaceholderManager.getTimestampString(date, getActivity().getBaseContext());
 
         ((TextView) view.findViewById(R.id.volumeHightlight)).setText(volumePlaceholder);
         view.findViewById(R.id.volumeHightlight).setVisibility(View.VISIBLE);
@@ -629,14 +545,14 @@ public class Charts extends Fragment {
         dataSet = new CandleDataSet(values, "");
         dataSet.setDrawIcons(false);
         dataSet.setDrawValues(false);
-        dataSet.setDecreasingColor(MoodlBox.getColor(R.color.decreaseCandle, getContext()));
+        dataSet.setDecreasingColor(MoodlBox.getColor(R.color.decreaseCandle, getActivity().getBaseContext()));
         dataSet.setShowCandleBar(true);
         dataSet.setShadowColorSameAsCandle(true);
         dataSet.setDecreasingPaintStyle(Paint.Style.FILL);
-        dataSet.setIncreasingColor(MoodlBox.getColor(R.color.increaseCandle, getContext()));
+        dataSet.setIncreasingColor(MoodlBox.getColor(R.color.increaseCandle, getActivity().getBaseContext()));
         dataSet.setIncreasingPaintStyle(Paint.Style.STROKE);
-        dataSet.setNeutralColor(MoodlBox.getColor(R.color.increaseCandle, getContext()));
-        dataSet.setHighLightColor(MoodlBox.getColor(R.color.colorAccent, getContext()));
+        dataSet.setNeutralColor(MoodlBox.getColor(R.color.increaseCandle, getActivity().getBaseContext()));
+        dataSet.setHighLightColor(MoodlBox.getColor(R.color.colorAccent, getActivity().getBaseContext()));
         dataSet.setDrawHorizontalHighlightIndicator(false);
 
         return new CandleData(dataSet);
@@ -644,12 +560,15 @@ public class Charts extends Fragment {
 
     private void updateChartsData(int timeUnit, int amount)
     {
-        dataChartList = new ArrayList<>();
+        dataChartList = null;
 
         switch (timeUnit)
         {
             case HOUR:
-                dataChartList = currency.getHistoryMinutes().subList(currency.getHistoryMinutes().size()-(60*amount), currency.getHistoryMinutes().size());
+                if(currency.getHistoryMinutes() != null)
+                {
+                    dataChartList = currency.getHistoryMinutes().subList(currency.getHistoryMinutes().size()-(60*amount), currency.getHistoryMinutes().size());
+                }
                 break;
             case DAY:
                 if(amount == 1)
@@ -658,11 +577,17 @@ public class Charts extends Fragment {
                 }
                 else
                 {
-                    dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-(24*amount), currency.getHistoryHours().size());
+                    if(currency.getHistoryHours() != null)
+                    {
+                        dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-(24*amount), currency.getHistoryHours().size());
+                    }
                 }
                 break;
             case WEEK:
-                dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-168, currency.getHistoryHours().size());
+                if(currency.getHistoryHours() != null)
+                {
+                    dataChartList = currency.getHistoryHours().subList(currency.getHistoryHours().size()-168, currency.getHistoryHours().size());
+                }
                 break;
             case MONTH:
                 switch (amount)
@@ -671,10 +596,16 @@ public class Charts extends Fragment {
                         dataChartList = currency.getHistoryHours();
                         break;
                     case 3:
-                        dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-93, currency.getHistoryDays().size());
+                        if(currency.getHistoryDays() != null)
+                        {
+                            dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-93, currency.getHistoryDays().size());
+                        }
                         break;
                     case 6:
-                        dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-186, currency.getHistoryDays().size());
+                        if(currency.getHistoryDays() != null)
+                        {
+                            dataChartList = currency.getHistoryDays().subList(currency.getHistoryDays().size()-186, currency.getHistoryDays().size());
+                        }
                         break;
                 }
                 break;
@@ -684,4 +615,52 @@ public class Charts extends Fragment {
         }
     }
 
+    @Override
+    public void onTimestampPriceUpdated(String price) {
+
+    }
+
+    @Override
+    public void onHistoryDataUpdated() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                switch (timeIntervalSpinner.getSelectedItemPosition())
+                {
+                    case 0:
+                        updateChartTab(Charts.HOUR, 1);
+                        break;
+                    case 1:
+                        updateChartTab(Charts.HOUR, 3);
+                        break;
+                    case 2:
+                        updateChartTab(Charts.DAY, 1);
+                        break;
+                    case 3:
+                        updateChartTab(Charts.DAY, 3);
+                        break;
+                    case 4:
+                        updateChartTab(Charts.WEEK, 11);
+                        break;
+                    case 5:
+                        updateChartTab(Charts.MONTH, 1);
+                        break;
+                    case 6:
+                        updateChartTab(Charts.MONTH, 3);
+                        break;
+                    case 7:
+                        updateChartTab(Charts.MONTH, 6);
+                        break;
+                    case 8:
+                        updateChartTab(Charts.YEAR, 1);
+                        break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onPriceUpdated(Currency currency) {
+
+    }
 }

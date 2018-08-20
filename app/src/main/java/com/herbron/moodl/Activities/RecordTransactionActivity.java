@@ -1,173 +1,684 @@
 package com.herbron.moodl.Activities;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.opengl.Visibility;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.herbron.moodl.Activities.RecordTransactionFragments.BuyFragment;
+import com.herbron.moodl.Activities.RecordTransactionFragments.SellFragment;
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
+import com.herbron.moodl.CustomAdapters.PairRecordListAdapter;
+import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
+import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.DatabaseManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
 import com.herbron.moodl.DataManagers.PreferencesManager;
+import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
+import com.herbron.moodl.CustomAdapters.CoinRecordListAdapter;
+import com.herbron.moodl.CustomLayouts.CustomTabLayout;
+import com.herbron.moodl.CustomAdapters.ExchangeRecordListAdapter;
+import com.herbron.moodl.CustomAdapters.RecordTransactionPageAdapter;
+import com.herbron.moodl.MoodlBox;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.PlaceholderManager;
 import com.herbron.moodl.R;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
-public class RecordTransactionActivity extends AppCompatActivity {
+public class RecordTransactionActivity extends AppCompatActivity implements CurrencyInfoUpdateNotifierInterface, CryptocompareNotifierInterface {
 
-    private String coin;
-    private String symbol;
-    private TextView symbolTxtView;
-    private TextInputLayout purchasedDateLayout;
-    private EditText purchaseDate;
-    private TextView feesTxtView;
-    private EditText amountTxtView;
-    private Button buyButton;
-    private Button sellButton;
-    private Button transferButton;
-    private DatabaseManager databaseManager;
-    private Calendar calendar;
-    private SimpleDateFormat sdf;
-    private PreferencesManager preferenceManager;
-    private EditText purchasedPriceEditText;
+    private Toolbar toolbar;
+    private ImageView currencyIconImageView;
+
     private Currency currency;
-    private int transactionId;
+    private Exchange exchange;
+    private Pair pair;
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_record_action, menu);
-        return true;
-    }
+    private CryptocompareApiManager cryptocompareApiManager;
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_record:
+    private AutoCompleteTextView coin_autoCompleteTextView;
+    private AutoCompleteTextView exchange_autoCompleteTextView;
+    private AutoCompleteTextView pair_autoCompleteTextView;
 
-                if(checkAmountText() && checkPriceText())
-                {
-                    double amount = Double.parseDouble(amountTxtView.getText().toString());
-                    double purchasedPrice = Double.parseDouble(purchasedPriceEditText.getText().toString());
-                    double fees = Double.parseDouble(feesTxtView.getText().toString());
+    private CustomTabLayout tabLayout;
+    private ViewPager viewPager;
 
-                    if(!sellButton.isEnabled())
-                    {
-                        amount *= -1;
-                    }
+    private RecordTransactionPageAdapter pageAdapter;
 
-                    if(transactionId != -1)
-                    {
-                        databaseManager.updateTransactionWithId(transactionId, amount, calendar.getTime(), purchasedPrice, fees);
-                    }
-                    else
-                    {
-                        databaseManager.addCurrencyToManualCurrency(symbol, amount, calendar.getTime(), purchasedPrice, fees);
-                    }
+    private Animation revealAnimation;
+    private Animation dismissAnimation;
 
-                    preferenceManager.setMustUpdateSummary(true);
-                    Intent intent = new Intent(RecordTransactionActivity.this, HomeActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
-                    finish();
-                }
-                break;
-            case android.R.id.home:
-                //NavUtils.navigateUpFromSameTask(this);
-                finish();
-                break;
-            default:
-                break;
+    private LinearLayout globalTabLayouts;
+
+    private boolean isGlobalLayoutVisible;
+
+    private Intent callingIntent;
+
+    private TextWatcher coinTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
         }
-        return true;
-    }
 
-    private boolean checkPriceText()
-    {
-        String purchasedPriceText = purchasedPriceEditText.getText().toString();
-        double purchasedPrice;
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            currencyIconImageView.setImageBitmap(null);
+            exchange_autoCompleteTextView.setEnabled(false);
+            exchange_autoCompleteTextView.setText("");
 
-        try {
-            purchasedPrice = Double.parseDouble(purchasedPriceText);
+            ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(2).setEnabled(false);
+            ((TextView) tabLayout.getTabAt(2).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
 
-            if(purchasedPrice < 0)
+            if(isGlobalLayoutVisible && globalTabLayouts.getAnimation().hasEnded())
             {
-                purchasedPriceEditText.setError(getResources().getString(R.string.field_negative));
+                globalTabLayouts.startAnimation(dismissAnimation);
             }
-        } catch (NumberFormatException e) {
-            purchasedPriceEditText.setError(getResources().getString(R.string.field_nan));
-
-            return false;
         }
 
-        if(purchasedPriceText.equals(""))
-        {
-            purchasedPriceEditText.setError(getResources().getString(R.string.field_empty));
+        @Override
+        public void afterTextChanged(Editable s) {
 
-            return false;
         }
-
-        return true;
-    }
-
-    private boolean checkAmountText()
-    {
-        String amountText = amountTxtView.getText().toString();
-
-        try {
-            Double.parseDouble(amountText);
-        } catch (NumberFormatException e) {
-            amountTxtView.setError(getResources().getString(R.string.field_nan));
-
-            return false;
-        }
-
-        if(amountText.equals(""))
-        {
-            amountTxtView.setError(getResources().getString(R.string.field_empty));
-
-            return false;
-        }
-
-        return true;
-    }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record_transaction);
 
-        Intent intent = getIntent();
+        toolbar = findViewById(R.id.toolbar);
 
-        sdf = new SimpleDateFormat(" HH:mm dd/MM/yyyy", Locale.UK);
+        currencyIconImageView = findViewById(R.id.currencyIconImageView);
+        cryptocompareApiManager = CryptocompareApiManager.getInstance(this);
 
-        calendar = Calendar.getInstance();
+        cryptocompareApiManager.addListener(this);
 
-        databaseManager = new DatabaseManager(this);
-        preferenceManager = new PreferencesManager(this);
+        cryptocompareApiManager.updateExchangeList();
 
-        initializeViewElements();
+        coin_autoCompleteTextView = findViewById(R.id.coin_autoCompleteTextView);
+        exchange_autoCompleteTextView = findViewById(R.id.exchange_autoCompleteTextView);
+        pair_autoCompleteTextView = findViewById(R.id.pair_autoCompleteTextView);
 
-        coin = intent.getStringExtra("coin");
-        symbol = intent.getStringExtra("symbol");
+        setSupportActionBar(toolbar);
 
-        transactionId = intent.getIntExtra("transactionId", -1);
+        setupTabLayout();
+
+        setupCoinAutoCompleteTextView();
+
+        setupExchangeAutoCompleteTextView();
+
+        setupPairAutoCompleteTextView();
+
+        setupBackButton();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if(callingIntent != null)
+        {
+            callingIntent.removeExtra("transactionId");
+        }
+    }
+
+    private void checkCallingIntent()
+    {
+        callingIntent = getIntent();
+        int transactionId = callingIntent.getIntExtra("transactionId", -1);
 
         if(transactionId != -1)
+        {
+            List<Exchange> exchangeList;
+            List<Pair> pairList;
+            DatabaseManager databaseManager = new DatabaseManager(getBaseContext());
+            Transaction transaction = databaseManager.getCurrencyTransactionById(transactionId);
+            List<Currency> denominationList = cryptocompareApiManager.getCurrenciesDenomination();
+
+            boolean found = false;
+            int index = 0;
+
+            while(index < denominationList.size() && !found)
+            {
+                if(denominationList.get(index).getSymbol().equals(transaction.getSymbol()))
+                {
+                    currency = denominationList.get(index);
+                    found = true;
+
+                    currency.setListener(RecordTransactionActivity.this);
+                    updateExchangeAdapter(currency.getSymbol());
+                    exchange_autoCompleteTextView.setEnabled(true);
+                    IconDownloaderTask iconDownloaderTask = new IconDownloaderTask();
+                    iconDownloaderTask.execute();
+                    coin_autoCompleteTextView.removeTextChangedListener(coinTextWatcher);
+                    coin_autoCompleteTextView.setText(PlaceholderManager.getDenomination(currency.getName(), currency.getSymbol(), getBaseContext()));
+                    coin_autoCompleteTextView.setEnabled(false);
+
+                    if(globalTabLayouts.getVisibility() == View.GONE)
+                    {
+                        globalTabLayouts.setVisibility(View.VISIBLE);
+                    }
+
+                    globalTabLayouts.startAnimation(revealAnimation);
+
+                    isGlobalLayoutVisible = true;
+
+                    updateCurrencyData();
+                }
+
+                index++;
+            }
+
+            found = false;
+            index = 0;
+
+            switch (transaction.getType())
+            {
+                case "b":
+                    exchangeList = cryptocompareApiManager.getExchangeList(currency.getSymbol());
+
+                    while(index < exchangeList.size() && !found)
+                    {
+                        if(exchangeList.get(index).getName().equals(transaction.getSource()))
+                        {
+                            exchange = exchangeList.get(index);
+
+                            exchange_autoCompleteTextView.setText(exchange.getName());
+                            exchange_autoCompleteTextView.setEnabled(true);
+
+                            updateExchangeData();
+
+                            updatePairAdapter();
+                            found = true;
+                        }
+
+                        index++;
+                    }
+
+                    pairList = exchange.getPairsFor(currency.getSymbol());
+
+                    found = false;
+                    index = 0;
+
+                    while(index < pairList.size() && !found)
+                    {
+                        if(pairList.get(index).contains(currency.getSymbol()) && pairList.get(index).contains(transaction.getSymPair()))
+                        {
+                            pair = pairList.get(index);
+
+                            pair_autoCompleteTextView.setText(PlaceholderManager.getPairString(pair.getFrom(), pair.getTo(), getBaseContext()));
+                            pair_autoCompleteTextView.setEnabled(true);
+
+                            ((BuyFragment) pageAdapter.getItem(0)).updatePair(pair);
+
+                            updatePairData();
+
+                            found = true;
+                        }
+
+                        index++;
+                    }
+
+                    tabLayout.getTabAt(0).select();
+
+                    break;
+                case "s":
+                    exchangeList = cryptocompareApiManager.getExchangeList(currency.getSymbol());
+
+                    while(index < exchangeList.size() && !found)
+                    {
+                        if(exchangeList.get(index).getName().equals(transaction.getSource()))
+                        {
+                            exchange = exchangeList.get(index);
+
+                            exchange_autoCompleteTextView.setText(exchange.getName());
+                            exchange_autoCompleteTextView.setEnabled(true);
+
+                            updateExchangeData();
+
+                            updatePairAdapter();
+                            found = true;
+                        }
+
+                        index++;
+                    }
+
+                    pairList = exchange.getPairsFor(currency.getSymbol());
+
+                    found = false;
+                    index = 0;
+
+                    while(index < pairList.size() && !found)
+                    {
+                        if(pairList.get(index).contains(currency.getSymbol()) && pairList.get(index).contains(transaction.getSymPair()))
+                        {
+                            pair = pairList.get(index);
+
+                            pair_autoCompleteTextView.setText(PlaceholderManager.getPairString(pair.getFrom(), pair.getTo(), getBaseContext()));
+                            pair_autoCompleteTextView.setEnabled(true);
+
+                            ((SellFragment) pageAdapter.getItem(1)).updatePair(pair);
+
+                            updatePairData();
+
+                            found = true;
+                        }
+
+                        index++;
+                    }
+
+                    tabLayout.getTabAt(1).select();
+                    break;
+                case "t":
+                    tabLayout.getTabAt(2).select();
+                    break;
+            }
+        }
+    }
+
+    public Currency getCurrency()
+    {
+        return currency;
+    }
+
+    private void setupTabLayout()
+    {
+        globalTabLayouts = findViewById(R.id.globalTabLayouts);
+
+        tabLayout = findViewById(R.id.transactionsTabLayout);
+        tabLayout.addTab(0, getResources().getString(R.string.buyText));
+        tabLayout.addTab(1, getResources().getString(R.string.sellText));
+        tabLayout.addTab(2, getResources().getString(R.string.transferText));
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+
+        viewPager = findViewById(R.id.transactionsViewPager);
+        pageAdapter = new RecordTransactionPageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(pageAdapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+        LinearLayout tabLayoutChildren = (LinearLayout) tabLayout.getChildAt(0);
+
+        for(int i = 0; i < tabLayoutChildren.getChildCount(); i++)
+        {
+            tabLayoutChildren.getChildAt(i).setEnabled(false);
+            ((TextView) tabLayout.getTabAt(i).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
+        }
+
+        revealAnimation = AnimationUtils.loadAnimation(this, R.anim.reveal);
+        dismissAnimation = AnimationUtils.loadAnimation(this, R.anim.dismiss);
+
+        dismissAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                isGlobalLayoutVisible = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+    }
+
+    private void setupPairAutoCompleteTextView()
+    {
+        pair_autoCompleteTextView.setThreshold(0);
+        pair_autoCompleteTextView.setTextColor(getResources().getColor(R.color.white));
+
+        pair_autoCompleteTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(0).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(1).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
+                tabLayout.getTabAt(2).select();
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        pair_autoCompleteTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pair_autoCompleteTextView.showDropDown();
+            }
+        });
+
+        pair_autoCompleteTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    pair_autoCompleteTextView.showDropDown();
+                }
+                else
+                {
+                    pair_autoCompleteTextView.dismissDropDown();
+                }
+            }
+        });
+
+        pair_autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                pair = (Pair) pair_autoCompleteTextView.getAdapter().getItem(position);
+
+                pair_autoCompleteTextView.setText(PlaceholderManager.getPairString(pair.getFrom(), pair.getTo(), getBaseContext()));
+                toolbar.requestFocus();
+                hideSoftKeyboard(RecordTransactionActivity.this);
+
+                updatePairData();
+
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(0).setEnabled(true);
+                ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.white));
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(1).setEnabled(true);
+                ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.white));
+                tabLayout.getTabAt(0).select();
+            }
+        });
+    }
+
+    private void setupExchangeAutoCompleteTextView()
+    {
+        exchange_autoCompleteTextView.setThreshold(0);
+        exchange_autoCompleteTextView.setTextColor(getResources().getColor(R.color.white));
+
+        exchange_autoCompleteTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                pair_autoCompleteTextView.setEnabled(false);
+                pair_autoCompleteTextView.setText("");
+
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(0).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(1).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
+                tabLayout.getTabAt(2).select();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        exchange_autoCompleteTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exchange_autoCompleteTextView.showDropDown();
+            }
+        });
+
+        exchange_autoCompleteTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    exchange_autoCompleteTextView.showDropDown();
+                }
+                else
+                {
+                    exchange_autoCompleteTextView.dismissDropDown();
+                }
+            }
+        });
+
+        exchange_autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                exchange = (Exchange) exchange_autoCompleteTextView.getAdapter().getItem(position);
+
+                exchange_autoCompleteTextView.setText(exchange.getName());
+                toolbar.requestFocus();
+                hideSoftKeyboard(RecordTransactionActivity.this);
+
+                updatePairAdapter();
+                pair_autoCompleteTextView.setEnabled(true);
+
+                updateExchangeData();
+            }
+        });
+    }
+
+    private void updatePairAdapter()
+    {
+        PairRecordListAdapter pairAdapter = new PairRecordListAdapter(this, android.R.layout.simple_list_item_1, new ArrayList<>(exchange.getPairsFor(currency.getSymbol())));
+
+        pair_autoCompleteTextView.setAdapter(pairAdapter);
+    }
+
+    private void updateExchangeAdapter(String symbol)
+    {
+        ExchangeRecordListAdapter exchangeAdapter = new ExchangeRecordListAdapter(this, android.R.layout.simple_list_item_1, new ArrayList<>(cryptocompareApiManager.getExchangeList(symbol)));
+
+        exchange_autoCompleteTextView.setAdapter(exchangeAdapter);
+    }
+
+    private void setupCoinAutoCompleteTextView()
+    {
+        CoinRecordListAdapter adapter = new CoinRecordListAdapter(getBaseContext(), R.layout.custom_summary_coin_row, new ArrayList<>(cryptocompareApiManager.getCurrenciesDenomination()));
+
+        coin_autoCompleteTextView.setThreshold(0);
+        coin_autoCompleteTextView.setAdapter(adapter);
+        coin_autoCompleteTextView.setTextColor(getResources().getColor(R.color.white));
+        coin_autoCompleteTextView.addTextChangedListener(coinTextWatcher);
+
+        coin_autoCompleteTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                coin_autoCompleteTextView.showDropDown();
+            }
+        });
+
+        coin_autoCompleteTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    coin_autoCompleteTextView.showDropDown();
+                }
+                else
+                {
+                    coin_autoCompleteTextView.dismissDropDown();
+                }
+            }
+        });
+
+        coin_autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                currency = (Currency) coin_autoCompleteTextView.getAdapter().getItem(position);
+
+                coin_autoCompleteTextView.setText(PlaceholderManager.getDenomination(currency.getName(), currency.getSymbol(), getBaseContext()));
+                toolbar.requestFocus();
+                hideSoftKeyboard(RecordTransactionActivity.this);
+
+                currency.setListener(RecordTransactionActivity.this);
+
+                updateExchangeAdapter(currency.getSymbol());
+                exchange_autoCompleteTextView.setEnabled(true);
+
+                IconDownloaderTask iconDownloaderTask = new IconDownloaderTask();
+                iconDownloaderTask.execute();
+
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(0).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(1).setEnabled(false);
+                ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.separationColor));
+                ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(2).setEnabled(true);
+                ((TextView) tabLayout.getTabAt(2).getCustomView()).setTextColor(getResources().getColor(R.color.white));
+                tabLayout.getTabAt(2).select();
+
+                updateCurrencyData();
+
+                if(globalTabLayouts.getVisibility() == View.GONE)
+                {
+                    globalTabLayouts.setVisibility(View.VISIBLE);
+                }
+
+                globalTabLayouts.startAnimation(revealAnimation);
+
+                isGlobalLayoutVisible = true;
+            }
+        });
+    }
+
+    private void updateCurrencyData()
+    {
+        for(int i = 0; i < pageAdapter.getCount(); i++)
+        {
+            ((CustomRecordFragment) pageAdapter.getItem(i)).setCurrency(currency);
+        }
+    }
+
+    private void updateExchangeData()
+    {
+        for(int i = 0; i < pageAdapter.getCount(); i++)
+        {
+            ((CustomRecordFragment) pageAdapter.getItem(i)).setExchange(exchange);
+        }
+    }
+
+    private void updatePairData()
+    {
+        for(int i = 0; i < pageAdapter.getCount(); i++)
+        {
+            ((CustomRecordFragment) pageAdapter.getItem(i)).setPair(pair);
+        }
+    }
+
+    @Override
+    public void onTimestampPriceUpdated(String price) {
+        //purchasedPriceEditText.setText(price);
+    }
+
+    @Override
+    public void onHistoryDataUpdated() {
+
+    }
+
+    @Override
+    public void onPriceUpdated(Currency currency) {
+
+    }
+
+    @Override
+    public void onDetailsUpdated() {
+
+    }
+
+    @Override
+    public void onExchangesUpdated() {
+        checkCallingIntent();
+    }
+
+    private class IconDownloaderTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), 500, cryptocompareApiManager);
+
+            if(iconUrl != null)
+            {
+                MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getBaseContext(), new MoodlboxNotifierInterface() {
+                    @Override
+                    public void onBitmapDownloaded(Bitmap bitmapIcon) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                currencyIconImageView.setImageBitmap(bitmapIcon);
+                            }
+                        });
+
+                    }
+                });
+            }
+            else
+            {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        currencyIconImageView.setBackground(getResources().getDrawable(R.mipmap.ic_launcher_moodl));
+                    }
+                });
+            }
+            return null;
+        }
+    }
+
+        /*if(transactionId != -1)
         {
             setTitle(PlaceholderManager.getEditTransactionString(coin, getBaseContext()));
 
@@ -206,106 +717,31 @@ public class RecordTransactionActivity extends AppCompatActivity {
             }
         });
 
-        initializeButtons();
+        //initializeButtons();
 
         currency.getTimestampPrice(this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
             @Override
             public void onSuccess(String price) {
                 purchasedPriceEditText.setText(price);
             }
-        }, calendar.getTimeInMillis() / 1000);
+        }, calendar.getTimeInMillis() / 1000);*/
+
+    public static void hideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) activity.getSystemService(
+                        Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(
+                activity.getCurrentFocus().getWindowToken(), 0);
     }
 
-    private void initializeButtons()
+    private void setupBackButton()
     {
-        buyButton.setOnClickListener(new View.OnClickListener() {
+        ImageButton backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                buyButton.setEnabled(false);
-                sellButton.setEnabled(true);
-                transferButton.setEnabled(true);
-                findViewById(R.id.input_purchase_price).setVisibility(View.VISIBLE);
-                findViewById(R.id.input_fees).setVisibility(View.GONE);
+            public void onClick(View v) {
+                finish();
             }
         });
-
-        sellButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                buyButton.setEnabled(true);
-                sellButton.setEnabled(false);
-                transferButton.setEnabled(true);
-                findViewById(R.id.input_purchase_price).setVisibility(View.GONE);
-                findViewById(R.id.input_fees).setVisibility(View.VISIBLE);
-            }
-        });
-
-        transferButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                buyButton.setEnabled(true);
-                sellButton.setEnabled(true);
-                transferButton.setEnabled(false);
-                // Prepare transfer interface
-            }
-        });
-    }
-
-    private void initializeViewElements()
-    {
-        symbolTxtView = findViewById(R.id.currencySymbol);
-        amountTxtView = findViewById(R.id.currencyAmount);
-        feesTxtView = findViewById(R.id.feesTextView);
-        purchasedDateLayout = findViewById(R.id.input_purchase_date);
-        purchaseDate = findViewById(R.id.purchaseDate);
-        purchasedPriceEditText = findViewById(R.id.purchasePrice);
-        buyButton = findViewById(R.id.buyButton);
-        sellButton = findViewById(R.id.sellButton);
-        transferButton = findViewById(R.id.transfertButton);
-    }
-
-    private void createDatePicker()
-    {
-        new android.app.DatePickerDialog(
-                RecordTransactionActivity.this,
-                new android.app.DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        calendar.set(Calendar.YEAR, year);
-                        calendar.set(Calendar.MONTH, month);
-                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        purchaseDate.setText(sdf.format(calendar.getTime()));
-                        createTimePicker();
-                    }
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        ).show();
-    }
-
-    private void createTimePicker()
-    {
-        new android.app.TimePickerDialog(
-                RecordTransactionActivity.this,
-                new android.app.TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hour, int minute) {
-                        calendar.set(Calendar.HOUR_OF_DAY, hour);
-                        calendar.set(Calendar.MINUTE, minute);
-                        purchaseDate.setText(sdf.format(calendar.getTime()));
-
-                        currency.getTimestampPrice(RecordTransactionActivity.this, preferenceManager.getDefaultCurrency(), new Currency.PriceCallBack() {
-                            @Override
-                            public void onSuccess(String price) {
-                                purchasedPriceEditText.setText(price);
-                            }
-                        }, calendar.getTimeInMillis() / 1000);
-                    }
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                true
-        ).show();
     }
 }

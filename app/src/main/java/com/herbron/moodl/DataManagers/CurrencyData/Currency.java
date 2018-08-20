@@ -4,10 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -46,7 +44,10 @@ public class Currency implements Parcelable {
     private int rank;
     private String startDate;
     private List<String> socialMediaLinks;
+    private List<OnTimestampPriceUpdatedListener> onTimestampPriceUpdatedListenerList;
     //private String proofType
+
+    private CurrencyInfoUpdateNotifierInterface currencyInfoUpdateNotifierInterface;
 
     public Currency() {}
 
@@ -76,9 +77,12 @@ public class Currency implements Parcelable {
         this.tickerId = tickerId;
     }
 
-    //public Currency(int id, String symbol, String name, String algorithm, String proofType, )
+    public void setListener(CurrencyInfoUpdateNotifierInterface currencyInfoUpdateNotifierInterface)
+    {
+        this.currencyInfoUpdateNotifierInterface = currencyInfoUpdateNotifierInterface;
+    }
 
-    public void getTimestampPrice(android.content.Context context, String toSymbol, final PriceCallBack callBack, long timestamp)
+    public void getTimestampPrice(android.content.Context context, String toSymbol, long timestamp)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
@@ -88,12 +92,20 @@ public class Currency implements Parcelable {
 
             @Override
             public void onSuccess(String price) {
-                callBack.onSuccess(price);
+                currencyInfoUpdateNotifierInterface.onTimestampPriceUpdated(price);
+
+                if(onTimestampPriceUpdatedListenerList != null)
+                {
+                    for(int i = 0; i < onTimestampPriceUpdatedListenerList.size(); i++)
+                    {
+                        onTimestampPriceUpdatedListenerList.get(i).onTimeStampPriceUpdated(price);
+                    }
+                }
             }
         }, timestamp);
     }
 
-    public void updatePrice(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    public void updatePrice(android.content.Context context, String toSymbol, final CurrencyInfoUpdateNotifierInterface callBack)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
@@ -107,12 +119,12 @@ public class Currency implements Parcelable {
                     setDayFluctuationPercentage(currencyInfo.getDayFluctuationPercentage());
                 }
 
-                callBack.onSuccess(Currency.this);
+                callBack.onPriceUpdated(currencyInfo);
             }
         });
     }
 
-    public void updateHistoryMinutes(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    public void updateHistoryMinutes(android.content.Context context, String toSymbol)
     {
         dataRetriver = new CurrencyDataRetriever(context);
 
@@ -121,7 +133,7 @@ public class Currency implements Parcelable {
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryMinutes(dataChart);
 
-                callBack.onSuccess(Currency.this);
+                currencyInfoUpdateNotifierInterface.onHistoryDataUpdated();
             }
 
             @Override
@@ -178,7 +190,7 @@ public class Currency implements Parcelable {
         });
     }
 
-    public void updateHistoryHours(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    public void updateHistoryHours(android.content.Context context, String toSymbol)
     {
         dataRetriver = new CurrencyDataRetriever(context);
         dataRetriver.updateHistory(symbol, toSymbol, new CurrencyDataRetriever.DataChartCallBack() {
@@ -186,7 +198,7 @@ public class Currency implements Parcelable {
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryHours(dataChart);
 
-                callBack.onSuccess(Currency.this);
+                currencyInfoUpdateNotifierInterface.onHistoryDataUpdated();
             }
 
             @Override
@@ -194,7 +206,7 @@ public class Currency implements Parcelable {
         }, CurrencyDataRetriever.HOURS);
     }
 
-    public void updateHistoryDays(android.content.Context context, String toSymbol, final CurrencyCallBack callBack)
+    public void updateHistoryDays(android.content.Context context, String toSymbol)
     {
         dataRetriver = new CurrencyDataRetriever(context);
         dataRetriver.updateHistory(symbol, toSymbol, new CurrencyDataRetriever.DataChartCallBack() {
@@ -202,18 +214,12 @@ public class Currency implements Parcelable {
             public void onSuccess(List<CurrencyDataChart> dataChart) {
                 setHistoryDays(dataChart);
 
-                callBack.onSuccess(Currency.this);
+                currencyInfoUpdateNotifierInterface.onHistoryDataUpdated();
             }
 
             @Override
             public void onSuccess(String price) {}
         }, CurrencyDataRetriever.DAYS);
-    }
-
-    public void updateDetails(android.content.Context context, final CurrencyCallBack callBack)
-    {
-            dataRetriver = new CurrencyDataRetriever(context);
-
     }
 
     private int getDarkenColor(int color)
@@ -525,4 +531,19 @@ public class Currency implements Parcelable {
             return new Currency[size];
         }
     };
+
+    public interface OnTimestampPriceUpdatedListener
+    {
+        void onTimeStampPriceUpdated(String price);
+    }
+
+    public void addOnTimestampPriceUpdatedListener(OnTimestampPriceUpdatedListener onTimestampPriceUpdatedListener)
+    {
+        if(onTimestampPriceUpdatedListenerList == null)
+        {
+            onTimestampPriceUpdatedListenerList = new ArrayList<>();
+        }
+
+        onTimestampPriceUpdatedListenerList.add(onTimestampPriceUpdatedListener);
+    }
 }

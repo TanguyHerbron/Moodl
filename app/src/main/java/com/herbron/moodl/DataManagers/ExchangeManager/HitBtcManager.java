@@ -11,6 +11,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
+import com.herbron.moodl.DataNotifiers.HitBTCUpdateNotifierInterface;
 import com.herbron.moodl.R;
 
 import org.json.JSONArray;
@@ -26,10 +27,8 @@ import java.util.Map;
  * Created by Guitoune on 26/02/2018.
  */
 
-public class HitBtcManager {
+public class HitBtcManager extends Exchange {
 
-    private String publicKey;
-    private String privateKey;
     final private String hitBalanceUrl = "https://api.hitbtc.com/api/2/account/balance";
     final private String hitTradingBalanceUrl = "https://api.hitbtc.com/api/2/trading/balance";
     final private String tradeHistoryUrl = "https://api.hitbtc.com/api/2/history/trades?";
@@ -41,13 +40,24 @@ public class HitBtcManager {
     private List<Currency> balance;
     private android.content.Context context;
 
-    public HitBtcManager(android.content.Context context, String publicKey, String privateKey)
+    private List<HitBTCUpdateNotifierInterface> hitBTCUpdateNotifierInterfaceList;
+
+    public HitBtcManager(android.content.Context context, Exchange exchange)
     {
+        super(exchange.id, exchange.name, exchange.type, exchange.description, exchange.publicKey, exchange.privateKey, exchange.isEnabled);
+
         this.context = context;
         requestQueue = Volley.newRequestQueue(context);
+    }
 
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
+    public void addListener(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface)
+    {
+        if(hitBTCUpdateNotifierInterfaceList == null)
+        {
+            hitBTCUpdateNotifierInterfaceList = new ArrayList<>();
+        }
+
+        hitBTCUpdateNotifierInterfaceList.add(hitBTCUpdateNotifierInterface);
     }
 
     private void createPairSymbolList()
@@ -58,11 +68,6 @@ public class HitBtcManager {
         pairSymbolList.add("ETH");
         pairSymbolList.add("BNB");
         pairSymbolList.add("USDT");
-    }
-
-    public void updateTrades(final HitBtcCallBack callBack, String symbol, String pairSymbol)
-    {
-
     }
 
     private void mergeBalanceSymbols()
@@ -91,7 +96,7 @@ public class HitBtcManager {
         balance = mergedBalance;
     }
 
-    public void updateGlobalBalance(final HitBtcCallBack masterCallBack)
+    public void updateGlobalBalance()
     {
         isTradingBalanceUpdated = false;
         isBalanceUpdated = false;
@@ -106,13 +111,20 @@ public class HitBtcManager {
                 if(isTradingBalanceUpdated)
                 {
                     mergeBalanceSymbols();
-                    masterCallBack.onSuccess();
+
+                    for(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface : hitBTCUpdateNotifierInterfaceList)
+                    {
+                        hitBTCUpdateNotifierInterface.onHitBTCBalanceUpdateSuccess();
+                    }
                 }
             }
 
             @Override
             public void onError(String error) {
-                masterCallBack.onError(error);
+                for(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface : hitBTCUpdateNotifierInterfaceList)
+                {
+                    hitBTCUpdateNotifierInterface.onHitBTCBalanceUpdateError(id, error);
+                }
             }
         });
 
@@ -124,13 +136,20 @@ public class HitBtcManager {
                 if(isBalanceUpdated)
                 {
                     mergeBalanceSymbols();
-                    masterCallBack.onSuccess();
+
+                    for(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface : hitBTCUpdateNotifierInterfaceList)
+                    {
+                        hitBTCUpdateNotifierInterface.onHitBTCBalanceUpdateSuccess();
+                    }
                 }
             }
 
             @Override
             public void onError(String error) {
-                masterCallBack.onError(error);
+                for(HitBTCUpdateNotifierInterface hitBTCUpdateNotifierInterface : hitBTCUpdateNotifierInterfaceList)
+                {
+                    hitBTCUpdateNotifierInterface.onHitBTCBalanceUpdateError(id, error);
+                }
             }
         });
     }

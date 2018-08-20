@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v7.widget.CardView;
@@ -13,8 +12,8 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
-import com.herbron.moodl.Activities.HomeActivity;
-import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDetailsList;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -207,7 +206,7 @@ public class MoodlBox {
         }
     }
 
-    public static void getBitmapFromURL(String src, String symbol, Resources resources, Context context, HomeActivity.IconCallBack callBack)
+    public static void getBitmapFromURL(String src, String symbol, Resources resources, Context context, MoodlboxNotifierInterface callBack)
     {
         String size = src.substring(src.lastIndexOf("=") + 1, src.length());
         String filepath = context.getCacheDir() + "/" + symbol + "x" + size + ".png";
@@ -240,7 +239,7 @@ public class MoodlBox {
             }
         }
 
-        callBack.onSuccess(result);
+        callBack.onBitmapDownloaded(result);
     }
 
     public static int getColor(int id, Context context)
@@ -275,9 +274,9 @@ public class MoodlBox {
         return drawable;
     }
 
-    public static String getIconUrl(String symbol, CurrencyDetailsList currencyDetailsList)
+    public static String getIconUrl(String symbol, CryptocompareApiManager cryptocompareApiManager)
     {
-        return getIconUrl(symbol, 50, currencyDetailsList);
+        return getIconUrl(symbol, 50, cryptocompareApiManager);
     }
 
     public static float convertDpToPx(float dp, Resources resources)
@@ -285,12 +284,12 @@ public class MoodlBox {
         return dp * resources.getDisplayMetrics().density;
     }
 
-    public static String getIconUrl(String symbol, int size, CurrencyDetailsList currencyDetailsList)
+    public static String getIconUrl(String symbol, int size, CryptocompareApiManager cryptocompareApiManager)
     {
         String url;
 
         try {
-            JSONObject jsonObject = new JSONObject(currencyDetailsList.getCoinInfosHashmap().get(symbol));
+            JSONObject jsonObject = new JSONObject(cryptocompareApiManager.getCoinInfosHashmap().get(symbol));
             url = "https://www.cryptocompare.com" + jsonObject.getString("ImageUrl") + "?width=" + size;
         } catch (JSONException | NullPointerException e) {
             url = null;

@@ -6,9 +6,11 @@ import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
@@ -34,9 +37,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.applandeo.FilePicker;
 import com.applandeo.listeners.OnSelectFileListener;
@@ -68,9 +69,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -178,6 +177,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        Drawable gradientDrawable = getResources().getDrawable(R.drawable.gradient_background);
+
+        actionBar.setBackgroundDrawable(gradientDrawable);
     }
 
     /**
@@ -235,7 +238,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
 
-                    return false;
+                    Log.d("moodl", "> " + o + " " + preference);
+
+                    return (boolean) o;
                 }
             });
 
@@ -244,7 +249,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     boolean isChecked = ((SwitchPreference) findPreference("enable_hitbtc")).isChecked();
 
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getBaseContext());
 
                     SharedPreferences.Editor editor = preferences.edit();
 
@@ -260,7 +265,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     boolean isChecked = ((SwitchPreference) findPreference("enable_binance")).isChecked();
 
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getBaseContext());
 
                     SharedPreferences.Editor editor = preferences.edit();
 
@@ -287,62 +292,64 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         private void startFingerprintProtocol()
         {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity().getBaseContext());
             FingerprintDialogFragment newFragment = FingerprintDialogFragment.newInstance();
+            SwitchPreference touchdIdSwitch = (SwitchPreference) findPreference("enable_fingerprint");
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                keyguardManager = (KeyguardManager) this.getActivity().getSystemService(KEYGUARD_SERVICE);
+                fingerprintManager = (FingerprintManager) this.getActivity().getSystemService(FINGERPRINT_SERVICE);
+
+                try {
+                    if(!fingerprintManager.isHardwareDetected())
+                    {
+                        touchdIdSwitch.setEnabled(false);
+                    }
+
+                    if(ActivityCompat.checkSelfPermission(this.getActivity().getBaseContext(), Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
+                    {
+                        touchdIdSwitch.setEnabled(false);
+                    }
+
+                    if(!fingerprintManager.hasEnrolledFingerprints())
+                    {
+                        touchdIdSwitch.setEnabled(false);
+                    }
+
+                    if(!keyguardManager.isKeyguardSecure())
+                    {
+                        touchdIdSwitch.setEnabled(false);
+                    }
+                    else
+                    {
+                        try {
+                            generateKey();
+                        } catch (FingerprintException e) {
+                            e.printStackTrace();
+                        }
+
+                        if(initCipher())
+                        {
+                            cryptoObject = new FingerprintManager.CryptoObject(cipher);
+
+                            FingerprintHandler helper = new FingerprintHandler(this.getActivity().getBaseContext(), newFragment);
+                            helper.startAuth(fingerprintManager, cryptoObject);
+                        }
+                    }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
 
             if(preferences.getBoolean("enable_fingerprint", false))
             {
                 newFragment.setCancelable(false);
                 newFragment.show(getFragmentManager(), "dialog");
-
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                {
-                    keyguardManager = (KeyguardManager) this.getActivity().getSystemService(KEYGUARD_SERVICE);
-                    fingerprintManager = (FingerprintManager) this.getActivity().getSystemService(FINGERPRINT_SERVICE);
-
-                    try {
-                        if(!fingerprintManager.isHardwareDetected())
-                        {
-                            this.getActivity().findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-                        }
-
-                        if(ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED)
-                        {
-                            this.getActivity().findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-                        }
-
-                        if(!fingerprintManager.hasEnrolledFingerprints())
-                        {
-                            this.getActivity().findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-                        }
-
-                        if(!keyguardManager.isKeyguardSecure())
-                        {
-                            this.getActivity().findViewById(R.id.fingerprint_switch).setVisibility(View.GONE);
-                        }
-                        else
-                        {
-                            try {
-                                generateKey();
-                            } catch (FingerprintException e) {
-                                e.printStackTrace();
-                            }
-
-                            if(initCipher())
-                            {
-                                cryptoObject = new FingerprintManager.CryptoObject(cipher);
-
-                                FingerprintHandler helper = new FingerprintHandler(this.getContext(), newFragment);
-                                helper.startAuth(fingerprintManager, cryptoObject);
-                            }
-                        }
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
 
+        @TargetApi(23)
         private void generateKey() throws FingerprintException
         {
             try {
@@ -368,6 +375,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
         }
 
+        @TargetApi(23)
         public boolean initCipher()
         {
             try {
@@ -426,7 +434,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 developperCategory.getPreference(0).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
-                        File cacheDir = getContext().getCacheDir();
+                        File cacheDir = getActivity().getBaseContext().getCacheDir();
                         File[] cachedFiles = cacheDir.listFiles();
 
                         for(int i = 0; i < cachedFiles.length; i++)
@@ -446,8 +454,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
-                    Context context = getContext();
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                    Context context = getActivity().getBaseContext();
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainPreferenceFragment.this.getActivity());
                     View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_export_data, null, true);
                     dialogBuilder.setView(dialogView);
 
@@ -502,7 +510,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                             Date currentDate = new Date();
                             String fileName = "Bakup_" + formatter.format(currentDate) + ".moodl";
-                            DatabaseManager databaseManager = new DatabaseManager(getContext());
+                            DatabaseManager databaseManager = new DatabaseManager(getActivity().getBaseContext());
 
                             if(enterPasswordCheckbox.isChecked())
                             {
@@ -528,15 +536,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     if(backupManualEntriesCheckbox.isChecked())
                                     {
                                         backupJson.put("transactions",
-                                                databaseManager.getDatabaseBackup(getContext(),
-                                                        DatabaseManager.TABLE_MANUAL_CURRENCIES,
+                                                databaseManager.getDatabaseBackup(getActivity().getBaseContext(),
+                                                        DatabaseManager.TABLE_MANUAL_TRANSACTIONS,
                                                         enterPasswordCheckbox.isChecked()));
                                     }
 
                                     if(backupWatchlistCheckbox.isChecked())
                                     {
                                         backupJson.put("watchlist",
-                                                databaseManager.getDatabaseBackup(getContext(),
+                                                databaseManager.getDatabaseBackup(getActivity().getBaseContext(),
                                                         DatabaseManager.TABLE_WATCHLIST,
                                                         enterPasswordCheckbox.isChecked()));
                                     }
@@ -544,7 +552,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     if(backupKeysCheckbox.isChecked())
                                     {
                                         backupJson.put("apiKeys",
-                                                databaseManager.getDatabaseBackup(getContext(),
+                                                databaseManager.getDatabaseBackup(getActivity().getBaseContext(),
                                                         DatabaseManager.TABLE_EXCHANGE_KEYS,
                                                         enterPasswordCheckbox.isChecked()));
                                     }
@@ -580,8 +588,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
-                    Context context = getContext();
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                    Context context = getActivity().getBaseContext();
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainPreferenceFragment.this.getActivity());
                     View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_import_data, null, true);
                     dialogBuilder.setView(dialogView);
 
@@ -706,7 +714,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                                     if(enterPasswordCheckbox.isChecked())
                                     {
-                                        checker = DataCrypter.decrypt(getContext(), backupJson.getString("encodeChecker"));
+                                        checker = DataCrypter.decrypt(getActivity().getBaseContext(), backupJson.getString("encodeChecker"));
                                     }
                                     else
                                     {
@@ -719,7 +727,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                         {
                                             if(wipeManualEntriesCheckbox.isChecked())
                                             {
-                                                databaseManager.wipeData(DatabaseManager.TABLE_MANUAL_CURRENCIES);
+                                                databaseManager.wipeData(DatabaseManager.TABLE_MANUAL_TRANSACTIONS);
                                             }
 
                                             if(backupJson.has("transactions"))
@@ -730,7 +738,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                                 {
                                                     JSONObject transactionObject = transactionsArray.getJSONObject(i);
 
-                                                    databaseManager.addRowTransaction(transactionObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                    databaseManager.addRowTransaction(transactionObject, getActivity().getBaseContext(), enterPasswordCheckbox.isChecked());
                                                 }
                                             }
                                         }
@@ -748,9 +756,29 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                                                 for(int i = 0; i < watchlistArray.length(); i++)
                                                 {
-                                                    JSONObject transactionObject = watchlistArray.getJSONObject(i);
+                                                    JSONObject watchlistObject = watchlistArray.getJSONObject(i);
 
-                                                    databaseManager.addRowWatchlist(transactionObject, getContext(), enterPasswordCheckbox.isChecked());
+                                                    databaseManager.addRowWatchlist(watchlistObject, getActivity().getBaseContext(), enterPasswordCheckbox.isChecked());
+                                                }
+                                            }
+                                        }
+
+                                        if(restoreApiKeysCheckbox.isChecked())
+                                        {
+                                            if(wipeApiKeyxCheckbox.isChecked())
+                                            {
+                                                databaseManager.wipeData(DatabaseManager.TABLE_EXCHANGE_KEYS);
+                                            }
+
+                                            if(backupJson.has("apiKeys"))
+                                            {
+                                                JSONArray apiArray = backupJson.getJSONArray("apiKeys");
+
+                                                for(int i = 0; i < apiArray.length(); i++)
+                                                {
+                                                    JSONObject apiKeysObject = apiArray.getJSONObject(i);
+
+                                                    databaseManager.addRowApiKeys(apiKeysObject, getActivity().getBaseContext(), enterPasswordCheckbox.isChecked());
                                                 }
                                             }
                                         }
@@ -784,6 +812,26 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
 
+            DatabaseManager databaseManager = new DatabaseManager(getActivity().getBaseContext());
+            int disabledAcount = databaseManager.getDisabledExchangeAccountsNumber();
+            PreferenceScreen preferenceScreen = (PreferenceScreen) findPreference("exchange");
+
+            if(disabledAcount > 0)
+            {
+                preferenceScreen.setWidgetLayoutResource(R.layout.alert_layout);
+            }
+
+            preferenceScreen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    Intent exchangeListIntent = new Intent(getActivity().getBaseContext(), ExchangeListActivity.class);
+                    startActivity(exchangeListIntent);
+
+                    return false;
+                }
+            });
+
             EditTextPreference editTextPreference = (EditTextPreference) findPreference("minimum_value_displayed");
             editTextPreference.setPositiveButtonText(getString(R.string.save));
             editTextPreference.setNegativeButtonText(getString(R.string.cancel));
@@ -793,7 +841,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         {
             if(mustEncrypt)
             {
-                backupJson.put("encodeChecker", DataCrypter.encrypt(getContext(), "NaukVerification"));
+                backupJson.put("encodeChecker", DataCrypter.encrypt(getActivity().getBaseContext(), "NaukVerification"));
             }
             else
             {
@@ -820,7 +868,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             int result;
             List<String> listPermissionsNeeded = new ArrayList<>();
             for (String p : permissions) {
-                result = ContextCompat.checkSelfPermission(getContext(), p);
+                result = ContextCompat.checkSelfPermission(getActivity().getBaseContext(), p);
                 if (result != PackageManager.PERMISSION_GRANTED) {
                     listPermissionsNeeded.add(p);
                 }
@@ -839,6 +887,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 //startActivity(new Intent(getActivity(), SettingsActivity.class));
                 return true;
             }
+
             return super.onOptionsItemSelected(item);
         }
     }

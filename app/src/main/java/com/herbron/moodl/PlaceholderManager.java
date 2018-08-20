@@ -4,6 +4,9 @@ import android.content.Context;
 
 import com.herbron.moodl.DataManagers.PreferencesManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Tiji on 19/04/2018.
  */
@@ -32,6 +35,26 @@ public class PlaceholderManager {
         }
 
         return formattedString;
+    }
+
+    public static List<String> getFeeOptionsForSymbol(String symbol, Context context)
+    {
+        List<String> options = new ArrayList<>();
+
+        options.add(context.getResources().getString(R.string.fixedFee, symbol));
+        options.add(context.getResources().getString(R.string.percentageFee, symbol));
+
+        return options;
+    }
+
+    public static String getPairString(String pair1, String pair2, Context context)
+    {
+        return context.getResources().getString(R.string.pairPlaceholder, pair1, pair2);
+    }
+
+    public static String getDenomination(String coinName, String coinSymbol, Context context)
+    {
+        return context.getResources().getString(R.string.denomincationPlaceholder, coinName, coinSymbol);
     }
 
     public static String getEditTransactionString(String coinName, Context context)
