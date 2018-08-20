@@ -624,7 +624,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
                                 if(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1)
                                 {
                                     currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                            , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                            , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
                                 }
                                 else
                                 {
@@ -638,14 +638,14 @@ public class DatabaseManager extends SQLiteOpenHelper{
                             if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))))
                             {
                                 currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                        , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                        , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
                             }
                             else
                             {
                                 if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))))
                                 {
                                     currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
                                 }
                             }
                         }
