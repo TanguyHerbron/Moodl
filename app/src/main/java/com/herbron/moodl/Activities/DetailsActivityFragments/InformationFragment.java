@@ -26,7 +26,7 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
  * Created by Tiji on 13/05/2018.
  */
 
-public class Informations extends Fragment {
+public class InformationFragment extends Fragment {
 
     private Currency currency;
     private View view;

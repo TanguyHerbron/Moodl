@@ -34,7 +34,7 @@ import java.util.List;
  * Created by Tiji on 13/05/2018.
  */
 
-public class Transactions extends Fragment {
+public class TransactionsFragment extends Fragment {
 
     private Currency currency;
     private View loadingFooter;
@@ -280,7 +280,7 @@ public class Transactions extends Fragment {
                         }
                     });
                 } catch (NullPointerException e) {
-                    Log.d("moodl", "Transactions do not need to be updated anymore");
+                    Log.d("moodl", "TransactionsFragment do not need to be updated anymore");
                 }
             }
         }

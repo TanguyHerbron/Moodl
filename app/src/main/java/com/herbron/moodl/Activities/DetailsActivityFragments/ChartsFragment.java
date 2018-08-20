@@ -49,7 +49,7 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
  * Created by Tiji on 13/05/2018.
  */
 
-public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterface {
+public class ChartsFragment extends Fragment implements CurrencyInfoUpdateNotifierInterface {
 
     private final static int HOUR = 0;
     private final static int DAY = 1;
@@ -628,31 +628,31 @@ public class Charts extends Fragment implements CurrencyInfoUpdateNotifierInterf
                 switch (timeIntervalSpinner.getSelectedItemPosition())
                 {
                     case 0:
-                        updateChartTab(Charts.HOUR, 1);
+                        updateChartTab(ChartsFragment.HOUR, 1);
                         break;
                     case 1:
-                        updateChartTab(Charts.HOUR, 3);
+                        updateChartTab(ChartsFragment.HOUR, 3);
                         break;
                     case 2:
-                        updateChartTab(Charts.DAY, 1);
+                        updateChartTab(ChartsFragment.DAY, 1);
                         break;
                     case 3:
-                        updateChartTab(Charts.DAY, 3);
+                        updateChartTab(ChartsFragment.DAY, 3);
                         break;
                     case 4:
-                        updateChartTab(Charts.WEEK, 11);
+                        updateChartTab(ChartsFragment.WEEK, 11);
                         break;
                     case 5:
-                        updateChartTab(Charts.MONTH, 1);
+                        updateChartTab(ChartsFragment.MONTH, 1);
                         break;
                     case 6:
-                        updateChartTab(Charts.MONTH, 3);
+                        updateChartTab(ChartsFragment.MONTH, 3);
                         break;
                     case 7:
-                        updateChartTab(Charts.MONTH, 6);
+                        updateChartTab(ChartsFragment.MONTH, 6);
                         break;
                     case 8:
-                        updateChartTab(Charts.YEAR, 1);
+                        updateChartTab(ChartsFragment.YEAR, 1);
                         break;
                 }
             }

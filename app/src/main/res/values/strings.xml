@@ -79,7 +79,7 @@
     <string name="trade_loading">Looking for trades&#8230;</string>
     <string name="default_value" translatable="false">--</string>
 
-    <!--Charts activity-->
+    <!--ChartsFragment activity-->
     <string name="drawer">Drawer</string>
     <string name="dominance_percentage">Dominance percentage</string>
     <string name="active_cryptocurrencies">Active cryptocurrencies</string>
