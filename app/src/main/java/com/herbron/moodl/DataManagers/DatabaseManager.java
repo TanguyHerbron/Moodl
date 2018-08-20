@@ -497,8 +497,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
             Log.d("moodl", "Error while inserting transaction " + e.getMessage());
         }
 
-        Log.d("mood", "Raw " + rawValues.toString());
-
         db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
         db.close();
     }
@@ -690,15 +688,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         if(resultatList.moveToFirst())
         {
-            boolean deduct = false;
-
-            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
-            {
-                deduct = resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1;
-            }
-
-            Log.d("moodl", "> " + resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)));
-
             transaction = new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
@@ -712,10 +701,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))
-                    , deduct);
+                    , resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1);
         }
-
-        Log.d("moodl", "> " + DatabaseUtils.dumpCurrentRowToString(resultatList));
 
         resultatList.close();
 

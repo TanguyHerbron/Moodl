@@ -64,7 +64,7 @@ public class BuyFragment extends CustomRecordFragment {
     private List<String> symbolStrings;
 
     private int transactionId;
-    private Transaction transaction;
+    private static Transaction transaction;
 
     private boolean isAmountLastUpdated;
 
@@ -523,6 +523,8 @@ public class BuyFragment extends CustomRecordFragment {
 
     public void updatePair(Pair pair)
     {
+        fragmentPair = pair;
+
         currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
         currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
@@ -532,6 +534,32 @@ public class BuyFragment extends CustomRecordFragment {
         symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
         currencyFeeAdapter.addAll(symbolStrings);
         currencyFeeAdapter.notifyDataSetChanged();
+
+        if(transaction != null)
+        {
+            if(transaction.getFeeCurrency().equals(fragmentPair.getFrom()))
+            {
+                if(transaction.getFeeFormat().equals("p"))
+                {
+                    feesCurrencySpinner.setSelection(0);
+                }
+                else
+                {
+                    feesCurrencySpinner.setSelection(1);
+                }
+            }
+            else
+            {
+                if(transaction.getFeeFormat().equals("p"))
+                {
+                    feesCurrencySpinner.setSelection(2);
+                }
+                else
+                {
+                    feesCurrencySpinner.setSelection(3);
+                }
+            }
+        }
     }
 
     @Override

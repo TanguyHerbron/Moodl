@@ -63,7 +63,7 @@ public class SellFragment extends CustomRecordFragment {
     private List<String> symbolStrings;
 
     private int transactionId;
-    private Transaction transaction;
+    private static Transaction transaction;
 
     private boolean isAmountLastUpdated;
 
@@ -531,6 +531,32 @@ public class SellFragment extends CustomRecordFragment {
         symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
         currencyFeeAdapter.addAll(symbolStrings);
         currencyFeeAdapter.notifyDataSetChanged();
+
+        if(transaction != null)
+        {
+            if(transaction.getFeeCurrency().equals(fragmentPair.getFrom()))
+            {
+                if(transaction.getFeeFormat().equals("p"))
+                {
+                    feesCurrencySpinner.setSelection(0);
+                }
+                else
+                {
+                    feesCurrencySpinner.setSelection(1);
+                }
+            }
+            else
+            {
+                if(transaction.getFeeFormat().equals("p"))
+                {
+                    feesCurrencySpinner.setSelection(2);
+                }
+                else
+                {
+                    feesCurrencySpinner.setSelection(3);
+                }
+            }
+        }
     }
 
     @Override
