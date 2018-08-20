@@ -53,11 +53,11 @@ public class TradeListAdapter extends ArrayAdapter<Trade> {
 
         if(trade.isBuyer())
         {
-            tradeIndicator.setBackgroundColor(context.getColor(R.color.green));
+            tradeIndicator.setBackgroundColor(context.getResources().getColor(R.color.green));
         }
         else
         {
-            tradeIndicator.setBackgroundColor(context.getColor(R.color.red));
+            tradeIndicator.setBackgroundColor(context.getResources().getColor(R.color.red));
         }
 
         return convertView;

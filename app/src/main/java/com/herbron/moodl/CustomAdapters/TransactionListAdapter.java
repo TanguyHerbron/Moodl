@@ -88,6 +88,21 @@ public class TransactionListAdapter extends ArrayAdapter<Transaction> {
             }
         });
 
+        View transactionIndicator = convertView.findViewById(R.id.transactionIndicator);
+
+        switch (transaction.getType())
+        {
+            case "b":
+                transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.increaseCandle));
+                break;
+            case "s":
+                transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.decreaseCandle));
+                break;
+            case "t":
+                transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.blue));
+                break;
+        }
+
         setupSwipeView(convertView);
 
         return convertView;
