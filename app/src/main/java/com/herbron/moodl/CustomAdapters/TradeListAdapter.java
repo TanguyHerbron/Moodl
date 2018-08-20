@@ -41,7 +41,7 @@ public class TradeListAdapter extends ArrayAdapter<Trade> {
         }
 
         TextView amountTxtView = convertView.findViewById(R.id.amountPurchased);
-        TextView purchasedPrice = convertView.findViewById(R.id.purchasedPrice);
+        TextView purchasedPrice = convertView.findViewById(R.id.purchasePrice);
         TextView tradePair = convertView.findViewById(R.id.pair);
         TextView dateTxtView = convertView.findViewById(R.id.tradeDate);
         View tradeIndicator = convertView.findViewById(R.id.tradeIndicator);

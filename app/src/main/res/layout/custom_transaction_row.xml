@@ -2,21 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:orientation="horizontal">
-
-    <View
-        android:id="@+id/transactionIndicator"
-        android:layout_width="5dp"
-        android:layout_height="match_parent"/>
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="49dp"
+        android:orientation="horizontal">
 
-        <com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <View
+            android:id="@+id/transactionIndicator"
+            android:layout_width="5dp"
+            android:layout_height="match_parent"/>
+
+        <com.daimajia.swipe.SwipeLayout
             android:layout_width="match_parent"
-            android:layout_height="49dp"
+            android:layout_height="match_parent"
             android:id="@+id/swipeLayout">
             <!-- Bottom View Start-->
             <LinearLayout
@@ -109,12 +109,12 @@
             <!-- Surface View End -->
         </com.daimajia.swipe.SwipeLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/separationLineSize"
-            android:layout_gravity="center_vertical"
-            android:background="@color/separationColor" />
-
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/separationLineSize"
+        android:layout_gravity="center_vertical"
+        android:background="@color/separationColor" />
 
 </LinearLayout>

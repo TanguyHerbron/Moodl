@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.herbron.moodl.Activities.RecordTransactionActivity;
+import com.herbron.moodl.DataManagers.CurrencyData.Trade;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
@@ -30,11 +32,11 @@ import static java.lang.Math.abs;
  * Created by Guitoune on 24/04/2018.
  */
 
-public class TransactionListAdapter extends ArrayAdapter<Transaction> {
+public class TransactionListAdapter extends ArrayAdapter<Object> {
 
     private Context context;
 
-    public TransactionListAdapter(Context context, ArrayList<Transaction> transactions)
+    public TransactionListAdapter(Context context, ArrayList<Object> transactions)
     {
         super(context, android.R.layout.simple_list_item_1, transactions);
         this.context = context;
@@ -43,12 +45,51 @@ public class TransactionListAdapter extends ArrayAdapter<Transaction> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        final Transaction transaction = getItem(position);
 
-        if(convertView == null)
+        if(getItem(position) instanceof Transaction)
         {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_transaction_row, parent, false);
+            return generateTransactionLayout(position, parent);
         }
+        else
+        {
+            return generateTradeLayout(position, parent);
+        }
+    }
+
+    private View generateTradeLayout(int position, ViewGroup parent)
+    {
+        Trade trade = (Trade) getItem(position);
+
+        View convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_trade_row, parent, false);
+
+        TextView amountTxtView = convertView.findViewById(R.id.amountPurchased);
+        TextView purchasedPrice = convertView.findViewById(R.id.purchasePrice);
+        TextView tradePair = convertView.findViewById(R.id.pair);
+        TextView dateTxtView = convertView.findViewById(R.id.tradeDate);
+        View tradeIndicator = convertView.findViewById(R.id.tradeIndicator);
+
+        amountTxtView.setText(String.valueOf(trade.getQty()));
+        purchasedPrice.setText(trade.getPrice());
+        dateTxtView.setText(getDateFromTimestamp(trade.getTime()));
+        tradePair.setText(trade.getSymbol() + "/" + trade.getPairSymbol());
+
+        if(trade.isBuyer())
+        {
+            tradeIndicator.setBackgroundColor(context.getResources().getColor(R.color.green));
+        }
+        else
+        {
+            tradeIndicator.setBackgroundColor(context.getResources().getColor(R.color.red));
+        }
+
+        return convertView;
+    }
+
+    private View generateTransactionLayout(int position, ViewGroup parent)
+    {
+        final Transaction transaction = (Transaction) getItem(position);
+
+        View convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_transaction_row, parent, false);
 
         TextView amountTxtView = convertView.findViewById(R.id.amountPurchased);
         TextView valueTxtView = convertView.findViewById(R.id.puchasedValue);

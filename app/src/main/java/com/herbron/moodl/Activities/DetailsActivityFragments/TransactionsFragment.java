@@ -28,6 +28,8 @@ import com.herbron.moodl.CustomAdapters.TransactionListAdapter;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class TransactionsFragment extends Fragment {
     private Currency currency;
     private View loadingFooter;
     private View view;
-    private ListView tradeLayout;
+    //private ListView tradeLayout;
     private ListView transactionLayout;
     private boolean flag_loading;
     private List<BinanceManager> binanceManagerList;
@@ -57,7 +59,7 @@ public class TransactionsFragment extends Fragment {
         currency = getActivity().getIntent().getParcelableExtra("currency");
         databaseManager = new DatabaseManager(getActivity().getBaseContext());
         binanceManagerList = databaseManager.getBinanceAccounts();
-        tradeLayout = view.findViewById(R.id.listTrades);
+        //tradeLayout = view.findViewById(R.id.listTrades);
         transactionLayout = view.findViewById(R.id.listTransactions);
 
         flag_loading = false;
@@ -65,59 +67,137 @@ public class TransactionsFragment extends Fragment {
         TransactionUpdater transactionUpdater = new TransactionUpdater();
         transactionUpdater.execute();
 
-        TradeUpdater updater = new TradeUpdater();
-        updater.execute();
-
         return view;
     }
 
-    private void loadingIndicatorGenerator()
+    private class TransactionUpdater extends AsyncTask<Void, Integer, Void> implements BinanceUpdateNotifierInterface
     {
-        loadingFooter = LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.listview_loading_indicator, null, false);
+        private ArrayList<Object> displayedTransactions;
+        private int nbTradeAccountUpdated;
+        private int nbTransactionAccountUpdated;
 
-        Drawable drawable = ((ProgressBar) loadingFooter.findViewById(R.id.progressIndicator)).getIndeterminateDrawable();
-        drawable.mutate();
-        drawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-        drawable.invalidateSelf();
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
 
-        tradeLayout.addFooterView(loadingFooter);
-    }
+            displayedTransactions = new ArrayList<>();
+            nbTradeAccountUpdated = 0;
+            nbTransactionAccountUpdated = 0;
+        }
 
-    private void drawTradeList(ArrayList<com.herbron.moodl.DataManagers.CurrencyData.Trade> trades)
-    {
-        if(returnedTrades.size() > 20)
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if(Looper.myLooper() == null)
+            {
+                Looper.prepare();
+            }
+
+            displayedTransactions.addAll(databaseManager.getCurrencyTransactionsForSymbol(currency.getSymbol()));
+
+            for(int i = 0; i < binanceManagerList.size(); i++)
+            {
+                binanceManagerList.get(i).addListener(this);
+                binanceManagerList.get(i).updateTrades(currency.getSymbol());
+                binanceManagerList.get(i).updateTransactions(currency.getSymbol());
+            }
+
+            if(nbTradeAccountUpdated == binanceManagerList.size())
+            {
+                drawTransactionList(displayedTransactions);
+            }
+
+            return null;
+        }
+
+        @Override
+        public void onBinanceTradesUpdated(List<Trade> trades) {
+            nbTradeAccountUpdated++;
+
+            displayedTransactions.addAll(trades);
+
+            if(nbTradeAccountUpdated == binanceManagerList.size())
+            {
+                drawTransactionList(displayedTransactions);
+            }
+        }
+
+        @Override
+        public void onBinanceBalanceUpdateSuccess() {
+
+        }
+
+        @Override
+        public void onBinanceBalanceUpdateError(int accountId, String error) {
+
+        }
+
+        private void drawTransactionList(ArrayList<Object> transactions)
         {
-            tradeLayout.setOnScrollListener(new AbsListView.OnScrollListener() {
+            Collections.sort(transactions, new Comparator<Object>() {
                 @Override
-                public void onScrollStateChanged(AbsListView absListView, int i) {
+                public int compare(Object o1, Object o2) {
+                    Long time1;
+                    Long time2;
 
-                }
-
-                @Override
-                public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                    if(firstVisibleItem+visibleItemCount == totalItemCount && totalItemCount!=0)
+                    if(o1 instanceof Transaction)
                     {
-                        if(!flag_loading && tradeLayout.getCount() != returnedTrades.size() - 1)
-                        {
-                            flag_loading = true;
-
-                            TradeAdder tradeAdder = new TradeAdder();
-                            tradeAdder.execute();
-                        }
+                        time1 = ((Transaction) o1).getTimestamp();
                     }
+                    else
+                    {
+                        time1 = ((Trade) o1).getTime();
+                    }
+
+                    if(o2 instanceof Transaction)
+                    {
+                        time2 = ((Transaction) o2).getTimestamp();
+                    }
+                    else
+                    {
+                        time2 = ((Trade) o2).getTime();
+                    }
+
+                    return time2.compareTo(time1);
+                }
+            });
+
+            TransactionListAdapter transactionListAdapter = new TransactionListAdapter(getActivity(), transactions);
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    transactionLayout.setAdapter(transactionListAdapter);
+                    transactionLayout.setTextFilterEnabled(false);
                 }
             });
         }
-
-        tradeListAdapter = new TradeListAdapter(getActivity().getBaseContext(), trades);
-
-        tradeLayout.setAdapter(tradeListAdapter);
-        tradeLayout.setTextFilterEnabled(false);
-
-        view.findViewById(R.id.tradeLoaderIndicator).setVisibility(View.GONE);
     }
 
-    private class TradeAdder extends AsyncTask<Void, Integer, Void>
+    /*public class TransactionUpdater extends AsyncTask<Void, Integer, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            if(Looper.myLooper() == null)
+            {
+                Looper.prepare();
+            }
+
+            //binanceManager.updateTransactions(currency.getSymbol());
+
+            final ArrayList<Transaction> transactionList = databaseManager.getCurrencyTransactionsForSymbol(currency.getSymbol());
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    drawTransactionList(transactionList);
+                }
+            });
+
+            return null;
+        }
+    }*/
+
+    /*private class TradeAdder extends AsyncTask<Void, Integer, Void>
     {
         @Override
         protected void onPreExecute()
@@ -146,7 +226,7 @@ public class TransactionsFragment extends Fragment {
                     tradeLayout.removeFooterView(loadingFooter);
                 }
             });
-            /*binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
+            binanceManager.updateTrades(new BinanceManager.BinanceCallBack() {
                 @Override
                 public void onSuccess() {
                     ArrayList<com.nauk.moodl.DataManagers.CurrencyData.Trade> trades = binanceManager.getTrades();
@@ -173,42 +253,18 @@ public class TransactionsFragment extends Fragment {
                 public void onError(String error) {
 
                 }
-            }, currency.getSymbol(), tradeListAdapter.getItem(tradeListAdapter.getCount() - 1).getId());*/
+            }, currency.getSymbol(), tradeListAdapter.getItem(tradeListAdapter.getCount() - 1).getId());
 
             return null;
         }
-    }
+    }*/
 
-    private void drawTransactionList(ArrayList<Transaction> transactions)
+    /*private void drawTransactionList(ArrayList<Transaction> transactions)
     {
         TransactionListAdapter transactionListAdapter = new TransactionListAdapter(getActivity(), transactions);
 
         transactionLayout.setAdapter(transactionListAdapter);
         transactionLayout.setTextFilterEnabled(false);
-    }
-
-    public class TransactionUpdater extends AsyncTask<Void, Integer, Void>
-    {
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            if(Looper.myLooper() == null)
-            {
-                Looper.prepare();
-            }
-
-            //binanceManager.updateTransactions(currency.getSymbol());
-
-            final ArrayList<Transaction> transactionList = databaseManager.getCurrencyTransactionsForSymbol(currency.getSymbol());
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    drawTransactionList(transactionList);
-                }
-            });
-
-            return null;
-        }
     }
 
     private class TradeUpdater extends AsyncTask<Void, Integer, Void> implements BinanceUpdateNotifierInterface
@@ -276,7 +332,7 @@ public class TransactionsFragment extends Fragment {
                                 trades.add(returnedTrades.get(i));
                             }
 
-                            drawTradeList(trades);
+                            //drawTradeList(trades);
                         }
                     });
                 } catch (NullPointerException e) {
@@ -294,5 +350,51 @@ public class TransactionsFragment extends Fragment {
         public void onBinanceBalanceUpdateError(int accountId, String error) {
 
         }
+    }*/
+
+    /*private void loadingIndicatorGenerator()
+    {
+        loadingFooter = LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.listview_loading_indicator, null, false);
+
+        Drawable drawable = ((ProgressBar) loadingFooter.findViewById(R.id.progressIndicator)).getIndeterminateDrawable();
+        drawable.mutate();
+        drawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        drawable.invalidateSelf();
+
+        tradeLayout.addFooterView(loadingFooter);
     }
+
+    private void drawTradeList(ArrayList<com.herbron.moodl.DataManagers.CurrencyData.Trade> trades)
+    {
+        if(returnedTrades.size() > 20)
+        {
+            tradeLayout.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView absListView, int i) {
+
+                }
+
+                @Override
+                public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    if(firstVisibleItem+visibleItemCount == totalItemCount && totalItemCount!=0)
+                    {
+                        if(!flag_loading && tradeLayout.getCount() != returnedTrades.size() - 1)
+                        {
+                            flag_loading = true;
+
+                            TradeAdder tradeAdder = new TradeAdder();
+                            tradeAdder.execute();
+                        }
+                    }
+                }
+            });
+        }
+
+        tradeListAdapter = new TradeListAdapter(getActivity().getBaseContext(), trades);
+
+        tradeLayout.setAdapter(tradeListAdapter);
+        tradeLayout.setTextFilterEnabled(false);
+
+        view.findViewById(R.id.tradeLoaderIndicator).setVisibility(View.GONE);
+    }*/
 }
