@@ -37,6 +37,7 @@ import com.herbron.moodl.Activities.RecordTransactionFragments.SellFragment;
 import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.CustomAdapters.PairRecordListAdapter;
 import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
+import com.herbron.moodl.CustomLayouts.CustomViewPager;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
@@ -76,7 +77,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
     private AutoCompleteTextView pair_autoCompleteTextView;
 
     private CustomTabLayout tabLayout;
-    private ViewPager viewPager;
+    private CustomViewPager viewPager;
 
     private RecordTransactionPageAdapter pageAdapter;
 
@@ -246,7 +247,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
                             ((BuyFragment) pageAdapter.getItem(0)).updatePair(pair);
 
-                            updatePairData();
+                            //updatePairData();
 
                             found = true;
                         }
@@ -255,6 +256,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
                     }
 
                     tabLayout.getTabAt(0).select();
+                    ((TextView) tabLayout.getTabAt(0).getCustomView()).setTextColor(getResources().getColor(R.color.white));
 
                     break;
                 case "s":
@@ -294,7 +296,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
 
                             ((SellFragment) pageAdapter.getItem(1)).updatePair(pair);
 
-                            updatePairData();
+                            //updatePairData();
 
                             found = true;
                         }
@@ -303,9 +305,11 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
                     }
 
                     tabLayout.getTabAt(1).select();
+                    ((TextView) tabLayout.getTabAt(1).getCustomView()).setTextColor(getResources().getColor(R.color.white));
                     break;
                 case "t":
                     tabLayout.getTabAt(2).select();
+                    ((TextView) tabLayout.getTabAt(2).getCustomView()).setTextColor(getResources().getColor(R.color.white));
                     break;
             }
         }
@@ -330,6 +334,7 @@ public class RecordTransactionActivity extends AppCompatActivity implements Curr
         pageAdapter = new RecordTransactionPageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
         viewPager.setAdapter(pageAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        viewPager.setPagingEnabled(false);
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
