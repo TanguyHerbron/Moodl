@@ -28,6 +28,7 @@ import com.herbron.moodl.CustomAdapters.TransactionListAdapter;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Tiji on 13/05/2018.
@@ -41,7 +42,7 @@ public class Transactions extends Fragment {
     private ListView tradeLayout;
     private ListView transactionLayout;
     private boolean flag_loading;
-    private BinanceManager binanceManager;
+    private List<BinanceManager> binanceManagerList;
     private DatabaseManager databaseManager;
     private TradeListAdapter tradeListAdapter;
     private ArrayList<com.herbron.moodl.DataManagers.CurrencyData.Trade> returnedTrades;
@@ -55,7 +56,7 @@ public class Transactions extends Fragment {
 
         currency = getActivity().getIntent().getParcelableExtra("currency");
         databaseManager = new DatabaseManager(getActivity().getBaseContext());
-        //binanceManager = new BinanceManager(preferencesManager.getBinancePublicKey(), preferencesManager.getBinancePrivateKey());
+        binanceManagerList = databaseManager.getBinanceAccounts();
         tradeLayout = view.findViewById(R.id.listTrades);
         transactionLayout = view.findViewById(R.id.listTransactions);
 
@@ -64,8 +65,8 @@ public class Transactions extends Fragment {
         TransactionUpdater transactionUpdater = new TransactionUpdater();
         transactionUpdater.execute();
 
-        /*TradeUpdater updater = new TradeUpdater();
-        updater.execute();*/
+        TradeUpdater updater = new TradeUpdater();
+        updater.execute();
 
         return view;
     }
@@ -212,10 +213,16 @@ public class Transactions extends Fragment {
 
     private class TradeUpdater extends AsyncTask<Void, Integer, Void> implements BinanceUpdateNotifierInterface
     {
+        private List<Trade> trades;
+        private int nbResponse;
+
         @Override
         protected void onPreExecute()
         {
             super.onPreExecute();
+
+            trades = new ArrayList<>();
+            nbResponse = 0;
         }
 
         @Override
@@ -228,7 +235,11 @@ public class Transactions extends Fragment {
         protected Void doInBackground(Void... params)
         {
 
-            binanceManager.updateTrades(currency.getSymbol());
+            for(int i = 0; i < binanceManagerList.size(); i++)
+            {
+                binanceManagerList.get(i).addListener(this);
+                binanceManagerList.get(i).updateTrades(currency.getSymbol());
+            }
 
             return null;
         }
@@ -240,31 +251,37 @@ public class Transactions extends Fragment {
         }
 
         @Override
-        public void onBinanceTradesUpdated() {
-            ArrayList<Trade> trades = binanceManager.getTrades();
-            returnedTrades = new ArrayList<>();
+        public void onBinanceTradesUpdated(List<Trade> newTrades) {
+            trades.addAll(newTrades);
 
-            for(int i = trades.size() - 1; i >= 0 ; i--)
+            nbResponse++;
+
+            if(nbResponse == binanceManagerList.size())
             {
-                returnedTrades.add(trades.get(i));
-            }
+                returnedTrades = new ArrayList<>();
 
-            try {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ArrayList<Trade> trades = new ArrayList<>();
+                for(int i = trades.size() - 1; i >= 0 ; i--)
+                {
+                    returnedTrades.add(trades.get(i));
+                }
 
-                        for(int i = 0; i < 20 && i < returnedTrades.size(); i++)
-                        {
-                            trades.add(returnedTrades.get(i));
+                try {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ArrayList<Trade> trades = new ArrayList<>();
+
+                            for(int i = 0; i < 20 && i < returnedTrades.size(); i++)
+                            {
+                                trades.add(returnedTrades.get(i));
+                            }
+
+                            drawTradeList(trades);
                         }
-
-                        drawTradeList(trades);
-                    }
-                });
-            } catch (NullPointerException e) {
-                Log.d("moodl", "Transactions do not need to be updated anymore");
+                    });
+                } catch (NullPointerException e) {
+                    Log.d("moodl", "Transactions do not need to be updated anymore");
+                }
             }
         }
 

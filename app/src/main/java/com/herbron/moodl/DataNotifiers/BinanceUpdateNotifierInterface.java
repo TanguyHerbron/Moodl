@@ -1,8 +1,12 @@
 package com.herbron.moodl.DataNotifiers;
 
+import com.herbron.moodl.DataManagers.CurrencyData.Trade;
+
+import java.util.List;
+
 public interface BinanceUpdateNotifierInterface {
 
-    void onBinanceTradesUpdated();
+    void onBinanceTradesUpdated(List<Trade> trades);
 
     void onBinanceBalanceUpdateSuccess();
 
