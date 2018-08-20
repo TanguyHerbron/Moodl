@@ -10,12 +10,14 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TimePicker;
 
 import com.herbron.moodl.Activities.HomeActivity;
@@ -46,6 +48,7 @@ public class BuyFragment extends CustomRecordFragment {
     private AppCompatButton saveBuyButton;
     private static Spinner feesCurrencySpinner;
     private static View view;
+    private Switch deductHoldingsSwitch;
 
     private ArrayAdapter<String> currencyFeeAdapter;
 
@@ -131,6 +134,105 @@ public class BuyFragment extends CustomRecordFragment {
         }
     };
 
+    private TextWatcher feesTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            totalValueEditText.removeTextChangedListener(totalValueTextWatcher);
+            amoutEditText.removeTextChangedListener(amountTextWatcher);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            if((isFieldCorrectlyFilled(amoutEditText, false) || isFieldCorrectlyFilled(totalValueEditText, false)) && isFieldCorrectlyFilled(buyPriceEditText, false))
+            {
+                double amount = Double.parseDouble(amoutEditText.getText().toString());
+                double purchasePrice = Double.parseDouble(buyPriceEditText.getText().toString());
+                double fees;
+                double totalValue = Double.parseDouble(totalValueEditText.getText().toString());
+                String feeCurrency;
+
+                if(isAmountLastUpdated)
+                {
+                    totalValue = amount * purchasePrice;
+                }
+                else
+                {
+                    amount = totalValue / purchasePrice;
+                }
+
+                if(fees_editText.getText().toString().equals("0") || (start == 0 && before == 1 && count == 0))
+                {
+                    if(isAmountLastUpdated)
+                    {
+                        totalValueEditText.setText(String.valueOf(amount * purchasePrice));
+                    }
+                    else
+                    {
+                        amoutEditText.setText(String.valueOf(totalValue / purchasePrice));
+                    }
+                }
+                else
+                {
+
+                    if(feesCurrencySpinner.getSelectedItemPosition() < 2)
+                    {
+                        feeCurrency = fragmentPair.getFrom();
+                    }
+                    else
+                    {
+                        feeCurrency = fragmentPair.getTo();
+                    }
+
+                    fees = getFees(feeCurrency, amount, purchasePrice);
+
+                    if(feesCurrencySpinner.getSelectedItemPosition() % 2 == 0)
+                    {
+                        if(isAmountLastUpdated)
+                        {
+                            totalValueEditText.setText(String.valueOf(totalValue + fees));
+                        }
+                        else
+                        {
+                            amoutEditText.setText(String.valueOf(amount - (fees / purchasePrice)));
+                        }
+                    }
+                    else
+                    {
+                        if(fragmentCurrency.getSymbol().equals(feeCurrency))
+                        {
+                            if(isAmountLastUpdated)
+                            {
+                                totalValueEditText.setText(String.valueOf(totalValue + (fees * purchasePrice)));
+                            }
+                            else
+                            {
+                                amoutEditText.setText(String.valueOf((totalValue / purchasePrice) - fees));
+                            }
+                        }
+                        else
+                        {
+                            if(isAmountLastUpdated)
+                            {
+                                totalValueEditText.setText(String.valueOf(totalValue + fees));
+                            }
+                            else
+                            {
+                                amoutEditText.setText(String.valueOf((totalValue - fees) / purchasePrice));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            totalValueEditText.addTextChangedListener(totalValueTextWatcher);
+            amoutEditText.addTextChangedListener(amountTextWatcher);
+        }
+    };
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -158,7 +260,7 @@ public class BuyFragment extends CustomRecordFragment {
             DatabaseManager databaseManager = new DatabaseManager(context);
             transaction = databaseManager.getCurrencyTransactionById(transactionId);
 
-            if(transaction.getType().equals("b"))
+            if(transaction.getType() == null || transaction.getType().equals("b"))
             {
                 fillFields();
             }
@@ -179,10 +281,8 @@ public class BuyFragment extends CustomRecordFragment {
     private void initializeViewElements()
     {
         totalValueEditText = view.findViewById(R.id.totalValue_editText_buy);
-        totalValueEditText.addTextChangedListener(totalValueTextWatcher);
 
         amoutEditText = view.findViewById(R.id.amount_editText_buy);
-        amoutEditText.addTextChangedListener(amountTextWatcher);
 
         buyPriceEditText = view.findViewById(R.id.buyPrice_editText);
         buyDateEditText = view.findViewById(R.id.buyDate_editText);
@@ -199,6 +299,8 @@ public class BuyFragment extends CustomRecordFragment {
         currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
         currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
+
+        deductHoldingsSwitch = view.findViewById(R.id.deductHoldingsBuy);
 
         if(fragmentPair != null)
         {
@@ -246,7 +348,8 @@ public class BuyFragment extends CustomRecordFragment {
                                 , ""
                                 , fragmentExchange.getName()
                                 , "b"
-                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
+                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f"
+                                , deductHoldingsSwitch.isChecked());
 
                         Intent intent = new Intent(getActivity(), HomeActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -265,7 +368,8 @@ public class BuyFragment extends CustomRecordFragment {
                                 , ""
                                 , fragmentExchange.getName()
                                 ,"b"
-                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
+                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f"
+                                , deductHoldingsSwitch.isChecked());
                     }
 
                     getActivity().finish();
@@ -274,108 +378,19 @@ public class BuyFragment extends CustomRecordFragment {
         });
 
         fees_editText = view.findViewById(R.id.fees_editText_buy);
-        fees_editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                totalValueEditText.removeTextChangedListener(totalValueTextWatcher);
-                amoutEditText.removeTextChangedListener(amountTextWatcher);
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                if((isFieldCorrectlyFilled(amoutEditText, false) || isFieldCorrectlyFilled(totalValueEditText, false)) && isFieldCorrectlyFilled(buyPriceEditText, false))
-                {
-                    double amount = Double.parseDouble(amoutEditText.getText().toString());
-                    double purchasePrice = Double.parseDouble(buyPriceEditText.getText().toString());
-                    double fees;
-                    double totalValue = Double.parseDouble(totalValueEditText.getText().toString());
-                    String feeCurrency;
-
-                    if(isAmountLastUpdated)
-                    {
-                        totalValue = amount * purchasePrice;
-                    }
-                    else
-                    {
-                        amount = totalValue / purchasePrice;
-                    }
-
-                    if(fees_editText.getText().toString().equals("0") || (start == 0 && before == 1 && count == 0))
-                    {
-                        if(isAmountLastUpdated)
-                        {
-                            totalValueEditText.setText(String.valueOf(amount * purchasePrice));
-                        }
-                        else
-                        {
-                            amoutEditText.setText(String.valueOf(totalValue / purchasePrice));
-                        }
-                    }
-                    else
-                    {
-
-                        if(feesCurrencySpinner.getSelectedItemPosition() < 2)
-                        {
-                            feeCurrency = fragmentPair.getFrom();
-                        }
-                        else
-                        {
-                            feeCurrency = fragmentPair.getTo();
-                        }
-
-                        fees = getFees(feeCurrency, amount, purchasePrice);
-
-                        if(feesCurrencySpinner.getSelectedItemPosition() % 2 == 0)
-                        {
-                            if(isAmountLastUpdated)
-                            {
-                                totalValueEditText.setText(String.valueOf(totalValue + fees));
-                            }
-                            else
-                            {
-                                amoutEditText.setText(String.valueOf(amount - (fees / purchasePrice)));
-                            }
-                        }
-                        else
-                        {
-                            if(fragmentCurrency.getSymbol().equals(feeCurrency))
-                            {
-                                if(isAmountLastUpdated)
-                                {
-                                    totalValueEditText.setText(String.valueOf(totalValue + (fees * purchasePrice)));
-                                }
-                                else
-                                {
-                                    amoutEditText.setText(String.valueOf((totalValue / purchasePrice) - fees));
-                                }
-                            }
-                            else
-                            {
-                                if(isAmountLastUpdated)
-                                {
-                                    totalValueEditText.setText(String.valueOf(totalValue + fees));
-                                }
-                                else
-                                {
-                                    amoutEditText.setText(String.valueOf((totalValue - fees) / purchasePrice));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                totalValueEditText.addTextChangedListener(totalValueTextWatcher);
-                amoutEditText.addTextChangedListener(amountTextWatcher);
-            }
-        });
 
         note_editText = view.findViewById(R.id.note_editText_buy);
 
         checkCallingIntent();
+
+        setupTextWatchers();
+    }
+
+    private void setupTextWatchers()
+    {
+        totalValueEditText.addTextChangedListener(totalValueTextWatcher);
+        amoutEditText.addTextChangedListener(amountTextWatcher);
+        fees_editText.addTextChangedListener(feesTextWatcher);
     }
 
     private double getFees(String feeCurrency, double amount, double purchasedPrice)

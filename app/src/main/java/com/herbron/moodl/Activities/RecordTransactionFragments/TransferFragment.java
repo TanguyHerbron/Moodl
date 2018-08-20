@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +17,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TimePicker;
 
+import com.herbron.moodl.Activities.HomeActivity;
 import com.herbron.moodl.CustomLayouts.CustomRecordFragment;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
+import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.R;
 
 import java.text.SimpleDateFormat;
@@ -43,7 +45,10 @@ public class TransferFragment extends CustomRecordFragment {
     private Spinner toSpinner;
     private Spinner feeSpinner;
 
+    private Switch deductHoldingsSwitch;
+
     private Button saveButton;
+
     private int transactionId;
     private Transaction transaction;
 
@@ -72,22 +77,49 @@ public class TransferFragment extends CustomRecordFragment {
             {
                 if(isTransactionPossible())
                 {
+                    PreferencesManager preferencesManager = new PreferencesManager(getContext());
                     DatabaseManager databaseManager = new DatabaseManager(getContext());
                     double amount = Double.valueOf(amountEditText.getText().toString());
                     double fees = getFees();
 
-                    databaseManager.addTransaction(fragmentCurrency.getSymbol()
-                            , amount
-                            , calendar.getTime()
-                            , 0
-                            , fees
-                            , noteEditText.getText().toString()
-                            , ""
-                            , fragmentCurrency.getSymbol()
-                            , getDestination()
-                            , getSource()
-                            , "t"
-                            , feeSpinner.getSelectedItemPosition() == 0 ? "p" : "f");
+                    if(transactionId == -1)
+                    {
+                        databaseManager.addTransaction(fragmentCurrency.getSymbol()
+                                , amount
+                                , calendar.getTime()
+                                , 0
+                                , fees
+                                , noteEditText.getText().toString()
+                                , ""
+                                , fragmentCurrency.getSymbol()
+                                , getDestination()
+                                , getSource()
+                                , "t"
+                                , feeSpinner.getSelectedItemPosition() == 0 ? "p" : "f"
+                                , deductHoldingsSwitch.isChecked());
+
+                        Intent intent = new Intent(getActivity(), HomeActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                    }
+                    else
+                    {
+                        databaseManager.updateTransactionWithId(transactionId
+                                , amount
+                                , calendar.getTime()
+                                , 0
+                                , fees
+                                , noteEditText.getText().toString()
+                                , ""
+                                , fragmentCurrency.getSymbol()
+                                , getDestination()
+                                , getSource()
+                                ,"t"
+                                , feeSpinner.getSelectedItemPosition() == 0 ? "p" : "f"
+                                , deductHoldingsSwitch.isChecked());
+                    }
+
+                    preferencesManager.setMustUpdateSummary(true);
 
                     getActivity().finish();
                 }
@@ -146,6 +178,8 @@ public class TransferFragment extends CustomRecordFragment {
         saveButton = view.findViewById(R.id.saveTransferButton);
         saveButton.setOnClickListener(saveButtonClickListener);
 
+        deductHoldingsSwitch = view.findViewById(R.id.deductHoldingsTransfer);
+
         checkCallingIntent();
     }
 
@@ -159,7 +193,7 @@ public class TransferFragment extends CustomRecordFragment {
             DatabaseManager databaseManager = new DatabaseManager(getContext());
             transaction = databaseManager.getCurrencyTransactionById(transactionId);
 
-            if(transaction.getType().equals("t"))
+            if(transaction.getType() != null && transaction.getType().equals("t"))
             {
                 fillFields();
             }
@@ -168,8 +202,61 @@ public class TransferFragment extends CustomRecordFragment {
 
     private void fillFields()
     {
+        setupFromSpinner();
+        setupToSpinner();
         amountEditText.setText(String.valueOf(transaction.getAmount()));
-        //Fill other fields
+        calendar.setTimeInMillis(transaction.getTimestamp());
+        transferDateEditText.setText(sdf.format(calendar.getTime()));
+        feesEditText.setText(String.format(Locale.UK, "%f", transaction.getFees()));
+        noteEditText.setText(transaction.getNote());
+        feeSpinner.setSelection(transaction.getFeeFormat().equals("p") ? 0 : 1);
+    }
+
+    private void setupFromSpinner()
+    {
+        switch (transaction.getSource())
+        {
+            case EXCHANGE_CODE:
+                fromSpinner.setSelection(0);
+                break;
+            case WALLET_CODE:
+                fromSpinner.setSelection(1);
+                break;
+            case MINING_CODE:
+                fromSpinner.setSelection(2);
+                break;
+            case ELSE_WALLET_CODE:
+                fromSpinner.setSelection(3);
+                break;
+            case AIRDROP_CODE:
+                fromSpinner.setSelection(4);
+                break;
+            case UNKNOWN_CODE:
+                fromSpinner.setSelection(5);
+                break;
+            case FORK_CODE:
+                fromSpinner.setSelection(6);
+                break;
+        }
+    }
+
+    private void setupToSpinner()
+    {
+        switch (transaction.getDestination())
+        {
+            case EXCHANGE_CODE:
+                toSpinner.setSelection(0);
+                break;
+            case WALLET_CODE:
+                toSpinner.setSelection(1);
+                break;
+            case ELSE_WALLET_CODE:
+                toSpinner.setSelection(2);
+                break;
+            case UNKNOWN_CODE:
+                toSpinner.setSelection(3);
+                break;
+        }
     }
 
     private void setupSpinnesr()

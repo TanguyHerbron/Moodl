@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TimePicker;
 
 import com.herbron.moodl.Activities.HomeActivity;
@@ -46,6 +47,7 @@ public class SellFragment extends CustomRecordFragment {
     private AppCompatButton saveSellButton;
     private static Spinner feesCurrencySpinner;
     private static View view;
+    private Switch deductHoldingsSwitch;
 
     private ArrayAdapter<String> currencyFeeAdapter;
 
@@ -177,6 +179,8 @@ public class SellFragment extends CustomRecordFragment {
             updateAdapter();
         }
 
+        deductHoldingsSwitch = view.findViewById(R.id.deductHoldingsSell);
+
         saveSellButton = view.findViewById(R.id.saveSellButton);
         saveSellButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -218,7 +222,8 @@ public class SellFragment extends CustomRecordFragment {
                                 , ""
                                 , fragmentExchange.getName()
                                 , "s"
-                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
+                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f"
+                                , deductHoldingsSwitch.isChecked());
 
                         Intent intent = new Intent(getActivity(), HomeActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -237,7 +242,8 @@ public class SellFragment extends CustomRecordFragment {
                                 , ""
                                 , fragmentExchange.getName()
                                 ,"s"
-                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f");
+                                , feesCurrencySpinner.getSelectedItemPosition() % 2 == 0 ? "p" : "f"
+                                , deductHoldingsSwitch.isChecked());
                     }
 
                     getActivity().finish();
@@ -386,7 +392,7 @@ public class SellFragment extends CustomRecordFragment {
             DatabaseManager databaseManager = new DatabaseManager(context);
             transaction = databaseManager.getCurrencyTransactionById(transactionId);
 
-            if(transaction.getType().equals("b"))
+            if(transaction.getType().equals("s"))
             {
                 fillFields();
             }

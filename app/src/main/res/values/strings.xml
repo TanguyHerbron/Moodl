@@ -295,7 +295,9 @@
     <string name="percentageFee">%1$s fixed</string>
     <string name="activity_sell_price">Sell price</string>
     <string name="activity_sell_date">Sell date</string>
-    <string name="activity_transfert_date">Date of transfert</string>
+    <string name="activity_transfert_date">Date of transfer</string>
     <string name="error_no_valid_from_to">This transaction is not valid</string>
+    <string name="deductFromHoldings">Deduct from holdings</string>
+    <string name="addToHoldings">Add to holdings</string>
 
 </resources>

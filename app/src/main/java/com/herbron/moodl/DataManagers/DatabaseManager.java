@@ -3,6 +3,7 @@ package com.herbron.moodl.DataManagers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -31,7 +32,7 @@ import java.util.Set;
 
 public class DatabaseManager extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 17;
 
     private static final String DATABASE_NAME = "mdn.db";
 
@@ -52,6 +53,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
     private static final String KEY_TRANSACTION_FEE_FORMAT = "feeFormat";
     private static final String KEY_TRANSACTION_NOTES = "notes";
     private static final String KEY_TRANSACTION_TYPE = "transactionType";
+    private static final String KEY_TRANSACTION_DEDUCT = "deductHoldings";
 
     private static final String KEY_EXCHANGE_ID = "idExchange";
     private static final String KEY_EXCHANGE_NAME = "name";
@@ -87,10 +89,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 + KEY_TRANSACTION_PAIR + " VARCHAR(4),"
                 + KEY_TRANSACTION_FEE_CURRENCY + " VARCHAR(4),"
                 + KEY_TRANSACTION_FEES + " REAL,"
-                + KEY_TRANSACTION_FEE_FORMAT + " VARCHAT(1),"
+                + KEY_TRANSACTION_FEE_FORMAT + " VARCHAR(1),"
                 + KEY_TRANSACTION_SOURCE + " TEXT,"
                 + KEY_TRANSACTION_DESTINATION + " TEXT,"
-                + KEY_TRANSACTION_TYPE + " VARCHAR(1)"
+                + KEY_TRANSACTION_TYPE + " VARCHAR(1),"
+                + KEY_TRANSACTION_DEDUCT + " INTEGER"
                 + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_EXCHANGE_KEYS + "("
@@ -154,7 +157,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return false;
     }
 
-    public void updateTransactionWithId(int transactionId, double amount, Date date, double purchasedPrice, double fees, String note, String symbolFrom, String feeCurrency, String destination, String source, String type, String feeFormat)
+    public void updateTransactionWithId(int transactionId, double amount, Date date, double purchasedPrice, double fees, String note, String symbolFrom, String feeCurrency, String destination, String source, String type, String feeFormat, boolean deductFromHoldings)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -170,12 +173,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
         cv.put(KEY_TRANSACTION_DESTINATION, destination);
         cv.put(KEY_TRANSACTION_TYPE, type);
         cv.put(KEY_TRANSACTION_FEE_FORMAT, feeFormat);
+        cv.put(KEY_TRANSACTION_DEDUCT, deductFromHoldings ? 1 : 0);
 
         db.update(TABLE_MANUAL_TRANSACTIONS, cv, KEY_TRANSACTION_ID + "=" + transactionId, null);
 
     }
 
-    public void addTransaction(String symbol, Double amount, Date date, double purchasePrice, double fees, String note, String symbolFrom, String feeCurrency, String destination, String source, String type, String feeFormat)
+    public void addTransaction(String symbol, Double amount, Date date, double purchasePrice, double fees, String note, String symbolFrom, String feeCurrency, String destination, String source, String type, String feeFormat, boolean deductFromHoldings)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -192,8 +196,9 @@ public class DatabaseManager extends SQLiteOpenHelper{
         values.put(KEY_TRANSACTION_DESTINATION, destination);
         values.put(KEY_TRANSACTION_TYPE, type);
         values.put(KEY_TRANSACTION_FEE_FORMAT, feeFormat);
+        values.put(KEY_TRANSACTION_DEDUCT, deductFromHoldings ? 1 : 0);
 
-        Log.d("moodl", "Insert result " + db.insert(TABLE_MANUAL_TRANSACTIONS, null, values));
+        db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
         db.close();
     }
 
@@ -463,18 +468,36 @@ public class DatabaseManager extends SQLiteOpenHelper{
                 values.put(KEY_TRANSACTION_DATE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_DATE)));
                 values.put(KEY_TRANSACTION_PURCHASE_PRICE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_PURCHASE_PRICE)));
                 values.put(KEY_TRANSACTION_FEES, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_FEES)));
+                values.put(KEY_TRANSACTION_NOTES, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_NOTES)));
+                values.put(KEY_TRANSACTION_PAIR, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_PAIR)));
+                values.put(KEY_TRANSACTION_FEE_CURRENCY, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_FEE_CURRENCY)));
+                values.put(KEY_TRANSACTION_SOURCE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_SOURCE)));
+                values.put(KEY_TRANSACTION_DESTINATION, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_DESTINATION)));
+                values.put(KEY_TRANSACTION_TYPE, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_TYPE)));
+                values.put(KEY_TRANSACTION_FEE_FORMAT, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_FEE_FORMAT)));
+                values.put(KEY_TRANSACTION_DEDUCT, DataCrypter.decrypt(context, rawValues.getString(KEY_TRANSACTION_DEDUCT)));
             }
             else
             {
                 values.put(KEY_TRANSACTION_SYMBOL, rawValues.getString(KEY_TRANSACTION_SYMBOL));
                 values.put(KEY_TRANSACTION_AMOUNT, rawValues.getString(KEY_TRANSACTION_AMOUNT));
                 values.put(KEY_TRANSACTION_DATE, rawValues.getString(KEY_TRANSACTION_DATE));
-                values.put(KEY_TRANSACTION_PURCHASE_PRICE, rawValues.getString(KEY_TRANSACTION_PURCHASE_PRICE));
-                values.put(KEY_TRANSACTION_FEES, rawValues.getString(KEY_TRANSACTION_FEES));
+                values.put(KEY_TRANSACTION_PURCHASE_PRICE, rawValues.getDouble(KEY_TRANSACTION_PURCHASE_PRICE));
+                values.put(KEY_TRANSACTION_FEES, rawValues.getDouble(KEY_TRANSACTION_FEES));
+                values.put(KEY_TRANSACTION_NOTES, rawValues.getString(KEY_TRANSACTION_NOTES));
+                values.put(KEY_TRANSACTION_PAIR, rawValues.getString(KEY_TRANSACTION_PAIR));
+                values.put(KEY_TRANSACTION_FEE_CURRENCY, rawValues.getString(KEY_TRANSACTION_FEE_CURRENCY));
+                values.put(KEY_TRANSACTION_SOURCE, rawValues.getString(KEY_TRANSACTION_SOURCE));
+                values.put(KEY_TRANSACTION_DESTINATION, rawValues.getString(KEY_TRANSACTION_DESTINATION));
+                values.put(KEY_TRANSACTION_TYPE, rawValues.getString(KEY_TRANSACTION_TYPE));
+                values.put(KEY_TRANSACTION_FEE_FORMAT, rawValues.getString(KEY_TRANSACTION_FEE_FORMAT));
+                values.put(KEY_TRANSACTION_DEDUCT, rawValues.getInt(KEY_TRANSACTION_DEDUCT));
             }
         } catch (JSONException e) {
             Log.d("moodl", "Error while inserting transaction " + e.getMessage());
         }
+
+        Log.d("mood", "Raw " + rawValues.toString());
 
         db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
         db.close();
@@ -585,7 +608,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
                         if(symbol.equals(feeSym))
                         {
                             currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                    , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) + resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                    , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
                         }
                         else
                         {
@@ -596,15 +619,26 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     case "t":
                         if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))) && isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))))
                         {
-                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                    , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
+                            {
+                                if(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1)
+                                {
+                                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                            , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                }
+                                else
+                                {
+                                    currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
+                                            , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                }
+                            }
                         }
                         else
                         {
                             if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))))
                             {
                                 currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                        , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) + resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                        , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
                             }
                             else
                             {
@@ -656,6 +690,15 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         if(resultatList.moveToFirst())
         {
+            boolean deduct = false;
+
+            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
+            {
+                deduct = resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1;
+            }
+
+            Log.d("moodl", "> " + resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)));
+
             transaction = new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
@@ -668,8 +711,11 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT)));
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))
+                    , deduct);
         }
+
+        Log.d("moodl", "> " + DatabaseUtils.dumpCurrentRowToString(resultatList));
 
         resultatList.close();
 
@@ -688,6 +734,13 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while (resultatList.moveToNext())
         {
+            boolean deduct = false;
+
+            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
+            {
+                deduct = resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1;
+            }
+
             transactionList.add(new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
@@ -700,7 +753,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))));
+                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))
+                    , deduct));
         }
 
         resultatList.close();

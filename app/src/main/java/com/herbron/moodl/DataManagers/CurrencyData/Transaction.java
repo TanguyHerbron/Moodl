@@ -19,8 +19,9 @@ public class Transaction {
     private String source;
     private String destination;
     private String type;
+    private boolean isDeducted;
 
-    public Transaction(int transactionId, String symbol, String symPair, double amount, long timestamp, double purchasedPrice, double fees, String note, String feeCurrency, String source, String destination, String type, String feeFormat)
+    public Transaction(int transactionId, String symbol, String symPair, double amount, long timestamp, double purchasedPrice, double fees, String note, String feeCurrency, String source, String destination, String type, String feeFormat, boolean isDeducted)
     {
         this.transactionId = transactionId;
         this.symbol = symbol;
@@ -35,6 +36,7 @@ public class Transaction {
         this.destination = destination;
         this.type = type;
         this.feeFormat = feeFormat;
+        this.isDeducted = isDeducted;
     }
 
     public int getTransactionId() {
@@ -142,5 +144,13 @@ public class Transaction {
 
     public void setFeeFormat(String feeFormat) {
         this.feeFormat = feeFormat;
+    }
+
+    public boolean isDeducted() {
+        return isDeducted;
+    }
+
+    public void setDeducted(boolean deducted) {
+        isDeducted = deducted;
     }
 }
