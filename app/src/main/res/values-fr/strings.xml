@@ -182,4 +182,8 @@
     <string name="percentageFee">%1$s fixe</string>
     <string name="activity_sell_price">Prix de vente</string>
     <string name="activity_sell_date">Date de vente</string>
+    <string name="activity_transfert_date">Date de transfert</string>
+    <string name="error_no_valid_from_to">Cette transaction n\'est pas valide</string>
+    <string name="deductFromHoldings">Déduire des avoirs</string>
+    <string name="addToHoldings">Ajouter aux avoirs</string>
 </resources>
