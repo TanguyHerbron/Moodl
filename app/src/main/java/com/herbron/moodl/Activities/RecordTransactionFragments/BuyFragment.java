@@ -296,8 +296,8 @@ public class BuyFragment extends CustomRecordFragment {
         });
         feesCurrencySpinner = view.findViewById(R.id.feesCurrency_editText_buy);
 
-        currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
-        currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        currencyFeeAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, new ArrayList<>());
+        currencyFeeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_black);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         deductHoldingsSwitch = view.findViewById(R.id.deductHoldingsBuy);

@@ -268,7 +268,7 @@ public class SellFragment extends CustomRecordFragment {
         feesCurrencySpinner = view.findViewById(R.id.feesCurrency_editText_sell);
 
         currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
-        currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        currencyFeeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_black);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         if(fragmentPair != null)
@@ -522,6 +522,8 @@ public class SellFragment extends CustomRecordFragment {
 
     public void updatePair(Pair pair)
     {
+        fragmentPair = pair;
+
         currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
         currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);

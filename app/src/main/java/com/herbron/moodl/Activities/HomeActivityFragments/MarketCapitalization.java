@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
 import android.text.SpannableString;
@@ -54,6 +55,7 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
     private PreferencesManager preferencesManager;
     private CoinmarketCapAPIManager coinmarketCapAPIManager;
     private SwipeRefreshLayout refreshLayout;
+    private NestedScrollView nestedScrollView;
     private long lastTimestamp;
     private String defaultCurrency;
     private CryptocompareApiManager cryptocompareApiManager;
@@ -88,6 +90,8 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
         lastTimestamp = 0;
+
+        nestedScrollView = view.findViewById(R.id.nestedMarketCap);
 
         setupRefreshLayout();
 
@@ -304,12 +308,12 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
                 switch (motionEvent.getAction())
                 {
                     case MotionEvent.ACTION_DOWN:
-                        refreshLayout.setEnabled(false);
+                        nestedScrollView.setEnabled(false);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     default:
-                        refreshLayout.setEnabled(true);
+                        nestedScrollView.setEnabled(true);
                         break;
                 }
 

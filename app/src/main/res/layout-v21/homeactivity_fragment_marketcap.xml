@@ -50,173 +50,181 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:background="@drawable/gradient_background">
 
-        <LinearLayout android:id="@+id/layoutMarketCap"
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/nestedMarketCap"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingTop="20dp"
             android:background="@drawable/list_background">
 
-            <ProgressBar
-                android:id="@+id/progressBarMarketCap"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_gravity="center"
-                android:background="@drawable/circular_progress_bar" />
-
-            <LinearLayout
-                android:id="@+id/layoutProgressMarketCap"
+            <LinearLayout android:id="@+id/layoutMarketCap"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="20dp"
+                android:background="@drawable/list_background">
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="350dp"
-                    android:layout_marginTop="5dp">
-
-                    <com.herbron.moodl.CustomLayouts.CustomPieChart
-                        android:id="@+id/marketCapPieChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
-
-                    <ImageView
-                        android:id="@+id/currencyIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:layout_gravity="center"
-                        android:visibility="gone"
-                        android:maxHeight="110dp"
-                        android:maxWidth="110dp"
-                        android:adjustViewBounds="true"/>
-
-                </FrameLayout>
-
-                <LinearLayout
-                    android:id="@+id/layoutMarketDetails"
+                <ProgressBar
+                    android:id="@+id/progressBarMarketCap"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_margin="10dp">
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circular_progress_bar" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/textViewTitle"
-                        android:textStyle="bold"
-                        android:textSize="20sp"/>
+                <LinearLayout
+                    android:id="@+id/layoutProgressMarketCap"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    android:orientation="vertical">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/separationLineSize"
-                        android:layout_gravity="center_vertical"
-                        android:layout_margin="10dp"
-                        android:background="@color/separationColor" />
+                        android:layout_height="350dp"
+                        android:layout_marginTop="5dp">
+
+                        <com.herbron.moodl.CustomLayouts.CustomPieChart
+                            android:id="@+id/marketCapPieChart"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+
+                        <ImageView
+                            android:id="@+id/currencyIcon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:layout_gravity="center"
+                            android:visibility="gone"
+                            android:maxHeight="110dp"
+                            android:maxWidth="110dp"
+                            android:adjustViewBounds="true"/>
+
+                    </FrameLayout>
 
                     <LinearLayout
+                        android:id="@+id/layoutMarketDetails"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:baselineAligned="false">
+                        android:orientation="vertical"
+                        android:layout_margin="10dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/textViewTitle"
+                            android:textStyle="bold"
+                            android:textSize="20sp"/>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/separationLineSize"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="10dp"
+                            android:background="@color/separationColor" />
 
                         <LinearLayout
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.5"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/market_capitalization"
-                                android:textStyle="bold"/>
-
-                            <TextView
-                                android:id="@+id/textViewMarketCap"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"/>
+                            android:orientation="horizontal"
+                            android:baselineAligned="false">
 
                             <LinearLayout
-                                android:id="@+id/layoutPercentageDominance"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:visibility="gone"
-                                android:layout_marginTop="5dp">
+                                android:layout_weight="0.5"
+                                android:orientation="vertical">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/dominance_percentage"
+                                    android:text="@string/market_capitalization"
                                     android:textStyle="bold"/>
 
                                 <TextView
-                                    android:id="@+id/textViewDominancePercentage"
+                                    android:id="@+id/textViewMarketCap"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"/>
+
+                                <LinearLayout
+                                    android:id="@+id/layoutPercentageDominance"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:visibility="gone"
+                                    android:layout_marginTop="5dp">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/dominance_percentage"
+                                        android:textStyle="bold"/>
+
+                                    <TextView
+                                        android:id="@+id/textViewDominancePercentage"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"/>
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:id="@+id/layoutActiveCrypto"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:layout_marginTop="5dp">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/active_cryptocurrencies"
+                                        android:textStyle="bold"/>
+
+                                    <TextView
+                                        android:id="@+id/textViewActiveCrypto"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"/>
+
+                                </LinearLayout>
 
                             </LinearLayout>
 
                             <LinearLayout
-                                android:id="@+id/layoutActiveCrypto"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:layout_marginTop="5dp">
+                                android:layout_weight="0.5"
+                                android:orientation="vertical">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/active_cryptocurrencies"
+                                    android:text="@string/volume_24h"
                                     android:textStyle="bold"/>
 
                                 <TextView
-                                    android:id="@+id/textViewActiveCrypto"
+                                    android:id="@+id/textViewVolume"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"/>
 
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="0.5"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/volume_24h"
-                                android:textStyle="bold"/>
-
-                            <TextView
-                                android:id="@+id/textViewVolume"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"/>
-
-                            <LinearLayout
-                                android:id="@+id/layoutActiveMarkets"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:layout_marginTop="5dp">
-
-                                <TextView
+                                <LinearLayout
+                                    android:id="@+id/layoutActiveMarkets"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/active_marketes"
-                                    android:textStyle="bold"/>
+                                    android:orientation="vertical"
+                                    android:layout_marginTop="5dp">
 
-                                <TextView
-                                    android:id="@+id/textViewActiveMarkets"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"/>
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/active_marketes"
+                                        android:textStyle="bold"/>
+
+                                    <TextView
+                                        android:id="@+id/textViewActiveMarkets"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"/>
+
+                                </LinearLayout>
 
                             </LinearLayout>
 
@@ -228,6 +236,6 @@
 
             </LinearLayout>
 
-        </LinearLayout>
+        </android.support.v4.widget.NestedScrollView>
     </android.support.v4.widget.SwipeRefreshLayout>
 </android.support.constraint.ConstraintLayout>

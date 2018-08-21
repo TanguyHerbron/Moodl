@@ -161,15 +161,18 @@ public class TransactionsFragment extends Fragment {
                 }
             });
 
-            TransactionListAdapter transactionListAdapter = new TransactionListAdapter(getActivity(), transactions);
+            if(getActivity() != null)
+            {
+                TransactionListAdapter transactionListAdapter = new TransactionListAdapter(getActivity(), transactions);
 
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    transactionLayout.setAdapter(transactionListAdapter);
-                    transactionLayout.setTextFilterEnabled(false);
-                }
-            });
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        transactionLayout.setAdapter(transactionListAdapter);
+                        transactionLayout.setTextFilterEnabled(false);
+                    }
+                });
+            }
         }
     }
 
