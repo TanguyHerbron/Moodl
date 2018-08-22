@@ -51,7 +51,7 @@ import com.herbron.moodl.BalanceSwitchManagerInterface;
 import com.herbron.moodl.DataNotifiers.BalanceUpdateNotifierInterface;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.io.File;
@@ -500,7 +500,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
     public void updateBalanceDisplayedTitle(float totalFluctuationPercentage)
     {
-        toolbarLayout.setTitle(PlaceholderManager.getValueString(numberConformer(totalValue), getActivity()));
+        toolbarLayout.setTitle(PlaceholderUtils.getValueString(numberConformer(totalValue), getActivity()));
         toolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
         toolbarLayout.setExpandedTitleColor(Color.WHITE);
 
@@ -517,18 +517,18 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
         if(totalFluctuation == 0)
         {
-            toolbarSubtitle.setText(PlaceholderManager.getValueString(numberConformer(totalValue), getActivity()));
+            toolbarSubtitle.setText(PlaceholderUtils.getValueString(numberConformer(totalValue), getActivity()));
             toolbarSubtitle.setTextColor(-1275068417);
         }
         else
         {
-            toolbarSubtitle.setText(PlaceholderManager.getValuePercentageString(numberConformer(totalFluctuation), numberConformer(totalFluctuationPercentage), getActivity()));
+            toolbarSubtitle.setText(PlaceholderUtils.getValuePercentageString(numberConformer(totalFluctuation), numberConformer(totalFluctuationPercentage), getActivity()));
         }
     }
 
     private void updateHideBalanceTitle(float totalFluctuationPercentage)
     {
-        toolbarLayout.setTitle(PlaceholderManager.getPercentageString(numberConformer(totalFluctuationPercentage), getActivity()));
+        toolbarLayout.setTitle(PlaceholderUtils.getPercentageString(numberConformer(totalFluctuationPercentage), getActivity()));
         toolbarSubtitle.setVisibility(View.GONE);
 
         if(totalFluctuation > 0)

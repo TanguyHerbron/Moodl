@@ -14,7 +14,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -29,7 +28,7 @@ import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.MoodlBox;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
@@ -219,18 +218,18 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
     private void updateCardViewInfos(Currency currency)
     {
         ((TextView) findViewById(R.id.currencyFluctuationTextView))
-                .setText(PlaceholderManager.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getContext()));
+                .setText(PlaceholderUtils.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getContext()));
         ((TextView) findViewById(R.id.currencyValueTextView))
-                .setText(PlaceholderManager.getValueString(numberConformer(currency.getValue()), getContext()));
+                .setText(PlaceholderUtils.getValueString(numberConformer(currency.getValue()), getContext()));
 
         ((ImageView) findViewById(R.id.currencyIcon))
                 .setImageBitmap(currency.getIcon());
         ((TextView) findViewById(R.id.currencyNameTextView))
                 .setText(currency.getName());
         ((TextView) findViewById(R.id.currencySymbolTextView))
-                .setText(PlaceholderManager.getSymbolString(currency.getSymbol(), getContext()));
+                .setText(PlaceholderUtils.getSymbolString(currency.getSymbol(), getContext()));
         ((TextView) findViewById(R.id.currencyFluctuationPercentageTextView))
-                .setText(PlaceholderManager.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getContext()));
+                .setText(PlaceholderUtils.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getContext()));
 
         Drawable arrowDrawable = ((ImageView) findViewById(R.id.detailsArrow)).getDrawable();
 
@@ -257,22 +256,22 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         double percentage = value / totalValue * 100;
 
         ((TextView) findViewById(R.id.currencyValueOwnedTextView))
-                .setText(PlaceholderManager.getValueParenthesisString(numberConformer(currency.getValue() * currency.getBalance()), getContext()));
+                .setText(PlaceholderUtils.getValueParenthesisString(numberConformer(currency.getValue() * currency.getBalance()), getContext()));
         ((TextView) findViewById(R.id.currencyFluctuationTextView))
-                .setText(PlaceholderManager.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getContext()));
+                .setText(PlaceholderUtils.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getContext()));
         ((TextView) findViewById(R.id.currencyValueTextView))
-                .setText(PlaceholderManager.getValueString(numberConformer(currency.getValue()), getContext()));
+                .setText(PlaceholderUtils.getValueString(numberConformer(currency.getValue()), getContext()));
 
         ((ImageView) findViewById(R.id.currencyIcon))
                 .setImageBitmap(currency.getIcon());
         ((TextView) findViewById(R.id.currencyNameTextView))
                 .setText(currency.getName());
         ((TextView) findViewById(R.id.currencySymbolTextView))
-                .setText(PlaceholderManager.getSymbolString(currency.getSymbol(), getContext()));
+                .setText(PlaceholderUtils.getSymbolString(currency.getSymbol(), getContext()));
         ((TextView) findViewById(R.id.currencyOwnedTextView))
-                .setText(PlaceholderManager.getBalanceString(numberConformer(currency.getBalance()), currency.getSymbol(), getContext()));
+                .setText(PlaceholderUtils.getBalanceString(numberConformer(currency.getBalance()), currency.getSymbol(), getContext()));
         ((TextView) findViewById(R.id.currencyFluctuationPercentageTextView))
-                .setText(PlaceholderManager.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getContext()));
+                .setText(PlaceholderUtils.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getContext()));
 
         Drawable arrowDrawable = ((ImageView) findViewById(R.id.detailsArrow)).getDrawable();
         arrowDrawable.mutate();
@@ -290,7 +289,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         progressBarDrawable.invalidateSelf();
 
         ((ProgressBar) findViewById(R.id.currencyPortfolioDominance)).setProgress((int) Math.round(percentage));
-        ((TextView) findViewById(R.id.percentageOwnedTextView)).setText(PlaceholderManager.getPercentageString(numberConformer(percentage), getContext()));
+        ((TextView) findViewById(R.id.percentageOwnedTextView)).setText(PlaceholderUtils.getPercentageString(numberConformer(percentage), getContext()));
 
         if(isBalanceHidden)
         {

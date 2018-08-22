@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#ffffffff">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,53 +18,47 @@
         <LinearLayout
             android:id="@+id/mainLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="5dp">
             <LinearLayout
-                android:padding="5dp"
-                android:background="#ffffffff"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-                <!--What you want to show in SurfaceView-->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.5"
-                    android:orientation="vertical">
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/amountPurchased"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="15dp"/>
+                <TextView
+                    android:id="@+id/amountPurchased"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15dp"/>
 
-                    <TextView
-                        android:id="@+id/purchasePrice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="10dp"/>
+                <TextView
+                    android:id="@+id/purchasePrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10dp"/>
 
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.5"
-                    android:orientation="vertical"
-                    android:gravity="end">
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:orientation="vertical"
+                android:gravity="end">
 
-                    <TextView
-                        android:id="@+id/pair"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="15dp"/>
+                <TextView
+                    android:id="@+id/pair"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15dp"/>
 
-                    <TextView
-                        android:id="@+id/tradeDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="10dp"/>
+                <TextView
+                    android:id="@+id/tradeDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10dp"/>
 
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

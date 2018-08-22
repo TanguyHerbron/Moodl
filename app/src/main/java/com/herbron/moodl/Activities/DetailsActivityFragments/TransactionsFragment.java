@@ -1,20 +1,14 @@
 package com.herbron.moodl.Activities.DetailsActivityFragments;
 
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import com.herbron.moodl.DataNotifiers.BinanceUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
@@ -23,7 +17,6 @@ import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.BinanceManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.CustomAdapters.TradeListAdapter;
 import com.herbron.moodl.CustomAdapters.TransactionListAdapter;
 import com.herbron.moodl.R;
 
@@ -46,7 +39,6 @@ public class TransactionsFragment extends Fragment {
     private boolean flag_loading;
     private List<BinanceManager> binanceManagerList;
     private DatabaseManager databaseManager;
-    private TradeListAdapter tradeListAdapter;
     private ArrayList<com.herbron.moodl.DataManagers.CurrencyData.Trade> returnedTrades;
 
     @Override

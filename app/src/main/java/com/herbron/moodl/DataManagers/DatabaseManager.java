@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.herbron.moodl.Utils.TransferUtils.isBalanceRelated;
+
 /**
  * Created by Guitoune on 14/01/2018.
  */
@@ -670,12 +672,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
         db.close();
 
         return currencyList;
-    }
-
-    private boolean isBalanceRelated(String str)
-    {
-        Set<String> set = new HashSet<>(Arrays.asList(TransferFragment.EXCHANGE_CODE, TransferFragment.WALLET_CODE));
-        return set.contains(str);
     }
 
     public Transaction getCurrencyTransactionById(int id)

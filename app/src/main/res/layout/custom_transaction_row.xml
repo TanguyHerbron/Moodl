@@ -79,13 +79,13 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/amountPurchased"
+                        android:id="@+id/transactionTLTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="15dp"/>
 
                     <TextView
-                        android:id="@+id/puchasedValue"
+                        android:id="@+id/transactionBLTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="10dp"/>
@@ -99,10 +99,20 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/purchaseDate"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="right"/>
+                        android:id="@+id/transactionAmountTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:textSize="15dp"/>
+
+                    <TextView
+                        android:id="@+id/transactionDateTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:textSize="10dp"/>
 
                 </LinearLayout>
             </LinearLayout>

@@ -3,13 +3,11 @@ package com.herbron.moodl.Activities;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -19,14 +17,12 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -38,7 +34,7 @@ import com.herbron.moodl.BalanceSwitchManagerInterface;
 import com.herbron.moodl.BalanceUpdateInterface;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import static com.herbron.moodl.MoodlBox.numberConformer;
@@ -247,11 +243,11 @@ public class HomeActivity extends AppCompatActivity implements BalanceUpdateInte
 
         if(preferencesManager.isBalanceHidden())
         {
-            drawerBalanceTextView.setText(PlaceholderManager.getPercentageString(numberConformer(value), getApplicationContext()));
+            drawerBalanceTextView.setText(PlaceholderUtils.getPercentageString(numberConformer(value), getApplicationContext()));
         }
         else
         {
-            drawerBalanceTextView.setText(PlaceholderManager.getValueString(numberConformer(value), getApplicationContext()));
+            drawerBalanceTextView.setText(PlaceholderUtils.getValueString(numberConformer(value), getApplicationContext()));
         }
     }
 }

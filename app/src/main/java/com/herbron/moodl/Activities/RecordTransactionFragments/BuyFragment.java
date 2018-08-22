@@ -10,7 +10,6 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,7 @@ import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.text.SimpleDateFormat;
@@ -452,8 +451,8 @@ public class BuyFragment extends CustomRecordFragment {
     private void updateAdapter()
     {
         symbolStrings = new ArrayList<>();
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
 
         currencyFeeAdapter.clear();
         currencyFeeAdapter.addAll(symbolStrings);
@@ -530,8 +529,8 @@ public class BuyFragment extends CustomRecordFragment {
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         symbolStrings = new ArrayList<>();
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
         currencyFeeAdapter.addAll(symbolStrings);
         currencyFeeAdapter.notifyDataSetChanged();
 

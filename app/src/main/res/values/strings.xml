@@ -299,5 +299,11 @@
     <string name="error_no_valid_from_to">This transaction is not valid</string>
     <string name="deductFromHoldings">Deduct from holdings</string>
     <string name="addToHoldings">Add to holdings</string>
+    <string name="withdrawText">Withdraw</string>
+    <string name="depositText">Deposit</string>
+    <string name="fromToPlaceholder">From %1$s to %2$s</string>
+    <string name="fromPlaceholder">From %1$s</string>
+    <string name="toPlaceholder">To %1$s</string>
+    <string name="toPairPlaceholder">%1$s to %2$s</string>
 
 </resources>

@@ -1,8 +1,9 @@
-package com.herbron.moodl;
+package com.herbron.moodl.Utils;
 
 import android.content.Context;
 
 import com.herbron.moodl.DataManagers.PreferencesManager;
+import com.herbron.moodl.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
  * Created by Tiji on 19/04/2018.
  */
 
-public class PlaceholderManager {
+public class PlaceholderUtils {
 
     public static String getValueString(String value, android.content.Context context)
     {
@@ -181,5 +182,25 @@ public class PlaceholderManager {
     public static String getTimestampString(String date, android.content.Context context)
     {
         return context.getResources().getString(R.string.timestampPlaceholder, date);
+    }
+
+    public static String getToString(String to, android.content.Context context)
+    {
+        return context.getResources().getString(R.string.toPlaceholder, to);
+    }
+
+    public static String getFromString(String from, android.content.Context context)
+    {
+        return context.getResources().getString(R.string.fromPlaceholder, from);
+    }
+
+    public static String getFromToString(String from, String to, android.content.Context context)
+    {
+        return context.getResources().getString(R.string.fromToPlaceholder, from, to);
+    }
+
+    public static String getToPairString(String from, String to, Context context)
+    {
+        return context.getResources().getString(R.string.toPairPlaceholder, from, to);
     }
 }

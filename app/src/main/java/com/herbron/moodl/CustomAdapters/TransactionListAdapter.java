@@ -20,6 +20,8 @@ import com.herbron.moodl.DataManagers.CurrencyData.Transaction;
 import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.R;
+import com.herbron.moodl.Utils.PlaceholderUtils;
+import com.herbron.moodl.Utils.TransferUtils;
 
 import java.util.ArrayList;
 
@@ -27,6 +29,8 @@ import static com.herbron.moodl.MoodlBox.collapseH;
 import static com.herbron.moodl.MoodlBox.getDateFromTimestamp;
 import static com.herbron.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
+
+import static com.herbron.moodl.Utils.TransferUtils.isBalanceRelated;
 
 /**
  * Created by Guitoune on 24/04/2018.
@@ -91,12 +95,12 @@ public class TransactionListAdapter extends ArrayAdapter<Object> {
 
         View convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_transaction_row, parent, false);
 
-        TextView amountTxtView = convertView.findViewById(R.id.amountPurchased);
-        TextView valueTxtView = convertView.findViewById(R.id.puchasedValue);
-        TextView dateTxtView = convertView.findViewById(R.id.purchaseDate);
+        TextView topLeftTextView = convertView.findViewById(R.id.transactionTLTV);
+        TextView bottomLeftTextView = convertView.findViewById(R.id.transactionBLTV);
+        TextView dateTxtView = convertView.findViewById(R.id.transactionDateTextView);
+        TextView amountTxtView = convertView.findViewById(R.id.transactionAmountTextView);
 
         amountTxtView.setText(String.valueOf(transaction.getAmount()));
-        valueTxtView.setText(numberConformer(transaction.getPrice() * transaction.getAmount()));
         dateTxtView.setText(getDateFromTimestamp(transaction.getTimestamp()));
 
         LinearLayout deleteLayout = convertView.findViewById(R.id.deleteTransactionLayout);
@@ -135,12 +139,40 @@ public class TransactionListAdapter extends ArrayAdapter<Object> {
         {
             case "b":
                 transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.increaseCandle));
+                topLeftTextView.setText(transaction.getSource());
+                bottomLeftTextView.setText(PlaceholderUtils.getToPairString(transaction.getSymbol(), transaction.getSymPair(), context));
                 break;
             case "s":
                 transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.decreaseCandle));
+                topLeftTextView.setText(transaction.getSource());
+                bottomLeftTextView.setText(PlaceholderUtils.getToPairString(transaction.getSymPair(), transaction.getSymbol(), context));
                 break;
             case "t":
                 transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.blue));
+
+                if(isBalanceRelated(transaction.getDestination()) && isBalanceRelated(transaction.getSource()))
+                {
+                    topLeftTextView.setText(context.getString(R.string.transferText));
+
+                    bottomLeftTextView.setText(PlaceholderUtils.getFromToString(TransferUtils.getLabelFor(context, transaction.getSource()), TransferUtils.getLabelFor(context, transaction.getDestination()), context));
+                }
+                else
+                {
+                    if(isBalanceRelated(transaction.getDestination()))
+                    {
+                        topLeftTextView.setText(context.getString(R.string.depositText));
+                        bottomLeftTextView.setText(PlaceholderUtils.getFromString(TransferUtils.getLabelFor(context, transaction.getSource()), context));
+                    }
+                    else
+                    {
+                        if(isBalanceRelated(transaction.getSource()))
+                        {
+                            topLeftTextView.setText(context.getString(R.string.withdrawText));
+                            bottomLeftTextView.setText(PlaceholderUtils.getToString(TransferUtils.getLabelFor(context, transaction.getDestination()), context));
+                        }
+                    }
+                }
+
                 break;
         }
 
@@ -148,6 +180,8 @@ public class TransactionListAdapter extends ArrayAdapter<Object> {
 
         return convertView;
     }
+
+
 
     private void setupSwipeView(View view)
     {

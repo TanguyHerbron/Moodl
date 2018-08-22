@@ -27,7 +27,7 @@ import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.text.SimpleDateFormat;
@@ -421,8 +421,8 @@ public class SellFragment extends CustomRecordFragment {
     private void updateAdapter()
     {
         symbolStrings = new ArrayList<>();
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
 
         currencyFeeAdapter.clear();
         currencyFeeAdapter.addAll(symbolStrings);
@@ -529,8 +529,8 @@ public class SellFragment extends CustomRecordFragment {
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         symbolStrings = new ArrayList<>();
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
         currencyFeeAdapter.addAll(symbolStrings);
         currencyFeeAdapter.notifyDataSetChanged();
 

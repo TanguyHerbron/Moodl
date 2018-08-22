@@ -36,7 +36,7 @@ import com.herbron.moodl.DataManagers.CurrencyData.CurrencyDataChart;
 import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.CustomLayouts.CustomViewPager;
 import com.herbron.moodl.MoodlBox;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
@@ -252,8 +252,8 @@ public class ChartsFragment extends Fragment implements CurrencyInfoUpdateNotifi
 
         updateFluctuation(start, end);
 
-        ((TextView) view.findViewById(R.id.txtViewPriceStart)).setText(PlaceholderManager.getValueString(numberConformer(start), getActivity().getBaseContext()));
-        ((TextView) view.findViewById(R.id.txtViewPriceNow)).setText(PlaceholderManager.getValueString(numberConformer(end), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.txtViewPriceStart)).setText(PlaceholderUtils.getValueString(numberConformer(start), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.txtViewPriceNow)).setText(PlaceholderUtils.getValueString(numberConformer(end), getActivity().getBaseContext()));
 
         for(int i = 1; i < dataChartList.size(); i++)
         {
@@ -270,9 +270,9 @@ public class ChartsFragment extends Fragment implements CurrencyInfoUpdateNotifi
             }
         }
 
-        ((TextView) view.findViewById(R.id.totalVolume)).setText(PlaceholderManager.getValueString(numberConformer(totalVolume), getActivity().getBaseContext()));
-        ((TextView) view.findViewById(R.id.highestPrice)).setText(PlaceholderManager.getValueString(numberConformer(highestPrice), getActivity().getBaseContext()));
-        ((TextView) view.findViewById(R.id.lowestPrice)).setText(PlaceholderManager.getValueString(numberConformer(lowestPrice), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.totalVolume)).setText(PlaceholderUtils.getValueString(numberConformer(totalVolume), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.highestPrice)).setText(PlaceholderUtils.getValueString(numberConformer(highestPrice), getActivity().getBaseContext()));
+        ((TextView) view.findViewById(R.id.lowestPrice)).setText(PlaceholderUtils.getValueString(numberConformer(lowestPrice), getActivity().getBaseContext()));
     }
 
     private void updateFluctuation(float start, float end)
@@ -457,9 +457,9 @@ public class ChartsFragment extends Fragment implements CurrencyInfoUpdateNotifi
             date = getDateFromTimestamp(dataChartList.get(index).getTimestamp() * 1000);
         }
 
-        volumePlaceholder = PlaceholderManager.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), getActivity().getBaseContext());
-        pricePlaceholder = PlaceholderManager.getPriceString(numberConformer((lineChart.getHighlighted())[0].getY()), getActivity().getBaseContext());
-        timestampPlaceholder = PlaceholderManager.getTimestampString(date, getActivity().getBaseContext());
+        volumePlaceholder = PlaceholderUtils.getVolumeString(numberConformer(barChart.getData().getDataSets().get(0).getEntryForIndex(index).getY()), getActivity().getBaseContext());
+        pricePlaceholder = PlaceholderUtils.getPriceString(numberConformer((lineChart.getHighlighted())[0].getY()), getActivity().getBaseContext());
+        timestampPlaceholder = PlaceholderUtils.getTimestampString(date, getActivity().getBaseContext());
 
         ((TextView) view.findViewById(R.id.volumeHightlight)).setText(volumePlaceholder);
         view.findViewById(R.id.volumeHightlight).setVisibility(View.VISIBLE);
