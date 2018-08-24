@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,14 +75,15 @@ public class InformationFragment extends Fragment {
     {
         if(isTickerUpdated && isSnapshotUpdated)
         {
-            if(getActivity() != null)
-            {
+            try {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         refreshInfoTab();
                     }
                 });
+            } catch (NullPointerException e) {
+                Log.d("moodl", "Information tab do not needs to be updated anymore");
             }
         }
     }

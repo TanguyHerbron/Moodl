@@ -553,7 +553,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     public void onBalanceDataUpdated() {
         final List<Currency> balance = balanceManager.getTotalBalance();
 
-        if(balance.size() > 0)
+        if(balance != null && balance.size() > 0)
         {
             for(int i = 0; i < balance.size(); i++)
             {
