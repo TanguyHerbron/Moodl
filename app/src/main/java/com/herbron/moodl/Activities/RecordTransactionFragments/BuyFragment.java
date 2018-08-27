@@ -275,6 +275,7 @@ public class BuyFragment extends CustomRecordFragment {
         totalValueEditText.setText(String.valueOf(transaction.getAmount() * transaction.getPrice()));
         fees_editText.setText(String.valueOf(transaction.getFees()));
         note_editText.setText(transaction.getNote());
+        deductHoldingsSwitch.setChecked(transaction.isDeducted());
     }
 
     private void initializeViewElements()

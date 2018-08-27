@@ -30,7 +30,6 @@ public class BalanceManager implements BinanceUpdateNotifierInterface, HitBTCUpd
 
     private int balanceCounter;
 
-    //NEW IMPLEMENTATION
     private List<HitBtcManager> hitBtcManagers;
     private List<BinanceManager> binanceManagers;
 

@@ -213,7 +213,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
                         final Currency currency = balanceManager.getTotalBalance().get(i);
 
-                        if (!currency.getSymbol().equals("USD") && (Math.abs(currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
+                        if ((Math.abs(currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
                             //currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
                             renderedCurrencies.add(currency);
                         }
@@ -235,6 +235,8 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                         {
                             loadingDialog.dismiss();
                         }
+
+                        updateTitle();
 
                         handler.removeCallbacks(updateRunnable);
                     }
@@ -371,9 +373,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     {
         coinCounter = 0;
         iconCounter = 0;
-
-        totalValue = 0;
-        totalFluctuation = 0;
     }
 
     private void adaptView()
@@ -466,8 +465,25 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         });
     }
 
+    private void computeTotalValue()
+    {
+        totalValue = 0;
+        totalFluctuation = 0;
+
+        for(int i = 0; i < currencyLayout.getChildCount(); i++)
+        {
+            if(currencyLayout.getChildAt(i) instanceof CurrencyCardview)
+            {
+                totalValue += ((CurrencyCardview) currencyLayout.getChildAt(i)).getOwnedValue();
+                totalFluctuation += ((CurrencyCardview) currencyLayout.getChildAt(i)).getFluctuation();
+            }
+        }
+    }
+
     protected void updateTitle()
     {
+        computeTotalValue();
+
         float totalFluctuationPercentage = totalFluctuation / (totalValue - totalFluctuation) * 100;
 
         if(preferencesManager.isBalanceHidden())
@@ -700,13 +716,8 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
         private void loadCurrency(Currency currency)
         {
-            if(!currency.getSymbol().equals("USD"))
-            {
-                currency.setName(balanceManager.getCurrencyName(currency.getSymbol()));
-                currency.setId(balanceManager.getCurrencyId(currency.getSymbol()));
-                totalValue += currency.getValue() * currency.getBalance();
-                totalFluctuation += (currency.getValue() * currency.getBalance()) * (currency.getDayFluctuationPercentage() / 100);
-            }
+            currency.setName(balanceManager.getCurrencyName(currency.getSymbol()));
+            currency.setId(balanceManager.getCurrencyId(currency.getSymbol()));
         }
 
         @Override
@@ -731,13 +742,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
                 balanceManager.getTotalBalance().set(i, localCurrency);
             }
-
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    updateTitle();
-                }
-            });
 
             return null;
         }

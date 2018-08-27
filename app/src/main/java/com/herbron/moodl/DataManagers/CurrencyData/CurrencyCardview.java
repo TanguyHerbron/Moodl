@@ -305,6 +305,16 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         }
     }
 
+    public double getOwnedValue()
+    {
+        return currency.getValue() * currency.getBalance();
+    }
+
+    public double getFluctuation()
+    {
+        return getOwnedValue() * (currency.getDayFluctuationPercentage() / 100);
+    }
+
     private LineData generateData(Currency currency)
     {
         LineDataSet dataSet;
