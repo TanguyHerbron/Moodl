@@ -140,12 +140,12 @@ public class TransactionListAdapter extends ArrayAdapter<Object> {
             case "b":
                 transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.increaseCandle));
                 topLeftTextView.setText(transaction.getSource());
-                bottomLeftTextView.setText(PlaceholderUtils.getToPairString(transaction.getSymbol(), transaction.getSymPair(), context));
+                bottomLeftTextView.setText(PlaceholderUtils.getToPairString(transaction.getSymPair(), transaction.getSymbol(), context));
                 break;
             case "s":
                 transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.decreaseCandle));
                 topLeftTextView.setText(transaction.getSource());
-                bottomLeftTextView.setText(PlaceholderUtils.getToPairString(transaction.getSymPair(), transaction.getSymbol(), context));
+                bottomLeftTextView.setText(PlaceholderUtils.getToPairString(transaction.getSymbol(), transaction.getSymPair(), context));
                 break;
             case "t":
                 transactionIndicator.setBackgroundColor(context.getResources().getColor(R.color.blue));

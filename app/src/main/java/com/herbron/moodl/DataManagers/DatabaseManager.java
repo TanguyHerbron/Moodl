@@ -725,7 +725,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public ArrayList<Transaction> getCurrencyTransactionsForSymbol(String symbol)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_SYMBOL + "='" + symbol.toUpperCase() + "'";
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_SYMBOL + "='" + symbol.toUpperCase()
+                + "' OR " + KEY_TRANSACTION_PAIR + "='" + symbol.toUpperCase() + "' AND " + KEY_TRANSACTION_DEDUCT + "=1";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -733,16 +734,38 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while (resultatList.moveToNext())
         {
-            boolean deduct = false;
+            String type = "t";
+            String pair = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR));
+            String sym = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL));
 
-            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
+            if(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL)).equals(symbol.toUpperCase()))
             {
-                deduct = resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1;
+                type = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE));
+            }
+            else
+            {
+                if(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)).equals("s"))
+                {
+                    type = "b";
+
+                    pair = sym;
+                    sym = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR));
+                }
+                else
+                {
+                    if(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)).equals("b"))
+                    {
+                        type = "s";
+
+                        pair = sym;
+                        sym = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR));
+                    }
+                }
             }
 
             transactionList.add(new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
+                    , sym
+                    , pair
                     , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))
                     , resultatList.getLong(resultatList.getColumnIndex(KEY_TRANSACTION_DATE))
                     , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_PURCHASE_PRICE))
@@ -751,9 +774,9 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
+                    , type
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))
-                    , deduct));
+                    , resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1));
         }
 
         resultatList.close();
