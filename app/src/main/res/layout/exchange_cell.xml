@@ -62,7 +62,7 @@
                     android:id="@+id/exchange_icon_imageView"
                     android:layout_width="56dp"
                     android:layout_height="56dp"
-                    android:layout_marginEnd="@dimen/margin"/>
+                    android:layout_margin="5dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -71,7 +71,8 @@
                     android:layout_toEndOf="@id/exchange_icon_imageView"
                     android:layout_toStartOf="@id/exchange_account_off_imageView"
                     android:gravity="center_vertical"
-                    android:foregroundGravity="center_vertical">
+                    android:foregroundGravity="center_vertical"
+                    android:layout_marginTop="5dp">
 
                     <TextView
                         android:id="@+id/exchange_name"

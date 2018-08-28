@@ -306,8 +306,8 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         }
         else
         {
-            TextView appNameTextView = splashLayout.findViewById(R.id.appNameTextView);
-            appNameTextView.setVisibility(View.VISIBLE);
+            /*ImageView appNameImageView = splashLayout.findViewById(R.id.appNameImageView);
+            appNameImageView.setVisibility(View.VISIBLE);*/
             animatedLayout.setVisibility(View.GONE);
         }
 
