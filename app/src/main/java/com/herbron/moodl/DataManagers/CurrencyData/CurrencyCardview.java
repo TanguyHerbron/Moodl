@@ -126,7 +126,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         updateColor(currency);
     }
 
-    public CurrencyCardview(@NonNull final Context context, final Currency currency, Activity activity, float totalValue, boolean isBalanceHidden)
+    public CurrencyCardview(@NonNull final Context context, final Currency currency, Activity activity, boolean isBalanceHidden)
     {
         super(context);
 
@@ -165,8 +165,6 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
                 }
             }
         });
-
-        updateCardViewInfos(currency, totalValue, isBalanceHidden);
 
         findViewById(R.id.linearLayoutSubCharts).setOnClickListener(detailsClickListener);
         findViewById(R.id.LineChartView).setOnClickListener(detailsClickListener);
@@ -250,7 +248,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         }
     }
 
-    private void updateCardViewInfos(Currency currency, float totalValue, boolean isBalanceHidden)
+    public void updateCardViewInfos(float totalValue, boolean isBalanceHidden)
     {
         double value = currency.getValue() * currency.getBalance();
         double percentage = value / totalValue * 100;

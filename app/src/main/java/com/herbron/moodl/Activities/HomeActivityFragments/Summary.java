@@ -228,7 +228,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                         for(int i = 0; i < renderedCurrencies.size(); i++)
                         {
                             //currencyLayout.addView(currencyView.get(i));
-                            currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), getActivity(), totalValue, preferencesManager.isBalanceHidden()));
+                            currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), getActivity(), preferencesManager.isBalanceHidden()));
                         }
 
                         if(loadingDialog.isShowing())
@@ -476,6 +476,14 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             {
                 totalValue += ((CurrencyCardview) currencyLayout.getChildAt(i)).getOwnedValue();
                 totalFluctuation += ((CurrencyCardview) currencyLayout.getChildAt(i)).getFluctuation();
+            }
+        }
+
+        for(int i = 0; i < currencyLayout.getChildCount(); i++)
+        {
+            if(currencyLayout.getChildAt(i) instanceof CurrencyCardview)
+            {
+                ((CurrencyCardview) currencyLayout.getChildAt(i)).updateCardViewInfos(totalValue, preferencesManager.isBalanceHidden());
             }
         }
     }
