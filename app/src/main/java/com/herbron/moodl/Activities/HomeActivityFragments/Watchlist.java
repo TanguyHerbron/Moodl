@@ -43,6 +43,7 @@ import java.util.List;
 import static com.herbron.moodl.MoodlBox.collapseW;
 import static com.herbron.moodl.MoodlBox.expandW;
 import static com.herbron.moodl.MoodlBox.getColor;
+import static com.herbron.moodl.MoodlBox.getIconDominantColor;
 
 /**
  * Created by Tiji on 13/04/2018.
@@ -380,20 +381,6 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
         }
     }
 
-    private void updateChartColor(Currency currency)
-    {
-        if(currency.getIcon() != null)
-        {
-            Palette.Builder builder = Palette.from(currency.getIcon());
-
-            currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
-        }
-        else
-        {
-            currency.setChartColor(getColor(R.color.default_color, getActivity().getBaseContext()));
-        }
-    }
-
     public int getCurrencyId(String symbol)
     {
         int id = 0;
@@ -454,7 +441,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
                                 @Override
                                 public void onBitmapDownloaded(Bitmap bitmapIcon) {
                                     currency.setIcon(bitmapIcon);
-                                    updateChartColor(currency);
+                                    currency.setChartColor(getIconDominantColor(getContext(), bitmapIcon));
                                     countWatchlist();
 
                                 }
@@ -466,7 +453,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
                             icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
 
                             currency.setIcon(icon);
-                            updateChartColor(currency);
+                            currency.setChartColor(getIconDominantColor(getContext(), icon));
                             countWatchlist();
                         }
                     }

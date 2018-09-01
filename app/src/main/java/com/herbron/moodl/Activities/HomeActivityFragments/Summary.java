@@ -708,26 +708,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             super.onProgressUpdate(values);
         }
 
-        private void updateChartColor(Currency currency)
-        {
-            if(currency.getIcon() != null)
-            {
-                Palette.Builder builder = Palette.from(currency.getIcon());
-
-                currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
-            }
-            else
-            {
-                currency.setChartColor(getColor(R.color.default_color, getActivity().getBaseContext()));
-            }
-        }
-
-        private void loadCurrency(Currency currency)
-        {
-            currency.setName(balanceManager.getCurrencyName(currency.getSymbol()));
-            currency.setId(balanceManager.getCurrencyId(currency.getSymbol()));
-        }
-
         @Override
         protected Void doInBackground(Void... params)
         {
@@ -744,7 +724,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
                 localCurrency.setTickerId(coinmarketCapAPIManager.getTickerIdForSymbol(localCurrency.getSymbol()));
 
-                updateChartColor(localCurrency);
+                localCurrency.setChartColor(getIconDominantColor(baseContext, localCurrency.getIcon()));
 
                 loadCurrency(localCurrency);
 

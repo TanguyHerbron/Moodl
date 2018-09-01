@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.getColor;
+import static com.herbron.moodl.MoodlBox.getIconDominantColor;
 import static java.lang.Math.abs;
 
 /**
@@ -265,10 +266,8 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
                 MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
                     @Override
                     public void onBitmapDownloaded(Bitmap bitmapIcon) {
-                        Palette.Builder builder = Palette.from(bitmapIcon);
-
                         coinmarketCapAPIManager.getTopCurrencies().get(index).setIcon(bitmapIcon);
-                        coinmarketCapAPIManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
+                        coinmarketCapAPIManager.getTopCurrencies().get(index).setChartColor(getIconDominantColor(getContext(), bitmapIcon));
 
                         countIcons();
 

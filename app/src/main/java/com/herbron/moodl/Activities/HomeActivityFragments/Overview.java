@@ -30,6 +30,7 @@ import com.herbron.moodl.R;
 import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.getDrawable;
+import static com.herbron.moodl.MoodlBox.getIconDominantColor;
 
 /**
  * Created by Administrator on 27/05/2018.
@@ -121,20 +122,6 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
         currencyLoader.execute();
     }
 
-    private void updateChartColor(Currency currency)
-    {
-        if(currency.getIcon() != null)
-        {
-            Palette.Builder builder = Palette.from(currency.getIcon());
-
-            currency.setChartColor(builder.generate().getDominantColor(0));
-        }
-        else
-        {
-            currency.setChartColor(12369084);
-        }
-    }
-
     private void loadingIndicatorGenerator()
     {
         loadingFooter = LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.listview_loading_indicator, null, false);
@@ -198,7 +185,7 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
                         @Override
                         public void onBitmapDownloaded(Bitmap bitmap) {
                             currency.setIcon(bitmap);
-                            updateChartColor(currency);
+                            currency.setChartColor(getIconDominantColor(getContext(), bitmap));
                             countIcons(currencies[0]);
                         }
                     });
@@ -216,7 +203,7 @@ public class Overview extends Fragment implements CoinmarketcapNotifierInterface
                     icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
 
                     currency.setIcon(icon);
-                    updateChartColor(currency);
+                    currency.setChartColor(getIconDominantColor(getContext(), icon));
                     countIcons(currencies[0]);
                 }
             }

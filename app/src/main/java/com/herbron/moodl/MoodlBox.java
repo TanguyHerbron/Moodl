@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
@@ -296,5 +297,19 @@ public class MoodlBox {
         }
 
         return url;
+    }
+
+    public static int getIconDominantColor(Context context, Bitmap icon)
+    {
+        if(icon != null)
+        {
+            Palette.Builder builder = Palette.from(icon);
+
+            return builder.generate().getDominantColor(getColor(R.color.default_color, context));
+        }
+        else
+        {
+            return getColor(R.color.default_color, context);
+        }
     }
 }
