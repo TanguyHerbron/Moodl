@@ -19,6 +19,12 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -51,6 +57,8 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
  */
 
 public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNotifierInterface {
+
+    private static final int FADE_IN_DURATION = 300;
 
     private Currency currency;
     private Activity parentActivity;
@@ -160,7 +168,13 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
     private void updateCurrencyColorRelatedLayouts()
     {
-        ((ImageView) findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
+        Animation fadeIn = new AlphaAnimation(0, 1);
+        fadeIn.setInterpolator(new AccelerateInterpolator());
+        fadeIn.setDuration(FADE_IN_DURATION);
+
+        ImageView currencyIconImageView = findViewById(R.id.currencyIcon);
+        currencyIconImageView.setImageBitmap(currency.getIcon());
+        currencyIconImageView.startAnimation(fadeIn);
 
         Drawable arrowDrawable = ((ImageView) findViewById(R.id.detailsArrow)).getDrawable();
         arrowDrawable.mutate();
@@ -302,16 +316,6 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
             findViewById(R.id.percentageOwnedTextView).setVisibility(View.GONE);
             findViewById(R.id.currencyOwnedInfoLayout).setVisibility(View.VISIBLE);
         }
-    }
-
-    public double getOwnedValue()
-    {
-        return currency.getValue() * currency.getBalance();
-    }
-
-    public double getFluctuation()
-    {
-        return getOwnedValue() * (currency.getDayFluctuationPercentage() / 100);
     }
 
     private LineData generateData()
