@@ -3,6 +3,7 @@ package com.herbron.moodl.Activities.HomeActivityFragments;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -61,6 +62,7 @@ import java.util.Random;
 
 import static com.herbron.moodl.MoodlBox.getColor;
 import static com.herbron.moodl.MoodlBox.getDrawable;
+import static com.herbron.moodl.MoodlBox.getIconDominantColor;
 import static com.herbron.moodl.MoodlBox.numberConformer;
 import static java.lang.Math.abs;
 
@@ -206,41 +208,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         layoutRefresherRunnable = new Runnable() {
             @Override
             public void run() {
-                final List<Currency> renderedCurrencies = new ArrayList<>();
-
-                if (balanceManager.getTotalBalance() != null)
-                {
-                    for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
-                        final Currency currency = balanceManager.getTotalBalance().get(i);
-
-                        if ((Math.abs(currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
-                            //currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
-                            renderedCurrencies.add(currency);
-                        }
-                    }
-                }
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        currencyLayout.removeAllViews();
-
-                        for(int i = 0; i < renderedCurrencies.size(); i++)
-                        {
-                            //currencyLayout.addView(currencyView.get(i));
-                            currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), getActivity(), preferencesManager.isBalanceHidden()));
-                        }
-
-                        if(loadingDialog.isShowing())
-                        {
-                            loadingDialog.dismiss();
-                        }
-
-                        updateTitle();
-
-                        handler.removeCallbacks(updateRunnable);
-                    }
-                });
             }
         };
     }
@@ -375,9 +342,44 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         iconCounter = 0;
     }
 
-    private void adaptView()
+    private void adaptView(float totalValue, float totalFluctuation)
     {
-        layoutRefresherRunnable.run();
+        this.totalValue = totalValue;
+        this.totalFluctuation = totalFluctuation;
+        final List<Currency> renderedCurrencies = new ArrayList<>();
+
+        if (balanceManager.getTotalBalance() != null)
+        {
+            for (int i = 0; i < balanceManager.getTotalBalance().size(); i++) {
+                final Currency currency = balanceManager.getTotalBalance().get(i);
+
+                if ((Math.abs(currency.getBalance() * currency.getValue()) >= preferencesManager.getMinimumAmount())) {
+                    //currencyView.add(layoutGenerator.getInfoLayout(currency, totalValue, preferencesManager.isBalanceHidden()));
+                    renderedCurrencies.add(currency);
+                }
+            }
+        }
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                currencyLayout.removeAllViews();
+
+                for(int i = 0; i < renderedCurrencies.size(); i++)
+                {
+                    currencyLayout.addView(new CurrencyCardview(getActivity(), renderedCurrencies.get(i), getActivity(), preferencesManager.isBalanceHidden()));
+                }
+
+                if(loadingDialog.isShowing())
+                {
+                    loadingDialog.dismiss();
+                }
+
+                updateTitle();
+
+                handler.removeCallbacks(updateRunnable);
+            }
+        });
     }
 
     private void countCoins(boolean isCoin, boolean isDetails, boolean isTickers)
@@ -401,46 +403,22 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         {
             if(balanceManager.getTotalBalance().size() == 0)
             {
-                countIcons();
+                updateNoBalance();
             }
             else
             {
                 if(coinCounter >= balanceManager.getTotalBalance().size() && detailsChecker && tickersChecker)
                 {
-                    IconDownloader iconDownloader = new IconDownloader();
-                    iconDownloader.execute();
-                }
-
-            }
-        }
-    }
-
-    private void countIcons()
-    {
-        int offset = 0;
-
-        for(int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-        {
-            if(balanceManager.getTotalBalance().get(i).getSymbol().equals("USD"))
-            {
-                offset++;
-            }
-        }
-
-        iconCounter++;
-
-        if(balanceManager.getTotalBalance() != null)
-        {
-            if(balanceManager.getTotalBalance().size() == 0)
-            {
-                updateNoBalance();
-            }
-            else
-            {
-                if(iconCounter == balanceManager.getTotalBalance().size() - offset)
-                {
                     UiHeavyLoadCalculator uiHeavyLoadCalculator = new UiHeavyLoadCalculator();
-                    uiHeavyLoadCalculator.execute();
+                    uiHeavyLoadCalculator.setOnUiEndListener(new UiHeavyLoadCalculator.OnUiEndListener() {
+                        @Override
+                        public void onEnd(float totalValue, float totalFluctuation) {
+                            refreshLayout.setRefreshing(false);
+
+                            adaptView(totalValue, totalFluctuation);
+                        }
+                    });
+                    uiHeavyLoadCalculator.execute(getActivity().getBaseContext(), balanceManager, coinmarketCapAPIManager);
                 }
             }
         }
@@ -467,23 +445,11 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
     private void computeTotalValue()
     {
-        totalValue = 0;
-        totalFluctuation = 0;
-
         for(int i = 0; i < currencyLayout.getChildCount(); i++)
         {
             if(currencyLayout.getChildAt(i) instanceof CurrencyCardview)
             {
-                totalValue += ((CurrencyCardview) currencyLayout.getChildAt(i)).getOwnedValue();
-                totalFluctuation += ((CurrencyCardview) currencyLayout.getChildAt(i)).getFluctuation();
-            }
-        }
-
-        for(int i = 0; i < currencyLayout.getChildCount(); i++)
-        {
-            if(currencyLayout.getChildAt(i) instanceof CurrencyCardview)
-            {
-                ((CurrencyCardview) currencyLayout.getChildAt(i)).updateCardViewInfos(totalValue, preferencesManager.isBalanceHidden());
+                ((CurrencyCardview) currencyLayout.getChildAt(i)).updateOwnedValues(totalValue, preferencesManager.isBalanceHidden());
             }
         }
     }
@@ -690,8 +656,21 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         countCoins(false, false, true);
     }
 
-    private class UiHeavyLoadCalculator extends AsyncTask<Void, Integer, Void>
+    private static class UiHeavyLoadCalculator extends AsyncTask<Object, Integer, Void>
     {
+
+        private float totalValue = 0;
+        private float totalFluctuation = 0;
+
+        private BalanceManager balanceManager;
+        private CoinmarketCapAPIManager coinmarketCapAPIManager;
+
+        private OnUiEndListener onUiEndListener;
+
+        public void setOnUiEndListener(OnUiEndListener onUiEndListener)
+        {
+            this.onUiEndListener = onUiEndListener;
+        }
 
         @Override
         protected void onPreExecute()
@@ -709,12 +688,17 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         }
 
         @Override
-        protected Void doInBackground(Void... params)
+        protected Void doInBackground(Object... params)
         {
             if(Looper.myLooper() == null)
             {
                 Looper.prepare();
             }
+
+            Context baseContext = (Context) params[0];
+
+            balanceManager = (BalanceManager) params[1];
+            coinmarketCapAPIManager = (CoinmarketCapAPIManager) params[2];
 
             balanceManager.sortCoins();
 
@@ -728,29 +712,30 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
                 loadCurrency(localCurrency);
 
+                totalValue += localCurrency.getValue() * localCurrency.getBalance();
+                totalFluctuation += localCurrency.getValue() * localCurrency.getBalance() * (localCurrency.getDayFluctuationPercentage() / 100);
+
                 balanceManager.getTotalBalance().set(i, localCurrency);
             }
 
             return null;
         }
 
+        private void loadCurrency(Currency currency)
+        {
+            currency.setName(balanceManager.getCurrencyName(currency.getSymbol()));
+            currency.setId(balanceManager.getCurrencyId(currency.getSymbol()));
+        }
+
         @Override
         protected void onPostExecute(Void result)
         {
-            refreshLayout.setRefreshing(false);
-            new AsyncTask<Void, Integer, Void>() {
+            onUiEndListener.onEnd(totalValue, totalFluctuation);
+        }
 
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    if(Looper.myLooper() == null)
-                    {
-                        Looper.prepare();
-                    }
-
-                    adaptView();
-                    return null;
-                }
-            }.execute();
+        public interface OnUiEndListener
+        {
+            void onEnd(float totalValue, float totalFluctuation);
         }
     }
 
@@ -777,61 +762,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
             }
         }
     }
-
-    private class IconDownloader extends AsyncTask<Void, Integer, Void>
-    {
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values)
-        {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params)
-        {
-            for (int i = 0; i < balanceManager.getTotalBalance().size(); i++)
-            {
-                final Currency localCurrency = balanceManager.getTotalBalance().get(i);
-
-                String iconUrl = MoodlBox.getIconUrl(localCurrency.getSymbol(), balanceManager.getCryptocompareApiManager());
-
-                if(iconUrl != null)
-                {
-                    MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
-                        @Override
-                        public void onBitmapDownloaded(Bitmap bitmapIcon) {
-                            localCurrency.setIcon(bitmapIcon);
-                            countIcons();
-                        }
-                    });
-                }
-                else
-                {
-                    Drawable drawable = getDrawable(R.drawable.ic_panorama_fish_eye_24dp, getActivity().getBaseContext());
-
-                    Bitmap icon = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-
-                    Canvas canvas = new Canvas(icon);
-                    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                    drawable.draw(canvas);
-
-                    icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
-
-                    localCurrency.setIcon(icon);
-                    countIcons();
-                }
-            }
-
-            return null;
-        }
-    }
-
 
     private class DataUpdater extends AsyncTask<Void, Integer, Void>
     {

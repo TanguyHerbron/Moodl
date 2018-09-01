@@ -4,14 +4,19 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -26,7 +31,9 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.herbron.moodl.Activities.CurrencyDetailsActivity;
 import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.DatabaseManager;
+import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
 import com.herbron.moodl.DataManagers.PreferencesManager;
+import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
@@ -36,6 +43,7 @@ import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.collapseH;
 import static com.herbron.moodl.MoodlBox.expandH;
+import static com.herbron.moodl.MoodlBox.getIconDominantColor;
 import static com.herbron.moodl.MoodlBox.numberConformer;
 
 /**
@@ -46,6 +54,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
     private Currency currency;
     private Activity parentActivity;
+    private Context context;
 
     private OnClickListener detailsClickListener = new OnClickListener() {
         @Override
@@ -67,6 +76,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
     public CurrencyCardview(@NonNull Context context) {
         super(context);
+        this.context = context;
     }
 
     public CurrencyCardview(@NonNull final Context context, final Currency currency, final Activity activity)
@@ -77,6 +87,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
         this.currency = currency;
         this.parentActivity = activity;
+        this.context = context;
 
         LayoutInflater.from(context).inflate(R.layout.cardview_watchlist, this, true);
 
@@ -84,32 +95,9 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
         setupCardView();
 
-        setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                PreferencesManager preferencesManager = new PreferencesManager(context);
+        setOnClickListeners();
 
-                if (view.findViewById(R.id.collapsableLayout).getVisibility() == View.VISIBLE) {
-                    collapseH(view.findViewById(R.id.collapsableLayout));
-                } else {
-                    view.findViewById(R.id.linearLayoutSubCharts).setVisibility(View.GONE);
-                    view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.VISIBLE);
-                    expandH(view.findViewById(R.id.collapsableLayout));
-
-                    if (currency.getHistoryMinutes() == null) {
-                        currency.updateHistoryMinutes(context, preferencesManager.getDefaultCurrency());
-                    }
-                    else
-                    {
-                        expandH(view.findViewById(R.id.collapsableLayout));
-                        view.findViewById(R.id.progressBarLinechartWatchlist).setVisibility(View.GONE);
-                        view.findViewById(R.id.linearLayoutSubCharts).setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-        });
-
-        updateCardViewInfos(currency);
+        updateCardviewInfos();
 
         findViewById(R.id.deleteCardWatchlist).setOnClickListener(new OnClickListener() {
             @Override
@@ -120,10 +108,9 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
             }
         });
 
-        findViewById(R.id.linearLayoutSubCharts).setOnClickListener(detailsClickListener);
-        findViewById(R.id.LineChartView).setOnClickListener(detailsClickListener);
+        updateColor();
 
-        updateColor(currency);
+        startIconUpdater();
     }
 
     public CurrencyCardview(@NonNull final Context context, final Currency currency, Activity activity, boolean isBalanceHidden)
@@ -134,6 +121,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
         this.currency = currency;
         this.parentActivity = activity;
+        this.context = context;
 
         LayoutInflater.from(context).inflate(R.layout.cardview_currency, this, true);
 
@@ -141,6 +129,68 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
 
         setupCardView();
 
+        setOnClickListeners();
+
+        updateCardviewInfos();
+
+        updateColor();
+
+        startIconUpdater();
+    }
+
+    private void startIconUpdater()
+    {
+        IconDownloader iconDownloader = new IconDownloader();
+        iconDownloader.execute(context, currency);
+        iconDownloader.setOnBitmapDownloadedListener(new IconDownloader.OnBitmapDownloadedListener() {
+            @Override
+            public void onDownloaded(Bitmap icon) {
+                currency.setIcon(icon);
+                currency.setChartColor(getIconDominantColor(context, icon));
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateCurrencyColorRelatedLayouts();
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateCurrencyColorRelatedLayouts()
+    {
+        ((ImageView) findViewById(R.id.currencyIcon)).setImageBitmap(currency.getIcon());
+
+        Drawable arrowDrawable = ((ImageView) findViewById(R.id.detailsArrow)).getDrawable();
+        arrowDrawable.mutate();
+        arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        arrowDrawable.invalidateSelf();
+
+        Drawable progressDrawable = ((ProgressBar) findViewById(R.id.progressBarLinechart)).getIndeterminateDrawable();
+        progressDrawable.mutate();
+        progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+        progressDrawable.invalidateSelf();
+
+        if(findViewById(R.id.currencyPortfolioDominance) != null)
+        {
+            Drawable progressBarDrawable = ((ProgressBar) findViewById(R.id.currencyPortfolioDominance)).getProgressDrawable();
+            progressBarDrawable.mutate();
+            progressBarDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
+            progressBarDrawable.invalidateSelf();
+        }
+
+        LineChart lineChart = findViewById(R.id.LineChartView);
+
+        if(currency.getHistoryMinutes() != null)
+        {
+            lineChart.setData(generateData());
+            lineChart.invalidate();
+        }
+    }
+
+    private void setOnClickListeners()
+    {
         setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -150,7 +200,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
                     collapseH(view.findViewById(R.id.collapsableLayout));
                 } else {
                     view.findViewById(R.id.linearLayoutSubCharts).setVisibility(View.GONE);
-                    view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.VISIBLE);
+                    view.findViewById(R.id.progressBarLinechart).setVisibility(View.VISIBLE);
                     expandH(view.findViewById(R.id.collapsableLayout));
 
                     if (currency.getHistoryMinutes() == null) {
@@ -159,7 +209,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
                     else
                     {
                         expandH(view.findViewById(R.id.collapsableLayout));
-                        view.findViewById(R.id.progressBarLinechartSummary).setVisibility(View.GONE);
+                        view.findViewById(R.id.progressBarLinechart).setVisibility(View.GONE);
                         view.findViewById(R.id.linearLayoutSubCharts).setVisibility(View.VISIBLE);
                     }
                 }
@@ -169,7 +219,6 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         findViewById(R.id.linearLayoutSubCharts).setOnClickListener(detailsClickListener);
         findViewById(R.id.LineChartView).setOnClickListener(detailsClickListener);
 
-        updateColor(currency);
     }
 
     public Currency getCurrency()
@@ -210,81 +259,33 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         lineChart.getLegend().setEnabled(false);
         lineChart.getXAxis().setEnabled(false);
         lineChart.setViewPortOffsets(0, 0, 0, 0);
-        lineChart.setData(generateData(currency));
+        lineChart.setData(generateData());
     }
 
-    private void updateCardViewInfos(Currency currency)
+    private void updateCardviewInfos()
     {
         ((TextView) findViewById(R.id.currencyFluctuationTextView))
                 .setText(PlaceholderUtils.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getContext()));
         ((TextView) findViewById(R.id.currencyValueTextView))
                 .setText(PlaceholderUtils.getValueString(numberConformer(currency.getValue()), getContext()));
 
-        ((ImageView) findViewById(R.id.currencyIcon))
-                .setImageBitmap(currency.getIcon());
         ((TextView) findViewById(R.id.currencyNameTextView))
                 .setText(currency.getName());
         ((TextView) findViewById(R.id.currencySymbolTextView))
                 .setText(PlaceholderUtils.getSymbolString(currency.getSymbol(), getContext()));
         ((TextView) findViewById(R.id.currencyFluctuationPercentageTextView))
                 .setText(PlaceholderUtils.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getContext()));
-
-        Drawable arrowDrawable = ((ImageView) findViewById(R.id.detailsArrow)).getDrawable();
-
-        if(arrowDrawable != null)
-        {
-            arrowDrawable.mutate();
-            arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-            arrowDrawable.invalidateSelf();
-        }
-
-        Drawable progressDrawable = ((ProgressBar) findViewById(R.id.progressBarLinechartWatchlist)).getIndeterminateDrawable();
-
-        if(progressDrawable != null)
-        {
-            progressDrawable.mutate();
-            progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-            progressDrawable.invalidateSelf();
-        }
     }
 
-    public void updateCardViewInfos(float totalValue, boolean isBalanceHidden)
+    public void updateOwnedValues(float totalValue, boolean isBalanceHidden)
     {
         double value = currency.getValue() * currency.getBalance();
         double percentage = value / totalValue * 100;
 
         ((TextView) findViewById(R.id.currencyValueOwnedTextView))
                 .setText(PlaceholderUtils.getValueParenthesisString(numberConformer(currency.getValue() * currency.getBalance()), getContext()));
-        ((TextView) findViewById(R.id.currencyFluctuationTextView))
-                .setText(PlaceholderUtils.getValueParenthesisString(numberConformer(currency.getDayFluctuation()), getContext()));
-        ((TextView) findViewById(R.id.currencyValueTextView))
-                .setText(PlaceholderUtils.getValueString(numberConformer(currency.getValue()), getContext()));
-
-        ((ImageView) findViewById(R.id.currencyIcon))
-                .setImageBitmap(currency.getIcon());
-        ((TextView) findViewById(R.id.currencyNameTextView))
-                .setText(currency.getName());
-        ((TextView) findViewById(R.id.currencySymbolTextView))
-                .setText(PlaceholderUtils.getSymbolString(currency.getSymbol(), getContext()));
         ((TextView) findViewById(R.id.currencyOwnedTextView))
                 .setText(PlaceholderUtils.getBalanceString(numberConformer(currency.getBalance()), currency.getSymbol(), getContext()));
-        ((TextView) findViewById(R.id.currencyFluctuationPercentageTextView))
-                .setText(PlaceholderUtils.getPercentageString(numberConformer(currency.getDayFluctuationPercentage()), getContext()));
-
-        Drawable arrowDrawable = ((ImageView) findViewById(R.id.detailsArrow)).getDrawable();
-        arrowDrawable.mutate();
-        arrowDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-        arrowDrawable.invalidateSelf();
-
-        Drawable progressDrawable = ((ProgressBar) findViewById(R.id.progressBarLinechartSummary)).getIndeterminateDrawable();
-        progressDrawable.mutate();
-        progressDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-        progressDrawable.invalidateSelf();
-
-        Drawable progressBarDrawable = ((ProgressBar) findViewById(R.id.currencyPortfolioDominance)).getProgressDrawable();
-        progressBarDrawable.mutate();
-        progressBarDrawable.setColorFilter(new PorterDuffColorFilter(currency.getChartColor(), PorterDuff.Mode.SRC_IN));
-        progressBarDrawable.invalidateSelf();
 
         ((ProgressBar) findViewById(R.id.currencyPortfolioDominance)).setProgress((int) Math.round(percentage));
         ((TextView) findViewById(R.id.percentageOwnedTextView)).setText(PlaceholderUtils.getPercentageString(numberConformer(percentage), getContext()));
@@ -313,7 +314,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         return getOwnedValue() * (currency.getDayFluctuationPercentage() / 100);
     }
 
-    private LineData generateData(Currency currency)
+    private LineData generateData()
     {
         LineDataSet dataSet;
         List<CurrencyDataChart> dataChartList = currency.getHistoryMinutes();
@@ -340,7 +341,7 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
         return new LineData(dataSet);
     }
 
-    private void updateColor(Currency currency)
+    private void updateColor()
     {
         if(currency.getDayFluctuationPercentage() >= 0)
         {
@@ -379,18 +380,9 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
     @Override
     public void onHistoryDataUpdated() {
 
-        View progressWatchlistView = findViewById(R.id.progressBarLinechartWatchlist);
-        View progressSummaryView = findViewById(R.id.progressBarLinechartSummary);
+        View progressView = findViewById(R.id.progressBarLinechart);
 
-        if(progressWatchlistView != null)
-        {
-            progressWatchlistView.setVisibility(View.GONE);
-        }
-
-        if(progressSummaryView != null)
-        {
-            progressSummaryView.setVisibility(View.GONE);
-        }
+        progressView.setVisibility(View.GONE);
 
         findViewById(R.id.linearLayoutSubCharts).setVisibility(View.VISIBLE);
 
@@ -403,5 +395,47 @@ public class CurrencyCardview extends CardView implements CurrencyInfoUpdateNoti
     @Override
     public void onPriceUpdated(Currency currency) {
 
+    }
+
+    private static class IconDownloader extends AsyncTask<Object, Integer, Void> implements MoodlboxNotifierInterface
+    {
+        private Bitmap icon = null;
+        private OnBitmapDownloadedListener onBitmapDownloadedListener;
+
+        public Bitmap getIcon()
+        {
+            return icon;
+        }
+
+        public void setOnBitmapDownloadedListener(OnBitmapDownloadedListener onBitmapDownloadedListener) {
+            this.onBitmapDownloadedListener = onBitmapDownloadedListener;
+        }
+
+        @Override
+        protected Void doInBackground(Object... objects) {
+            Context context = (Context) objects[0];
+            Currency currency = (Currency) objects[1];
+
+            CryptocompareApiManager cryptocompareApiManager = CryptocompareApiManager.getInstance(context);
+
+            String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), cryptocompareApiManager);
+
+            if(iconUrl != null)
+            {
+                MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), context.getResources(), context, this);
+            }
+
+            return null;
+        }
+
+        @Override
+        public void onBitmapDownloaded(Bitmap bitmap) {
+            icon = bitmap;
+            onBitmapDownloadedListener.onDownloaded(bitmap);
+        }
+
+        public interface OnBitmapDownloadedListener {
+            void onDownloaded(Bitmap icon);
+        }
     }
 }

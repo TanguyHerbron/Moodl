@@ -166,7 +166,7 @@
             android:focusable="true">
 
             <ProgressBar
-                android:id="@+id/progressBarLinechartSummary"
+                android:id="@+id/progressBarLinechart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
