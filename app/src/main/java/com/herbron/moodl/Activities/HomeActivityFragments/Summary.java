@@ -85,7 +85,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     private Handler handler;
 
     private Runnable updateRunnable;
-    private Runnable layoutRefresherRunnable;
 
     private int coinCounter;
     private int iconCounter;
@@ -125,8 +124,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
         handler = new Handler();
 
         initiateUpdateRunnable();
-
-        initiateLayoutRefresherRunnable();
 
         refreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -199,15 +196,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                     showErrorSnackbar();
                     Log.d("moodl", "Error > Refresh out of time");
                 }
-            }
-        };
-    }
-
-    private void initiateLayoutRefresherRunnable()
-    {
-        layoutRefresherRunnable = new Runnable() {
-            @Override
-            public void run() {
             }
         };
     }
