@@ -73,10 +73,12 @@ public class DataCrypter {
             IvParameterSpec ivParameterSpec = new IvParameterSpec(context.getString(R.string.ivKey).getBytes("UTF-8"));
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivParameterSpec);
+            cipher.init(Cipher.DECRYPT_MODE, aesKey, ivParameterSpec);
+            
+            byte[] decryptedBytes = cipher.doFinal(data.getBytes("UTF-8"));
 
-            byte[] dataBytes = Base64.decode(data, Base64.DEFAULT);
-            decryptedData = new String(dataBytes, StandardCharsets.UTF_8);
+            //byte[] dataBytes = Base64.decode(data, Base64.DEFAULT);
+            decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
 
         } catch(NoSuchPaddingException | NoSuchAlgorithmException
                 | InvalidKeyException | UnsupportedEncodingException
