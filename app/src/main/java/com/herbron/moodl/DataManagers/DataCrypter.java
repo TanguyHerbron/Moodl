@@ -82,7 +82,8 @@ public class DataCrypter {
 
         } catch(NoSuchPaddingException | NoSuchAlgorithmException
                 | InvalidKeyException | UnsupportedEncodingException
-                | InvalidAlgorithmParameterException e) {
+                | InvalidAlgorithmParameterException | BadPaddingException
+                | IllegalBlockSizeException e) {
             e.printStackTrace();
         }
 
