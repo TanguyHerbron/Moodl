@@ -149,7 +149,7 @@
     <string name="cannot_resole_host">Impossible de résoudre l\'hôte</string>
     <string name="unexpected">Erreur inconnue</string>
     <string name="select_coin">Selectionner une monnaie</string>
-    <string name="already_watchlisr">Monnaie déjà présente dans la liste suivie</string>
+    <string name="already_watchlist">Monnaie déjà présente dans la liste suivie</string>
     <string name="create_backup">Créer une sauvegarde</string>
     <string name="wrong_password">Mauvais mot de passe</string>
     <string name="error">Erreur</string>

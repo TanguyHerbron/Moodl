@@ -261,7 +261,7 @@
     <string name="cannot_resole_host">Can\'t resolve host</string>
     <string name="unexpected">Unexpected error</string>
     <string name="select_coin">Select a coin</string>
-    <string name="already_watchlisr">Currency already in watchlist</string>
+    <string name="already_watchlist">Currency already in watchlist</string>
     <string name="create_backup">Create backup</string>
     <string name="wrong_password">Wrong password</string>
     <string name="error">Error</string>

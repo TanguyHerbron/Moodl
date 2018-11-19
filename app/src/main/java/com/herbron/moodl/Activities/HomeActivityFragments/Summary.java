@@ -72,13 +72,14 @@ import static java.lang.Math.abs;
 
 public class Summary extends Fragment implements BalanceSwitchManagerInterface, BalanceUpdateNotifierInterface, CryptocompareNotifierInterface, CoinmarketcapNotifierInterface {
 
+
+
     private LinearLayout currencyLayout;
     private PreferencesManager preferencesManager;
     private BalanceManager balanceManager;
     private SwipeRefreshLayout refreshLayout;
     private Dialog loadingDialog;
     private String defaultCurrency;
-    private CoinmarketCapAPIManager coinmarketCapAPIManager;
 
     private TextView toolbarSubtitle;
     private CollapsingToolbarLayout toolbarLayout;
@@ -87,7 +88,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     private Runnable updateRunnable;
 
     private int coinCounter;
-    private int iconCounter;
     private float totalValue;
     private boolean detailsChecker;
     private boolean tickersChecker;
@@ -95,6 +95,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     private long lastTimestamp;
 
     private BalanceUpdateInterface balanceUpdateInterface;
+    private CoinmarketCapAPIManager coinmarketCapAPIManager;
     private CryptocompareApiManager cryptocompareApiManager;
 
     @NonNull
@@ -318,7 +319,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
                 .setAction(getString(R.string.update), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-
+                        updateAll(true);
                     }
                 })
                 .show();
@@ -327,7 +328,6 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
     private void resetCounters()
     {
         coinCounter = 0;
-        iconCounter = 0;
     }
 
     private void adaptView(float totalValue, float totalFluctuation)
@@ -753,6 +753,7 @@ public class Summary extends Fragment implements BalanceSwitchManagerInterface, 
 
     private class DataUpdater extends AsyncTask<Void, Integer, Void>
     {
+
         @Override
         protected Void doInBackground(Void... params)
         {
