@@ -203,6 +203,11 @@ public class CoinmarketCapAPIManager {
         }
     }
 
+    public List<Currency> getTotalListing()
+    {
+        return currencyTickerList;
+    }
+
     public void updateTopCurrencies(final String toSymbol)
     {
         String requestString = topCurrenciesUrl + toSymbol;

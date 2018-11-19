@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.graphics.Palette;
 import android.text.SpannableString;
@@ -36,13 +37,14 @@ import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.CustomLayouts.CustomPieChart;
 import com.herbron.moodl.MoodlBox;
 import com.herbron.moodl.DataNotifiers.MoodlboxNotifierInterface;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.getColor;
+import static com.herbron.moodl.MoodlBox.getIconDominantColor;
 import static java.lang.Math.abs;
 
 /**
@@ -54,6 +56,7 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
     private PreferencesManager preferencesManager;
     private CoinmarketCapAPIManager coinmarketCapAPIManager;
     private SwipeRefreshLayout refreshLayout;
+    private NestedScrollView nestedScrollView;
     private long lastTimestamp;
     private String defaultCurrency;
     private CryptocompareApiManager cryptocompareApiManager;
@@ -88,6 +91,8 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
 
         defaultCurrency = preferencesManager.getDefaultCurrency();
         lastTimestamp = 0;
+
+        nestedScrollView = view.findViewById(R.id.nestedMarketCap);
 
         setupRefreshLayout();
 
@@ -261,10 +266,8 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
                 MoodlBox.getBitmapFromURL(iconUrl, localCurrency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
                     @Override
                     public void onBitmapDownloaded(Bitmap bitmapIcon) {
-                        Palette.Builder builder = Palette.from(bitmapIcon);
-
                         coinmarketCapAPIManager.getTopCurrencies().get(index).setIcon(bitmapIcon);
-                        coinmarketCapAPIManager.getTopCurrencies().get(index).setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
+                        coinmarketCapAPIManager.getTopCurrencies().get(index).setChartColor(getIconDominantColor(getContext(), bitmapIcon));
 
                         countIcons();
 
@@ -304,12 +307,12 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
                 switch (motionEvent.getAction())
                 {
                     case MotionEvent.ACTION_DOWN:
-                        refreshLayout.setEnabled(false);
+                        nestedScrollView.setEnabled(false);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     default:
-                        refreshLayout.setEnabled(true);
+                        nestedScrollView.setEnabled(true);
                         break;
                 }
 
@@ -387,13 +390,13 @@ public class MarketCapitalization extends Fragment implements CryptocompareNotif
     private void updateDetails(double marketCap, double volume, String title, double percentage)
     {
         ((TextView) view.findViewById(R.id.textViewMarketCap))
-                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(marketCap), getActivity().getBaseContext()));
+                .setText(PlaceholderUtils.getValueString(MoodlBox.numberConformer(marketCap), getActivity().getBaseContext()));
         ((TextView) view.findViewById(R.id.textViewVolume))
-                .setText(PlaceholderManager.getValueString(MoodlBox.numberConformer(volume), getActivity().getBaseContext()));
+                .setText(PlaceholderUtils.getValueString(MoodlBox.numberConformer(volume), getActivity().getBaseContext()));
         ((TextView) view.findViewById(R.id.textViewTitle))
                 .setText(title);
         ((TextView) view.findViewById(R.id.textViewDominancePercentage))
-                .setText(PlaceholderManager.getPercentageString(MoodlBox.numberConformer(percentage), getActivity().getBaseContext()));
+                .setText(PlaceholderUtils.getPercentageString(MoodlBox.numberConformer(percentage), getActivity().getBaseContext()));
     }
 
     private SpannableString generateCenterSpannableText() {

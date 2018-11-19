@@ -30,9 +30,9 @@
 
             <ImageView
                 android:id="@+id/currencyIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp" />
+                android:layout_width="@dimen/currency_icon_cardview_size"
+                android:layout_height="@dimen/currency_icon_cardview_size"
+                android:layout_margin="1dp"/>
 
             <TextView
                 android:id="@+id/currencyNameTextView"
@@ -166,7 +166,7 @@
             android:focusable="true">
 
             <ProgressBar
-                android:id="@+id/progressBarLinechartSummary"
+                android:id="@+id/progressBarLinechart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

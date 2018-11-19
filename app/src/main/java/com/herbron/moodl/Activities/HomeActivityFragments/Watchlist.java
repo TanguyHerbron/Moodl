@@ -12,14 +12,14 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-import com.herbron.moodl.Activities.CurrencySelectionActivity;
+import com.herbron.moodl.Activities.CurrencyListActivity;
 import com.herbron.moodl.DataNotifiers.CoinmarketcapNotifierInterface;
 import com.herbron.moodl.DataNotifiers.CryptocompareNotifierInterface;
 import com.herbron.moodl.CurrencyInfoUpdateNotifierInterface;
@@ -42,7 +42,7 @@ import java.util.List;
 
 import static com.herbron.moodl.MoodlBox.collapseW;
 import static com.herbron.moodl.MoodlBox.expandW;
-import static com.herbron.moodl.MoodlBox.getColor;
+import static com.herbron.moodl.MoodlBox.getIconDominantColor;
 
 /**
  * Created by Tiji on 13/04/2018.
@@ -249,7 +249,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
                     disableEdition();
                 }
 
-                Intent selectionIntent = new Intent(getActivity(), CurrencySelectionActivity.class);
+                Intent selectionIntent = new Intent(getActivity(), CurrencyListActivity.class);
                 selectionIntent.putExtra("isWatchList", true);
                 startActivity(selectionIntent);
             }
@@ -354,6 +354,7 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
             public void run() {
                 dragLinearLayout.removeAllViews();
                 view.findViewById(R.id.progressBarWatchlist).setVisibility(View.GONE);
+                view.findViewById(R.id.buttonAddWatchlist).setVisibility(View.VISIBLE);
 
                 for(Currency currency : watchlistManager.getWatchlist())
                 {
@@ -380,20 +381,6 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
         }
     }
 
-    private void updateChartColor(Currency currency)
-    {
-        if(currency.getIcon() != null)
-        {
-            Palette.Builder builder = Palette.from(currency.getIcon());
-
-            currency.setChartColor(builder.generate().getDominantColor(getColor(R.color.default_color, getActivity().getBaseContext())));
-        }
-        else
-        {
-            currency.setChartColor(getColor(R.color.default_color, getActivity().getBaseContext()));
-        }
-    }
-
     public int getCurrencyId(String symbol)
     {
         int id = 0;
@@ -402,6 +389,9 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
             JSONObject jsonObject = new JSONObject(cryptocompareApiManager.getCoinInfosHashmap().get(symbol));
             id = jsonObject.getInt("Id");
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            Log.d("moodl", "ID not found");
             e.printStackTrace();
         }
 
@@ -448,27 +438,14 @@ public class Watchlist extends Fragment implements CryptocompareNotifierInterfac
                     public void onPriceUpdated(Currency successCurrency) {
                         String iconUrl = MoodlBox.getIconUrl(currency.getSymbol(), cryptocompareApiManager);
 
-                        if(iconUrl != null)
-                        {
-                            MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
-                                @Override
-                                public void onBitmapDownloaded(Bitmap bitmapIcon) {
-                                    currency.setIcon(bitmapIcon);
-                                    updateChartColor(currency);
-                                    countWatchlist();
-
-                                }
-                            });
-                        }
-                        else
-                        {
-                            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_moodl);
-                            icon = Bitmap.createScaledBitmap(icon, 50, 50, false);
-
-                            currency.setIcon(icon);
-                            updateChartColor(currency);
-                            countWatchlist();
-                        }
+                        MoodlBox.getBitmapFromURL(iconUrl, currency.getSymbol(), getResources(), getActivity().getBaseContext(), new MoodlboxNotifierInterface() {
+                            @Override
+                            public void onBitmapDownloaded(Bitmap bitmapIcon) {
+                                currency.setIcon(bitmapIcon);
+                                currency.setChartColor(getIconDominantColor(getContext(), bitmapIcon));
+                                countWatchlist();
+                            }
+                        });
                     }
                 });
             }

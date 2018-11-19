@@ -34,7 +34,7 @@
             android:label="@string/title_activity_settings"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.CurrencySelectionActivity"
+            android:name=".Activities.CurrencyListActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

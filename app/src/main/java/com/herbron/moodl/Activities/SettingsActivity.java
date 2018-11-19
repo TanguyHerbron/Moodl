@@ -44,6 +44,7 @@ import com.applandeo.listeners.OnSelectFileListener;
 import com.herbron.moodl.BuildConfig;
 import com.herbron.moodl.DataManagers.DataCrypter;
 import com.herbron.moodl.DataManagers.DatabaseManager;
+import com.herbron.moodl.DataManagers.PreferencesManager;
 import com.herbron.moodl.FingerprintToolkit.FingerprintDialogFragment;
 import com.herbron.moodl.FingerprintToolkit.FingerprintHandler;
 import com.herbron.moodl.MoodlBox;
@@ -782,6 +783,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                                 }
                                             }
                                         }
+
+                                        PreferencesManager preferencesManager = new PreferencesManager(getContext());
+                                        preferencesManager.setMustUpdateSummary(true);
                                     }
                                     else
                                     {

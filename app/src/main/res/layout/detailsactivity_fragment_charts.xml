@@ -6,6 +6,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/mainMenuLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -128,7 +129,7 @@
         android:paddingEnd="4dp"
         android:baselineAligned="false"
         android:gravity="bottom"
-        android:layout_alignParentBottom="true">
+        android:layout_below="@id/mainMenuLayout">
 
         <LinearLayout
             android:layout_width="match_parent"

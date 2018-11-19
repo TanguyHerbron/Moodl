@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.herbron.moodl.Utils.TransferUtils.isBalanceRelated;
+
 /**
  * Created by Guitoune on 14/01/2018.
  */
@@ -497,8 +499,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
             Log.d("moodl", "Error while inserting transaction " + e.getMessage());
         }
 
-        Log.d("mood", "Raw " + rawValues.toString());
-
         db.insert(TABLE_MANUAL_TRANSACTIONS, null, values);
         db.close();
     }
@@ -603,6 +603,14 @@ public class DatabaseManager extends SQLiteOpenHelper{
                             currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
                                     , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
                         }
+
+                        if(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1)
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
+                                    , -(resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_PURCHASE_PRICE))
+                                    * resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))
+                                    + resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES)))));
+                        }
                         break;
                     case "s":
                         if(symbol.equals(feeSym))
@@ -615,6 +623,14 @@ public class DatabaseManager extends SQLiteOpenHelper{
                             currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
                                     , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
                         }
+
+                        if(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1)
+                        {
+                            currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
+                                    , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_PURCHASE_PRICE))
+                                            * resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))
+                                            - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                        }
                         break;
                     case "t":
                         if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))) && isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))))
@@ -624,7 +640,7 @@ public class DatabaseManager extends SQLiteOpenHelper{
                                 if(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1)
                                 {
                                     currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                            , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                            , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
                                 }
                                 else
                                 {
@@ -638,14 +654,14 @@ public class DatabaseManager extends SQLiteOpenHelper{
                             if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))))
                             {
                                 currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                        , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                        , -resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
                             }
                             else
                             {
                                 if(isBalanceRelated(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))))
                                 {
                                     currencyList.add(new Currency(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT)) - resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_FEES))));
+                                            , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))));
                                 }
                             }
                         }
@@ -674,12 +690,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
         return currencyList;
     }
 
-    private boolean isBalanceRelated(String str)
-    {
-        Set<String> set = new HashSet<>(Arrays.asList(TransferFragment.EXCHANGE_CODE, TransferFragment.WALLET_CODE));
-        return set.contains(str);
-    }
-
     public Transaction getCurrencyTransactionById(int id)
     {
         String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_ID + "='" + id + "'";
@@ -690,15 +700,6 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         if(resultatList.moveToFirst())
         {
-            boolean deduct = false;
-
-            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
-            {
-                deduct = resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1;
-            }
-
-            Log.d("moodl", "> " + resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)));
-
             transaction = new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
@@ -712,10 +713,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))
-                    , deduct);
+                    , resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1);
         }
-
-        Log.d("moodl", "> " + DatabaseUtils.dumpCurrentRowToString(resultatList));
 
         resultatList.close();
 
@@ -726,7 +725,8 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
     public ArrayList<Transaction> getCurrencyTransactionsForSymbol(String symbol)
     {
-        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_SYMBOL + "='" + symbol.toUpperCase() + "'";
+        String searchQuerry = "SELECT * FROM " + TABLE_MANUAL_TRANSACTIONS + " WHERE " + KEY_TRANSACTION_SYMBOL + "='" + symbol.toUpperCase()
+                + "' OR " + KEY_TRANSACTION_PAIR + "='" + symbol.toUpperCase() + "' AND " + KEY_TRANSACTION_DEDUCT + "=1";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor resultatList = db.rawQuery(searchQuerry, null);
 
@@ -734,16 +734,38 @@ public class DatabaseManager extends SQLiteOpenHelper{
 
         while (resultatList.moveToNext())
         {
-            boolean deduct = false;
+            String type = "t";
+            String pair = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR));
+            String sym = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL));
 
-            if(!resultatList.isNull(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)))
+            if(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL)).equals(symbol.toUpperCase()))
             {
-                deduct = resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1;
+                type = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE));
+            }
+            else
+            {
+                if(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)).equals("s"))
+                {
+                    type = "b";
+
+                    pair = sym;
+                    sym = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR));
+                }
+                else
+                {
+                    if(resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE)).equals("b"))
+                    {
+                        type = "s";
+
+                        pair = sym;
+                        sym = resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR));
+                    }
+                }
             }
 
             transactionList.add(new Transaction(resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_ID))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SYMBOL))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_PAIR))
+                    , sym
+                    , pair
                     , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_AMOUNT))
                     , resultatList.getLong(resultatList.getColumnIndex(KEY_TRANSACTION_DATE))
                     , resultatList.getDouble(resultatList.getColumnIndex(KEY_TRANSACTION_PURCHASE_PRICE))
@@ -752,9 +774,9 @@ public class DatabaseManager extends SQLiteOpenHelper{
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_CURRENCY))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_SOURCE))
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_DESTINATION))
-                    , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_TYPE))
+                    , type
                     , resultatList.getString(resultatList.getColumnIndex(KEY_TRANSACTION_FEE_FORMAT))
-                    , deduct));
+                    , resultatList.getInt(resultatList.getColumnIndex(KEY_TRANSACTION_DEDUCT)) == 1));
         }
 
         resultatList.close();

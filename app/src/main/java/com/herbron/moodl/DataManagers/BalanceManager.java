@@ -1,6 +1,7 @@
 package com.herbron.moodl.DataManagers;
 
 import com.herbron.moodl.Activities.HomeActivity;
+import com.herbron.moodl.DataManagers.CurrencyData.Trade;
 import com.herbron.moodl.DataNotifiers.BinanceUpdateNotifierInterface;
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.CryptocompareApiManager;
@@ -29,7 +30,6 @@ public class BalanceManager implements BinanceUpdateNotifierInterface, HitBTCUpd
 
     private int balanceCounter;
 
-    //NEW IMPLEMENTATION
     private List<HitBtcManager> hitBtcManagers;
     private List<BinanceManager> binanceManagers;
 
@@ -87,7 +87,7 @@ public class BalanceManager implements BinanceUpdateNotifierInterface, HitBTCUpd
 
             for(int i = 0; i < binanceManagers.size(); i++)
             {
-                final BinanceManager binanceManager = binanceManagers.get(i);
+                BinanceManager binanceManager = binanceManagers.get(i);
                 binanceManager.addListener(this);
                 binanceManager.updateBalance();
             }
@@ -169,7 +169,7 @@ public class BalanceManager implements BinanceUpdateNotifierInterface, HitBTCUpd
     }
 
     @Override
-    public void onBinanceTradesUpdated() {
+    public void onBinanceTradesUpdated(List<Trade> trades) {
 
     }
 

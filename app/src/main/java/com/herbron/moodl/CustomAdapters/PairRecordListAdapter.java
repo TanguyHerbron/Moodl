@@ -11,7 +11,7 @@ import android.widget.Filter;
 import android.widget.TextView;
 
 import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ public class PairRecordListAdapter extends ArrayAdapter<Pair> {
         TextView pairTxtView = convertView.findViewById(R.id.textView);
         pairTxtView.setTextColor(getContext().getResources().getColor(android.R.color.tab_indicator_text));
 
-        pairTxtView.setText(PlaceholderManager.getPairString(pair.getFrom(), pair.getTo(), getContext()));
+        pairTxtView.setText(PlaceholderUtils.getPairString(pair.getFrom(), pair.getTo(), getContext()));
 
         return convertView;
     }

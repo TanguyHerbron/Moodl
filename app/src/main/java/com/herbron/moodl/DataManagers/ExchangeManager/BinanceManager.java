@@ -101,7 +101,7 @@ public class BinanceManager extends Exchange {
 
         for(BinanceUpdateNotifierInterface binanceUpdateNotifierInterface : binanceUpdateNotifierInterfaceList)
         {
-            binanceUpdateNotifierInterface.onBinanceTradesUpdated();
+            binanceUpdateNotifierInterface.onBinanceTradesUpdated(trades);
         }
     }
 

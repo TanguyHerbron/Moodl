@@ -6,7 +6,7 @@
     <string name="pref_title_default_currency">Monnaie par défaut</string>
     <string name="buyText">Achat</string>
     <string name="sellText">Vente</string>
-    <string name="transferText">Transfère</string>
+    <string name="transferText">Transfert</string>
     <string name="transaction_record">Enregistrer</string>
     <string name="pref_header_exchange">Réglages des échanges</string>
     <string name="pref_title_enable_synchronization_hitbtc">Activer la synchronisation</string>
@@ -118,19 +118,19 @@
     </string-array>
 
     <string-array name="from_transfer_options_string_array">
-        <item>Site d'échange</item>
+        <item>Site d\'échange</item>
         <item>Mon portefeuille</item>
         <item>Minage</item>
-        <item>Le portefeuille de quelqu'un d'autre</item>
+        <item>Le portefeuille de quelqu\'un d\'autre</item>
         <item>Airdrop</item>
         <item>Autre / Inconnu</item>
         <item>Fork</item>
     </string-array>
 
     <string-array name="to_transfer_options_string_array">
-        <item>Site d'échange</item>
+        <item>Site d\'échange</item>
         <item>Mon portefeuille</item>
-        <item>Le portefeuille de quelqu'un d'autre</item>
+        <item>Le portefeuille de quelqu\'un d\'autre</item>
         <item>Autre / Inconnu</item>
     </string-array>
 
@@ -149,7 +149,7 @@
     <string name="cannot_resole_host">Impossible de résoudre l\'hôte</string>
     <string name="unexpected">Erreur inconnue</string>
     <string name="select_coin">Selectionner une monnaie</string>
-    <string name="already_watchlisr">Monnaie déjà présente dans la liste suivie</string>
+    <string name="already_watchlist">Monnaie déjà présente dans la liste suivie</string>
     <string name="create_backup">Créer une sauvegarde</string>
     <string name="wrong_password">Mauvais mot de passe</string>
     <string name="error">Erreur</string>

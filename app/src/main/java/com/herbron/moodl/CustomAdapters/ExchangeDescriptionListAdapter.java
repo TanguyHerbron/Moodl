@@ -18,6 +18,9 @@ import com.herbron.moodl.R;
 
 import java.util.ArrayList;
 
+import static com.herbron.moodl.DataManagers.DatabaseManager.BINANCE_TYPE;
+import static com.herbron.moodl.DataManagers.DatabaseManager.HITBTC_TYPE;
+
 public class ExchangeDescriptionListAdapter extends ArrayAdapter<Exchange> {
 
     private Context context;
@@ -42,9 +45,20 @@ public class ExchangeDescriptionListAdapter extends ArrayAdapter<Exchange> {
         TextView exchangeNameTextView = convertView.findViewById(R.id.exchange_name);
         TextView exchangeDescriptionTextView = convertView.findViewById(R.id.exchange_description);
         ImageView accountOffImageView = convertView.findViewById(R.id.exchange_account_off_imageView);
+        ImageView exchangeImageView = convertView.findViewById(R.id.exchange_icon_imageView);
 
         exchangeNameTextView.setText(exchange.getName());
         exchangeDescriptionTextView.setText(exchange.getDescription());
+
+        switch (exchange.getType())
+        {
+            case BINANCE_TYPE:
+                exchangeImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.exchange_logo_binance));
+                break;
+            case HITBTC_TYPE:
+                exchangeImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.exchange_logo_hitbtc));
+                break;
+        }
 
         if(!exchange.isEnabled())
         {

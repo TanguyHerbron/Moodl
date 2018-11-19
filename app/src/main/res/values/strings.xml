@@ -79,7 +79,7 @@
     <string name="trade_loading">Looking for trades&#8230;</string>
     <string name="default_value" translatable="false">--</string>
 
-    <!--Charts activity-->
+    <!--ChartsFragment activity-->
     <string name="drawer">Drawer</string>
     <string name="dominance_percentage">Dominance percentage</string>
     <string name="active_cryptocurrencies">Active cryptocurrencies</string>
@@ -261,7 +261,7 @@
     <string name="cannot_resole_host">Can\'t resolve host</string>
     <string name="unexpected">Unexpected error</string>
     <string name="select_coin">Select a coin</string>
-    <string name="already_watchlisr">Currency already in watchlist</string>
+    <string name="already_watchlist">Currency already in watchlist</string>
     <string name="create_backup">Create backup</string>
     <string name="wrong_password">Wrong password</string>
     <string name="error">Error</string>
@@ -299,5 +299,11 @@
     <string name="error_no_valid_from_to">This transaction is not valid</string>
     <string name="deductFromHoldings">Deduct from holdings</string>
     <string name="addToHoldings">Add to holdings</string>
+    <string name="withdrawText">Withdraw</string>
+    <string name="depositText">Deposit</string>
+    <string name="fromToPlaceholder">From %1$s to %2$s</string>
+    <string name="fromPlaceholder">From %1$s</string>
+    <string name="toPlaceholder">To %1$s</string>
+    <string name="toPairPlaceholder">%1$s to %2$s</string>
 
 </resources>

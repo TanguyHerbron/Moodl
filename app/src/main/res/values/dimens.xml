@@ -21,4 +21,6 @@
     <dimen name="double_toolbarSpinner_size">180dp</dimen>
 
     <dimen name="spinner_toolbar_height">50dp</dimen>
+
+    <dimen name="currency_icon_cardview_size">17dp</dimen>
 </resources>

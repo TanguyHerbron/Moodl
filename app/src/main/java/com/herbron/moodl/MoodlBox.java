@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
@@ -208,35 +210,50 @@ public class MoodlBox {
 
     public static void getBitmapFromURL(String src, String symbol, Resources resources, Context context, MoodlboxNotifierInterface callBack)
     {
-        String size = src.substring(src.lastIndexOf("=") + 1, src.length());
-        String filepath = context.getCacheDir() + "/" + symbol + "x" + size + ".png";
         Bitmap result;
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
-        result = BitmapFactory.decodeFile(filepath, options);
-
-        if(result == null)
+        if(src != null)
         {
-            try {
-                java.net.URL url = new java.net.URL(src);
-                HttpURLConnection connection = (HttpURLConnection) url
-                        .openConnection();
-                connection.setDoInput(true);
-                connection.connect();
-                InputStream input = connection.getInputStream();
-                result = BitmapFactory.decodeStream(input);
+            String size = src.substring(src.lastIndexOf("=") + 1, src.length());
+            String filepath = context.getCacheDir() + "/" + symbol + "x" + size + ".png";
 
-                FileOutputStream out = new FileOutputStream(filepath);
-                result.compress(Bitmap.CompressFormat.PNG, 100, out);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
-            } catch (IOException e) {
-                Log.d("moodl", "Error while downloading " + symbol + " icon > " + e.getMessage());
-                result = BitmapFactory.decodeResource(resources,
-                        R.mipmap.ic_launcher_moodl);
-                result = Bitmap.createScaledBitmap(result, Integer.valueOf(size), Integer.valueOf(size), false);
+            result = BitmapFactory.decodeFile(filepath, options);
+
+            if(result == null)
+            {
+                try {
+                    java.net.URL url = new java.net.URL(src);
+                    HttpURLConnection connection = (HttpURLConnection) url
+                            .openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    result = BitmapFactory.decodeStream(input);
+
+                    FileOutputStream out = new FileOutputStream(filepath);
+                    result.compress(Bitmap.CompressFormat.PNG, 100, out);
+
+                } catch (IOException e) {
+                    Log.d("moodl", "Error while downloading " + symbol + " icon > " + e.getMessage());
+                    Drawable defautlDrawable = resources.getDrawable(R.drawable.ic_panorama_fish_eye_24dp);
+                    result = Bitmap.createBitmap(defautlDrawable.getIntrinsicWidth(), defautlDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(result);
+                    defautlDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    defautlDrawable.draw(canvas);
+                }
             }
+        }
+        else
+        {
+            Log.d("moodl", "No URL for " + symbol);
+            Drawable defautlDrawable = resources.getDrawable(R.drawable.ic_panorama_fish_eye_24dp);
+            result = Bitmap.createBitmap(defautlDrawable.getIntrinsicWidth(), defautlDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(result);
+            defautlDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            defautlDrawable.draw(canvas);
         }
 
         callBack.onBitmapDownloaded(result);
@@ -296,5 +313,19 @@ public class MoodlBox {
         }
 
         return url;
+    }
+
+    public static int getIconDominantColor(Context context, Bitmap icon)
+    {
+        if(icon != null)
+        {
+            Palette.Builder builder = Palette.from(icon);
+
+            return builder.generate().getDominantColor(getColor(R.color.default_color, context));
+        }
+        else
+        {
+            return getColor(R.color.default_color, context);
+        }
     }
 }

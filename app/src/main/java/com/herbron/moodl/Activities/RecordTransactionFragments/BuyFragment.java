@@ -10,7 +10,6 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,7 @@ import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.text.SimpleDateFormat;
@@ -64,7 +63,7 @@ public class BuyFragment extends CustomRecordFragment {
     private List<String> symbolStrings;
 
     private int transactionId;
-    private Transaction transaction;
+    private static Transaction transaction;
 
     private boolean isAmountLastUpdated;
 
@@ -276,6 +275,7 @@ public class BuyFragment extends CustomRecordFragment {
         totalValueEditText.setText(String.valueOf(transaction.getAmount() * transaction.getPrice()));
         fees_editText.setText(String.valueOf(transaction.getFees()));
         note_editText.setText(transaction.getNote());
+        deductHoldingsSwitch.setChecked(transaction.isDeducted());
     }
 
     private void initializeViewElements()
@@ -296,8 +296,8 @@ public class BuyFragment extends CustomRecordFragment {
         });
         feesCurrencySpinner = view.findViewById(R.id.feesCurrency_editText_buy);
 
-        currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
-        currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        currencyFeeAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, new ArrayList<>());
+        currencyFeeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_black);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         deductHoldingsSwitch = view.findViewById(R.id.deductHoldingsBuy);
@@ -452,8 +452,8 @@ public class BuyFragment extends CustomRecordFragment {
     private void updateAdapter()
     {
         symbolStrings = new ArrayList<>();
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
 
         currencyFeeAdapter.clear();
         currencyFeeAdapter.addAll(symbolStrings);
@@ -523,15 +523,43 @@ public class BuyFragment extends CustomRecordFragment {
 
     public void updatePair(Pair pair)
     {
+        fragmentPair = pair;
+
         currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
         currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         symbolStrings = new ArrayList<>();
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
         currencyFeeAdapter.addAll(symbolStrings);
         currencyFeeAdapter.notifyDataSetChanged();
+
+        if(transaction != null)
+        {
+            if(transaction.getFeeCurrency().equals(fragmentPair.getFrom()))
+            {
+                if(transaction.getFeeFormat().equals("p"))
+                {
+                    feesCurrencySpinner.setSelection(0);
+                }
+                else
+                {
+                    feesCurrencySpinner.setSelection(1);
+                }
+            }
+            else
+            {
+                if(transaction.getFeeFormat().equals("p"))
+                {
+                    feesCurrencySpinner.setSelection(2);
+                }
+                else
+                {
+                    feesCurrencySpinner.setSelection(3);
+                }
+            }
+        }
     }
 
     @Override

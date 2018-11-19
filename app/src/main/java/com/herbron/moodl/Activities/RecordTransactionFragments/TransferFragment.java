@@ -262,15 +262,15 @@ public class TransferFragment extends CustomRecordFragment {
     private void setupSpinnesr()
     {
         ArrayAdapter<String> fromAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.from_transfer_options_string_array));
-        fromAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        fromAdapter.setDropDownViewResource(R.layout.spinner_dropdown_black);
         fromSpinner.setAdapter(fromAdapter);
 
         ArrayAdapter<String> toAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.to_transfer_options_string_array));
-        toAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        toAdapter.setDropDownViewResource(R.layout.spinner_dropdown_black);
         toSpinner.setAdapter(toAdapter);
 
         ArrayAdapter<String> feeAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.fees_options));
-        feeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        feeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_black);
         feeSpinner.setAdapter(feeAdapter);
 
         fromSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

@@ -1,102 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="50dp"
     android:orientation="vertical">
 
-    <com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:id="@+id/swipeLayout">
-        <!-- Bottom View Start-->
-        <LinearLayout
-            android:id="@+id/bottom_wrapper"
-            android:layout_width="100dp"
-            android:weightSum="1"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-            <!--What you want to show-->
+        android:layout_height="49dp"
+        android:orientation="horizontal">
 
-            <LinearLayout
-                android:id="@+id/editTransactionLayout"
-                android:layout_width="wrap_content"
-                android:layout_weight="0.5"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:background="@color/green">
+        <View
+            android:id="@+id/transactionIndicator"
+            android:layout_width="5dp"
+            android:layout_height="match_parent"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/ic_edit_white_24dp"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/deleteTransactionLayout"
-                android:layout_width="wrap_content"
-                android:layout_weight="0.5"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:background="@color/red">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/ic_delete_white_24dp"/>
-
-            </LinearLayout>
-
-        </LinearLayout>
-        <!-- Bottom View End-->
-
-        <!-- Surface View Start -->
-        <LinearLayout
-            android:padding="5dp"
-            android:background="#ffffff"
+        <com.daimajia.swipe.SwipeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <!--What you want to show in SurfaceView-->
+            android:layout_height="match_parent"
+            android:id="@+id/swipeLayout">
+            <!-- Bottom View Start-->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/bottom_wrapper"
+                android:layout_width="100dp"
+                android:weightSum="1"
                 android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+                <!--What you want to show-->
 
-                <TextView
-                    android:id="@+id/amountPurchased"
+                <LinearLayout
+                    android:id="@+id/editTransactionLayout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="15dp"/>
+                    android:layout_weight="0.5"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:background="@color/green">
 
-                <TextView
-                    android:id="@+id/puchasedValue"
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/ic_edit_white_24dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/deleteTransactionLayout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="10dp"/>
+                    android:layout_weight="0.5"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:background="@color/red">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/ic_delete_white_24dp"/>
+
+                </LinearLayout>
 
             </LinearLayout>
+            <!-- Bottom View End-->
 
+            <!-- Surface View Start -->
             <LinearLayout
+                android:padding="5dp"
+                android:background="#ffffff"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/purchaseDate"
+                android:layout_height="match_parent">
+                <!--What you want to show in SurfaceView-->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="right"/>
+                    android:layout_weight="0.5"
+                    android:orientation="vertical">
 
+                    <TextView
+                        android:id="@+id/transactionTLTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="15dp"/>
+
+                    <TextView
+                        android:id="@+id/transactionBLTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="10dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/transactionAmountTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:textSize="15dp"/>
+
+                    <TextView
+                        android:id="@+id/transactionDateTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:textSize="10dp"/>
+
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-        <!-- Surface View End -->
-    </com.daimajia.swipe.SwipeLayout>
+            <!-- Surface View End -->
+        </com.daimajia.swipe.SwipeLayout>
+
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"

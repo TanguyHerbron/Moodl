@@ -27,7 +27,7 @@ import com.herbron.moodl.DataManagers.DatabaseManager;
 import com.herbron.moodl.DataManagers.ExchangeManager.Exchange;
 import com.herbron.moodl.DataManagers.InfoAPIManagers.Pair;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import java.text.SimpleDateFormat;
@@ -63,7 +63,7 @@ public class SellFragment extends CustomRecordFragment {
     private List<String> symbolStrings;
 
     private int transactionId;
-    private Transaction transaction;
+    private static Transaction transaction;
 
     private boolean isAmountLastUpdated;
 
@@ -133,6 +133,105 @@ public class SellFragment extends CustomRecordFragment {
         }
     };
 
+    private TextWatcher feesTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            totalValueEditText.removeTextChangedListener(totalValueTextWatcher);
+            amoutEditText.removeTextChangedListener(amountTextWatcher);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            if((isFieldCorrectlyFilled(amoutEditText, false) || isFieldCorrectlyFilled(totalValueEditText, false)) && isFieldCorrectlyFilled(sellPriceEditText, false))
+            {
+                double amount = Double.parseDouble(amoutEditText.getText().toString());
+                double purchasePrice = Double.parseDouble(sellPriceEditText.getText().toString());
+                double fees;
+                double totalValue = Double.parseDouble(totalValueEditText.getText().toString());
+                String feeCurrency;
+
+                if(isAmountLastUpdated)
+                {
+                    totalValue = amount * purchasePrice;
+                }
+                else
+                {
+                    amount = totalValue / purchasePrice;
+                }
+
+                if(fees_editText.getText().toString().equals("0") || (start == 0 && before == 1 && count == 0))
+                {
+                    if(isAmountLastUpdated)
+                    {
+                        totalValueEditText.setText(String.valueOf(amount * purchasePrice));
+                    }
+                    else
+                    {
+                        amoutEditText.setText(String.valueOf(totalValue / purchasePrice));
+                    }
+                }
+                else
+                {
+
+                    if(feesCurrencySpinner.getSelectedItemPosition() < 2)
+                    {
+                        feeCurrency = fragmentPair.getFrom();
+                    }
+                    else
+                    {
+                        feeCurrency = fragmentPair.getTo();
+                    }
+
+                    fees = getFees(feeCurrency, amount, purchasePrice);
+
+                    if(feesCurrencySpinner.getSelectedItemPosition() % 2 == 0)
+                    {
+                        if(isAmountLastUpdated)
+                        {
+                            totalValueEditText.setText(String.valueOf(totalValue - fees));
+                        }
+                        else
+                        {
+                            amoutEditText.setText(String.valueOf(amount + (fees / purchasePrice)));
+                        }
+                    }
+                    else
+                    {
+                        if(fragmentCurrency.getSymbol().equals(feeCurrency))
+                        {
+                            if(isAmountLastUpdated)
+                            {
+                                totalValueEditText.setText(String.valueOf(totalValue - (fees * purchasePrice)));
+                            }
+                            else
+                            {
+                                amoutEditText.setText(String.valueOf((totalValue / purchasePrice) + fees));
+                            }
+                        }
+                        else
+                        {
+                            if(isAmountLastUpdated)
+                            {
+                                totalValueEditText.setText(String.valueOf(totalValue - fees));
+                            }
+                            else
+                            {
+                                amoutEditText.setText(String.valueOf((totalValue + fees) / purchasePrice));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            totalValueEditText.addTextChangedListener(totalValueTextWatcher);
+            amoutEditText.addTextChangedListener(amountTextWatcher);
+        }
+    };
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -153,10 +252,8 @@ public class SellFragment extends CustomRecordFragment {
     private void initializeViewElements()
     {
         totalValueEditText = view.findViewById(R.id.totalValue_editText_sell);
-        totalValueEditText.addTextChangedListener(totalValueTextWatcher);
 
         amoutEditText = view.findViewById(R.id.amount_editText_sell);
-        amoutEditText.addTextChangedListener(amountTextWatcher);
 
         sellPriceEditText = view.findViewById(R.id.sellPrice_editText);
         sellDateEditText = view.findViewById(R.id.sellDate_editText);
@@ -171,7 +268,7 @@ public class SellFragment extends CustomRecordFragment {
         feesCurrencySpinner = view.findViewById(R.id.feesCurrency_editText_sell);
 
         currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
-        currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        currencyFeeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_black);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         if(fragmentPair != null)
@@ -252,108 +349,19 @@ public class SellFragment extends CustomRecordFragment {
         });
 
         fees_editText = view.findViewById(R.id.fees_editText_sell);
-        fees_editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                totalValueEditText.removeTextChangedListener(totalValueTextWatcher);
-                amoutEditText.removeTextChangedListener(amountTextWatcher);
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                if((isFieldCorrectlyFilled(amoutEditText, false) || isFieldCorrectlyFilled(totalValueEditText, false)) && isFieldCorrectlyFilled(sellPriceEditText, false))
-                {
-                    double amount = Double.parseDouble(amoutEditText.getText().toString());
-                    double purchasePrice = Double.parseDouble(sellPriceEditText.getText().toString());
-                    double fees;
-                    double totalValue = Double.parseDouble(totalValueEditText.getText().toString());
-                    String feeCurrency;
-
-                    if(isAmountLastUpdated)
-                    {
-                        totalValue = amount * purchasePrice;
-                    }
-                    else
-                    {
-                        amount = totalValue / purchasePrice;
-                    }
-
-                    if(fees_editText.getText().toString().equals("0") || (start == 0 && before == 1 && count == 0))
-                    {
-                        if(isAmountLastUpdated)
-                        {
-                            totalValueEditText.setText(String.valueOf(amount * purchasePrice));
-                        }
-                        else
-                        {
-                            amoutEditText.setText(String.valueOf(totalValue / purchasePrice));
-                        }
-                    }
-                    else
-                    {
-
-                        if(feesCurrencySpinner.getSelectedItemPosition() < 2)
-                        {
-                            feeCurrency = fragmentPair.getFrom();
-                        }
-                        else
-                        {
-                            feeCurrency = fragmentPair.getTo();
-                        }
-
-                        fees = getFees(feeCurrency, amount, purchasePrice);
-
-                        if(feesCurrencySpinner.getSelectedItemPosition() % 2 == 0)
-                        {
-                            if(isAmountLastUpdated)
-                            {
-                                totalValueEditText.setText(String.valueOf(totalValue - fees));
-                            }
-                            else
-                            {
-                                amoutEditText.setText(String.valueOf(amount + (fees / purchasePrice)));
-                            }
-                        }
-                        else
-                        {
-                            if(fragmentCurrency.getSymbol().equals(feeCurrency))
-                            {
-                                if(isAmountLastUpdated)
-                                {
-                                    totalValueEditText.setText(String.valueOf(totalValue - (fees * purchasePrice)));
-                                }
-                                else
-                                {
-                                    amoutEditText.setText(String.valueOf((totalValue / purchasePrice) + fees));
-                                }
-                            }
-                            else
-                            {
-                                if(isAmountLastUpdated)
-                                {
-                                    totalValueEditText.setText(String.valueOf(totalValue - fees));
-                                }
-                                else
-                                {
-                                    amoutEditText.setText(String.valueOf((totalValue + fees) / purchasePrice));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                totalValueEditText.addTextChangedListener(totalValueTextWatcher);
-                amoutEditText.addTextChangedListener(amountTextWatcher);
-            }
-        });
 
         note_editText = view.findViewById(R.id.note_editText_sell);
 
         checkCallingIntent();
+
+        setupTextWatchers();
+    }
+
+    private void setupTextWatchers()
+    {
+        totalValueEditText.addTextChangedListener(totalValueTextWatcher);
+        amoutEditText.addTextChangedListener(amountTextWatcher);
+        fees_editText.addTextChangedListener(feesTextWatcher);
     }
 
     private double getFees(String feeCurrency, double amount, double purchasedPrice)
@@ -413,8 +421,8 @@ public class SellFragment extends CustomRecordFragment {
     private void updateAdapter()
     {
         symbolStrings = new ArrayList<>();
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(fragmentPair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(fragmentPair.getTo(), getSecureContext()));
 
         currencyFeeAdapter.clear();
         currencyFeeAdapter.addAll(symbolStrings);
@@ -514,15 +522,43 @@ public class SellFragment extends CustomRecordFragment {
 
     public void updatePair(Pair pair)
     {
+        fragmentPair = pair;
+
         currencyFeeAdapter = new ArrayAdapter<String>(getSecureContext(), android.R.layout.simple_spinner_item, new ArrayList<>());
         currencyFeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         feesCurrencySpinner.setAdapter(currencyFeeAdapter);
 
         symbolStrings = new ArrayList<>();
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
-        symbolStrings.addAll(PlaceholderManager.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(pair.getFrom(), getSecureContext()));
+        symbolStrings.addAll(PlaceholderUtils.getFeeOptionsForSymbol(pair.getTo(), getSecureContext()));
         currencyFeeAdapter.addAll(symbolStrings);
         currencyFeeAdapter.notifyDataSetChanged();
+
+        if(transaction != null)
+        {
+            if(transaction.getFeeCurrency().equals(fragmentPair.getFrom()))
+            {
+                if(transaction.getFeeFormat().equals("p"))
+                {
+                    feesCurrencySpinner.setSelection(0);
+                }
+                else
+                {
+                    feesCurrencySpinner.setSelection(1);
+                }
+            }
+            else
+            {
+                if(transaction.getFeeFormat().equals("p"))
+                {
+                    feesCurrencySpinner.setSelection(2);
+                }
+                else
+                {
+                    feesCurrencySpinner.setSelection(3);
+                }
+            }
+        }
     }
 
     @Override

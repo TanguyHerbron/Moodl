@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,7 @@ import android.widget.TextView;
 
 import com.herbron.moodl.DataManagers.CurrencyData.Currency;
 import com.herbron.moodl.DataManagers.PreferencesManager;
-import com.herbron.moodl.PlaceholderManager;
+import com.herbron.moodl.Utils.PlaceholderUtils;
 import com.herbron.moodl.R;
 
 import static com.herbron.moodl.MoodlBox.numberConformer;
@@ -26,7 +27,7 @@ import static com.herbron.moodl.MoodlBox.numberConformer;
  * Created by Tiji on 13/05/2018.
  */
 
-public class Informations extends Fragment {
+public class InformationFragment extends Fragment {
 
     private Currency currency;
     private View view;
@@ -74,12 +75,16 @@ public class Informations extends Fragment {
     {
         if(isTickerUpdated && isSnapshotUpdated)
         {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    refreshInfoTab();
-                }
-            });
+            try {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshInfoTab();
+                    }
+                });
+            } catch (NullPointerException e) {
+                Log.d("moodl", "Information tab do not needs to be updated anymore");
+            }
         }
     }
 
@@ -120,12 +125,12 @@ public class Informations extends Fragment {
         ((TextView) view.findViewById(R.id.txtViewDescription))
                 .setMovementMethod(LinkMovementMethod.getInstance());
         ((TextView) view.findViewById(R.id.txtViewPercentageCoinEmited))
-                .setText(PlaceholderManager.getEmitedPercentageString(numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100), getActivity().getBaseContext()));
+                .setText(PlaceholderUtils.getEmitedPercentageString(numberConformer(currency.getMinedCoinSupply() / currency.getMaxCoinSupply() * 100), getActivity().getBaseContext()));
 
         if(currency.getMarketCapitalization() != 0)
         {
             ((TextView) view.findViewById(R.id.txtViewMarketCapitalization))
-                    .setText(PlaceholderManager.getValueString(numberConformer(currency.getMarketCapitalization()), getActivity().getBaseContext()));
+                    .setText(PlaceholderUtils.getValueString(numberConformer(currency.getMarketCapitalization()), getActivity().getBaseContext()));
             view.findViewById(R.id.linearMarketCap).setVisibility(View.VISIBLE);
         }
 
@@ -139,15 +144,15 @@ public class Informations extends Fragment {
         if(currency.getMaxCoinSupply() == 0)
         {
             ((TextView) view.findViewById(R.id.txtViewTotalSupply))
-                    .setText(PlaceholderManager.getSymbolString(getString(R.string.infinity), getActivity()));
+                    .setText(PlaceholderUtils.getSymbolString(getString(R.string.infinity), getActivity()));
         }
         else
         {
             ((TextView) view.findViewById(R.id.txtViewTotalSupply))
-                    .setText(PlaceholderManager.getSymbolString(numberConformer(currency.getMaxCoinSupply()), getActivity()));
+                    .setText(PlaceholderUtils.getSymbolString(numberConformer(currency.getMaxCoinSupply()), getActivity()));
         }
         ((TextView) view.findViewById(R.id.txtViewCirculatingSupply))
-                .setText(PlaceholderManager.getSymbolString(numberConformer(currency.getMinedCoinSupply()), getActivity()));
+                .setText(PlaceholderUtils.getSymbolString(numberConformer(currency.getMinedCoinSupply()), getActivity()));
     }
 
 }
