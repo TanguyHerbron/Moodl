@@ -135,22 +135,25 @@ public class CurrencyDetailsActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME |
                 ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_USE_LOGO);
 
-        Bitmap result = Bitmap.createBitmap(150, 150, currency.getIcon().getConfig());
+        if(currency.getIcon() != null)
+        {
+            Bitmap result = Bitmap.createBitmap(150, 150, currency.getIcon().getConfig());
 
-        Paint paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(ContextCompat.getColor(this, R.color.white));
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(ContextCompat.getColor(this, R.color.white));
 
-        Canvas canvas = new Canvas(result);
-        canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
-        canvas.drawBitmap(Bitmap.createScaledBitmap(currency.getIcon(), 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
+            Canvas canvas = new Canvas(result);
+            canvas.drawCircle(result.getHeight()/2, result.getWidth()/2, 75, paint);
+            canvas.drawBitmap(Bitmap.createScaledBitmap(currency.getIcon(), 100, 100, false), result.getHeight()/2 - 50, result.getWidth()/2 - 50, null);
 
-        getSupportActionBar()
-                .setIcon(new BitmapDrawable(getResources(),
-                        Bitmap.createScaledBitmap(result
-                                , (int) MoodlBox.convertDpToPx(25, getResources())
-                                , (int) MoodlBox.convertDpToPx(25, getResources())
-                                , false)));
+            getSupportActionBar()
+                    .setIcon(new BitmapDrawable(getResources(),
+                            Bitmap.createScaledBitmap(result
+                                    , (int) MoodlBox.convertDpToPx(25, getResources())
+                                    , (int) MoodlBox.convertDpToPx(25, getResources())
+                                    , false)));
+        }
     }
 }
 /*for(int i = 0; i < dataChartList.size(); i++)
